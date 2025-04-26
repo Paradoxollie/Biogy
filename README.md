@@ -29,4 +29,16 @@ Biogy est un site web destiné aux élèves en biotechnologie, au lycée et dans
 *   **GitHub:** Hébergement du code source et collaboration.
 *   **Netlify/Vercel:** Hébergement du frontend.
 *   **Heroku/Railway:** Hébergement du backend.
-* **MongoDB Atlas**: Hébergement de la base de données.
+*   **MongoDB Atlas**: Hébergement de la base de données.
+
+## Déploiement
+
+### Netlify Configuration
+
+Pour déployer sur Netlify:
+
+1. Base directory: `.`
+2. Build command: `cd frontend && npm run build`
+3. Publish directory: `frontend/build`
+4. Functions directory: `frontend/netlify/functions`
+5. Branch: `master`
