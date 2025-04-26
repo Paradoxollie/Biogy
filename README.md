@@ -37,8 +37,8 @@ Biogy est un site web destiné aux élèves en biotechnologie, au lycée et dans
 
 Pour déployer sur Netlify:
 
-1. Base directory: `.`
+1. Base directory: `Biogy`
 2. Build command: `cd frontend && npm run build`
 3. Publish directory: `frontend/build`
-4. Functions directory: `frontend/netlify/functions`
-5. Branch: `master`
+4. Functions directory: `netlify/functions`
+5. Branch: `main`
