@@ -4,7 +4,8 @@ function App() {
   return (
     <div>
       <h1>Biogy</h1>
-    </div>);
+    </div>
+  );
 }
 
 export default App;
