@@ -27,6 +27,10 @@ module.exports = {
         'pulse-glow': 'pulseGlow 4s ease-in-out infinite',
         'dna-rotate': 'dnaRotate 12s linear infinite',
         'dna-pulse': 'dnaPulse 4s ease-in-out infinite',
+        'orbit-1': 'orbit 12s linear infinite',
+        'orbit-2': 'orbit 15s linear infinite reverse',
+        'orbit-3': 'orbit 10s linear infinite',
+        'spin': 'spin 20s linear infinite',
       },
       keyframes: {
         fadeInUp: {
@@ -69,13 +73,25 @@ module.exports = {
           '0%, 100%': { opacity: '0.8' },
           '50%': { opacity: '1' },
         },
-      }
+        orbit: {
+          '0%': { transform: 'rotate(0deg) translateX(60px) rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg) translateX(60px) rotate(-360deg)' },
+        },
+        spin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+      },
+      boxShadow: {
+        'glow': '0 0 8px 2px rgba(255, 255, 255, 0.3)',
+      },
     },
   },
   safelist: [
     'text-lab-blue', 'text-lab-purple', 'text-lab-teal', 'text-lab-green',
     'bg-lab-blue', 'bg-lab-purple', 'bg-lab-teal', 'bg-lab-green',
     'hover:text-lab-blue', 'hover:text-lab-purple', 'hover:text-lab-teal', 'hover:text-lab-green',
+    'animate-orbit-1', 'animate-orbit-2', 'animate-orbit-3', 'shadow-glow',
   ],
   plugins: [],
 } 

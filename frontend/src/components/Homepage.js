@@ -132,16 +132,29 @@ function Homepage() {
                 <div className="absolute top-1/2 right-0 w-1 h-1 rounded-full bg-white/40 animate-pulse"></div>
                 
                 {/* Logo avec conteneur */}
-                <div className="relative bg-green-900/60 backdrop-blur-sm rounded-lg p-6 shadow-inner overflow-hidden border border-white/10">
+                <div className="relative bg-green-900/60 backdrop-blur-sm rounded-full p-8 shadow-inner overflow-hidden border border-white/10 aspect-square flex items-center justify-center">
                   {/* Effet de texture de tableau */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-30"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-30 rounded-full"></div>
+                  
+                  {/* Orbites moléculaires */}
+                  <div className="absolute inset-0 rounded-full border border-white/20 animate-spin" style={{ animationDuration: '20s' }}></div>
+                  <div className="absolute inset-2 rounded-full border border-white/15 animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
+                  <div className="absolute inset-4 rounded-full border border-white/10 animate-spin" style={{ animationDuration: '10s' }}></div>
+                  
+                  {/* Atomes/molécules en orbite */}
+                  <div className="absolute w-4 h-4 bg-lab-blue rounded-full shadow-glow animate-orbit-1" 
+                       style={{ top: '15%', left: '15%' }}></div>
+                  <div className="absolute w-3 h-3 bg-lab-purple rounded-full shadow-glow animate-orbit-2" 
+                       style={{ bottom: '20%', right: '15%' }}></div>
+                  <div className="absolute w-2 h-2 bg-lab-teal rounded-full shadow-glow animate-orbit-3" 
+                       style={{ top: '25%', right: '20%' }}></div>
                   
                   {/* Logo avec animation subtile */}
-                  <div className="relative animate-float-gentle transform">
+                  <div className="relative animate-float-gentle transform w-3/4 h-3/4">
                     <img 
                       src="/images/biogy-logo.png" 
                       alt="Biogy Logo" 
-                      className="w-full h-auto object-contain z-10 relative drop-shadow-lg"
+                      className="w-full h-full object-contain z-10 relative drop-shadow-lg rounded-full"
                     />
                   </div>
                 </div>
