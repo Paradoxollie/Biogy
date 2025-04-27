@@ -110,7 +110,7 @@ function Homepage() {
             <div className="md:w-1/2 space-y-6">
               <div className="w-full max-w-md">
                 <img 
-                  src="https://raw.githubusercontent.com/user-attachments/assets/main/a22ee1fb-e73d-494d-aa3c-9d9c3bae3e4a" 
+                  src="/images/biogy-logo.png" 
                   alt="Biogy Logo" 
                   className="w-full h-auto object-contain"
                 />
