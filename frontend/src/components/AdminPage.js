@@ -243,7 +243,7 @@ function AdminPage() {
     }
     
     fetchPendingPosts();
-  }, [userInfo, navigate]);
+  }, [userInfo, navigate, fetchPendingPosts]);
 
   // Rafraîchir le statut des messages après quelques secondes
   useEffect(() => {
