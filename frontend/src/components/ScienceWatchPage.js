@@ -5,6 +5,58 @@ function ScienceWatchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSource, setSelectedSource] = useState('all');
+  const [selectedColor, setSelectedColor] = useState('all');
+
+  // Définition des catégories de biotechnologie par couleur
+  const biotechColors = {
+    green: {
+      name: 'Verte',
+      description: 'Agro-alimentaire, production végétale, biomatériaux, énergie',
+      color: 'green',
+      keywords: ['agro-alimentaire', 'agro alimentaire', 'agriculture', 'plante', 'végétal', 'biomatériau', 'biocarburant', 'énergie', 'biomasse', 'culture', 'plantation', 'semence', 'OGM', 'céréale', 'agroalimentaire', 'agronomie', 'fermentation', 'ferment']
+    },
+    red: {
+      name: 'Rouge',
+      description: 'Santé, pharmaceutique, médecine',
+      color: 'red',
+      keywords: ['santé', 'médic', 'pharmac', 'thérapie', 'médicament', 'vaccin', 'clinique', 'patient', 'maladie', 'sang', 'cellule', 'cancer', 'diagnostic', 'génétique', 'crispr', 'ADN', 'ARN', 'organe', 'cerveau', 'biocapteur', 'glycémie', 'diabète']
+    },
+    white: {
+      name: 'Blanche',
+      description: 'Applications industrielles, procédés biologiques',
+      color: 'gray',
+      keywords: ['industrie', 'chimie', 'enzyme', 'biocatalyse', 'bioproduction', 'polymère', 'textile', 'procédé', 'fermentation industrielle', 'biocarburant', 'bioraffinerie', 'solvant', 'synthèse', 'biochimie', 'biotech industrielle', 'bioréacteur', 'production']
+    },
+    yellow: {
+      name: 'Jaune',
+      description: 'Protection de l\'environnement, traitement des pollutions',
+      color: 'yellow',
+      keywords: ['environnement', 'pollution', 'dépollution', 'traitement', 'déchet', 'recyclage', 'biodégradation', 'écologie', 'écosystème', 'biodiversité', 'bioremédiation', 'sol', 'eau', 'assainissement', 'développement durable', 'impact environnemental', 'microorganisme']
+    },
+    blue: {
+      name: 'Bleue',
+      description: 'Biodiversité marine, aquaculture, cosmétique marine',
+      color: 'blue',
+      keywords: ['marin', 'aquaculture', 'algue', 'océan', 'mer', 'poisson', 'cosmétique marine', 'ressource marine', 'biotechnologie marine', 'milieu aquatique', 'microalgue', 'spiruline', 'pêche', 'aquatique', 'maritime']
+    }
+  };
+
+  // Détermine la catégorie de couleur d'un article
+  const determineBiotechColor = (article) => {
+    const searchText = `${article.title} ${article.description || ''} ${article.content || ''}`.toLowerCase();
+    
+    // Vérifie pour chaque couleur si l'article contient des mots-clés associés
+    for (const [colorKey, colorData] of Object.entries(biotechColors)) {
+      for (const keyword of colorData.keywords) {
+        if (searchText.includes(keyword.toLowerCase())) {
+          return colorKey;
+        }
+      }
+    }
+    
+    // Par défaut, on retourne null si aucune correspondance
+    return null;
+  };
 
   const fetchArticles = useCallback(async () => {
     setLoading(true);
@@ -96,7 +148,7 @@ function ScienceWatchPage() {
                 }
               }
               
-              return {
+              const processedItem = {
                 ...item,
                 // S'assurer que le lien est l'URL complète de l'article
                 link: item.link || item.guid || '',
@@ -105,6 +157,11 @@ function ScienceWatchPage() {
                 // Ajouter la source pour le filtrage
                 source: data.feed?.title || feedUrl
               };
+              
+              // Déterminer la catégorie de couleur de l'article
+              processedItem.biotechColor = determineBiotechColor(processedItem);
+              
+              return processedItem;
             });
             
             // Ajouter les articles de ce flux à l'ensemble
@@ -124,19 +181,34 @@ function ScienceWatchPage() {
       // Trier les articles par date (du plus récent au plus ancien)
       allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
       
+      // Filtrer les articles par couleur si nécessaire
+      let filteredArticles = allArticles;
+      if (selectedColor !== 'all') {
+        filteredArticles = allArticles.filter(article => article.biotechColor === selectedColor);
+        // Si aucun article dans cette catégorie, on affiche tous les articles
+        if (filteredArticles.length === 0) {
+          filteredArticles = allArticles;
+        }
+      }
+      
       // Limiter le nombre d'articles à afficher (pour éviter une surcharge)
-      setArticles(allArticles.slice(0, 30));
+      setArticles(filteredArticles.slice(0, 30));
       
     } catch (err) {
       console.error('Erreur lors de la récupération des articles:', err);
       setError(err.message || 'Une erreur est survenue');
       
       // Utiliser des données de démonstration en cas d'erreur ou pour le développement
-      setArticles(getDemoArticles());
+      const demoArticles = getDemoArticles();
+      // Ajouter les catégories de couleur aux articles de démonstration
+      demoArticles.forEach(article => {
+        article.biotechColor = determineBiotechColor(article);
+      });
+      setArticles(demoArticles);
     } finally {
       setLoading(false);
     }
-  }, [selectedSource]);
+  }, [selectedSource, selectedColor]);
 
   useEffect(() => {
     fetchArticles();
@@ -200,62 +272,152 @@ function ScienceWatchPage() {
         pubDate: '2023-06-10T15:30:00Z',
         content: 'Cette installation de pointe permet de produire jusqu\'à 300 millions de doses par an...',
         source: 'Usine Nouvelle'
+      },
+      {
+        title: 'Des chercheurs développent une nouvelle méthode pour cultiver des algues à haute valeur ajoutée',
+        description: 'Une technique innovante permet de multiplier par cinq la production de microalgues riches en oméga-3, ouvrant des perspectives pour l\'alimentation et la cosmétique.',
+        link: 'https://www.example.com/algues-biotechnologie-bleue',
+        author: 'Ifremer',
+        imageUrl: 'https://via.placeholder.com/600x400?text=Microalgues',
+        pubDate: '2023-06-05T10:20:00Z',
+        content: 'Cette avancée dans la culture des microalgues en milieu contrôlé pourrait révolutionner l\'aquaculture et la production de compléments alimentaires...',
+        source: 'Institut Français de Recherche pour l\'Exploitation de la Mer'
+      },
+      {
+        title: 'Une enzyme issue de bactéries du sol décompose les plastiques en temps record',
+        description: 'Des microbiologistes ont identifié et optimisé une enzyme capable de dégrader les plastiques PET en seulement 24 heures, une avancée majeure pour le traitement des déchets.',
+        link: 'https://www.example.com/enzyme-degradation-plastique',
+        author: 'Revue Nature',
+        imageUrl: 'https://via.placeholder.com/600x400?text=Dépollution+Enzymatique',
+        pubDate: '2023-05-28T14:10:00Z',
+        content: 'Cette découverte pourrait transformer notre approche du recyclage et de la gestion des déchets plastiques qui polluent l\'environnement...',
+        source: 'Nature Biotechnology'
       }
     ];
+  };
+
+  // Obtenir la légende des couleurs de biotech
+  const getLegend = () => {
+    return (
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm">
+        <h3 className="text-lg font-semibold mb-2">Les couleurs des biotechnologies</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
+          {Object.entries(biotechColors).map(([key, data]) => (
+            <div key={key} className="flex items-center">
+              <div className={`w-4 h-4 rounded-full bg-${data.color}-500 mr-2`}></div>
+              <span className="text-sm">{data.name}: {data.description}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Obtenir la couleur tailwind pour le badge
+  const getBadgeColor = (colorKey) => {
+    if (!colorKey) return 'gray';
+    
+    const colorMap = {
+      'green': 'green',
+      'red': 'red',
+      'white': 'gray',
+      'yellow': 'yellow',
+      'blue': 'blue'
+    };
+    
+    return colorMap[colorKey] || 'gray';
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center text-lab-teal mb-8">Veille Scientifique Biotechnologie</h1>
       
-      {/* Filtres */}
-      <div className="flex justify-center mb-8">
-        <div className="inline-flex rounded-md shadow-sm flex-wrap justify-center" role="group">
-          <button
-            type="button"
-            className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg ${
-              selectedSource === 'all' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-            onClick={() => setSelectedSource('all')}
-          >
-            Toutes les sources
-          </button>
-          <button
-            type="button"
-            className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-              selectedSource === 'science' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-            onClick={() => setSelectedSource('science')}
-          >
-            Sciences
-          </button>
-          <button
-            type="button"
-            className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-              selectedSource === 'medical' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-            onClick={() => setSelectedSource('medical')}
-          >
-            Médical
-          </button>
-          <button
-            type="button"
-            className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-              selectedSource === 'innovation' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-            onClick={() => setSelectedSource('innovation')}
-          >
-            Innovation
-          </button>
-          <button
-            type="button"
-            className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 rounded-r-md ${
-              selectedSource === 'education' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-            onClick={() => setSelectedSource('education')}
-          >
-            Education
-          </button>
+      {/* Légende des couleurs */}
+      {getLegend()}
+      
+      {/* Filtres par source */}
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold mb-2">Filtrer par source</h3>
+        <div className="flex flex-wrap justify-center mb-4">
+          <div className="inline-flex rounded-md shadow-sm flex-wrap justify-center" role="group">
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg ${
+                selectedSource === 'all' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setSelectedSource('all')}
+            >
+              Toutes les sources
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
+                selectedSource === 'science' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setSelectedSource('science')}
+            >
+              Sciences
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
+                selectedSource === 'medical' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setSelectedSource('medical')}
+            >
+              Médical
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
+                selectedSource === 'innovation' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setSelectedSource('innovation')}
+            >
+              Innovation
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 rounded-r-md ${
+                selectedSource === 'education' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setSelectedSource('education')}
+            >
+              Éducation
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Filtres par couleur de biotechnologie */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold mb-2">Filtrer par couleur de biotechnologie</h3>
+        <div className="flex flex-wrap justify-center">
+          <div className="inline-flex rounded-md shadow-sm flex-wrap justify-center" role="group">
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg ${
+                selectedColor === 'all' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setSelectedColor('all')}
+            >
+              Toutes
+            </button>
+            {Object.entries(biotechColors).map(([key, data], index) => (
+              <button
+                key={key}
+                type="button"
+                className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
+                  index === Object.keys(biotechColors).length - 1 ? 'rounded-r-md' : ''
+                } ${
+                  selectedColor === key ? `bg-${data.color}-500 text-white` : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+                onClick={() => setSelectedColor(key)}
+              >
+                {data.name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       
@@ -298,9 +460,19 @@ function ScienceWatchPage() {
               
               <div className="p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold bg-lab-teal bg-opacity-20 text-lab-teal px-2 py-1 rounded-full">
-                    {article.source || article.author || 'Source scientifique'}
-                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {/* Badge de source */}
+                    <span className="text-xs font-semibold bg-lab-teal bg-opacity-20 text-lab-teal px-2 py-1 rounded-full">
+                      {article.source || article.author || 'Source scientifique'}
+                    </span>
+                    
+                    {/* Badge de couleur de biotechnologie */}
+                    {article.biotechColor && (
+                      <span className={`text-xs font-semibold bg-${getBadgeColor(article.biotechColor)}-500 bg-opacity-20 text-${getBadgeColor(article.biotechColor)}-700 px-2 py-1 rounded-full`}>
+                        {biotechColors[article.biotechColor]?.name || 'Non classé'}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs text-gray-500">
                     {formatDate(article.pubDate)}
                   </span>
