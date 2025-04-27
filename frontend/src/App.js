@@ -1,17 +1,20 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Homepage from './components/Homepage';
+import Layout from './components/Layout';
 
 function App() {
   return (
-    <div>
-      {/* Future location for a consistent Header/Navbar */}
+    <Layout>
       <Routes>
         <Route path="/" element={<Homepage />} />
-        {/* Add other routes here later */}
+        <Route path="/apprendre" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-blue">Section Apprendre</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
+        <Route path="/recherche" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-purple">Section Recherche</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
+        <Route path="/actualites" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-teal">Section Actualités</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
+        <Route path="/methodes" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-green">Section Méthodes</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
+        <Route path="/contact" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-lab-blue to-lab-purple">Contact</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
       </Routes>
-      {/* Future location for a consistent Footer */}
-    </div>
+    </Layout>
   );
 }
 

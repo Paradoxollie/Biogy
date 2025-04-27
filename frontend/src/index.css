@@ -4,4 +4,9 @@
 
 body {
   @apply font-sans bg-lab-bg text-gray-800;
+}
+
+.perspective {
+  perspective: 800px;
+  transform-style: preserve-3d;
 } 
