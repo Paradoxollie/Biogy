@@ -4,7 +4,6 @@ function ScienceWatchPage() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedColor, setSelectedColor] = useState('all');
 
   // Définition des catégories de biotechnologie par couleur
   const biotechColors = {
@@ -104,7 +103,7 @@ function ScienceWatchPage() {
 
   useEffect(() => {
     fetchArticles();
-  }, [selectedColor]);
+  }, []);
 
   const fetchArticles = async () => {
     setLoading(true);
@@ -203,9 +202,46 @@ function ScienceWatchPage() {
             const content = item.querySelector('content\\:encoded, encoded, content')?.textContent || 
                            item.querySelector('description, summary')?.textContent || '';
             
-            const imageRegex = /<img[^>]+src="?([^"\s]+)"?\s*[^>]*>/g;
-            const match = imageRegex.exec(content);
-            const imageUrl = match ? match[1] : null;
+            // Recherche d'images dans le contenu
+            let imageUrl = null;
+            
+            // Méthode 1: recherche d'attribut image ou thumbnail
+            const mediaContent = item.querySelector('media\\:content, media\\:thumbnail, enclosure');
+            if (mediaContent && mediaContent.getAttribute('url')) {
+              imageUrl = mediaContent.getAttribute('url');
+            }
+            
+            // Méthode 2: recherche d'image dans le contenu HTML
+            if (!imageUrl) {
+              const imageRegex = /<img[^>]+src="?([^"\s]+)"?\s*[^>]*>/g;
+              const match = imageRegex.exec(content);
+              if (match) imageUrl = match[1];
+            }
+            
+            // Méthode 3: recherche d'image dans des champs spéciaux
+            if (!imageUrl) {
+              const imageElement = item.querySelector('image, thumbnail');
+              if (imageElement && imageElement.textContent) {
+                imageUrl = imageElement.textContent.trim();
+              }
+            }
+            
+            // Fallback pour les images
+            if (!imageUrl || !imageUrl.startsWith('http')) {
+              // Images par défaut selon la catégorie
+              const defaultImages = {
+                red: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
+                green: 'https://images.unsplash.com/photo-1574707100262-7a26b64d3fd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                blue: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                white: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                yellow: 'https://images.unsplash.com/photo-1604187351574-c75ca79f5807?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                black: 'https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80',
+                multi: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'
+              };
+              
+              // On utilisera une image par défaut selon la catégorie de la source
+              imageUrl = sourceColorCategory ? defaultImages[sourceColorCategory] : defaultImages.multi;
+            }
             
             // Extract description, removing HTML tags
             let description = item.querySelector('description, summary')?.textContent || '';
@@ -328,7 +364,8 @@ function ScienceWatchPage() {
         imageUrl: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
         source: "Institut Pasteur",
         sourceColorCategory: "red",
-        sourceColorTags: ["red"]
+        sourceColorTags: ["red"],
+        biotechColor: "red"
       },
       {
         title: "Collaboration entre l'INRAE et une biotech pour développer des biofertilisants",
@@ -339,7 +376,8 @@ function ScienceWatchPage() {
         imageUrl: "https://images.unsplash.com/photo-1574707100262-7a26b64d3fd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
         source: "INRAE",
         sourceColorCategory: "green",
-        sourceColorTags: ["green", "yellow", "white"]
+        sourceColorTags: ["green", "yellow", "white"],
+        biotechColor: "green"
       },
       {
         title: "Levée de fonds record pour une startup française de bioimpression 3D",
@@ -350,7 +388,8 @@ function ScienceWatchPage() {
         imageUrl: "https://images.unsplash.com/photo-1574169208507-84376144848b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1445&q=80",
         source: "Genopole",
         sourceColorCategory: "white",
-        sourceColorTags: ["white", "red"]
+        sourceColorTags: ["white", "red"],
+        biotechColor: "white"
       },
       {
         title: "Nouveau procédé industriel pour la production de biocarburants",
@@ -361,7 +400,8 @@ function ScienceWatchPage() {
         imageUrl: "https://images.unsplash.com/photo-1620523162656-4f968dca355a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
         source: "ADEME",
         sourceColorCategory: "yellow",
-        sourceColorTags: ["yellow", "green"]
+        sourceColorTags: ["yellow", "green"],
+        biotechColor: "yellow"
       },
       {
         title: "Découverte d'une enzyme capable de dégrader efficacement le plastique",
@@ -372,7 +412,8 @@ function ScienceWatchPage() {
         imageUrl: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
         source: "CNRS Le Journal",
         sourceColorCategory: "multi",
-        sourceColorTags: ["green", "yellow", "white"]
+        sourceColorTags: ["green", "yellow", "white"],
+        biotechColor: "yellow"
       },
       {
         title: "Nouvelles méthodes d'aquaculture durable développées par l'Ifremer",
@@ -383,7 +424,8 @@ function ScienceWatchPage() {
         imageUrl: "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
         source: "Ifremer",
         sourceColorCategory: "blue",
-        sourceColorTags: ["blue"]
+        sourceColorTags: ["blue"],
+        biotechColor: "blue"
       },
       {
         title: "Lancement d'un nouveau Master en biotechnologies marines à Brest",
@@ -394,18 +436,12 @@ function ScienceWatchPage() {
         imageUrl: "https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80",
         source: "Ministère de l'Enseignement Supérieur et de la Recherche",
         sourceColorCategory: "black",
-        sourceColorTags: ["black"]
+        sourceColorTags: ["black"],
+        biotechColor: "black"
       }
     ];
     
-    // Apply biotechnology color to each demo article
-    return articles.map(article => {
-      // Si l'article n'a pas déjà une couleur assignée, la déterminer
-      if (!article.biotechColor) {
-        article.biotechColor = determineBiotechColor(article);
-      }
-      return article;
-    });
+    return articles;
   };
 
   // Fonction pour formater la date
@@ -430,36 +466,8 @@ function ScienceWatchPage() {
       </div>
     );
   };
-
-  // Filter articles based on selected color category
-  const getFilteredArticlesByBiotechColor = () => {
-    // Si aucune couleur n'est sélectionnée, renvoyer tous les articles
-    if (selectedColor === 'all') {
-      return organizeArticlesByColor(articles);
-    }
-    
-    // Filtrer les articles par couleur sélectionnée
-    const colorFiltered = articles.filter(article => {
-      // Vérifier la couleur principale de l'article
-      if (article.biotechColor === selectedColor) {
-        return true;
-      }
-      
-      // Vérifier les tags de couleur source 
-      if (article.sourceColorTags && article.sourceColorTags.includes(selectedColor)) {
-        return true;
-      }
-      
-      return false;
-    });
-    
-    // Pour le débogage
-    console.log(`Filtered articles for color ${selectedColor}:`, colorFiltered.length);
-    
-    return organizeArticlesByColor(colorFiltered);
-  };
   
-  // Organiser les articles par couleur de biotechnologie
+  // Organiser les articles par couleur de biotechnologie avec limite de 4 par couleur
   const organizeArticlesByColor = (articleList) => {
     const organizedByColor = {
       green: [],
@@ -473,19 +481,20 @@ function ScienceWatchPage() {
     };
     
     articleList.forEach(article => {
+      // Déterminer la couleur
       const color = article.biotechColor || 'unclassified';
-      if (organizedByColor.hasOwnProperty(color)) {
+      
+      // N'ajouter que si la limite n'est pas atteinte
+      if (organizedByColor.hasOwnProperty(color) && organizedByColor[color].length < 4) {
         organizedByColor[color].push(article);
-      } else {
-        organizedByColor.unclassified.push(article);
       }
     });
     
     return organizedByColor;
   };
 
-  // Get articles organized by biotech color
-  const articlesByBiotechColor = getFilteredArticlesByBiotechColor();
+  // Get articles organized by biotech color with limit
+  const articlesByBiotechColor = organizeArticlesByColor(articles);
 
   return (
     <div className="container mx-auto p-4">
@@ -494,27 +503,6 @@ function ScienceWatchPage() {
       {renderBiotechLegend()}
       
       <div className="mb-6">
-        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-4">
-          <div className="w-full sm:w-1/2">
-            <label htmlFor="colorSelect" className="block mb-2 text-sm font-medium">Filtrer par couleur biotechnologique:</label>
-            <select
-              id="colorSelect"
-              value={selectedColor}
-              onChange={(e) => setSelectedColor(e.target.value)}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            >
-              <option value="all">Toutes les couleurs</option>
-              <option value="green">Biotechnologie Verte (Agro-alimentaire)</option>
-              <option value="red">Biotechnologie Rouge (Santé)</option>
-              <option value="white">Biotechnologie Blanche (Industrielle)</option>
-              <option value="yellow">Biotechnologie Jaune (Environnement)</option>
-              <option value="blue">Biotechnologie Bleue (Marine)</option>
-              <option value="black">Biotechnologie Noire (Éducation)</option>
-              <option value="multi">Multi-couleurs (Général)</option>
-            </select>
-          </div>
-        </div>
-        
         <div className="flex justify-center">
           <button
             onClick={() => {
@@ -543,7 +531,7 @@ function ScienceWatchPage() {
         </div>
       ) : (
         <div>
-          {/* Display articles grouped by biotech color */}
+          {/* Display articles grouped by biotech color (max 4 per color) */}
           {Object.entries(articlesByBiotechColor).map(([colorKey, colorArticles]) => {
             if (colorArticles.length === 0) return null;
             
@@ -566,20 +554,20 @@ function ScienceWatchPage() {
                   <p className="text-sm">{colorData.description}</p>
                 </div>
                 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {colorArticles.map((article, index) => (
                     <div key={index} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                      {article.imageUrl && (
+                      <div className="h-40 overflow-hidden">
                         <img
                           src={article.imageUrl}
                           alt={article.title}
-                          className="w-full h-48 object-cover"
+                          className="w-full h-full object-cover"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = 'https://via.placeholder.com/400x200?text=Image+non+disponible';
+                            e.target.src = 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80';
                           }}
                         />
-                      )}
+                      </div>
                       <div className="p-4">
                         <div className="flex justify-between items-start mb-2">
                           <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
@@ -589,8 +577,8 @@ function ScienceWatchPage() {
                             {colorData.name}
                           </span>
                         </div>
-                        <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
-                        <p className="text-gray-700 mb-4">
+                        <h2 className="text-xl font-semibold mb-2 line-clamp-2">{article.title}</h2>
+                        <p className="text-gray-700 mb-4 line-clamp-3">
                           {article.description}
                         </p>
                         <div className="flex justify-between items-center">
