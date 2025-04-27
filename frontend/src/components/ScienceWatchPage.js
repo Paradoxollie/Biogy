@@ -89,8 +89,8 @@ function ScienceWatchPage() {
   };
 
   useEffect(() => {
-    fetchArticles();
-  }, []);
+    fetchArticles(selectedSource);
+  }, [selectedSource]);
 
   const fetchArticles = async (sourceFilter = 'all') => {
     setLoading(true);
@@ -125,68 +125,83 @@ function ScienceWatchPage() {
       
       // Using a CORS proxy to avoid cross-origin issues
       const corsProxy = 'https://api.allorigins.win/raw?url=';
+      const fetchPromises = [];
       
-      const fetchPromises = feedsToFetch.map(async feed => {
-        const encodedFeedUrl = encodeURIComponent(feed);
-        const response = await fetch(`${corsProxy}${encodedFeedUrl}`);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch ${feed}`);
-        }
-        
-        const data = await response.text();
-        
-        // Create a new DOMParser to parse the XML content
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data, 'text/xml');
-        
-        // Get category based on feed URL
-        let sourceCategory = '';
-        Object.entries(feeds).forEach(([category, urls]) => {
-          if (urls.includes(feed)) {
-            sourceCategory = category;
+      for (const feed of feedsToFetch) {
+        try {
+          const encodedFeedUrl = encodeURIComponent(feed);
+          const response = await fetch(`${corsProxy}${encodedFeedUrl}`);
+          
+          if (!response.ok) {
+            console.warn(`Failed to fetch ${feed}: ${response.status}`);
+            continue;
           }
-        });
-        
-        // Extract source from URL
-        const source = new URL(feed).hostname.replace('www.', '');
-        
-        // Parse the items from the feed
-        const items = xmlDoc.querySelectorAll('item');
-        
-        return Array.from(items).map(item => {
-          // Extract image URL from content if it exists
-          const content = item.querySelector('content\\:encoded, encoded')?.textContent || 
-                          item.querySelector('description')?.textContent || '';
           
-          const imageRegex = /<img[^>]+src="?([^"\s]+)"?\s*[^>]*>/g;
-          const match = imageRegex.exec(content);
-          const imageUrl = match ? match[1] : null;
+          const data = await response.text();
           
-          // Extract description, removing HTML tags
-          let description = item.querySelector('description')?.textContent || '';
-          description = description.replace(/<[^>]*>?/gm, '').trim();
-          description = description.length > 150 ? description.substring(0, 150) + '...' : description;
+          // Create a new DOMParser to parse the XML content
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(data, 'text/xml');
           
-          return {
-            title: item.querySelector('title')?.textContent || 'Sans titre',
-            link: item.querySelector('link')?.textContent || '#',
-            pubDate: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
-            description,
-            imageUrl,
-            source,
-            sourceCategory
-          };
-        });
-      });
+          // Get category based on feed URL
+          let sourceCategory = '';
+          Object.entries(feeds).forEach(([category, urls]) => {
+            if (urls.includes(feed)) {
+              sourceCategory = category;
+            }
+          });
+          
+          // Extract source from URL
+          const source = new URL(feed).hostname.replace('www.', '');
+          
+          // Parse the items from the feed
+          const items = xmlDoc.querySelectorAll('item');
+          
+          const articleItems = Array.from(items).map(item => {
+            // Extract image URL from content if it exists
+            const content = item.querySelector('content\\:encoded, encoded')?.textContent || 
+                           item.querySelector('description')?.textContent || '';
+            
+            const imageRegex = /<img[^>]+src="?([^"\s]+)"?\s*[^>]*>/g;
+            const match = imageRegex.exec(content);
+            const imageUrl = match ? match[1] : null;
+            
+            // Extract description, removing HTML tags
+            let description = item.querySelector('description')?.textContent || '';
+            description = description.replace(/<[^>]*>?/gm, '').trim();
+            description = description.length > 150 ? description.substring(0, 150) + '...' : description;
+            
+            const article = {
+              title: item.querySelector('title')?.textContent || 'Sans titre',
+              link: item.querySelector('link')?.textContent || '#',
+              pubDate: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
+              description,
+              content: content,
+              imageUrl,
+              source,
+              sourceCategory
+            };
+            
+            // Determine biotechnology color for the article
+            article.biotechColor = determineBiotechColor(article);
+            
+            return article;
+          });
+          
+          fetchPromises.push(articleItems);
+        } catch (error) {
+          console.error(`Error processing feed ${feed}:`, error);
+          continue;
+        }
+      }
       
-      try {
-        const results = await Promise.allSettled(fetchPromises);
-        
-        // Filter for fulfilled promises and flatten the array
-        const articlesArray = results
-          .filter(result => result.status === 'fulfilled')
-          .flatMap(result => result.value);
+      if (fetchPromises.length === 0) {
+        console.warn('No articles could be fetched from any source');
+        const demoArticles = getDemoArticles();
+        setArticles(demoArticles);
+        setError("Impossible de récupérer les articles. Affichage des données de démonstration.");
+      } else {
+        const articlesArray = fetchPromises.flat();
         
         // Sort by publication date (newest first)
         const sortedArticles = articlesArray.sort((a, b) => 
@@ -195,19 +210,17 @@ function ScienceWatchPage() {
         
         if (sortedArticles.length === 0) {
           // If no articles were fetched, fallback to demo articles
-          setArticles(getDemoArticles());
-          setError("Impossible de récupérer les articles. Affichage des données de démonstration.");
+          const demoArticles = getDemoArticles();
+          setArticles(demoArticles);
+          setError("Aucun article trouvé. Affichage des données de démonstration.");
         } else {
           setArticles(sortedArticles);
         }
-      } catch (error) {
-        console.error("Error processing feeds:", error);
-        setArticles(getDemoArticles());
-        setError("Erreur lors du traitement des flux RSS. Affichage des données de démonstration.");
       }
     } catch (error) {
       console.error("Fetch error:", error);
-      setArticles(getDemoArticles());
+      const demoArticles = getDemoArticles();
+      setArticles(demoArticles);
       setError("Erreur de connexion. Affichage des données de démonstration.");
     } finally {
       setLoading(false);
@@ -220,14 +233,15 @@ function ScienceWatchPage() {
     return new Date(dateString).toLocaleDateString('fr-FR', options);
   };
 
-  // Données de démonstration pour le développement ou en cas d'erreur avec l'API
+  // Function to get demo articles with proper biotechnology color categorization
   const getDemoArticles = () => {
-    return [
+    const articles = [
       {
         title: "De nouvelles avancées dans la thérapie génique pour les maladies rares",
         link: "https://example.com/article1",
         pubDate: "2023-08-15T10:00:00Z",
         description: "Des chercheurs ont développé une nouvelle approche de thérapie génique qui montre des résultats prometteurs pour le traitement de maladies génétiques rares.",
+        content: "Des chercheurs ont développé une nouvelle approche de thérapie génique qui montre des résultats prometteurs pour le traitement de maladies génétiques rares.",
         imageUrl: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
         source: "biofutur.info",
         sourceCategory: "biotechnology"
@@ -237,6 +251,7 @@ function ScienceWatchPage() {
         link: "https://example.com/article2",
         pubDate: "2023-08-10T14:30:00Z",
         description: "L'INRAE et une entreprise de biotechnologie ont signé un accord de collaboration pour développer une nouvelle génération de biofertilisants.",
+        content: "L'INRAE et une entreprise de biotechnologie ont signé un accord de collaboration pour développer une nouvelle génération de biofertilisants à partir de ressources naturelles.",
         imageUrl: "https://images.unsplash.com/photo-1574707100262-7a26b64d3fd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
         source: "inrae.fr",
         sourceCategory: "research"
@@ -246,6 +261,7 @@ function ScienceWatchPage() {
         link: "https://example.com/article3",
         pubDate: "2023-08-05T09:15:00Z",
         description: "Une startup spécialisée dans la bioimpression 3D annonce une levée de fonds de 40 millions d'euros pour accélérer le développement de ses technologies.",
+        content: "Une startup spécialisée dans la bioimpression 3D annonce une levée de fonds de 40 millions d'euros pour accélérer le développement de ses technologies médicales innovantes.",
         imageUrl: "https://images.unsplash.com/photo-1574169208507-84376144848b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1445&q=80",
         source: "biotech-finances.com",
         sourceCategory: "business"
@@ -255,6 +271,7 @@ function ScienceWatchPage() {
         link: "https://example.com/article4",
         pubDate: "2023-08-01T11:45:00Z",
         description: "Une entreprise a mis au point un procédé industriel innovant permettant de produire des biocarburants à partir de déchets agricoles avec un rendement accru.",
+        content: "Une entreprise a mis au point un procédé industriel innovant permettant de produire des biocarburants à partir de déchets agricoles avec un rendement accru et un impact environnemental réduit.",
         imageUrl: "https://images.unsplash.com/photo-1620523162656-4f968dca355a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
         source: "industrie.com",
         sourceCategory: "biotechnology"
@@ -264,11 +281,18 @@ function ScienceWatchPage() {
         link: "https://example.com/article5",
         pubDate: "2023-07-28T08:20:00Z",
         description: "Des chercheurs du CNRS ont identifié une enzyme capable de dégrader plusieurs types de plastiques, ouvrant la voie à de nouvelles solutions de recyclage biologique.",
+        content: "Des chercheurs du CNRS ont identifié une enzyme capable de dégrader plusieurs types de plastiques, ouvrant la voie à de nouvelles solutions de recyclage biologique pour réduire la pollution environnementale.",
         imageUrl: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
         source: "cnrs.fr",
         sourceCategory: "research"
       }
     ];
+    
+    // Apply biotechnology color to each demo article
+    return articles.map(article => {
+      article.biotechColor = determineBiotechColor(article);
+      return article;
+    });
   };
 
   // Obtenir la légende des couleurs de biotech
@@ -344,10 +368,15 @@ function ScienceWatchPage() {
     );
   };
 
-  // Grouper les articles par catégorie de biotechnologie
-  const getArticlesByCategory = () => {
-    // Créer un objet avec les différentes catégories de couleur
-    const categorizedArticles = {
+  // Filter articles based on selected category and organize by biotech color
+  const getFilteredArticlesByBiotechColor = () => {
+    // First filter by source category if needed
+    const categoryFiltered = selectedCategory === 'all' 
+      ? articles 
+      : articles.filter(article => article.sourceCategory === selectedCategory);
+    
+    // Then organize by biotech color
+    const organizedByColor = {
       green: [],
       red: [],
       white: [],
@@ -357,52 +386,26 @@ function ScienceWatchPage() {
       unclassified: []
     };
     
-    // Répartir les articles dans leurs catégories respectives
-    articles.forEach(article => {
-      if (article.biotechColor && categorizedArticles[article.biotechColor]) {
-        categorizedArticles[article.biotechColor].push(article);
+    categoryFiltered.forEach(article => {
+      const color = article.biotechColor || 'unclassified';
+      if (organizedByColor.hasOwnProperty(color)) {
+        organizedByColor[color].push(article);
       } else {
-        categorizedArticles.unclassified.push(article);
+        organizedByColor.unclassified.push(article);
       }
     });
     
-    return categorizedArticles;
+    return organizedByColor;
   };
 
-  // Amélioration du filtrage des articles
-  const isBiotechArticle = (article) => {
-    const searchText = `${article.title || ''} ${article.description || ''} ${article.content || ''}`.toLowerCase();
-    
-    // Mots-clés généraux de la biotechnologie
-    const biotechGeneralKeywords = [
-      'biotech', 'biotechnologie', 'biologique', 'génétique', 'génome', 
-      'crispr', 'adn', 'arn', 'cellule', 'biologie', 'enzyme', 
-      'protéine', 'thérapie génique', 'biopharma', 'biomédical', 
-      'biocarburant', 'biosourcé', 'biomatériau', 'bioremédiation',
-      'microorganisme', 'fermentation', 'clonage', 'ogm', 'transgénique',
-      'in vitro', 'in vivo', 'microbiologie', 'bactérie', 'levure',
-      'biochimie', 'bioplastique', 'métabolisme', 'recombinant',
-      'biodégradable', 'biomasse', 'procaryote', 'eucaryote'
-    ];
-    
-    // Vérifier si l'article contient au moins un mot-clé général de biotechnologie
-    for (const keyword of biotechGeneralKeywords) {
-      if (searchText.includes(keyword.toLowerCase())) {
-        return true;
-      }
-    }
-    
-    return false;
-  };
-
-  // Filter articles based on selected category
-  const filteredArticles = selectedCategory === 'all' 
-    ? articles 
-    : articles.filter(article => article.sourceCategory === selectedCategory);
+  // Get articles organized by biotech color
+  const articlesByBiotechColor = getFilteredArticlesByBiotechColor();
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-6">Veille Scientifique</h1>
+      
+      {renderBiotechLegend()}
       
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
@@ -462,57 +465,77 @@ function ScienceWatchPage() {
           </div>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredArticles.length > 0 ? (
-            filteredArticles.map((article, index) => (
-              <div key={index} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                {article.imageUrl && (
-                  <img
-                    src={article.imageUrl}
-                    alt={article.title}
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://via.placeholder.com/400x200?text=Image+non+disponible';
-                    }}
-                  />
-                )}
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                      {article.source}
-                    </span>
-                    <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
-                      {article.sourceCategory === 'biotechnology' && 'Biotechnologie'}
-                      {article.sourceCategory === 'business' && 'Business'}
-                      {article.sourceCategory === 'research' && 'Recherche'}
-                    </span>
-                  </div>
-                  <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
-                  <p className="text-gray-700 mb-4">
-                    {article.description}
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <a
-                      href={article.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:text-blue-700 font-medium"
-                    >
-                      Lire l'article
-                    </a>
-                    <span className="text-sm text-gray-500">
-                      {new Date(article.pubDate).toLocaleDateString('fr-FR')}
-                    </span>
-                  </div>
+        <div>
+          {/* Display articles grouped by biotech color */}
+          {Object.entries(articlesByBiotechColor).map(([colorKey, colorArticles]) => {
+            if (colorArticles.length === 0) return null;
+            
+            const colorData = biotechColors[colorKey] || {
+              name: 'Non classifié',
+              description: 'Articles non classifiés',
+              bgColor: 'bg-gray-500',
+              textColor: 'text-gray-800',
+              bgColorLight: 'bg-gray-100',
+              borderColor: 'border-gray-500',
+            };
+            
+            return (
+              <div key={colorKey} className="mb-10">
+                <div className={`p-3 ${colorData.bgColorLight} border-l-4 ${colorData.borderColor} mb-4`}>
+                  <h2 className={`text-xl font-bold ${colorData.textColor}`}>
+                    Biotechnologie {colorData.name} 
+                    <span className="ml-2 text-sm font-normal">({colorArticles.length} articles)</span>
+                  </h2>
+                  <p className="text-sm">{colorData.description}</p>
+                </div>
+                
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {colorArticles.map((article, index) => (
+                    <div key={index} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                      {article.imageUrl && (
+                        <img
+                          src={article.imageUrl}
+                          alt={article.title}
+                          className="w-full h-48 object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://via.placeholder.com/400x200?text=Image+non+disponible';
+                          }}
+                        />
+                      )}
+                      <div className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                            {article.source}
+                          </span>
+                          <span className={`inline-block ${colorData.bgColorLight} ${colorData.textColor} text-xs px-2 py-1 rounded`}>
+                            {colorData.name}
+                          </span>
+                        </div>
+                        <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
+                        <p className="text-gray-700 mb-4">
+                          {article.description}
+                        </p>
+                        <div className="flex justify-between items-center">
+                          <a
+                            href={article.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-700 font-medium"
+                          >
+                            Lire l'article
+                          </a>
+                          <span className="text-sm text-gray-500">
+                            {new Date(article.pubDate).toLocaleDateString('fr-FR')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="col-span-3 text-center py-10">
-              <p className="text-xl">Aucun article trouvé</p>
-            </div>
-          )}
+            );
+          })}
         </div>
       )}
     </div>
