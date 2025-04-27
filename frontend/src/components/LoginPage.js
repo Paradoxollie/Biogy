@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Importer useNavigate
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // Importer useAuth
 
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Initialiser useNavigate
+  const navigate = useNavigate();
+  const { login } = useAuth(); // Obtenir la fonction login du contexte
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,7 +16,6 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      // Utiliser la variable d'environnement pour l'URL de l'API
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; 
       
       const response = await fetch(`${apiUrl}/api/auth/login`, {
@@ -28,23 +29,20 @@ function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        // Utiliser le message d'erreur du backend si disponible
         throw new Error(data.message || `Erreur HTTP: ${response.status}`); 
       }
 
       // Connexion réussie
       console.log('Connexion réussie:', data); 
-      // Stocker les informations utilisateur dans localStorage
-      localStorage.setItem('userInfo', JSON.stringify(data)); 
       
-      // Rediriger l'utilisateur vers la page d'accueil (ou une autre page)
+      // Appeler la fonction login du contexte pour mettre à jour l'état global et localStorage
+      login(data); 
+      
+      // Rediriger l'utilisateur vers la page d'accueil
       navigate('/'); 
-      // Optionnel: Forcer un rechargement pour que le Layout/Header se mette à jour si nécessaire
-      // window.location.reload(); 
 
     } catch (err) {
       console.error('Erreur de connexion:', err);
-      // Afficher l'erreur à l'utilisateur
       setError(err.message || 'Une erreur est survenue lors de la connexion.');
     } finally {
       setLoading(false);

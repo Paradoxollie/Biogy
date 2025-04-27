@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext'; // Importer useAuth
 // import axios from 'axios'; // On utilisera fetch pour l'instant, mais axios est une option
 
 // Icône SVG pour l'upload (style crayonné)
@@ -23,6 +24,7 @@ function ShareProjectPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [consent, setConsent] = useState(false); // Pour le consentement RGPD
+  const { userInfo } = useAuth(); // Obtenir userInfo depuis le contexte
 
   // Gérer la sélection de fichier et l'aperçu
   const handleFileChange = (e) => {
@@ -62,33 +64,31 @@ function ShareProjectPage() {
     }
     
     if (!consent) {
-        setError('Vous devez accepter les conditions pour partager votre projet.');
-        return;
+      setError('Vous devez accepter les conditions pour partager votre projet.');
+      return;
     }
-
+    
+    // Vérifier si l'utilisateur est connecté via le contexte
+    if (!userInfo || !userInfo.token) {
+      setError('Vous devez être connecté pour partager un projet.');
+      // Optionnel: rediriger vers login ? 
+      // import { useNavigate } from 'react-router-dom';
+      // const navigate = useNavigate();
+      // navigate('/login');
+      return;
+    }
+    
     setLoading(true);
 
     const formData = new FormData();
     formData.append('file', file);
     formData.append('caption', caption);
 
-    // Récupérer le token depuis le localStorage (ou contexte/état global)
-    // !!! Assurez-vous que le token est bien stocké lors de la connexion !!!
-    const userInfo = localStorage.getItem('userInfo') 
-                    ? JSON.parse(localStorage.getItem('userInfo')) 
-                    : null;
-    const token = userInfo ? userInfo.token : null;
-
-    if (!token) {
-      setError('Vous devez être connecté pour partager un projet.');
-      setLoading(false);
-      return;
-    }
+    const token = userInfo.token; // Utiliser le token du contexte
 
     try {
-      // Utiliser la variable d'environnement pour l'URL de l'API
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; 
-      const postUrl = `${apiUrl}/api/posts`; // Construire l'URL complète
+      const postUrl = `${apiUrl}/api/posts`;
       
       const response = await fetch(postUrl, { 
         method: 'POST',
@@ -109,7 +109,6 @@ function ShareProjectPage() {
       setCaption('');
       setPreview(null);
       setConsent(false);
-      // Réinitialiser le champ de fichier visuellement
       if(document.getElementById('file-input')) {
         document.getElementById('file-input').value = '';
       }
