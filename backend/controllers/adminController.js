@@ -1,5 +1,6 @@
 const Post = require('../models/Post');
 const { deleteFromCloudinary } = require('../config/cloudinary');
+const User = require('../models/User');
 
 /**
  * @desc    Get all pending posts awaiting moderation
@@ -138,10 +139,91 @@ const deletePostAdmin = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Mettre à jour le rôle d'un utilisateur
+ * @route   PUT /api/admin/users/:id/role
+ * @access  Private (admin uniquement)
+ */
+const updateUserRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    const userId = req.params.id;
+    
+    if (!role || !['admin', 'student'].includes(role)) {
+      return res.status(400).json({ message: 'Rôle invalide. Les valeurs acceptées sont: admin, student' });
+    }
+    
+    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: 'ID utilisateur invalide' });
+    }
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    
+    user.role = role;
+    await user.save();
+    
+    res.status(200).json({
+      success: true,
+      message: `L'utilisateur ${user.username} a été promu au rôle de ${role}`,
+      user: {
+        _id: user._id,
+        username: user.username,
+        role: user.role
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in updateUserRole:', error);
+    res.status(500).json({
+      message: 'Erreur lors de la mise à jour du rôle utilisateur',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Trouver un utilisateur par nom d'utilisateur
+ * @route   GET /api/admin/users/find/:username
+ * @access  Private (admin uniquement)
+ */
+const findUserByUsername = async (req, res) => {
+  try {
+    const { username } = req.params;
+    
+    if (!username) {
+      return res.status(400).json({ message: 'Nom d\'utilisateur requis' });
+    }
+    
+    const user = await User.findOne({ username }).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    
+    res.status(200).json({
+      success: true,
+      user
+    });
+    
+  } catch (error) {
+    console.error('Error in findUserByUsername:', error);
+    res.status(500).json({
+      message: 'Erreur lors de la recherche de l\'utilisateur',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getPendingPosts,
   getAllPosts,
   approvePost,
   rejectPost,
-  deletePostAdmin
+  deletePostAdmin,
+  updateUserRole,
+  findUserByUsername
 }; 

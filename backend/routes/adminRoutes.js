@@ -1,5 +1,5 @@
 const express = require('express');
-const { getPendingPosts, getAllPosts, approvePost, rejectPost, deletePostAdmin } = require('../controllers/adminController');
+const { getPendingPosts, getAllPosts, approvePost, rejectPost, deletePostAdmin, updateUserRole, findUserByUsername } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const { admin } = require('../middleware/adminMiddleware');
 
@@ -23,5 +23,11 @@ router.put('/posts/:id/reject', rejectPost);
 
 // Delete a post (admin function)
 router.delete('/posts/:id', deletePostAdmin);
+
+// Trouver un utilisateur par nom d'utilisateur
+router.get('/users/find/:username', findUserByUsername);
+
+// Mettre à jour le rôle d'un utilisateur
+router.put('/users/:id/role', updateUserRole);
 
 module.exports = router; 
