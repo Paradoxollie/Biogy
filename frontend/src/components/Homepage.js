@@ -1,11 +1,109 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
+// Fonction utilitaire pour l'animation des cercles de Petri
+const animatePetriDishes = (canvas, ctx) => {
+  if (!canvas || !ctx) return;
+  
+  // Configuration
+  const circles = [];
+  const colors = ['#3b82f6', '#8b5cf6', '#14b8a6', '#22c55e'];
+  const numCircles = 20;
+  
+  // Création des cercles initiaux
+  for (let i = 0; i < numCircles; i++) {
+    circles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      radius: Math.random() * 15 + 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: Math.random() * 0.3 + 0.1,
+      speed: {
+        x: Math.random() * 0.3 - 0.15,
+        y: Math.random() * 0.3 - 0.15
+      }
+    });
+  }
+  
+  // Boucle d'animation
+  const animate = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    circles.forEach(circle => {
+      // Déplacement
+      circle.x += circle.speed.x;
+      circle.y += circle.speed.y;
+      
+      // Rebond sur les bords
+      if (circle.x < 0 || circle.x > canvas.width) circle.speed.x *= -1;
+      if (circle.y < 0 || circle.y > canvas.height) circle.speed.y *= -1;
+      
+      // Dessin du cercle (boîte de Petri)
+      ctx.beginPath();
+      ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = circle.color;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = circle.alpha;
+      ctx.stroke();
+      
+      // Petites cellules à l'intérieur
+      const cells = Math.floor(Math.random() * 3) + 2;
+      for (let j = 0; j < cells; j++) {
+        const cellAngle = Math.random() * Math.PI * 2;
+        const cellDistance = Math.random() * (circle.radius * 0.7);
+        const cellX = circle.x + Math.cos(cellAngle) * cellDistance;
+        const cellY = circle.y + Math.sin(cellAngle) * cellDistance;
+        const cellRadius = Math.random() * 2 + 1;
+        
+        ctx.beginPath();
+        ctx.arc(cellX, cellY, cellRadius, 0, Math.PI * 2);
+        ctx.fillStyle = circle.color;
+        ctx.globalAlpha = circle.alpha + 0.2;
+        ctx.fill();
+      }
+    });
+    
+    requestAnimationFrame(animate);
+  };
+  
+  animate();
+};
+
 function Homepage() {
+  const canvasRef = useRef(null);
+  
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    // Configuration du canvas
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    
+    // Initialisation de l'animation
+    animatePetriDishes(canvas, ctx);
+    
+    // Redimensionnement
+    const handleResize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <div className="relative min-h-screen bg-white">
+    <div className="relative min-h-screen">
+      {/* Canvas d'arrière-plan pour l'animation des boîtes de Petri */}
+      <canvas 
+        ref={canvasRef} 
+        className="absolute top-0 left-0 w-full h-full -z-10 opacity-30"
+      ></canvas>
+      
       {/* Section héro avec illustrations de labo */}
-      <section className="relative pt-20 pb-24 px-4 md:px-0 z-10">
+      <section className="pt-20 pb-24 px-4 md:px-0">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-10">
             {/* Texte principal */}
@@ -33,13 +131,16 @@ function Homepage() {
                 <div className="absolute bottom-1/3 right-4 w-0.5 h-0.5 rounded-full bg-white/40 animate-pulse"></div>
                 <div className="absolute top-1/2 right-0 w-1 h-1 rounded-full bg-white/40 animate-pulse"></div>
                 
-                {/* Logo Atomique avec orbites */}
-                <div className="relative rounded-full p-8 aspect-square flex items-center justify-center">
+                {/* Logo avec conteneur */}
+                <div className="relative bg-green-900/60 backdrop-blur-sm rounded-full p-8 shadow-inner overflow-hidden border border-white/10 aspect-square flex items-center justify-center">
+                  {/* Effet de texture de tableau */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-30 rounded-full"></div>
+                  
                   {/* Orbites moléculaires */}
-                  <div className="absolute inset-0 rounded-full border border-lab-blue/30 animate-spin" style={{ animationDuration: '20s' }}></div>
-                  <div className="absolute inset-2 rounded-full border border-lab-purple/25 animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
-                  <div className="absolute inset-4 rounded-full border border-lab-teal/20 animate-spin" style={{ animationDuration: '10s' }}></div>
-                  <div className="absolute inset-6 rounded-full border-dashed border border-lab-green/15 animate-spin" style={{ animationDuration: '25s' }}></div>
+                  <div className="absolute inset-0 rounded-full border border-white/20 animate-spin" style={{ animationDuration: '20s' }}></div>
+                  <div className="absolute inset-2 rounded-full border border-white/15 animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
+                  <div className="absolute inset-4 rounded-full border border-white/10 animate-spin" style={{ animationDuration: '10s' }}></div>
+                  <div className="absolute inset-6 rounded-full border-dashed border border-white/5 animate-spin" style={{ animationDuration: '25s' }}></div>
                   
                   {/* Atomes/molécules en orbite */}
                   <div className="absolute w-4 h-4 bg-lab-blue rounded-full shadow-glow animate-orbit-1" 
@@ -59,29 +160,26 @@ function Homepage() {
                   <div className="absolute w-2 h-2 bg-indigo-300 rounded-full shadow-glow animate-orbit-2" 
                        style={{ top: '40%', left: '5%', animationDelay: '0.3s' }}></div>
                   
-                  {/* Logo parfaitement rond */}
+                  {/* Logo avec animation subtile */}
                   <div className="relative animate-float-gentle transform w-3/4 h-3/4 rounded-full overflow-hidden">
-                    <img 
-                      src="/images/biogy-logo.png" 
-                      alt="Biogy Logo" 
-                      className="w-full h-full object-contain z-10 relative drop-shadow-lg"
-                      style={{
-                        borderRadius: '50%',
-                        clipPath: 'circle(50% at center)'
-                      }}
-                    />
+                    <div className="w-full h-full flex items-center justify-center rounded-full overflow-hidden bg-green-900/80">
+                      <img 
+                        src="/images/biogy-logo.png" 
+                        alt="Biogy Logo" 
+                        className="w-[85%] h-[85%] object-contain z-10 relative drop-shadow-lg rounded-full"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
               
               <h2 className="text-2xl md:text-3xl text-gray-700 font-light leading-snug">
-                Votre <span className="font-semibold">portail</span> vers le monde fascinant de la <span className="font-semibold text-lab-purple">biologie</span>
+                Votre <span className="font-semibold">plateforme dédiée</span> à l'excellence en <span className="font-semibold text-lab-purple">Biotechnologie</span>
               </h2>
               
               <p className="text-lg text-gray-600">
-                Explorez nos ressources pour apprendre, découvrir les dernières recherches 
-                et vous tenir informé des actualités scientifiques dans un environnement 
-                conçu pour les passionnés de biotechnologie.
+                Ressources pédagogiques, protocoles de laboratoire, actualités de la recherche et outils collaboratifs 
+                pour les <span className="font-medium">lycéens, étudiants et enseignants</span> en biotechnologie.
               </p>
               
               <div className="flex flex-wrap gap-4 pt-4">
@@ -184,7 +282,7 @@ function Homepage() {
       <section className="py-16 bg-gradient-to-b from-white to-lab-bg/40">
         <div className="container mx-auto max-w-6xl px-4">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-            Explorer le monde de la <span className="text-lab-purple">bio</span><span className="text-lab-teal">logie</span>
+            Explorer l'univers de la <span className="text-lab-purple">Bio</span><span className="text-lab-teal">tech</span>
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -212,52 +310,39 @@ function Homepage() {
               </div>
               
               <div className="p-6">
-                <h3 className="text-xl font-bold text-lab-blue mb-3">Apprendre</h3>
+                <h3 className="text-xl font-bold text-lab-blue mb-3">Maîtriser les Concepts</h3>
                 <p className="text-gray-600 mb-5">
-                  Des cours structurés, exercices et QCM pour approfondir vos connaissances en biotechnologie.
+                  Cours interactifs, schémas animés et QCM pour <span className="font-medium">assimiler les notions clés</span> en biologie moléculaire, cellulaire et génie génétique.
                 </p>
                 <Link to="/apprendre" className="inline-block text-lab-blue font-medium group-hover:underline">
-                  Explorer les cours →
+                  Explorer les modules →
                 </Link>
               </div>
             </div>
             
-            {/* Carte Recherche */}
+            {/* Carte Méthodes (remplace Recherche) */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
               <div className="h-40 bg-gradient-to-r from-lab-purple/90 to-lab-purple/70 relative overflow-hidden">
-                {/* Illustration de recherche en laboratoire */}
-                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
-                  {/* Tubes à essai */}
-                  <path d="M80,40 L80,160 Q90,180 100,160 L100,40 Z" stroke="white" strokeWidth="1" fill="none" />
-                  <path d="M80,60 L100,60" stroke="white" strokeWidth="1" />
-                  <path d="M80,140 L100,140" stroke="white" strokeWidth="1" />
-                  <path d="M85,160 L95,160" stroke="white" strokeWidth="0.5" fill="white" />
-                  
-                  {/* Erlenmeyer */}
-                  <path d="M150,40 L130,140 Q130,160 150,160 Q170,160 170,140 L150,40 Z" stroke="white" strokeWidth="1" fill="none" />
-                  <path d="M140,120 L160,120" stroke="white" strokeWidth="0.5" strokeDasharray="2 2" />
-                  
-                  {/* Boîte de Petri */}
-                  <ellipse cx="220" cy="100" rx="40" ry="15" stroke="white" strokeWidth="1" />
-                  <ellipse cx="220" cy="100" rx="30" ry="10" stroke="white" strokeWidth="1" fill="none" />
-                  
-                  {/* Petites cellules/bactéries dans la boîte */}
-                  <circle cx="210" cy="95" r="2" stroke="white" strokeWidth="0.5" fill="white" />
-                  <circle cx="225" cy="102" r="3" stroke="white" strokeWidth="0.5" fill="white" />
-                  <circle cx="215" cy="105" r="1.5" stroke="white" strokeWidth="0.5" fill="white" />
-                  <circle cx="230" cy="98" r="2" stroke="white" strokeWidth="0.5" fill="white" />
+                <svg className="absolute inset-0 w-full h-full opacity-50" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+                  {/* Pipette et Flacon */}
+                  <path d="M100 40 L 100 140 Q 95 145 90 140 L 90 40 Z" stroke="white" strokeWidth="1" fill="none" />
+                  <path d="M100 50 L 90 50 M 100 70 L 90 70 M 100 90 L 90 90" stroke="white" strokeWidth="0.5" />
+                  <path d="M140 160 L 140 80 L 180 80 L 180 160 Q 160 170 140 160" stroke="white" strokeWidth="1" fill="none" />
+                  <path d="M140 100 L 180 100" stroke="white" strokeWidth="0.5" strokeDasharray="2 2" />
+                  {/* Lignes décoratives */}
+                  <line x1="50" y1="60" x2="70" y2="60" stroke="white" strokeWidth="0.5" strokeDasharray="1 1" />
+                  <line x1="200" y1="120" x2="220" y2="120" stroke="white" strokeWidth="0.5" strokeDasharray="1 1" />
                 </svg>
-                
                 <div className="absolute inset-0 bg-lab-purple/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               
               <div className="p-6">
-                <h3 className="text-xl font-bold text-lab-purple mb-3">Recherche</h3>
+                <h3 className="text-xl font-bold text-lab-purple mb-3">Techniques & Protocoles</h3>
                 <p className="text-gray-600 mb-5">
-                  Découvrez les projets de recherche en cours et les dernières innovations en biotechnologie.
+                  Fiches méthodes détaillées, <span className="font-medium">protocoles standardisés</span> et tutoriels vidéo pour maîtriser les techniques de laboratoire essentielles.
                 </p>
-                <Link to="/recherche" className="inline-block text-lab-purple font-medium group-hover:underline">
-                  Explorer la recherche →
+                <Link to="/methodes" className="inline-block text-lab-purple font-medium group-hover:underline">
+                  Consulter les fiches →
                 </Link>
               </div>
             </div>
@@ -294,12 +379,12 @@ function Homepage() {
               </div>
               
               <div className="p-6">
-                <h3 className="text-xl font-bold text-lab-teal mb-3">Actualités</h3>
+                <h3 className="text-xl font-bold text-lab-teal mb-3">Veille Scientifique</h3>
                 <p className="text-gray-600 mb-5">
-                  Restez informé des dernières découvertes et avancées dans le domaine de la biologie.
+                  Restez à la pointe avec les <span className="font-medium">dernières publications</span>, les innovations technologiques et les débats actuels en biotechnologie.
                 </p>
                 <Link to="/actualites" className="inline-block text-lab-teal font-medium group-hover:underline">
-                  Voir les actualités →
+                  Lire les actualités →
                 </Link>
               </div>
             </div>
@@ -318,9 +403,9 @@ function Homepage() {
         
         <div className="container mx-auto max-w-6xl px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4 text-gray-800">Biogy pour tous les passionnés de biologie</h2>
+            <h2 className="text-3xl font-bold mb-4 text-gray-800">Des outils pour réussir en Biotechnologie</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Notre plateforme propose des outils et ressources adaptés aux étudiants et professionnels en biotechnologie.
+              Biogy centralise les ressources indispensables aux parcours <span className="font-medium">lycéens et supérieurs</span> en biotechnologie.
             </p>
           </div>
           
@@ -333,9 +418,9 @@ function Homepage() {
                   <path d="M9 14l2 2 4-4" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">QCM Auto-Corrigés</h3>
+              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Évaluation Interactive</h3>
               <p className="text-gray-600 text-center">
-                Testez vos connaissances avec nos questionnaires auto-corrigés.
+                Validez vos acquis avec des <span className="font-medium">QCM auto-corrigés</span> et des exercices ciblés par chapitre.
               </p>
             </div>
             
@@ -346,9 +431,9 @@ function Homepage() {
                   <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Fiches Méthodes</h3>
+              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Protocoles de TP</h3>
               <p className="text-gray-600 text-center">
-                Consultez nos fiches techniques détaillées pour vos travaux pratiques.
+                Accédez à une <span className="font-medium">bibliothèque de fiches techniques</span> claires et précises pour vos manipulations.
               </p>
             </div>
 
@@ -359,9 +444,9 @@ function Homepage() {
                   <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Galerie</h3>
+              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Partage de Projets</h3>
               <p className="text-gray-600 text-center">
-                Parcourez les photos et vidéos des projets réalisés par les étudiants.
+                Inspirez-vous et partagez vos <span className="font-medium">réalisations expérimentales</span> (photos, vidéos, rapports).
               </p>
             </div>
 
@@ -372,9 +457,9 @@ function Homepage() {
                   <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Communauté</h3>
+              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Espace Collaboratif</h3>
               <p className="text-gray-600 text-center">
-                Échangez avec d'autres passionnés et partagez vos expériences.
+                Échangez avec <span className="font-medium">étudiants et enseignants</span>, posez vos questions et partagez vos astuces.
               </p>
             </div>
           </div>
@@ -392,9 +477,9 @@ function Homepage() {
             
             {/* Contenu */}
             <div className="text-center max-w-3xl mx-auto relative z-10">
-              <h2 className="text-3xl font-bold mb-6 text-gray-800">Prêt à commencer votre voyage dans l'univers de la biologie ?</h2>
+              <h2 className="text-3xl font-bold mb-6 text-gray-800">Propulsez votre parcours en Biotechnologie</h2>
               <p className="text-gray-600 mb-8">
-                Rejoignez notre communauté pour accéder à toutes nos ressources pédagogiques et échanger avec d'autres passionnés de biologie et biotechnologie.
+                Rejoignez la communauté Biogy pour accéder à l'ensemble des ressources, collaborer sur des projets et échanger avec vos pairs et enseignants.
               </p>
               <Link to="/contact" className="inline-block px-8 py-4 bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 Nous contacter
