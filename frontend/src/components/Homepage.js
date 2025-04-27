@@ -3,21 +3,26 @@ import { Link } from 'react-router-dom';
 
 // Fonction utilitaire pour l'animation des cercles de Petri
 const animatePetriDishes = (canvas, ctx) => {
-  if (!canvas || !ctx) return;
+  if (!canvas || !ctx) {
+    console.error('Canvas ou context non disponible pour les boîtes de Petri');
+    return;
+  }
+  
+  console.log('Animation des boîtes de Petri démarrée');
   
   // Configuration
   const circles = [];
   const colors = ['#3b82f6', '#8b5cf6', '#14b8a6', '#22c55e', '#f97316', '#ef4444'];
-  const numCircles = 25; // Augmentation du nombre de boîtes de Petri
+  const numCircles = 15; // Moins de cercles pour plus de visibilité
   
   // Création des cercles initiaux
   for (let i = 0; i < numCircles; i++) {
     circles.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      radius: Math.random() * 20 + 10, // Augmentation de la taille pour plus de visibilité
+      radius: Math.random() * 40 + 20, // Boîtes beaucoup plus grandes
       color: colors[Math.floor(Math.random() * colors.length)],
-      alpha: Math.random() * 0.4 + 0.2, // Augmentation de l'opacité
+      alpha: Math.random() * 0.5 + 0.4, // Beaucoup plus opaque
       speed: {
         x: Math.random() * 0.4 - 0.2,
         y: Math.random() * 0.4 - 0.2
@@ -42,23 +47,23 @@ const animatePetriDishes = (canvas, ctx) => {
       ctx.beginPath();
       ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
       ctx.strokeStyle = circle.color;
-      ctx.lineWidth = 2; // Augmentation de l'épaisseur
+      ctx.lineWidth = 3; // Lignes beaucoup plus épaisses
       ctx.globalAlpha = circle.alpha;
       ctx.stroke();
       
       // Petites cellules à l'intérieur (plus nombreuses)
-      const cells = Math.floor(Math.random() * 5) + 3;
+      const cells = Math.floor(Math.random() * 5) + 5; // Plus de cellules
       for (let j = 0; j < cells; j++) {
         const cellAngle = Math.random() * Math.PI * 2;
         const cellDistance = Math.random() * (circle.radius * 0.7);
         const cellX = circle.x + Math.cos(cellAngle) * cellDistance;
         const cellY = circle.y + Math.sin(cellAngle) * cellDistance;
-        const cellRadius = Math.random() * 3 + 1.5; // Cellules plus grandes
+        const cellRadius = Math.random() * 5 + 3; // Cellules beaucoup plus grandes
         
         ctx.beginPath();
         ctx.arc(cellX, cellY, cellRadius, 0, Math.PI * 2);
         ctx.fillStyle = circle.color;
-        ctx.globalAlpha = circle.alpha + 0.3;
+        ctx.globalAlpha = circle.alpha + 0.2;
         ctx.fill();
       }
     });
@@ -67,6 +72,7 @@ const animatePetriDishes = (canvas, ctx) => {
   };
   
   animate();
+  console.log('Animation des boîtes de Petri en cours...');
 };
 
 function Homepage() {
@@ -78,16 +84,19 @@ function Homepage() {
     
     // Configuration du canvas
     const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    console.log('Canvas initialisé avec dimensions:', canvas.width, 'x', canvas.height);
     
     // Initialisation de l'animation
     animatePetriDishes(canvas, ctx);
     
     // Redimensionnement
     const handleResize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      console.log('Canvas redimensionné:', canvas.width, 'x', canvas.height);
     };
     
     window.addEventListener('resize', handleResize);
@@ -99,7 +108,8 @@ function Homepage() {
       {/* Canvas d'arrière-plan pour l'animation des boîtes de Petri */}
       <canvas 
         ref={canvasRef} 
-        className="absolute top-0 left-0 w-full h-full -z-10 opacity-50"
+        className="absolute top-0 left-0 w-full h-full opacity-60"
+        style={{ zIndex: -1, backgroundColor: '#f0f8ff' }}
       ></canvas>
       
       {/* Section héro avec illustrations de labo */}
