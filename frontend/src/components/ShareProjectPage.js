@@ -28,7 +28,10 @@ function ShareProjectPage() {
   const { userInfo, loadingAuth } = useAuth(); // Obtenir userInfo ET loadingAuth depuis le contexte
   const navigate = useNavigate();
 
+  console.log('ShareProjectPage - Initial render/update. loadingAuth:', loadingAuth, 'userInfo:', userInfo); // DEBUG
+
   useEffect(() => {
+    console.log('ShareProjectPage - useEffect triggered. loadingAuth:', loadingAuth, 'userInfo:', userInfo); // DEBUG
     // Attendre que l'authentification soit chargée avant de vérifier
     if (!loadingAuth) {
       console.log('ShareProjectPage - Auth chargé. État utilisateur:', userInfo);
@@ -81,6 +84,8 @@ function ShareProjectPage() {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    console.log('ShareProjectPage - handleSubmit triggered. loadingAuth:', loadingAuth, 'userInfo:', userInfo); // DEBUG
 
     if (!file) {
       setError('Veuillez sélectionner un fichier (image ou vidéo).');
