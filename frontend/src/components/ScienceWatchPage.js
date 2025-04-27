@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 function ScienceWatchPage() {
   const [articles, setArticles] = useState([]);
@@ -6,11 +6,7 @@ function ScienceWatchPage() {
   const [error, setError] = useState(null);
   const [selectedSource, setSelectedSource] = useState('all');
 
-  useEffect(() => {
-    fetchArticles();
-  }, [selectedSource]);
-
-  const fetchArticles = async () => {
+  const fetchArticles = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -66,7 +62,11 @@ function ScienceWatchPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSource]);
+
+  useEffect(() => {
+    fetchArticles();
+  }, [fetchArticles]);
 
   // Fonction pour formater la date
   const formatDate = (dateString) => {
