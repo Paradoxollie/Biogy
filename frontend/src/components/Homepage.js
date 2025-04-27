@@ -7,20 +7,20 @@ const animatePetriDishes = (canvas, ctx) => {
   
   // Configuration
   const circles = [];
-  const colors = ['#3b82f6', '#8b5cf6', '#14b8a6', '#22c55e'];
-  const numCircles = 20;
+  const colors = ['#3b82f6', '#8b5cf6', '#14b8a6', '#22c55e', '#f97316', '#ef4444'];
+  const numCircles = 25; // Augmentation du nombre de boîtes de Petri
   
   // Création des cercles initiaux
   for (let i = 0; i < numCircles; i++) {
     circles.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      radius: Math.random() * 15 + 5,
+      radius: Math.random() * 20 + 10, // Augmentation de la taille pour plus de visibilité
       color: colors[Math.floor(Math.random() * colors.length)],
-      alpha: Math.random() * 0.3 + 0.1,
+      alpha: Math.random() * 0.4 + 0.2, // Augmentation de l'opacité
       speed: {
-        x: Math.random() * 0.3 - 0.15,
-        y: Math.random() * 0.3 - 0.15
+        x: Math.random() * 0.4 - 0.2,
+        y: Math.random() * 0.4 - 0.2
       }
     });
   }
@@ -42,23 +42,23 @@ const animatePetriDishes = (canvas, ctx) => {
       ctx.beginPath();
       ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
       ctx.strokeStyle = circle.color;
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 2; // Augmentation de l'épaisseur
       ctx.globalAlpha = circle.alpha;
       ctx.stroke();
       
-      // Petites cellules à l'intérieur
-      const cells = Math.floor(Math.random() * 3) + 2;
+      // Petites cellules à l'intérieur (plus nombreuses)
+      const cells = Math.floor(Math.random() * 5) + 3;
       for (let j = 0; j < cells; j++) {
         const cellAngle = Math.random() * Math.PI * 2;
         const cellDistance = Math.random() * (circle.radius * 0.7);
         const cellX = circle.x + Math.cos(cellAngle) * cellDistance;
         const cellY = circle.y + Math.sin(cellAngle) * cellDistance;
-        const cellRadius = Math.random() * 2 + 1;
+        const cellRadius = Math.random() * 3 + 1.5; // Cellules plus grandes
         
         ctx.beginPath();
         ctx.arc(cellX, cellY, cellRadius, 0, Math.PI * 2);
         ctx.fillStyle = circle.color;
-        ctx.globalAlpha = circle.alpha + 0.2;
+        ctx.globalAlpha = circle.alpha + 0.3;
         ctx.fill();
       }
     });
@@ -140,6 +140,7 @@ function Homepage() {
                   <div className="absolute inset-0 rounded-full border border-white/20 animate-spin" style={{ animationDuration: '20s' }}></div>
                   <div className="absolute inset-2 rounded-full border border-white/15 animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
                   <div className="absolute inset-4 rounded-full border border-white/10 animate-spin" style={{ animationDuration: '10s' }}></div>
+                  <div className="absolute inset-6 rounded-full border-dashed border border-white/5 animate-spin" style={{ animationDuration: '25s' }}></div>
                   
                   {/* Atomes/molécules en orbite */}
                   <div className="absolute w-4 h-4 bg-lab-blue rounded-full shadow-glow animate-orbit-1" 
@@ -148,14 +149,26 @@ function Homepage() {
                        style={{ bottom: '20%', right: '15%' }}></div>
                   <div className="absolute w-2 h-2 bg-lab-teal rounded-full shadow-glow animate-orbit-3" 
                        style={{ top: '25%', right: '20%' }}></div>
+                  <div className="absolute w-3 h-3 bg-amber-400 rounded-full shadow-glow animate-orbit-4" 
+                       style={{ bottom: '25%', left: '20%' }}></div>
+                  <div className="absolute w-2 h-2 bg-green-400 rounded-full shadow-glow animate-orbit-5" 
+                       style={{ top: '50%', right: '5%' }}></div>
+                  <div className="absolute w-2.5 h-2.5 bg-red-400 rounded-full shadow-glow animate-orbit-1" 
+                       style={{ top: '10%', right: '45%', animationDelay: '0.5s' }}></div>
+                  <div className="absolute w-1.5 h-1.5 bg-yellow-300 rounded-full shadow-glow animate-orbit-3" 
+                       style={{ bottom: '10%', left: '45%', animationDelay: '0.7s' }}></div>
+                  <div className="absolute w-2 h-2 bg-indigo-300 rounded-full shadow-glow animate-orbit-2" 
+                       style={{ top: '40%', left: '5%', animationDelay: '0.3s' }}></div>
                   
                   {/* Logo avec animation subtile */}
-                  <div className="relative animate-float-gentle transform w-3/4 h-3/4">
-                    <img 
-                      src="/images/biogy-logo.png" 
-                      alt="Biogy Logo" 
-                      className="w-full h-full object-contain z-10 relative drop-shadow-lg rounded-full"
-                    />
+                  <div className="relative animate-float-gentle transform w-3/4 h-3/4 rounded-full overflow-hidden">
+                    <div className="w-full h-full flex items-center justify-center rounded-full overflow-hidden bg-green-900/80">
+                      <img 
+                        src="/images/biogy-logo.png" 
+                        alt="Biogy Logo" 
+                        className="w-[85%] h-[85%] object-contain z-10 relative drop-shadow-lg rounded-full"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
