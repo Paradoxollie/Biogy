@@ -14,10 +14,10 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      // Définir l'URL de l'API (remplacer par une variable d'environnement si possible)
-      const apiUrl = 'http://localhost:5000/api/auth/login'; 
+      // Utiliser la variable d'environnement pour l'URL de l'API
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; 
       
-      const response = await fetch(apiUrl, {
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

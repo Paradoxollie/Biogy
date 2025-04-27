@@ -28,9 +28,9 @@ function RegisterPage() {
     setLoading(true);
 
     try {
-      const apiUrl = 'http://localhost:5000/api/auth/register';
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       
-      const response = await fetch(apiUrl, {
+      const response = await fetch(`${apiUrl}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
