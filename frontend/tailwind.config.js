@@ -22,6 +22,7 @@ module.exports = {
         'bubble1': 'bubble 3s ease-in-out infinite 0.2s',
         'bubble2': 'bubble 2.5s ease-in-out infinite 0.7s',
         'float': 'float 6s ease-in-out infinite',
+        'float-gentle': 'floatGentle 6s ease-in-out infinite',
         'microscope-scan': 'microscopeScan 15s ease-in-out infinite',
         'pulse-glow': 'pulseGlow 4s ease-in-out infinite',
         'dna-rotate': 'dnaRotate 12s linear infinite',
@@ -42,6 +43,12 @@ module.exports = {
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-10px)' },
+        },
+        floatGentle: {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '25%': { transform: 'translateY(-3px) rotate(0.5deg)' },
+          '50%': { transform: 'translateY(-5px) rotate(-0.5deg)' },
+          '75%': { transform: 'translateY(-2px) rotate(0.25deg)' },
         },
         microscopeScan: {
           '0%': { transform: 'translateX(0%) translateY(0%)' },

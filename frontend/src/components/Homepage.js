@@ -110,29 +110,38 @@ function Homepage() {
             <div className="md:w-1/2 space-y-6">
               <div className="w-full max-w-md mx-auto relative">
                 {/* Fond et effets décoratifs */}
-                <div className="absolute -inset-4 bg-gray-900/95 rounded-xl blur-sm -z-10"></div>
-                <div className="absolute -inset-1 bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal opacity-75 rounded-lg blur -z-10"></div>
+                <div className="absolute -inset-6 bg-green-900 rounded-xl shadow-xl -z-10"></div>
+                <div className="absolute -inset-6 bg-green-800 rounded-xl opacity-80 -z-10 
+                  border-2 border-amber-100/20 shadow-inner"></div>
                 
-                {/* Éléments décoratifs - cercles et points */}
-                <div className="absolute -top-4 -left-6 w-16 h-16 bg-lab-blue/10 rounded-full blur-xl"></div>
-                <div className="absolute -bottom-4 -right-6 w-16 h-16 bg-lab-purple/10 rounded-full blur-xl"></div>
+                {/* Effet de craie sur tableau */}
+                <div className="absolute -top-2 -left-2 w-full h-full">
+                  <div className="absolute top-3 left-4 h-0.5 w-16 bg-white/20 rotate-2"></div>
+                  <div className="absolute top-6 right-10 h-0.5 w-20 bg-white/10 -rotate-1"></div>
+                  <div className="absolute bottom-5 left-8 h-0.5 w-24 bg-white/15 rotate-1"></div>
+                  <div className="absolute bottom-10 right-6 h-0.5 w-16 bg-white/10 -rotate-2"></div>
+                </div>
                 
-                {/* Petites particules décoratives */}
-                <div className="absolute top-1/4 left-0 w-2 h-2 rounded-full bg-lab-blue/60 animate-pulse"></div>
-                <div className="absolute bottom-1/3 right-4 w-1.5 h-1.5 rounded-full bg-lab-purple/60 animate-pulse"></div>
-                <div className="absolute top-1/2 right-0 w-2 h-2 rounded-full bg-lab-teal/60 animate-pulse"></div>
+                {/* Traces de craie/poussière */}
+                <div className="absolute -top-4 -left-6 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
+                <div className="absolute -bottom-4 -right-6 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
+                
+                {/* Petites particules de craie */}
+                <div className="absolute top-1/4 left-0 w-1 h-1 rounded-full bg-white/40 animate-pulse"></div>
+                <div className="absolute bottom-1/3 right-4 w-0.5 h-0.5 rounded-full bg-white/40 animate-pulse"></div>
+                <div className="absolute top-1/2 right-0 w-1 h-1 rounded-full bg-white/40 animate-pulse"></div>
                 
                 {/* Logo avec conteneur */}
-                <div className="relative bg-gray-900 rounded-lg p-6 shadow-2xl overflow-hidden">
-                  {/* Effet de lueur sur le fond */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-lab-blue/5 via-lab-purple/5 to-lab-teal/5"></div>
+                <div className="relative bg-green-900/60 backdrop-blur-sm rounded-lg p-6 shadow-inner overflow-hidden border border-white/10">
+                  {/* Effet de texture de tableau */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-30"></div>
                   
                   {/* Logo avec animation subtile */}
-                  <div className="relative transition-all duration-700 hover:scale-105 transform">
+                  <div className="relative animate-float-gentle transform">
                     <img 
                       src="/images/biogy-logo.png" 
                       alt="Biogy Logo" 
-                      className="w-full h-auto object-contain z-10 relative"
+                      className="w-full h-auto object-contain z-10 relative drop-shadow-lg"
                     />
                   </div>
                 </div>
