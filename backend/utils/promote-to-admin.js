@@ -15,8 +15,11 @@ if (process.argv.length < 3) {
 
 const username = process.argv[2];
 
+// Utiliser directement l'URI MongoDB pour ce script
+const MONGO_URI = "mongodb+srv://Parad0x:4JQSXUPV0wga8Tic@parad0x.kee2wqc.mongodb.net/biogyDB?retryWrites=true&w=majority&appName=Parad0x";
+
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(MONGO_URI)
   .then(async () => {
     console.log('Connected to MongoDB');
     
