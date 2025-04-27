@@ -13,38 +13,51 @@ const parser = new Parser({
 
 // --- Configuration ---
 const FEEDS = [
-  // Général / Multi-couleurs
-  { url: 'https://lejournal.cnrs.fr/rss', source: 'CNRS Le Journal', color: 'multi' }, // Primarily multi
-  { url: 'http://www.cea.fr/rss/actualites.php?format=xml', source: 'CEA', color: 'multi' }, // Mix of Red, Green, White -> Multi
-  { url: 'https://www.ird.fr/rss.xml', source: 'IRD', color: 'multi' }, // Mix of Red, Green, Yellow, Blue -> Multi
-  // Verte
-  { url: 'https://www.inrae.fr/actualites/rss', source: 'INRAE', color: 'green' }, // Primarily Green
-  { url: 'https://www.cirad.fr/actualites/toutes-les-actualites/rss', source: 'CIRAD', color: 'green' }, // Primarily Green
-  { url: 'https://www.anses.fr/fr/rss/actualites.xml', source: 'ANSES', color: 'green' }, // Mix -> Assign Green first
-  { url: 'https://www.usinenouvelle.com/flux/rss/agroalimentaire', source: 'Usine Nouvelle (Agro)', color: 'green' }, // Primarily Green
-  // Rouge
+  // Général / Multi-couleurs (Bases importantes)
+  { url: 'https://lejournal.cnrs.fr/rss', source: 'CNRS Le Journal', color: 'multi' },
+  { url: 'https://www.cea.fr/rss/actualites.php?format=xml', source: 'CEA', color: 'multi' }, // Tentative HTTPS
+  { url: 'https://www.ird.fr/rss.xml', source: 'IRD', color: 'multi' },
+  { url: 'https://www.sorbonne-universite.fr/actualites/recherche/feed', source: 'Sorbonne Université (Recherche)', color: 'multi' }, // Nouvel ajout
+  { url: 'https://www.universite-paris-saclay.fr/actualites/feed', source: 'Université Paris-Saclay (Actus)', color: 'multi' }, // Nouvel ajout
+
+  // Verte (Agro-alimentaire, production végétale, biomatériaux, énergie)
+  { url: 'https://www.inrae.fr/flux/actualites/all/rss.xml', source: 'INRAE', color: 'green' }, // URL Corrigée
+  { url: 'https://www.cirad.fr/actualites/toutes-les-actualites/feed', source: 'CIRAD', color: 'green' }, // URL Corrigée (/feed)
+  { url: 'https://www.anses.fr/fr/flux/actualites/rss.xml', source: 'ANSES', color: 'green' }, // URL Corrigée
+  { url: 'https://www.terresinovia.fr/rss', source: 'Terres Inovia', color: 'green' }, // Nouvel ajout
+
+  // Rouge (Santé, pharmaceutique, médecine)
   { url: 'https://presse.inserm.fr/feed/', source: 'INSERM', color: 'red' },
-  { url: 'https://www.pasteur.fr/fr/rss/actualites/actualites-scientifiques.xml', source: 'Institut Pasteur', color: 'red' },
-  { url: 'https://ansm.sante.fr/actualites/feed', source: 'ANSM', color: 'red' },
-  { url: 'https://curie.fr/actualites.rss.xml', source: 'Institut Curie', color: 'red' },
+  { url: 'https://www.pasteur.fr/fr/rss/press/press-releases.xml', source: 'Institut Pasteur (Presse)', color: 'red' }, // URL Corrigée (spécifique)
+  { url: 'https://ansm.sante.fr/feed', source: 'ANSM', color: 'red' }, // URL Corrigée (générale)
+  { url: 'https://curie.fr/rss.xml', source: 'Institut Curie', color: 'red' }, // URL Corrigée
   { url: 'https://www.santepubliquefrance.fr/rss/actualites.xml', source: 'Santé Publique France', color: 'red' },
-  // Blanche
-  { url: 'https://www.genopole.fr/feed/', source: 'Genopole', color: 'white' }, // Primarily White
-  { url: 'https://www.usinenouvelle.com/flux/rss/chimie-et-materiaux', source: 'Usine Nouvelle (Chimie)', color: 'white' }, // Primarily White
-  // Note: TWB has no feed - skip
-  // Jaune
-  // INRAE already included in Green
-  { url: 'https://presse.ademe.fr/feed/', source: 'ADEME', color: 'yellow' },
-  // IRD already included in Multi
-  // ANSES already included in Green
-  // Bleue
-  { url: 'https://www.ifremer.fr/fr/actualites/rss', source: 'Ifremer', color: 'blue' },
-  // Note: Station Biologique Roscoff has no feed - skip
-  // Note: CORDIS requires custom search - skip for now
-  // Noir
-  { url: 'https://www.enseignementsup-recherche.gouv.fr/fr/rss.xml', source: 'Ministère Enseignement Sup Recherche', color: 'black' },
-  { url: 'https://www.onisep.fr/rss/feed/actualites', source: 'Onisep', color: 'black' },
-  { url: 'https://eduscol.education.fr/sti/taxonomy/term/15316/all/feed', source: 'Eduscol (Biotech)', color: 'black' },
+  { url: 'https://france-biotech.fr/feed/', source: 'France Biotech', color: 'red' }, // Nouvel ajout
+
+  // Blanche (Applications industrielles, procédés biologiques)
+  { url: 'https://www.genopole.fr/feed/', source: 'Genopole', color: 'white' }, // Fonctionnait mais parfois vide
+  { url: 'https://www.usinenouvelle.com/flux/rss', source: 'Usine Nouvelle (Général)', color: 'white' }, // Alternative Stable
+  { url: 'http://www.biotechinfo.fr/feed/', source: 'BioTech Info', color: 'white' }, // Nouvel ajout (HTTP)
+  // Rappel: CNRS, CEA, INRAE pertinents aussi
+
+  // Jaune (Protection de l'environnement, traitement des pollutions)
+  // INRAE déjà listé (Vert)
+  { url: 'https://presse.ademe.fr/feed/', source: 'ADEME', color: 'yellow' }, // Fonctionnait mais parfois vide
+  // IRD déjà listé (Multi)
+  // ANSES déjà listé (Vert)
+  { url: 'https://www.actu-environnement.com/feeds/rss/ae/eau.xml', source: 'Actu-Environnement (Eau)', color: 'yellow' }, // Nouvel ajout
+  { url: 'https://www.actu-environnement.com/feeds/rss/ae/dechets.xml', source: 'Actu-Environnement (Déchets)', color: 'yellow' }, // Nouvel ajout
+
+  // Bleue (Biodiversité marine, aquaculture, cosmétique marine)
+  { url: 'https://www.ifremer.fr/fr/actualites-ifremer/-/journal_content/56/10192/RSS', source: 'Ifremer', color: 'blue' }, // URL Corrigée (spécifique)
+  { url: 'https://www.pole-mer-bretagne-atlantique.com/fr/actualites/feed/', source: 'Pôle Mer Bretagne Atlantique', color: 'blue' }, // Nouvel ajout
+  { url: 'https://www.polemermediterranee.com/feed/', source: 'Pôle Mer Méditerranée', color: 'blue' }, // Nouvel ajout
+  // Rappel: CNRS, IRD pertinents aussi
+
+  // Noir (Éducation)
+  { url: 'https://www.enseignementsup-recherche.gouv.fr/fr/rss/actualites.xml', source: 'Ministère Ens Sup Recherche', color: 'black' }, // URL Corrigée
+  { url: 'https://www.onisep.fr/feed/actualites-nationales', source: 'Onisep (Nationales)', color: 'black' }, // URL Corrigée (spécifique)
+  { url: 'https://eduscol.education.fr/sti/feed', source: 'Eduscol (STI Général)', color: 'black' }, // Alternative Stable
 ];
 
 // Max articles per feed to avoid overwhelming results
