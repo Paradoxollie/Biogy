@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -14,11 +14,8 @@ function ProjectsGallery() {
 
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
+  // Utiliser useCallback pour éviter les boucles infinies avec useEffect
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`${apiUrl}/api/posts`);
@@ -35,7 +32,11 @@ function ProjectsGallery() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiUrl]); // Dépendance apiUrl pour useCallback
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]); // Ajout de fetchProjects comme dépendance
 
   // Format date function
   const formatDate = (dateString) => {
