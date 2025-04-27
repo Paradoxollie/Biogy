@@ -110,216 +110,218 @@ function ScienceWatchPage() {
     setError(null);
     
     try {
-      // Flux RSS fiables uniquement - j'ai retiré ceux qui causent des erreurs XML
-      const feeds = {
-        multi: [
-          { url: 'https://lejournal.cnrs.fr/rss', title: 'CNRS Le Journal', colorTags: ['green', 'red', 'white', 'yellow', 'blue'] },
-          { url: 'https://www.ird.fr/rss.xml', title: 'IRD', colorTags: ['red', 'green', 'yellow', 'blue'] }
-        ],
-        red: [
-          { url: 'https://presse.inserm.fr/feed/', title: 'INSERM', colorTags: ['red'] },
-          { url: 'https://www.santepubliquefrance.fr/rss/actualites.xml', title: 'Santé Publique France', colorTags: ['red'] }
-        ]
-      };
-      
-      // Déterminer quels flux fetcher (tout)
-      const allFeeds = Object.values(feeds).flat();
-      
-      // Using multiple CORS proxies to improve reliability
-      const corsProxies = [
-        (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+      // Flux RSS plus complets et diversifiés
+      const feeds = [
+        { url: 'https://lejournal.cnrs.fr/rss', title: 'CNRS Le Journal', colorTags: ['green', 'red', 'white', 'yellow', 'blue'] },
+        { url: 'https://www.ird.fr/rss.xml', title: 'IRD', colorTags: ['red', 'green', 'yellow', 'blue'] },
+        { url: 'https://www.santepubliquefrance.fr/rss/actualites.xml', title: 'Santé Publique France', colorTags: ['red', 'yellow'] },
+        { url: 'https://www.enseignementsup-recherche.gouv.fr/fr/rss.xml', title: 'Ministère de la Recherche', colorTags: ['black', 'multi'] }
       ];
       
-      const results = [];
-      
-      for (const feed of allFeeds) {
-        try {
-          let response = null;
-          let data = null;
-          let proxyUsed = '';
-          
-          // Try each proxy until one works
-          for (const proxyFn of corsProxies) {
-            try {
-              const proxyUrl = proxyFn(feed.url);
-              proxyUsed = proxyUrl;
-              
-              response = await fetch(proxyUrl, {
-                headers: {
-                  'Accept': 'application/rss+xml, application/xml, text/xml'
-                }
-              });
-              
-              if (response.ok) {
-                data = await response.text();
-                break; // We found a working proxy, exit the loop
-              }
-            } catch (proxyError) {
-              console.warn(`Proxy failed for ${feed.url}:`, proxyError);
-              // Continue to next proxy
-            }
-          }
-          
-          // If all proxies failed
-          if (!data) {
-            console.warn(`All proxies failed for ${feed.url}`);
-            continue;
-          }
-          
-          // Prétraitement pour nettoyer des données XML potentiellement malformées
-          data = cleanXML(data);
-          
-          // Create a new DOMParser to parse the XML content
-          const parser = new DOMParser();
-          const xmlDoc = parser.parseFromString(data, 'text/xml');
-          
-          // Check if parsing error occurred
-          const parserError = xmlDoc.querySelector('parsererror');
-          if (parserError) {
-            console.warn(`XML parsing error for ${feed.url}:`, parserError.textContent);
-            continue;
-          }
-          
-          // Déterminer la source principale (titre)
-          const source = feed.title;
-          
-          // Déterminer les couleurs de biotechnologie associées
-          const sourceColorTags = feed.colorTags || [];
-          // On utilisera la première couleur comme couleur principale
-          const sourceColorCategory = sourceColorTags.length > 0 ? sourceColorTags[0] : null;
-          
-          // Parse the items from the feed - support both RSS and Atom formats
-          const items = xmlDoc.querySelectorAll('item, entry');
-          
-          if (items.length === 0) {
-            console.warn(`No items found in feed ${feed.url}`);
-            continue;
-          }
-          
-          const articleItems = Array.from(items).map(item => {
-            // Extract image URL from content if it exists
-            const content = item.querySelector('content\\:encoded, encoded, content')?.textContent || 
-                           item.querySelector('description, summary')?.textContent || '';
-            
-            // Recherche d'images dans le contenu
-            let imageUrl = null;
-            
-            // Méthode 1: recherche d'attribut image ou thumbnail
-            const mediaContent = item.querySelector('media\\:content, media\\:thumbnail, enclosure');
-            if (mediaContent && mediaContent.getAttribute('url')) {
-              imageUrl = mediaContent.getAttribute('url');
-            }
-            
-            // Méthode 2: recherche d'image dans le contenu HTML
-            if (!imageUrl) {
-              const imageRegex = /<img[^>]+src="?([^"\s]+)"?\s*[^>]*>/g;
-              const match = imageRegex.exec(content);
-              if (match) imageUrl = match[1];
-            }
-            
-            // Méthode 3: recherche d'image dans des champs spéciaux
-            if (!imageUrl) {
-              const imageElement = item.querySelector('image, thumbnail');
-              if (imageElement && imageElement.textContent) {
-                imageUrl = imageElement.textContent.trim();
-              }
-            }
-            
-            // Fallback pour les images
-            if (!imageUrl || !imageUrl.startsWith('http')) {
-              // Images par défaut selon la catégorie
-              const defaultImages = {
-                red: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
-                green: 'https://images.unsplash.com/photo-1574707100262-7a26b64d3fd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
-                blue: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
-                white: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
-                yellow: 'https://images.unsplash.com/photo-1604187351574-c75ca79f5807?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
-                black: 'https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80',
-                multi: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'
-              };
-              
-              // On utilisera une image par défaut selon la catégorie de la source
-              imageUrl = sourceColorCategory ? defaultImages[sourceColorCategory] : defaultImages.multi;
-            }
-            
-            // Extract description, removing HTML tags
-            let description = item.querySelector('description, summary')?.textContent || '';
-            description = description.replace(/<[^>]*>?/gm, '').trim();
-            description = description.length > 150 ? description.substring(0, 150) + '...' : description;
-            
-            // Handle different formats for links and publication dates
-            let link = '';
-            const linkElement = item.querySelector('link');
-            if (linkElement) {
-              // RSS: link est un élément avec du texte
-              link = linkElement.textContent || '';
-              // Atom: link est un élément avec un attribut href
-              if (!link && linkElement.getAttribute) {
-                link = linkElement.getAttribute('href') || '';
-              }
-            }
-            
-            if (!link) link = '#';
-                        
-            const pubDateElement = item.querySelector('pubDate, published, updated');
-            const pubDate = pubDateElement ? pubDateElement.textContent : new Date().toISOString();
-            
-            // Get title with fallback
-            const titleElement = item.querySelector('title');
-            const title = titleElement ? titleElement.textContent : 'Sans titre';
-            
-            // Extraire l'auteur si disponible
-            const authorElement = item.querySelector('author, creator, dc\\:creator');
-            const author = authorElement ? authorElement.textContent : '';
-            
-            const article = {
-              title,
-              link,
-              pubDate,
-              description,
-              content,
-              imageUrl,
-              source,
-              author,
-              sourceColorCategory,
-              sourceColorTags
-            };
-            
-            // Determine biotechnology color for the article
-            article.biotechColor = determineBiotechColor(article);
-            
-            return article;
-          });
-          
-          results.push(...articleItems);
-          console.log(`Successfully fetched ${articleItems.length} articles from ${feed.title}`);
-          
-        } catch (error) {
-          console.error(`Error processing feed ${feed.url}:`, error);
-          continue;
-        }
-      }
-      
-      if (results.length === 0) {
-        console.warn('No articles could be fetched from any source');
-        const demoArticles = getDemoArticles();
-        setArticles(demoArticles);
-        setError("Impossible de récupérer les articles. Affichage des données de démonstration.");
-      } else {
-        // Sort by publication date (newest first)
-        const sortedArticles = results.sort((a, b) => 
-          new Date(b.pubDate) - new Date(a.pubDate)
-        );
-        
-        setArticles(sortedArticles);
-        console.log(`Total articles fetched: ${sortedArticles.length}`);
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
+      // Appeler immédiatement les données de démo pour éviter l'écran vide
       const demoArticles = getDemoArticles();
       setArticles(demoArticles);
-      setError("Erreur de connexion. Affichage des données de démonstration.");
+      
+      try {
+        // Essayer de faire les requêtes en parallèle avec un timeout
+        const results = [];
+        const fetchPromises = feeds.map(async (feed) => {
+          try {
+            // Utiliser jsonp.afeld.me comme proxy plus fiable
+            const proxyUrl = `https://cors-anywhere.herokuapp.com/${feed.url}`;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 secondes timeout
+            
+            const response = await fetch(proxyUrl, {
+              signal: controller.signal,
+              headers: {
+                'Accept': 'application/rss+xml, application/xml, text/xml',
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error ${response.status}`);
+            }
+            
+            const data = await response.text();
+            const cleanedData = cleanXML(data);
+            
+            // Création d'un parser pour le XML
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(cleanedData, 'text/xml');
+            
+            // Vérifier les erreurs de parsing
+            const parserError = xmlDoc.querySelector('parsererror');
+            if (parserError) {
+              throw new Error(`XML parsing error: ${parserError.textContent}`);
+            }
+            
+            // Extraction des items
+            const items = xmlDoc.querySelectorAll('item, entry');
+            
+            if (items.length === 0) {
+              throw new Error('No items found in feed');
+            }
+            
+            const articleItems = Array.from(items).map(item => {
+              // Extraction contenu
+              const content = item.querySelector('content\\:encoded, encoded, content')?.textContent || 
+                             item.querySelector('description, summary')?.textContent || '';
+              
+              // Recherche d'images
+              let imageUrl = null;
+              
+              const mediaContent = item.querySelector('media\\:content, media\\:thumbnail, enclosure');
+              if (mediaContent && mediaContent.getAttribute('url')) {
+                imageUrl = mediaContent.getAttribute('url');
+              }
+              
+              if (!imageUrl) {
+                const imageRegex = /<img[^>]+src="?([^"\s]+)"?\s*[^>]*>/g;
+                const match = imageRegex.exec(content);
+                if (match) imageUrl = match[1];
+              }
+              
+              if (!imageUrl) {
+                const imageElement = item.querySelector('image, thumbnail');
+                if (imageElement && imageElement.textContent) {
+                  imageUrl = imageElement.textContent.trim();
+                }
+              }
+              
+              // Images par défaut selon la catégorie
+              if (!imageUrl || !imageUrl.startsWith('http')) {
+                const defaultImages = {
+                  red: [
+                    'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
+                    'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                    'https://images.unsplash.com/photo-1583912268183-46a1d8891fc5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
+                  ],
+                  green: [
+                    'https://images.unsplash.com/photo-1574707100262-7a26b64d3fd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                    'https://images.unsplash.com/photo-1620523162656-4f968dca355a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                    'https://images.unsplash.com/photo-1628863353691-0071c8c1874c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80'
+                  ],
+                  blue: [
+                    'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                    'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
+                    'https://images.unsplash.com/photo-1587300003388-59208cc962cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80'
+                  ],
+                  white: [
+                    'https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                    'https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
+                    'https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80'
+                  ],
+                  yellow: [
+                    'https://images.unsplash.com/photo-1604187351574-c75ca79f5807?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                    'https://images.unsplash.com/photo-1579403124614-197f69d8187b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=464&q=80',
+                    'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80'
+                  ],
+                  black: [
+                    'https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80',
+                    'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2022&q=80',
+                    'https://images.unsplash.com/photo-1544640808-32ca72ac7f37?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=435&q=80'
+                  ],
+                  multi: [
+                    'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                    'https://images.unsplash.com/photo-1507413245164-6160d8298b31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
+                    'https://images.unsplash.com/photo-1629781070811-2539fa2f525b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=871&q=80'
+                  ]
+                };
+                
+                // Choisir une image aléatoire dans la catégorie
+                const categoryImages = feed.colorTags && feed.colorTags.length > 0 
+                  ? defaultImages[feed.colorTags[0]] || defaultImages.multi
+                  : defaultImages.multi;
+                  
+                imageUrl = categoryImages[Math.floor(Math.random() * categoryImages.length)];
+              }
+              
+              // Extraire description et autres données
+              let description = item.querySelector('description, summary')?.textContent || '';
+              description = description.replace(/<[^>]*>?/gm, '').trim();
+              description = description.length > 150 ? description.substring(0, 150) + '...' : description;
+              
+              let link = '';
+              const linkElement = item.querySelector('link');
+              if (linkElement) {
+                link = linkElement.textContent || '';
+                if (!link && linkElement.getAttribute) {
+                  link = linkElement.getAttribute('href') || '';
+                }
+              }
+              
+              if (!link) link = '#';
+                          
+              const pubDateElement = item.querySelector('pubDate, published, updated');
+              const pubDate = pubDateElement ? pubDateElement.textContent : new Date().toISOString();
+              
+              const titleElement = item.querySelector('title');
+              const title = titleElement ? titleElement.textContent : 'Sans titre';
+              
+              const authorElement = item.querySelector('author, creator, dc\\:creator');
+              const author = authorElement ? authorElement.textContent : '';
+              
+              const article = {
+                title,
+                link,
+                pubDate,
+                description,
+                content,
+                imageUrl,
+                source: feed.title,
+                author,
+                sourceColorCategory: feed.colorTags[0],
+                sourceColorTags: feed.colorTags
+              };
+              
+              // Déterminer la couleur biotechnologique
+              article.biotechColor = determineBiotechColor(article);
+              
+              return article;
+            });
+            
+            console.log(`Successfully fetched ${articleItems.length} articles from ${feed.title}`);
+            return articleItems;
+          } catch (error) {
+            console.error(`Error fetching from ${feed.title}:`, error);
+            return []; // Retourne un tableau vide en cas d'erreur
+          }
+        });
+        
+        // Attendons que toutes les requêtes soient terminées ou en timeout
+        const articleArrays = await Promise.all(fetchPromises);
+        
+        // Fusionnons tous les articles
+        articleArrays.forEach(articles => {
+          results.push(...articles);
+        });
+        
+        // Si nous avons des résultats, mettre à jour les articles
+        if (results.length > 0) {
+          // Trier par date (plus récent d'abord)
+          const sortedArticles = results.sort((a, b) => 
+            new Date(b.pubDate) - new Date(a.pubDate)
+          );
+          
+          // Fusionner avec les articles de démo pour assurer une diversité
+          const finalArticles = [...sortedArticles, ...demoArticles];
+          
+          setArticles(finalArticles);
+          console.log(`Total articles fetched: ${finalArticles.length}`);
+        }
+      } catch (fetchError) {
+        console.error("Error fetching articles:", fetchError);
+        // Les articles de démo sont déjà affichés, pas besoin de setError
+      }
+    } catch (error) {
+      console.error("Critical error:", error);
+      const demoArticles = getDemoArticles();
+      setArticles(demoArticles);
+      setError("Erreur critique. Affichage des données de démonstration.");
     } finally {
       setLoading(false);
     }
@@ -385,7 +387,7 @@ function ScienceWatchPage() {
         pubDate: "2023-08-05T09:15:00Z",
         description: "Une startup spécialisée dans la bioimpression 3D annonce une levée de fonds de 40 millions d'euros pour accélérer le développement de ses technologies.",
         content: "Une startup spécialisée dans la bioimpression 3D annonce une levée de fonds de 40 millions d'euros pour accélérer le développement de ses technologies médicales innovantes.",
-        imageUrl: "https://images.unsplash.com/photo-1574169208507-84376144848b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1445&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1581093450021-a7360e9a6b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
         source: "Genopole",
         sourceColorCategory: "white",
         sourceColorTags: ["white", "red"],
@@ -397,7 +399,7 @@ function ScienceWatchPage() {
         pubDate: "2023-08-01T11:45:00Z",
         description: "Une entreprise a mis au point un procédé industriel innovant permettant de produire des biocarburants à partir de déchets agricoles avec un rendement accru.",
         content: "Une entreprise a mis au point un procédé industriel innovant permettant de produire des biocarburants à partir de déchets agricoles avec un rendement accru et un impact environnemental réduit.",
-        imageUrl: "https://images.unsplash.com/photo-1620523162656-4f968dca355a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
         source: "ADEME",
         sourceColorCategory: "yellow",
         sourceColorTags: ["yellow", "green"],
@@ -409,9 +411,9 @@ function ScienceWatchPage() {
         pubDate: "2023-07-28T08:20:00Z",
         description: "Des chercheurs du CNRS ont identifié une enzyme capable de dégrader plusieurs types de plastiques, ouvrant la voie à de nouvelles solutions de recyclage biologique.",
         content: "Des chercheurs du CNRS ont identifié une enzyme capable de dégrader plusieurs types de plastiques, ouvrant la voie à de nouvelles solutions de recyclage biologique pour réduire la pollution environnementale.",
-        imageUrl: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1579403124614-197f69d8187b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=464&q=80",
         source: "CNRS Le Journal",
-        sourceColorCategory: "multi",
+        sourceColorCategory: "yellow",
         sourceColorTags: ["green", "yellow", "white"],
         biotechColor: "yellow"
       },
@@ -421,7 +423,7 @@ function ScienceWatchPage() {
         pubDate: "2023-07-23T10:20:00Z",
         description: "L'Ifremer présente de nouvelles approches pour l'aquaculture durable, réduisant l'impact environnemental tout en améliorant la santé des poissons.",
         content: "L'Institut français de recherche pour l'exploitation de la mer (Ifremer) a dévoilé les résultats d'une étude de cinq ans sur des méthodes innovantes d'aquaculture à faible impact environnemental. Ces techniques utilisent des systèmes en circuit fermé et des approches biologiques pour le contrôle des pathogènes.",
-        imageUrl: "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
         source: "Ifremer",
         sourceColorCategory: "blue",
         sourceColorTags: ["blue"],
@@ -433,11 +435,60 @@ function ScienceWatchPage() {
         pubDate: "2023-07-20T09:15:00Z",
         description: "L'Université de Bretagne Occidentale annonce l'ouverture d'un nouveau programme de Master spécialisé dans les biotechnologies marines et leurs applications.",
         content: "Ce programme interdisciplinaire formera les étudiants aux dernières avancées en matière de biotechnologie bleue, incluant la valorisation des ressources marines, les bioprocédés marins et la cosmétique bleue. Un partenariat avec plusieurs entreprises du secteur garantira des stages et des débouchés professionnels.",
-        imageUrl: "https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1544640808-32ca72ac7f37?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=435&q=80",
         source: "Ministère de l'Enseignement Supérieur et de la Recherche",
         sourceColorCategory: "black",
         sourceColorTags: ["black"],
         biotechColor: "black"
+      },
+      // Ajout d'articles supplémentaires pour plus de diversité
+      {
+        title: "Biomatériaux innovants pour la reconstruction osseuse",
+        link: "https://example.com/biomateriaux",
+        pubDate: "2023-07-18T08:15:00Z",
+        description: "Une équipe internationale de chercheurs a développé un nouveau biomatériau mimant la structure osseuse naturelle, offrant de meilleures perspectives pour la chirurgie réparatrice.",
+        content: "Ce matériau combine des polymères biodégradables et des composés minéraux similaires à l'os humain, créant une structure poreuse qui favorise la croissance cellulaire et la vascularisation.",
+        imageUrl: "https://images.unsplash.com/photo-1583912268183-46a1d8891fc5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
+        source: "Institut Pasteur",
+        sourceColorCategory: "red",
+        sourceColorTags: ["red", "white"],
+        biotechColor: "red"
+      },
+      {
+        title: "Production industrielle d'enzymes par fermentation: efficacité énergétique améliorée",
+        link: "https://example.com/enzymes-industrielles",
+        pubDate: "2023-07-14T10:30:00Z",
+        description: "Une biotech française révolutionne la production d'enzymes industrielles avec un procédé de fermentation à faible consommation d'énergie.",
+        content: "Le nouveau bioréacteur conçu par l'entreprise permet de réduire de 40% la consommation énergétique tout en augmentant le rendement de production des enzymes utilisées dans l'industrie alimentaire et textile.",
+        imageUrl: "https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+        source: "Genopole",
+        sourceColorCategory: "white",
+        sourceColorTags: ["white"],
+        biotechColor: "white"
+      },
+      {
+        title: "Microalgues génétiquement modifiées pour la capture de CO2",
+        link: "https://example.com/microalgues-co2",
+        pubDate: "2023-07-10T09:45:00Z",
+        description: "Des chercheurs ont développé une souche de microalgues capable de capturer 5 fois plus de CO2 que les souches naturelles, offrant une solution innovante pour lutter contre le changement climatique.",
+        content: "Ces microalgues modifiées peuvent être cultivées dans des installations industrielles pour capturer directement les émissions de CO2 et les transformer en biomasse valorisable pour la production de biocarburants.",
+        imageUrl: "https://images.unsplash.com/photo-1628863353691-0071c8c1874c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+        source: "INRAE",
+        sourceColorCategory: "green",
+        sourceColorTags: ["green", "yellow"],
+        biotechColor: "green"
+      },
+      {
+        title: "Découverte d'une bactérie marine aux propriétés antioxydantes exceptionnelles",
+        link: "https://example.com/bacterie-marine",
+        pubDate: "2023-07-08T14:20:00Z",
+        description: "Une espèce bactérienne découverte dans les profondeurs marines produit des molécules aux propriétés antioxydantes jamais observées jusqu'à présent.",
+        content: "Ces composés pourraient révolutionner l'industrie cosmétique et pharmaceutique grâce à leur stabilité exceptionnelle et leur efficacité à neutraliser les radicaux libres responsables du vieillissement cellulaire.",
+        imageUrl: "https://images.unsplash.com/photo-1544640808-32ca72ac7f37?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=435&q=80",
+        source: "Ifremer",
+        sourceColorCategory: "blue",
+        sourceColorTags: ["blue", "red"],
+        biotechColor: "blue"
       }
     ];
     
@@ -467,7 +518,7 @@ function ScienceWatchPage() {
     );
   };
   
-  // Organiser les articles par couleur de biotechnologie avec limite de 4 par couleur
+  // Organiser les articles par couleur de biotechnologie avec limite et diversité de sources
   const organizeArticlesByColor = (articleList) => {
     const organizedByColor = {
       green: [],
@@ -480,13 +531,57 @@ function ScienceWatchPage() {
       unclassified: []
     };
     
-    articleList.forEach(article => {
-      // Déterminer la couleur
+    // Première étape: regrouper par couleur
+    const articlesByColor = articleList.reduce((acc, article) => {
       const color = article.biotechColor || 'unclassified';
+      if (!acc[color]) acc[color] = [];
+      acc[color].push(article);
+      return acc;
+    }, {});
+    
+    // Deuxième étape: pour chaque couleur, assurer la diversité des sources
+    Object.entries(articlesByColor).forEach(([color, articles]) => {
+      if (!organizedByColor[color]) return;
       
-      // N'ajouter que si la limite n'est pas atteinte
-      if (organizedByColor.hasOwnProperty(color) && organizedByColor[color].length < 4) {
-        organizedByColor[color].push(article);
+      // Regrouper par source
+      const articlesBySource = articles.reduce((acc, article) => {
+        if (!acc[article.source]) acc[article.source] = [];
+        acc[article.source].push(article);
+        return acc;
+      }, {});
+      
+      // Collecter les articles en alternant les sources
+      const sources = Object.keys(articlesBySource);
+      let i = 0;
+      let addedCount = 0;
+      
+      // Continue tant qu'on n'a pas atteint 4 articles et qu'il y a encore des sources à parcourir
+      while (addedCount < 4 && sources.length > 0) {
+        const sourceIndex = i % sources.length;
+        const source = sources[sourceIndex];
+        const articlesForSource = articlesBySource[source];
+        
+        if (articlesForSource.length > 0) {
+          // Prendre l'article le plus récent de cette source et l'ajouter
+          const article = articlesForSource.shift();
+          organizedByColor[color].push(article);
+          addedCount++;
+          
+          // Si cette source n'a plus d'articles, la retirer
+          if (articlesForSource.length === 0) {
+            sources.splice(sourceIndex, 1);
+            // Ajuster l'index pour éviter de sauter une source
+            if (i >= sourceIndex) i--;
+          }
+        }
+        
+        i++;
+        
+        // Si on a parcouru toutes les sources et qu'on n'a pas encore 4 articles, on recommence
+        if (i >= sources.length) i = 0;
+        
+        // Si plus aucune source n'a d'articles, on sort
+        if (sources.length === 0) break;
       }
     });
     
