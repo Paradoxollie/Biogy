@@ -68,7 +68,11 @@ function Homepage() {
                       <img 
                         src="/images/biogy-logo.png" 
                         alt="Biogy Logo" 
-                        className="w-[85%] h-[85%] object-contain z-10 relative drop-shadow-lg rounded-full"
+                        className="w-[85%] h-[85%] object-contain z-10 relative drop-shadow-lg"
+                        style={{
+                          borderRadius: '50%',
+                          clipPath: 'circle(50% at center)'
+                        }}
                       />
                     </div>
                   </div>
