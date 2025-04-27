@@ -115,7 +115,7 @@ function ScienceWatchPage() {
       const feeds = {
         multi: [
           { url: 'https://lejournal.cnrs.fr/rss', title: 'CNRS Le Journal', colorTags: ['green', 'red', 'white', 'yellow', 'blue'] },
-          { url: 'http://www.cea.fr/rss/actualites.php?format=xml', title: 'CEA', colorTags: ['red', 'green', 'white'] },
+          { url: 'https://www.cea.fr/comprendre/Pages/RSS.aspx', title: 'CEA', colorTags: ['red', 'green', 'white'] },
           { url: 'https://www.ird.fr/rss.xml', title: 'IRD', colorTags: ['red', 'green', 'yellow', 'blue'] }
         ],
         green: [
@@ -125,7 +125,7 @@ function ScienceWatchPage() {
         ],
         red: [
           { url: 'https://presse.inserm.fr/feed/', title: 'INSERM', colorTags: ['red'] },
-          { url: 'https://www.pasteur.fr/fr/rss/actualites/actualites-scientifiques.xml', title: 'Institut Pasteur', colorTags: ['red'] },
+          { url: 'https://www.pasteur.fr/fr/journal-pasteur/feed', title: 'Institut Pasteur', colorTags: ['red'] },
           { url: 'https://ansm.sante.fr/actualites/feed', title: 'ANSM', colorTags: ['red'] },
           { url: 'https://curie.fr/actualites.rss.xml', title: 'Institut Curie', colorTags: ['red'] },
           { url: 'https://www.santepubliquefrance.fr/rss/actualites.xml', title: 'Santé Publique France', colorTags: ['red'] }
@@ -148,25 +148,59 @@ function ScienceWatchPage() {
       // Déterminer quels flux fetcher (tout)
       const allFeeds = Object.values(feeds).flat();
       
-      // Using a CORS proxy to avoid cross-origin issues
-      const corsProxy = 'https://api.allorigins.win/raw?url=';
-      const fetchPromises = [];
+      // Using multiple CORS proxies to improve reliability
+      const corsProxies = [
+        (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        (url) => `https://cors-anywhere.herokuapp.com/${url}`
+      ];
+      
+      const results = [];
       
       for (const feed of allFeeds) {
         try {
-          const encodedFeedUrl = encodeURIComponent(feed.url);
-          const response = await fetch(`${corsProxy}${encodedFeedUrl}`);
+          let response = null;
+          let data = null;
+          let proxyUsed = '';
           
-          if (!response.ok) {
-            console.warn(`Failed to fetch ${feed.url}: ${response.status}`);
-            continue;
+          // Try each proxy until one works
+          for (const proxyFn of corsProxies) {
+            try {
+              const proxyUrl = proxyFn(feed.url);
+              proxyUsed = proxyUrl;
+              
+              response = await fetch(proxyUrl, {
+                headers: {
+                  'Accept': 'application/rss+xml, application/xml, text/xml'
+                }
+              });
+              
+              if (response.ok) {
+                data = await response.text();
+                break; // We found a working proxy, exit the loop
+              }
+            } catch (proxyError) {
+              console.warn(`Proxy failed for ${feed.url}:`, proxyError);
+              // Continue to next proxy
+            }
           }
           
-          const data = await response.text();
+          // If all proxies failed
+          if (!data) {
+            console.warn(`All proxies failed for ${feed.url}`);
+            continue;
+          }
           
           // Create a new DOMParser to parse the XML content
           const parser = new DOMParser();
           const xmlDoc = parser.parseFromString(data, 'text/xml');
+          
+          // Check if parsing error occurred
+          const parserError = xmlDoc.querySelector('parsererror');
+          if (parserError) {
+            console.warn(`XML parsing error for ${feed.url}:`, parserError.textContent);
+            continue;
+          }
           
           // Déterminer la source principale (titre)
           const source = feed.title;
@@ -176,29 +210,44 @@ function ScienceWatchPage() {
           // On utilisera la première couleur comme couleur principale
           const sourceColorCategory = sourceColorTags.length > 0 ? sourceColorTags[0] : null;
           
-          // Parse the items from the feed
-          const items = xmlDoc.querySelectorAll('item');
+          // Parse the items from the feed - support both RSS and Atom formats
+          const items = xmlDoc.querySelectorAll('item, entry');
+          
+          if (items.length === 0) {
+            console.warn(`No items found in feed ${feed.url}`);
+            continue;
+          }
           
           const articleItems = Array.from(items).map(item => {
             // Extract image URL from content if it exists
-            const content = item.querySelector('content\\:encoded, encoded')?.textContent || 
-                           item.querySelector('description')?.textContent || '';
+            const content = item.querySelector('content\\:encoded, encoded, content')?.textContent || 
+                           item.querySelector('description, summary')?.textContent || '';
             
             const imageRegex = /<img[^>]+src="?([^"\s]+)"?\s*[^>]*>/g;
             const match = imageRegex.exec(content);
             const imageUrl = match ? match[1] : null;
             
             // Extract description, removing HTML tags
-            let description = item.querySelector('description')?.textContent || '';
+            let description = item.querySelector('description, summary')?.textContent || '';
             description = description.replace(/<[^>]*>?/gm, '').trim();
             description = description.length > 150 ? description.substring(0, 150) + '...' : description;
             
+            // Handle different formats for links and publication dates
+            const link = item.querySelector('link')?.textContent || 
+                        item.querySelector('link')?.getAttribute('href') || '#';
+                        
+            const pubDate = item.querySelector('pubDate, published, updated')?.textContent || 
+                           new Date().toISOString();
+            
+            // Get title with fallback
+            const title = item.querySelector('title')?.textContent || 'Sans titre';
+            
             const article = {
-              title: item.querySelector('title')?.textContent || 'Sans titre',
-              link: item.querySelector('link')?.textContent || '#',
-              pubDate: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
+              title,
+              link,
+              pubDate,
               description,
-              content: content,
+              content,
               imageUrl,
               source,
               sourceColorCategory,
@@ -211,34 +260,28 @@ function ScienceWatchPage() {
             return article;
           });
           
-          fetchPromises.push(articleItems);
+          results.push(...articleItems);
+          console.log(`Successfully fetched ${articleItems.length} articles from ${feed.title}`);
+          
         } catch (error) {
           console.error(`Error processing feed ${feed.url}:`, error);
           continue;
         }
       }
       
-      if (fetchPromises.length === 0) {
+      if (results.length === 0) {
         console.warn('No articles could be fetched from any source');
         const demoArticles = getDemoArticles();
         setArticles(demoArticles);
         setError("Impossible de récupérer les articles. Affichage des données de démonstration.");
       } else {
-        const articlesArray = fetchPromises.flat();
-        
         // Sort by publication date (newest first)
-        const sortedArticles = articlesArray.sort((a, b) => 
+        const sortedArticles = results.sort((a, b) => 
           new Date(b.pubDate) - new Date(a.pubDate)
         );
         
-        if (sortedArticles.length === 0) {
-          // If no articles were fetched, fallback to demo articles
-          const demoArticles = getDemoArticles();
-          setArticles(demoArticles);
-          setError("Aucun article trouvé. Affichage des données de démonstration.");
-        } else {
-          setArticles(sortedArticles);
-        }
+        setArticles(sortedArticles);
+        console.log(`Total articles fetched: ${sortedArticles.length}`);
       }
     } catch (error) {
       console.error("Fetch error:", error);
