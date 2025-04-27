@@ -110,19 +110,330 @@ function ScienceWatchPage() {
     setError(null);
     
     try {
-      // Flux RSS plus complets et diversifiés
-      const feeds = [
-        { url: 'https://lejournal.cnrs.fr/rss', title: 'CNRS Le Journal', colorTags: ['green', 'red', 'white', 'yellow', 'blue'] },
-        { url: 'https://www.ird.fr/rss.xml', title: 'IRD', colorTags: ['red', 'green', 'yellow', 'blue'] },
-        { url: 'https://www.santepubliquefrance.fr/rss/actualites.xml', title: 'Santé Publique France', colorTags: ['red', 'yellow'] },
-        { url: 'https://www.enseignementsup-recherche.gouv.fr/fr/rss.xml', title: 'Ministère de la Recherche', colorTags: ['black', 'multi'] }
-      ];
-      
+      // Function to get demo articles with proper biotechnology color categorization
+      const getDemoArticles = () => {
+        const articles = [
+          // BIOTECHNOLOGIE ROUGE (SANTÉ)
+          {
+            title: "Nouvelle thérapie génique contre la drépanocytose approuvée en Europe",
+            link: "https://example.com/gene-therapy-2024",
+            pubDate: "2024-05-15T10:00:00Z",
+            description: "L'Agence européenne des médicaments a approuvé une thérapie génique révolutionnaire qui corrige le gène responsable de la drépanocytose.",
+            content: "Cette thérapie utilise la technologie CRISPR-Cas9 pour modifier les cellules souches du patient, offrant un espoir de guérison complète pour les patients atteints de cette maladie génétique du sang.",
+            imageUrl: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+            source: "Institut Pasteur",
+            sourceColorCategory: "red",
+            sourceColorTags: ["red"],
+            biotechColor: "red"
+          },
+          {
+            title: "Un vaccin à ARNm contre le paludisme montre 87% d'efficacité en phase 3",
+            link: "https://example.com/malaria-mrna-2024",
+            pubDate: "2024-05-02T09:30:00Z",
+            description: "Les essais cliniques de phase 3 d'un vaccin innovant utilisant la technologie ARNm ont montré une efficacité de 87% contre le paludisme.",
+            content: "Après le succès des vaccins à ARNm contre la COVID-19, cette technologie est maintenant appliquée avec succès à d'autres maladies infectieuses, comme le paludisme qui tue plus de 600 000 personnes chaque année.",
+            imageUrl: "https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+            source: "OMS",
+            sourceColorCategory: "red",
+            sourceColorTags: ["red"],
+            biotechColor: "red"
+          },
+          {
+            title: "Implants cérébraux : premiers résultats encourageants chez les patients paralysés",
+            link: "https://example.com/brain-implant-2024",
+            pubDate: "2024-04-18T14:15:00Z",
+            description: "Des chercheurs français rapportent que trois patients tétraplégiques ont retrouvé une mobilité partielle grâce à des implants cérébraux connectés.",
+            content: "Cette interface cerveau-machine permet de contourner les lésions de la moelle épinière et de rétablir la communication entre le cerveau et les membres, ouvrant de nouvelles perspectives pour les personnes souffrant de paralysie.",
+            imageUrl: "https://images.unsplash.com/photo-1583912268183-46a1d8891fc5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
+            source: "INSERM",
+            sourceColorCategory: "red",
+            sourceColorTags: ["red"],
+            biotechColor: "red"
+          },
+          {
+            title: "Révolution biopharmaceutique : les anticorps multi-spécifiques entrent en clinique",
+            link: "https://example.com/multispecific-antibodies-2024",
+            pubDate: "2024-03-25T11:20:00Z",
+            description: "Une nouvelle génération d'anticorps capables de cibler simultanément plusieurs cibles thérapeutiques entre en phase clinique pour le traitement du cancer.",
+            content: "Ces anticorps multi-spécifiques représentent une avancée majeure en immunothérapie, permettant d'attaquer les tumeurs sur plusieurs fronts et de contourner les mécanismes de résistance.",
+            imageUrl: "https://images.unsplash.com/photo-1576086213369-97a306d36557?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80",
+            source: "Sanofi",
+            sourceColorCategory: "red",
+            sourceColorTags: ["red"],
+            biotechColor: "red"
+          },
+
+          // BIOTECHNOLOGIE VERTE (AGRICULTURE)
+          {
+            title: "Des cultures résistantes à la sécheresse développées par édition génomique",
+            link: "https://example.com/drought-crops-2024",
+            pubDate: "2024-05-10T08:45:00Z",
+            description: "Des scientifiques ont créé des variétés de maïs et de blé nécessitant 40% moins d'eau grâce à l'édition génomique ciblée.",
+            content: "Face au changement climatique, ces nouvelles variétés pourraient révolutionner l'agriculture dans les zones arides et semi-arides, tout en maintenant les rendements nécessaires pour nourrir une population mondiale croissante.",
+            imageUrl: "https://images.unsplash.com/photo-1574707100262-7a26b64d3fd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+            source: "INRAE",
+            sourceColorCategory: "green",
+            sourceColorTags: ["green"],
+            biotechColor: "green"
+          },
+          {
+            title: "Biocarburant de 3ème génération : une usine de production d'algues inaugurée",
+            link: "https://example.com/algae-biofuel-2024",
+            pubDate: "2024-04-28T13:10:00Z",
+            description: "La plus grande usine européenne de production de biocarburants à base de microalgues a été inaugurée en Bretagne, avec une capacité de 10 000 tonnes par an.",
+            content: "Ces biocarburants de 3ème génération ne concurrencent pas les cultures alimentaires et absorbent du CO2 pendant leur croissance, offrant un bilan carbone bien plus favorable que les carburants fossiles.",
+            imageUrl: "https://images.unsplash.com/photo-1620523162656-4f968dca355a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+            source: "TotalEnergies",
+            sourceColorCategory: "green",
+            sourceColorTags: ["green"],
+            biotechColor: "green"
+          },
+          {
+            title: "Percée dans les bioplastiques compostables à base de déchets agricoles",
+            link: "https://example.com/bioplastics-2024",
+            pubDate: "2024-04-05T10:40:00Z",
+            description: "Une startup française a développé un procédé permettant de transformer des résidus agricoles en bioplastiques entièrement compostables en 3 mois.",
+            content: "Ce matériau innovant offre les mêmes propriétés mécaniques que les plastiques conventionnels, tout en étant biodégradable même dans des conditions naturelles, sans nécessiter d'installations industrielles.",
+            imageUrl: "https://images.unsplash.com/photo-1628863353691-0071c8c1874c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+            source: "ADEME",
+            sourceColorCategory: "green",
+            sourceColorTags: ["green"],
+            biotechColor: "green"
+          },
+          {
+            title: "Un riz enrichi naturellement en vitamine A approuvé pour la culture",
+            link: "https://example.com/golden-rice-2024",
+            pubDate: "2024-03-12T09:50:00Z",
+            description: "L'Union Européenne a approuvé la culture d'une variété de riz enrichie en provitamine A pour lutter contre les carences nutritionnelles dans les pays en développement.",
+            content: "Ce 'riz doré' a été développé pour combattre la carence en vitamine A, qui cause la cécité chez des centaines de milliers d'enfants chaque année et augmente la mortalité infantile.",
+            imageUrl: "https://images.unsplash.com/photo-1568324601910-6ea515d5b8d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+            source: "FAO",
+            sourceColorCategory: "green",
+            sourceColorTags: ["green"],
+            biotechColor: "green"
+          },
+
+          // BIOTECHNOLOGIE BLANCHE (INDUSTRIELLE)
+          {
+            title: "Enzymes ultra-résistantes pour le recyclage des plastiques complexes",
+            link: "https://example.com/enzyme-recycling-2024",
+            pubDate: "2024-05-08T15:30:00Z",
+            description: "Des chercheurs ont mis au point des enzymes modifiées capables de décomposer les plastiques multicouches considérés jusqu'ici comme non recyclables.",
+            content: "Cette innovation pourrait transformer l'industrie du recyclage en permettant de traiter des emballages complexes comme les briques alimentaires ou les sachets multicouches, contribuant à réduire significativement les déchets plastiques.",
+            imageUrl: "https://images.unsplash.com/photo-1581093450021-a7360e9a6b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+            source: "Genopole",
+            sourceColorCategory: "white",
+            sourceColorTags: ["white"],
+            biotechColor: "white"
+          },
+          {
+            title: "Révolution dans la production de protéines par fermentation de précision",
+            link: "https://example.com/protein-fermentation-2024",
+            pubDate: "2024-04-22T11:15:00Z",
+            description: "Une nouvelle technique de fermentation de précision permet de produire des protéines alimentaires avec 95% moins de ressources que l'élevage traditionnel.",
+            content: "Cette technologie utilise des microorganismes spécialement conçus pour convertir efficacement les sucres en protéines de haute qualité, offrant une alternative durable à la viande avec une empreinte environnementale minimale.",
+            imageUrl: "https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+            source: "Université de Wageningen",
+            sourceColorCategory: "white",
+            sourceColorTags: ["white"],
+            biotechColor: "white"
+          },
+          {
+            title: "Bioproduction de fibres textiles : une usine révolutionnaire en France",
+            link: "https://example.com/biotextiles-2024",
+            pubDate: "2024-04-02T14:40:00Z",
+            description: "La première usine européenne de production de fibres textiles par biofabrication vient d'ouvrir ses portes, avec une capacité de 5000 tonnes annuelles.",
+            content: "Ces fibres produites par des bactéries modifiées remplacent avantageusement le polyester d'origine pétrolière, tout en étant biodégradables et ne rejetant pas de microplastiques lors du lavage.",
+            imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+            source: "Ministère de l'Industrie",
+            sourceColorCategory: "white",
+            sourceColorTags: ["white"],
+            biotechColor: "white"
+          },
+          {
+            title: "Des biosolvants remplacent les solvants pétrochimiques toxiques",
+            link: "https://example.com/biosolvents-2024",
+            pubDate: "2024-03-20T09:30:00Z",
+            description: "Une entreprise chimique a développé une gamme de biosolvants dérivés de déchets agricoles qui éliminent l'utilisation de produits toxiques dans l'industrie des peintures.",
+            content: "Ces biosolvants offrent les mêmes performances techniques que leurs équivalents pétroliers, tout en réduisant de 90% les émissions de COV (composés organiques volatils) nocifs pour la santé et l'environnement.",
+            imageUrl: "https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+            source: "CNRS",
+            sourceColorCategory: "white",
+            sourceColorTags: ["white"],
+            biotechColor: "white"
+          },
+
+          // BIOTECHNOLOGIE JAUNE (ENVIRONNEMENT)
+          {
+            title: "Bactéries mangeuses de plastique déployées pour nettoyer un fleuve pollué",
+            link: "https://example.com/plastic-eating-bacteria-2024",
+            pubDate: "2024-05-05T16:20:00Z",
+            description: "Un consortium de chercheurs et d'écologistes a lancé le premier projet à grande échelle utilisant des bactéries modifiées pour dépolluer un fleuve contaminé par les microplastiques.",
+            content: "Ces bactéries, naturellement présentes dans certains environnements, ont été optimisées pour accélérer la dégradation des particules plastiques et convertir les polymères en composés non toxiques pour l'écosystème aquatique.",
+            imageUrl: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+            source: "Greenpeace",
+            sourceColorCategory: "yellow",
+            sourceColorTags: ["yellow"],
+            biotechColor: "yellow"
+          },
+          {
+            title: "Mycorestauration : des champignons pour dépolluer d'anciens sites industriels",
+            link: "https://example.com/mycoremediation-2024",
+            pubDate: "2024-04-15T10:10:00Z",
+            description: "Une technique innovante utilisant des champignons spécialisés permet de neutraliser les métaux lourds et hydrocarbures présents dans les sols d'une ancienne raffinerie.",
+            content: "Cette méthode de bioremédiation naturelle s'avère 60% moins coûteuse que les techniques conventionnelles d'excavation et traitement, tout en restaurant la vie microbienne dans les sols traités.",
+            imageUrl: "https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+            source: "ADEME",
+            sourceColorCategory: "yellow",
+            sourceColorTags: ["yellow"],
+            biotechColor: "yellow"
+          },
+          {
+            title: "Biofiltres vivants : des algues pour purifier les eaux usées urbaines",
+            link: "https://example.com/algae-biofiltration-2024",
+            pubDate: "2024-03-30T13:45:00Z",
+            description: "La ville de Bordeaux a inauguré un système innovant de traitement des eaux usées utilisant des algues et microorganismes pour éliminer les polluants et produire de la biomasse.",
+            content: "Ce système de biofiltration naturelle élimine efficacement les nitrates, phosphates et certains micropolluants comme les résidus pharmaceutiques, tout en produisant de la biomasse algale valorisable en biogaz.",
+            imageUrl: "https://images.unsplash.com/photo-1579403124614-197f69d8187b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=464&q=80",
+            source: "Agence de l'Eau",
+            sourceColorCategory: "yellow",
+            sourceColorTags: ["yellow"],
+            biotechColor: "yellow"
+          },
+          {
+            title: "Des bactéries luminescentes comme biosenseurs de pollution",
+            link: "https://example.com/bioluminescent-sensors-2024",
+            pubDate: "2024-03-05T11:30:00Z",
+            description: "Des chercheurs ont développé un système de détection de la pollution utilisant des bactéries bioluminescentes qui s'illuminent en présence de contaminants spécifiques.",
+            content: "Ces biosenseurs vivants permettent une détection rapide et peu coûteuse de multiples polluants dans l'eau et les sols, offrant une alternative aux analyses chimiques complexes pour la surveillance environnementale.",
+            imageUrl: "https://images.unsplash.com/photo-1527066236128-2ff79f7b9705?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=764&q=80",
+            source: "CNRS Le Journal",
+            sourceColorCategory: "yellow",
+            sourceColorTags: ["yellow"],
+            biotechColor: "yellow"
+          },
+
+          // BIOTECHNOLOGIE BLEUE (MARINE)
+          {
+            title: "Des éponges marines sources de nouveaux antibiotiques",
+            link: "https://example.com/marine-antibiotics-2024",
+            pubDate: "2024-05-12T12:10:00Z",
+            description: "Des chercheurs ont identifié trois nouvelles molécules antibiotiques dans des éponges marines profondes, actives contre des bactéries multirésistantes.",
+            content: "Ces composés, issus d'éponges collectées à plus de 1000 mètres de profondeur, montrent une efficacité remarquable contre des souches bactériennes résistantes aux antibiotiques conventionnels, offrant un espoir dans la lutte contre l'antibiorésistance.",
+            imageUrl: "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+            source: "Ifremer",
+            sourceColorCategory: "blue",
+            sourceColorTags: ["blue"],
+            biotechColor: "blue"
+          },
+          {
+            title: "Bioraffinerie marine : des microalgues pour la cosmétique haut de gamme",
+            link: "https://example.com/marine-biorefinery-2024",
+            pubDate: "2024-04-25T09:40:00Z",
+            description: "Une bioraffinerie marine unique au monde vient d'être inaugurée à Brest, produisant des actifs cosmétiques à partir de microalgues cultivées en photobioréacteurs.",
+            content: "Cette installation permet d'extraire des molécules aux propriétés anti-âge exceptionnelles et des pigments naturels, tout en valorisant l'intégralité de la biomasse produite selon les principes de l'économie circulaire.",
+            imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+            source: "Pôle Mer Bretagne",
+            sourceColorCategory: "blue",
+            sourceColorTags: ["blue"],
+            biotechColor: "blue"
+          },
+          {
+            title: "Aquaculture de précision : des fermes marines intelligentes",
+            link: "https://example.com/smart-aquaculture-2024",
+            pubDate: "2024-04-10T14:50:00Z",
+            description: "Une startup a développé un système d'aquaculture de précision utilisant l'IA et des capteurs biologiques pour optimiser l'élevage de poissons en minimisant l'impact environnemental.",
+            content: "Cette technologie permet de réduire de 40% l'utilisation d'antibiotiques et d'améliorer de 25% l'efficacité alimentaire, tout en surveillant en temps réel la santé des poissons et la qualité de l'eau grâce à des biosenseurs avancés.",
+            imageUrl: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+            source: "Université de Bretagne Occidentale",
+            sourceColorCategory: "blue",
+            sourceColorTags: ["blue"],
+            biotechColor: "blue"
+          },
+          {
+            title: "Un biomatériau marin révolutionnaire pour la régénération osseuse",
+            link: "https://example.com/marine-biomaterial-2024",
+            pubDate: "2024-03-15T11:20:00Z",
+            description: "Des chercheurs ont développé un substitut osseux à partir de corail et d'algues calcifiées, offrant des propriétés de régénération supérieures aux matériaux synthétiques.",
+            content: "Ce biomatériau d'origine marine présente une structure poreuse idéale pour la colonisation cellulaire et la vascularisation, tout en se résorbant progressivement pour laisser place à l'os naturel du patient.",
+            imageUrl: "https://images.unsplash.com/photo-1551244072-5d12893278ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+            source: "CHU de Nantes",
+            sourceColorCategory: "blue",
+            sourceColorTags: ["blue", "red"],
+            biotechColor: "blue"
+          },
+
+          // BIOTECHNOLOGIE NOIRE (ÉDUCATION)
+          {
+            title: "Simulateurs biotechnologiques en réalité virtuelle pour les universités",
+            link: "https://example.com/biotech-vr-2024",
+            pubDate: "2024-05-01T15:45:00Z",
+            description: "Un consortium universitaire a développé des simulateurs en réalité virtuelle permettant aux étudiants de s'entraîner à manipuler des équipements biotechnologiques coûteux.",
+            content: "Ces environnements virtuels hyperréalistes reproduisent fidèlement les laboratoires de pointe et permettent aux étudiants de réaliser des expériences complexes comme l'édition génomique ou la culture cellulaire avancée, sans risque et à moindre coût.",
+            imageUrl: "https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80",
+            source: "Ministère de l'Enseignement Supérieur et de la Recherche",
+            sourceColorCategory: "black",
+            sourceColorTags: ["black"],
+            biotechColor: "black"
+          },
+          {
+            title: "Plateforme collaborative de formation à la bioéthique pour chercheurs",
+            link: "https://example.com/bioethics-platform-2024",
+            pubDate: "2024-04-20T13:30:00Z",
+            description: "Une nouvelle plateforme numérique propose des modules interactifs de formation à la bioéthique, obligatoires pour tous les chercheurs travaillant sur des projets sensibles.",
+            content: "Cette plateforme développée par le Comité Consultatif National d'Éthique aborde les dilemmes éthiques liés aux nouvelles biotechnologies comme l'édition génomique germinale ou la biologie synthétique avancée.",
+            imageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2022&q=80",
+            source: "CCNE",
+            sourceColorCategory: "black",
+            sourceColorTags: ["black"],
+            biotechColor: "black"
+          },
+          {
+            title: "Premier baccalauréat spécialisé en biotechnologies pour les lycéens",
+            link: "https://example.com/biotech-bac-2024",
+            pubDate: "2024-04-05T09:50:00Z",
+            description: "Le ministère de l'Éducation Nationale annonce la création d'un baccalauréat spécialisé en biotechnologies, disponible dès la rentrée 2025 dans 50 lycées pilotes.",
+            content: "Cette formation, développée en partenariat avec l'industrie, vise à former les techniciens et chercheurs de demain aux disciplines clés des biotechnologies : génie génétique, bioprocessus, culture cellulaire et analyse de données biologiques.",
+            imageUrl: "https://images.unsplash.com/photo-1544640808-32ca72ac7f37?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=435&q=80",
+            source: "Ministère de l'Éducation Nationale",
+            sourceColorCategory: "black",
+            sourceColorTags: ["black"],
+            biotechColor: "black"
+          },
+          {
+            title: "Encyclopédie collaborative des biotechnologies en accès libre",
+            link: "https://example.com/biotech-encyclopedia-2024",
+            pubDate: "2024-03-10T10:15:00Z",
+            description: "Une équipe internationale de chercheurs lance une encyclopédie numérique collaborative des biotechnologies, librement accessible et traduite en 12 langues.",
+            content: "Cette ressource pédagogique de référence couvre l'ensemble des domaines des biotechnologies modernes et s'adresse aussi bien aux étudiants qu'aux professionnels ou au grand public souhaitant comprendre ces technologies transformatives.",
+            imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+            source: "UNESCO",
+            sourceColorCategory: "black",
+            sourceColorTags: ["black", "multi"],
+            biotechColor: "black"
+          }
+        ];
+        
+        return articles;
+      };
+
       // Appeler immédiatement les données de démo pour éviter l'écran vide
       const demoArticles = getDemoArticles();
       setArticles(demoArticles);
       
       try {
+        // Remplacer le proxy CORS par notre propre API
+        const feeds = [
+          { url: 'https://lejournal.cnrs.fr/rss', title: 'CNRS Le Journal', colorTags: ['green', 'red', 'white', 'yellow', 'blue'] },
+          { url: 'https://www.ird.fr/rss.xml', title: 'IRD', colorTags: ['red', 'green', 'yellow', 'blue'] },
+          { url: 'https://www.santepubliquefrance.fr/rss/actualites.xml', title: 'Santé Publique France', colorTags: ['red', 'yellow'] },
+          { url: 'https://www.enseignementsup-recherche.gouv.fr/fr/rss.xml', title: 'Ministère de la Recherche', colorTags: ['black', 'multi'] },
+          { url: 'https://www.inserm.fr/actualites-et-evenements/actualites/feed/', title: 'INSERM', colorTags: ['red'] },
+          { url: 'https://www.inrae.fr/rss.xml', title: 'INRAE', colorTags: ['green', 'yellow'] },
+          { url: 'https://www.ifremer.fr/fr/actualites/flux', title: 'Ifremer', colorTags: ['blue'] },
+          { url: 'https://www.ademe.fr/actualites/feed/', title: 'ADEME', colorTags: ['yellow', 'green'] }
+        ];
+
         // Essayer de faire les requêtes en parallèle avec un timeout
         const results = [];
         const fetchPromises = feeds.map(async (feed) => {
@@ -212,7 +523,7 @@ function ScienceWatchPage() {
                   ],
                   white: [
                     'https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
-                    'https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
+                    'https://images.unsplash.com/photo-1581093450021-a7360e9a6b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
                     'https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80'
                   ],
                   yellow: [
@@ -354,147 +665,6 @@ function ScienceWatchPage() {
     return xml;
   };
 
-  // Function to get demo articles with proper biotechnology color categorization
-  const getDemoArticles = () => {
-    const articles = [
-      {
-        title: "De nouvelles avancées dans la thérapie génique pour les maladies rares",
-        link: "https://example.com/article1",
-        pubDate: "2023-08-15T10:00:00Z",
-        description: "Des chercheurs ont développé une nouvelle approche de thérapie génique qui montre des résultats prometteurs pour le traitement de maladies génétiques rares.",
-        content: "Des chercheurs ont développé une nouvelle approche de thérapie génique qui montre des résultats prometteurs pour le traitement de maladies génétiques rares.",
-        imageUrl: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-        source: "Institut Pasteur",
-        sourceColorCategory: "red",
-        sourceColorTags: ["red"],
-        biotechColor: "red"
-      },
-      {
-        title: "Collaboration entre l'INRAE et une biotech pour développer des biofertilisants",
-        link: "https://example.com/article2",
-        pubDate: "2023-08-10T14:30:00Z",
-        description: "L'INRAE et une entreprise de biotechnologie ont signé un accord de collaboration pour développer une nouvelle génération de biofertilisants.",
-        content: "L'INRAE et une entreprise de biotechnologie ont signé un accord de collaboration pour développer une nouvelle génération de biofertilisants à partir de ressources naturelles.",
-        imageUrl: "https://images.unsplash.com/photo-1574707100262-7a26b64d3fd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-        source: "INRAE",
-        sourceColorCategory: "green",
-        sourceColorTags: ["green", "yellow", "white"],
-        biotechColor: "green"
-      },
-      {
-        title: "Levée de fonds record pour une startup française de bioimpression 3D",
-        link: "https://example.com/article3",
-        pubDate: "2023-08-05T09:15:00Z",
-        description: "Une startup spécialisée dans la bioimpression 3D annonce une levée de fonds de 40 millions d'euros pour accélérer le développement de ses technologies.",
-        content: "Une startup spécialisée dans la bioimpression 3D annonce une levée de fonds de 40 millions d'euros pour accélérer le développement de ses technologies médicales innovantes.",
-        imageUrl: "https://images.unsplash.com/photo-1581093450021-a7360e9a6b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
-        source: "Genopole",
-        sourceColorCategory: "white",
-        sourceColorTags: ["white", "red"],
-        biotechColor: "white"
-      },
-      {
-        title: "Nouveau procédé industriel pour la production de biocarburants",
-        link: "https://example.com/article4",
-        pubDate: "2023-08-01T11:45:00Z",
-        description: "Une entreprise a mis au point un procédé industriel innovant permettant de produire des biocarburants à partir de déchets agricoles avec un rendement accru.",
-        content: "Une entreprise a mis au point un procédé industriel innovant permettant de produire des biocarburants à partir de déchets agricoles avec un rendement accru et un impact environnemental réduit.",
-        imageUrl: "https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
-        source: "ADEME",
-        sourceColorCategory: "yellow",
-        sourceColorTags: ["yellow", "green"],
-        biotechColor: "yellow"
-      },
-      {
-        title: "Découverte d'une enzyme capable de dégrader efficacement le plastique",
-        link: "https://example.com/article5",
-        pubDate: "2023-07-28T08:20:00Z",
-        description: "Des chercheurs du CNRS ont identifié une enzyme capable de dégrader plusieurs types de plastiques, ouvrant la voie à de nouvelles solutions de recyclage biologique.",
-        content: "Des chercheurs du CNRS ont identifié une enzyme capable de dégrader plusieurs types de plastiques, ouvrant la voie à de nouvelles solutions de recyclage biologique pour réduire la pollution environnementale.",
-        imageUrl: "https://images.unsplash.com/photo-1579403124614-197f69d8187b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=464&q=80",
-        source: "CNRS Le Journal",
-        sourceColorCategory: "yellow",
-        sourceColorTags: ["green", "yellow", "white"],
-        biotechColor: "yellow"
-      },
-      {
-        title: "Nouvelles méthodes d'aquaculture durable développées par l'Ifremer",
-        link: "https://example.com/article6",
-        pubDate: "2023-07-23T10:20:00Z",
-        description: "L'Ifremer présente de nouvelles approches pour l'aquaculture durable, réduisant l'impact environnemental tout en améliorant la santé des poissons.",
-        content: "L'Institut français de recherche pour l'exploitation de la mer (Ifremer) a dévoilé les résultats d'une étude de cinq ans sur des méthodes innovantes d'aquaculture à faible impact environnemental. Ces techniques utilisent des systèmes en circuit fermé et des approches biologiques pour le contrôle des pathogènes.",
-        imageUrl: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
-        source: "Ifremer",
-        sourceColorCategory: "blue",
-        sourceColorTags: ["blue"],
-        biotechColor: "blue"
-      },
-      {
-        title: "Lancement d'un nouveau Master en biotechnologies marines à Brest",
-        link: "https://example.com/article7",
-        pubDate: "2023-07-20T09:15:00Z",
-        description: "L'Université de Bretagne Occidentale annonce l'ouverture d'un nouveau programme de Master spécialisé dans les biotechnologies marines et leurs applications.",
-        content: "Ce programme interdisciplinaire formera les étudiants aux dernières avancées en matière de biotechnologie bleue, incluant la valorisation des ressources marines, les bioprocédés marins et la cosmétique bleue. Un partenariat avec plusieurs entreprises du secteur garantira des stages et des débouchés professionnels.",
-        imageUrl: "https://images.unsplash.com/photo-1544640808-32ca72ac7f37?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=435&q=80",
-        source: "Ministère de l'Enseignement Supérieur et de la Recherche",
-        sourceColorCategory: "black",
-        sourceColorTags: ["black"],
-        biotechColor: "black"
-      },
-      // Ajout d'articles supplémentaires pour plus de diversité
-      {
-        title: "Biomatériaux innovants pour la reconstruction osseuse",
-        link: "https://example.com/biomateriaux",
-        pubDate: "2023-07-18T08:15:00Z",
-        description: "Une équipe internationale de chercheurs a développé un nouveau biomatériau mimant la structure osseuse naturelle, offrant de meilleures perspectives pour la chirurgie réparatrice.",
-        content: "Ce matériau combine des polymères biodégradables et des composés minéraux similaires à l'os humain, créant une structure poreuse qui favorise la croissance cellulaire et la vascularisation.",
-        imageUrl: "https://images.unsplash.com/photo-1583912268183-46a1d8891fc5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
-        source: "Institut Pasteur",
-        sourceColorCategory: "red",
-        sourceColorTags: ["red", "white"],
-        biotechColor: "red"
-      },
-      {
-        title: "Production industrielle d'enzymes par fermentation: efficacité énergétique améliorée",
-        link: "https://example.com/enzymes-industrielles",
-        pubDate: "2023-07-14T10:30:00Z",
-        description: "Une biotech française révolutionne la production d'enzymes industrielles avec un procédé de fermentation à faible consommation d'énergie.",
-        content: "Le nouveau bioréacteur conçu par l'entreprise permet de réduire de 40% la consommation énergétique tout en augmentant le rendement de production des enzymes utilisées dans l'industrie alimentaire et textile.",
-        imageUrl: "https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
-        source: "Genopole",
-        sourceColorCategory: "white",
-        sourceColorTags: ["white"],
-        biotechColor: "white"
-      },
-      {
-        title: "Microalgues génétiquement modifiées pour la capture de CO2",
-        link: "https://example.com/microalgues-co2",
-        pubDate: "2023-07-10T09:45:00Z",
-        description: "Des chercheurs ont développé une souche de microalgues capable de capturer 5 fois plus de CO2 que les souches naturelles, offrant une solution innovante pour lutter contre le changement climatique.",
-        content: "Ces microalgues modifiées peuvent être cultivées dans des installations industrielles pour capturer directement les émissions de CO2 et les transformer en biomasse valorisable pour la production de biocarburants.",
-        imageUrl: "https://images.unsplash.com/photo-1628863353691-0071c8c1874c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
-        source: "INRAE",
-        sourceColorCategory: "green",
-        sourceColorTags: ["green", "yellow"],
-        biotechColor: "green"
-      },
-      {
-        title: "Découverte d'une bactérie marine aux propriétés antioxydantes exceptionnelles",
-        link: "https://example.com/bacterie-marine",
-        pubDate: "2023-07-08T14:20:00Z",
-        description: "Une espèce bactérienne découverte dans les profondeurs marines produit des molécules aux propriétés antioxydantes jamais observées jusqu'à présent.",
-        content: "Ces composés pourraient révolutionner l'industrie cosmétique et pharmaceutique grâce à leur stabilité exceptionnelle et leur efficacité à neutraliser les radicaux libres responsables du vieillissement cellulaire.",
-        imageUrl: "https://images.unsplash.com/photo-1544640808-32ca72ac7f37?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=435&q=80",
-        source: "Ifremer",
-        sourceColorCategory: "blue",
-        sourceColorTags: ["blue", "red"],
-        biotechColor: "blue"
-      }
-    ];
-    
-    return articles;
-  };
-
   // Fonction pour formater la date
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -555,7 +725,8 @@ function ScienceWatchPage() {
       let i = 0;
       let addedCount = 0;
       
-      // Continue tant qu'on n'a pas atteint 4 articles et qu'il y a encore des sources à parcourir
+      // Continue tant qu'on peut ajouter des articles (on veut 4 par couleur au maximum)
+      // et qu'il y a encore des sources à parcourir
       while (addedCount < 4 && sources.length > 0) {
         const sourceIndex = i % sources.length;
         const source = sources[sourceIndex];
