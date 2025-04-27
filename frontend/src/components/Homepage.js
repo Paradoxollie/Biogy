@@ -448,6 +448,11 @@ function Homepage() {
               <p className="text-gray-600 text-center">
                 Inspirez-vous et partagez vos <span className="font-medium">réalisations expérimentales</span> (photos, vidéos, rapports).
               </p>
+              <div className="text-center mt-4">
+                <Link to="/projets" className="text-lab-teal hover:text-lab-teal/80 font-medium">
+                  Voir les projets →
+                </Link>
+              </div>
             </div>
 
             {/* Communauté */}

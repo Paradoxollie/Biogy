@@ -31,6 +31,8 @@ const createPost = async (req, res, next) => {
       caption: caption || '', // Légende optionnelle
       status: 'pending', // Statut initial
       cloudinaryPublicId: uploadResult.public_id, // ID public pour suppression future
+      likes: [],
+      comments: []
     });
 
     const createdPost = await post.save();
@@ -67,12 +69,97 @@ const getApprovedPosts = async (req, res, next) => {
     // et peupler les informations de l'utilisateur (username seulement)
     const posts = await Post.find({ status: 'approved' })
       .sort({ createdAt: -1 })
-      .populate('user', 'username'); // Récupérer seulement le username de l'auteur
+      .populate('user', 'username') // Récupérer seulement le username de l'auteur
+      .populate({
+        path: 'comments.user',
+        select: 'username'
+      }); // Récupérer les usernames des commentateurs
 
     res.json(posts);
   } catch (error) {
     console.error('Error in getApprovedPosts:', error);
     res.status(500).json({ message: 'Erreur serveur lors de la récupération des posts' });
+  }
+};
+
+// @desc    Ajouter un like à un post
+// @route   POST /api/posts/:id/like
+// @access  Private
+const likePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Post non trouvé' });
+    }
+    
+    // Vérifier si l'utilisateur a déjà aimé le post
+    const alreadyLiked = post.likes.includes(req.user._id);
+    
+    if (alreadyLiked) {
+      // Si déjà aimé, retirer le like (toggle)
+      post.likes = post.likes.filter(
+        userId => userId.toString() !== req.user._id.toString()
+      );
+    } else {
+      // Sinon, ajouter le like
+      post.likes.push(req.user._id);
+    }
+    
+    await post.save();
+    
+    res.json({ 
+      likes: post.likes,
+      likesCount: post.likes.length,
+      isLiked: !alreadyLiked 
+    });
+    
+  } catch (error) {
+    console.error('Error in likePost:', error);
+    res.status(500).json({ message: 'Erreur lors de l\'ajout du like' });
+  }
+};
+
+// @desc    Ajouter un commentaire à un post
+// @route   POST /api/posts/:id/comment
+// @access  Private
+const commentPost = async (req, res) => {
+  try {
+    const { text } = req.body;
+    
+    if (!text || text.trim() === '') {
+      return res.status(400).json({ message: 'Le texte du commentaire est requis' });
+    }
+    
+    const post = await Post.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Post non trouvé' });
+    }
+    
+    const comment = {
+      user: req.user._id,
+      text: text.trim()
+    };
+    
+    post.comments.push(comment);
+    await post.save();
+    
+    // Récupérer le post mis à jour avec le commentaire peuplé
+    const updatedPost = await Post.findById(req.params.id)
+      .populate('comments.user', 'username');
+    
+    // Récupérer uniquement le dernier commentaire ajouté
+    const newComment = updatedPost.comments[updatedPost.comments.length - 1];
+    
+    res.status(201).json({
+      comment: newComment,
+      commentsCount: updatedPost.comments.length
+    });
+    
+  } catch (error) {
+    console.error('Error in commentPost:', error);
+    res.status(500).json({ message: 'Erreur lors de l\'ajout du commentaire' });
   }
 };
 
@@ -113,4 +200,4 @@ const deletePost = async (req, res, next) => {
 };
 
 
-module.exports = { createPost, getApprovedPosts, deletePost }; 
+module.exports = { createPost, getApprovedPosts, likePost, commentPost, deletePost }; 

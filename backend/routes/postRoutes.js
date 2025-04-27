@@ -1,5 +1,5 @@
 const express = require('express');
-const { createPost, getApprovedPosts, deletePost } = require('../controllers/postController');
+const { createPost, getApprovedPosts, likePost, commentPost, deletePost } = require('../controllers/postController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware'); // Middleware pour gérer l'upload
 
@@ -15,5 +15,10 @@ router.post('/', protect, upload.single('file'), createPost);
 // Route pour supprimer un post (protégée, nécessite connexion et auteur/admin)
 router.delete('/:id', protect, deletePost);
 
+// Route pour liker/unliker un post (protégée, nécessite connexion)
+router.post('/:id/like', protect, likePost);
+
+// Route pour commenter un post (protégée, nécessite connexion)
+router.post('/:id/comment', protect, commentPost);
 
 module.exports = router; 

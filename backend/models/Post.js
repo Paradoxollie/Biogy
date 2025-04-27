@@ -1,5 +1,21 @@
 const mongoose = require('mongoose');
 
+const commentSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User'
+  },
+  text: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: [500, 'Le commentaire ne peut pas dépasser 500 caractères']
+  }
+}, {
+  timestamps: true
+});
+
 const postSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -30,6 +46,11 @@ const postSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  likes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  comments: [commentSchema],
   moderatedAt: {
     type: Date,
     default: null,
