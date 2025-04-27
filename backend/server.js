@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
 // Routes spécifiques (à compléter dans routes/)
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/posts', require('./routes/postRoutes'));
-// app.use('/api/admin', require('./routes/adminRoutes')); // Si tu fais une partie admin plus tard
+app.use('/api/admin', require('./routes/adminRoutes')); // Nouvelles routes admin
 
 // Gestionnaire d'erreurs global (optionnel mais recommandé)
 // app.use((err, req, res, next) => {

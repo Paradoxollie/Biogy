@@ -143,6 +143,14 @@ function Layout({ children }) {
             {userInfo ? (
                 <>
                 <span className="text-gray-700">Bonjour, {userInfo.username}!</span>
+                {userInfo.role === 'admin' && (
+                  <Link 
+                    to="/admin" 
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+                  >
+                    Admin
+                  </Link>
+                )}
                 <button 
                     onClick={handleLogout}
                     className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium transition duration-150 ease-in-out"
@@ -222,6 +230,13 @@ function Layout({ children }) {
               <ul className="space-y-2">
               {userInfo ? (
                 <>
+                  {userInfo.role === 'admin' && (
+                    <li>
+                      <Link to="/admin" className="text-indigo-600 hover:text-indigo-800 transition duration-300">
+                        Panneau Admin
+                      </Link>
+                    </li>
+                  )}
                   <li>
                     <button 
                       onClick={handleLogout}

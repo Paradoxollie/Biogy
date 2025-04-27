@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import ShareProjectPage from './components/ShareProjectPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
+import AdminPage from './components/AdminPage';
 import AuthDebug from './context/AuthDebug';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/partager-projet" element={<ShareProjectPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </Layout>
     </>

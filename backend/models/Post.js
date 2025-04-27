@@ -30,6 +30,15 @@ const postSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  moderatedAt: {
+    type: Date,
+    default: null,
+  },
+  moderatedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
 }, {
   timestamps: true, // Ajoute createdAt et updatedAt
 });
