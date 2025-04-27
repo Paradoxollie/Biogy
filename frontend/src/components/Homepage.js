@@ -82,38 +82,97 @@ function Homepage() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    // Configuration du canvas
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    if (!ctx) return;
     
-    console.log('Canvas initialisé avec dimensions:', canvas.width, 'x', canvas.height);
-    
-    // Initialisation de l'animation
-    animatePetriDishes(canvas, ctx);
-    
-    // Redimensionnement
-    const handleResize = () => {
+    // S'assurer que le canvas prend toute la fenêtre
+    const setCanvasSize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      console.log('Canvas redimensionné:', canvas.width, 'x', canvas.height);
     };
     
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    setCanvasSize();
+    
+    // Configuration de l'animation
+    const petriDishes = [];
+    const colors = ['#3b82f6', '#8b5cf6', '#14b8a6', '#22c55e', '#f97316', '#ef4444'];
+    
+    // Créer des boîtes de Petri
+    for (let i = 0; i < 12; i++) {
+      petriDishes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 60 + 30,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speedX: (Math.random() - 0.5) * 0.5,
+        speedY: (Math.random() - 0.5) * 0.5
+      });
+    }
+    
+    // Animation des boîtes de Petri
+    function animatePetriDishes() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      petriDishes.forEach(dish => {
+        // Mise à jour de la position
+        dish.x += dish.speedX;
+        dish.y += dish.speedY;
+        
+        // Rebond sur les bords
+        if (dish.x < 0 || dish.x > canvas.width) dish.speedX *= -1;
+        if (dish.y < 0 || dish.y > canvas.height) dish.speedY *= -1;
+        
+        // Dessin de la boîte de Petri
+        ctx.beginPath();
+        ctx.arc(dish.x, dish.y, dish.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = dish.color;
+        ctx.lineWidth = 4;
+        ctx.globalAlpha = 0.7;
+        ctx.stroke();
+        
+        // Dessin des "cellules" à l'intérieur
+        for (let i = 0; i < 7; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const distance = Math.random() * (dish.radius * 0.8);
+          const cellX = dish.x + Math.cos(angle) * distance;
+          const cellY = dish.y + Math.sin(angle) * distance;
+          const cellSize = Math.random() * 8 + 4;
+          
+          ctx.beginPath();
+          ctx.arc(cellX, cellY, cellSize, 0, Math.PI * 2);
+          ctx.fillStyle = dish.color;
+          ctx.globalAlpha = 0.8;
+          ctx.fill();
+        }
+      });
+      
+      requestAnimationFrame(animatePetriDishes);
+    }
+    
+    // Démarrer l'animation
+    animatePetriDishes();
+    
+    // Gérer le redimensionnement de la fenêtre
+    window.addEventListener('resize', setCanvasSize);
+    
+    return () => window.removeEventListener('resize', setCanvasSize);
   }, []);
 
   return (
-    <div className="relative min-h-screen">
-      {/* Canvas d'arrière-plan pour l'animation des boîtes de Petri */}
+    <div className="relative min-h-screen bg-white">
+      {/* Canvas pour les boîtes de Petri */}
       <canvas 
         ref={canvasRef} 
-        className="absolute top-0 left-0 w-full h-full opacity-60"
-        style={{ zIndex: -1, backgroundColor: '#f0f8ff' }}
+        className="absolute top-0 left-0 w-full h-full"
+        style={{ 
+          zIndex: 0, 
+          opacity: 0.7,
+          backgroundColor: '#f8faff' 
+        }}
       ></canvas>
       
       {/* Section héro avec illustrations de labo */}
-      <section className="pt-20 pb-24 px-4 md:px-0">
+      <section className="relative pt-20 pb-24 px-4 md:px-0 z-10">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-10">
             {/* Texte principal */}
