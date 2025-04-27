@@ -208,6 +208,7 @@ function ScienceWatchPage() {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSource, selectedColor]);
 
   useEffect(() => {
