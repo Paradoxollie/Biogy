@@ -102,11 +102,328 @@ const PendingPostCard = ({ post, onApprove, onReject, onDelete }) => {
   );
 };
 
+// Composant pour la gestion des utilisateurs
+const UserManagement = ({ userInfo }) => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [editingUser, setEditingUser] = useState(null);
+  const [newUsername, setNewUsername] = useState('');
+  const [newRole, setNewRole] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  
+  // Récupérer la liste des utilisateurs
+  const fetchUsers = useCallback(async () => {
+    if (!userInfo || !userInfo.token) {
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetch(`${apiUrl}/api/admin/users`, {
+        headers: {
+          'Authorization': `Bearer ${userInfo.token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de la récupération des utilisateurs');
+      }
+      
+      setUsers(data);
+    } catch (err) {
+      console.error('Erreur:', err);
+      setError(err.message || 'Une erreur est survenue');
+    } finally {
+      setLoading(false);
+    }
+  }, [userInfo, apiUrl]);
+  
+  // Charger les utilisateurs au chargement du composant
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+  
+  // Gérer la modification du rôle d'un utilisateur
+  const handleRoleChange = async (userId, newRole) => {
+    setError('');
+    setSuccess('');
+    
+    try {
+      const response = await fetch(`${apiUrl}/api/admin/users/${userId}/role`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${userInfo.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ role: newRole })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de la modification du rôle');
+      }
+      
+      setSuccess(data.message || 'Rôle mis à jour avec succès');
+      
+      // Mettre à jour la liste des utilisateurs
+      setUsers(users.map(user => 
+        user._id === userId ? { ...user, role: newRole } : user
+      ));
+      
+      // Réinitialiser le formulaire d'édition
+      setEditingUser(null);
+      setNewRole('');
+    } catch (err) {
+      console.error('Erreur:', err);
+      setError(err.message || 'Une erreur est survenue');
+    }
+  };
+  
+  // Gérer la modification du nom d'utilisateur
+  const handleUsernameChange = async (userId) => {
+    if (!newUsername.trim()) {
+      setError('Le nom d\'utilisateur ne peut pas être vide');
+      return;
+    }
+    
+    setError('');
+    setSuccess('');
+    
+    try {
+      const response = await fetch(`${apiUrl}/api/admin/users/${userId}/username`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${userInfo.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: newUsername })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de la modification du nom d\'utilisateur');
+      }
+      
+      setSuccess(data.message || 'Nom d\'utilisateur mis à jour avec succès');
+      
+      // Mettre à jour la liste des utilisateurs
+      setUsers(users.map(user => 
+        user._id === userId ? { ...user, username: newUsername } : user
+      ));
+      
+      // Réinitialiser le formulaire d'édition
+      setEditingUser(null);
+      setNewUsername('');
+    } catch (err) {
+      console.error('Erreur:', err);
+      setError(err.message || 'Une erreur est survenue');
+    }
+  };
+  
+  // Gérer la suppression d'un utilisateur
+  const handleDeleteUser = async (userId, username) => {
+    // Demander confirmation
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${username} ? Cette action est irréversible.`)) {
+      return;
+    }
+    
+    setError('');
+    setSuccess('');
+    
+    try {
+      const response = await fetch(`${apiUrl}/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${userInfo.token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de la suppression de l\'utilisateur');
+      }
+      
+      setSuccess(data.message || 'Utilisateur supprimé avec succès');
+      
+      // Mettre à jour la liste des utilisateurs
+      setUsers(users.filter(user => user._id !== userId));
+    } catch (err) {
+      console.error('Erreur:', err);
+      setError(err.message || 'Une erreur est survenue');
+    }
+  };
+  
+  // Filtrer les utilisateurs en fonction du terme de recherche
+  const filteredUsers = users.filter(user => 
+    user.username.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Gestion des Utilisateurs</h2>
+      
+      {/* Messages de succès/erreur */}
+      {error && (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+          <p>{error}</p>
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
+          <p>{success}</p>
+        </div>
+      )}
+      
+      {/* Barre de recherche */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Rechercher un utilisateur..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      
+      {/* Liste des utilisateurs */}
+      {loading ? (
+        <div className="text-center py-4">
+          <p className="text-gray-600">Chargement des utilisateurs...</p>
+        </div>
+      ) : filteredUsers.length === 0 ? (
+        <div className="text-center py-4">
+          <p className="text-gray-600">Aucun utilisateur trouvé</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nom d'utilisateur
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Rôle
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredUsers.map((user) => (
+                <tr key={user._id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {editingUser === user._id ? (
+                      <input
+                        type="text"
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value)}
+                        className="px-2 py-1 border border-gray-300 rounded-md"
+                        placeholder={user.username}
+                      />
+                    ) : (
+                      <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {editingUser === user._id ? (
+                      <select
+                        value={newRole}
+                        onChange={(e) => setNewRole(e.target.value)}
+                        className="px-2 py-1 border border-gray-300 rounded-md"
+                      >
+                        <option value="">Sélectionner un rôle</option>
+                        <option value="student">Étudiant</option>
+                        <option value="admin">Administrateur</option>
+                      </select>
+                    ) : (
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        user.role === 'admin' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                      }`}>
+                        {user.role === 'admin' ? 'Administrateur' : 'Étudiant'}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                    {editingUser === user._id ? (
+                      <>
+                        {newUsername && (
+                          <button
+                            onClick={() => handleUsernameChange(user._id)}
+                            className="text-indigo-600 hover:text-indigo-900 mr-2"
+                          >
+                            Enregistrer nom
+                          </button>
+                        )}
+                        {newRole && (
+                          <button
+                            onClick={() => handleRoleChange(user._id, newRole)}
+                            className="text-indigo-600 hover:text-indigo-900 mr-2"
+                          >
+                            Enregistrer rôle
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setEditingUser(null);
+                            setNewUsername('');
+                            setNewRole('');
+                          }}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          Annuler
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingUser(user._id);
+                            setNewUsername(user.username);
+                            setNewRole(user.role);
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900 mr-2"
+                        >
+                          Modifier
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user._id, user.username)}
+                          className="text-red-600 hover:text-red-900"
+                          disabled={user._id === userInfo._id} // Empêcher la suppression de son propre compte
+                          title={user._id === userInfo._id ? "Vous ne pouvez pas supprimer votre propre compte" : ""}
+                        >
+                          Supprimer
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
 function AdminPage() {
   const [pendingPosts, setPendingPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [activeTab, setActiveTab] = useState('posts'); // 'posts' ou 'users'
   const { userInfo } = useAuth();
   const navigate = useNavigate();
 
@@ -260,63 +577,63 @@ function AdminPage() {
   }, [success]);
 
   return (
-    <div className="container mx-auto max-w-5xl p-6 my-10">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Panneau d'Administration</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Panneau d'administration</h1>
       
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 mb-6">
+        <button
+          className={`py-2 px-4 font-medium text-sm focus:outline-none ${
+            activeTab === 'posts'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+          onClick={() => setActiveTab('posts')}
+        >
+          Modération des Posts
+        </button>
+        <button
+          className={`py-2 px-4 font-medium text-sm focus:outline-none ${
+            activeTab === 'users'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+          onClick={() => setActiveTab('users')}
+        >
+          Gestion des Utilisateurs
+        </button>
+      </div>
+      
+      {/* Afficher les messages */}
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+          <p>{error}</p>
         </div>
       )}
       
       {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          {success}
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
+          <p>{success}</p>
         </div>
       )}
       
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 mb-6">
-        <div className="p-4 bg-gray-50 border-b">
-          <h2 className="text-xl font-semibold text-gray-800">Posts en attente de modération</h2>
-        </div>
-        
-        <div className="p-4">
+      {/* Contenu des onglets */}
+      {activeTab === 'posts' ? (
+        // Contenu de l'onglet "Modération des Posts"
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6">Posts en attente de modération</h2>
+          
           {loading ? (
-            <div className="text-center py-10">
-              <svg className="animate-spin h-10 w-10 text-gray-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <p className="mt-3 text-gray-600">Chargement...</p>
+            <div className="text-center py-8">
+              <p className="text-gray-600">Chargement des posts en attente...</p>
             </div>
           ) : pendingPosts.length === 0 ? (
-            <div className="text-center py-10">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p className="mt-3 text-gray-600">Aucun post en attente de modération</p>
-              <button 
-                onClick={fetchPendingPosts}
-                className="mt-2 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Rafraîchir
-              </button>
+            <div className="bg-white rounded-lg shadow-md p-6 text-center">
+              <p className="text-gray-600">Aucun post en attente de modération.</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center mb-4">
-                <p className="text-gray-600">
-                  {pendingPosts.length} {pendingPosts.length > 1 ? 'posts en attente' : 'post en attente'}
-                </p>
-                <button 
-                  onClick={fetchPendingPosts}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Rafraîchir
-                </button>
-              </div>
-              
-              {pendingPosts.map(post => (
+            <div>
+              {pendingPosts.map((post) => (
                 <PendingPostCard
                   key={post._id}
                   post={post}
@@ -328,7 +645,10 @@ function AdminPage() {
             </div>
           )}
         </div>
-      </div>
+      ) : (
+        // Contenu de l'onglet "Gestion des Utilisateurs"
+        <UserManagement userInfo={userInfo} />
+      )}
     </div>
   );
 }

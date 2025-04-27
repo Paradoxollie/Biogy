@@ -218,6 +218,120 @@ const findUserByUsername = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Get all users
+ * @route   GET /api/admin/users
+ * @access  Private/Admin
+ */
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({})
+      .select('-password')
+      .sort({ username: 1 });
+    
+    res.json(users);
+  } catch (error) {
+    console.error('Error in getAllUsers:', error);
+    res.status(500).json({ message: 'Erreur serveur lors de la récupération des utilisateurs' });
+  }
+};
+
+/**
+ * @desc    Delete a user
+ * @route   DELETE /api/admin/users/:id
+ * @access  Private/Admin
+ */
+const deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    // Validate user ID format
+    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: 'ID utilisateur invalide' });
+    }
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    
+    // Don't allow admin to delete themselves
+    if (user._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({ message: 'Vous ne pouvez pas supprimer votre propre compte' });
+    }
+    
+    await User.deleteOne({ _id: userId });
+    
+    // Could add additional cleanup here - delete user's posts, comments, etc.
+    
+    res.json({ 
+      message: `L'utilisateur ${user.username} a été supprimé avec succès`,
+      deletedUser: {
+        _id: user._id,
+        username: user.username
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in deleteUser:', error);
+    res.status(500).json({ message: 'Erreur serveur lors de la suppression de l\'utilisateur' });
+  }
+};
+
+/**
+ * @desc    Update a user's username
+ * @route   PUT /api/admin/users/:id/username
+ * @access  Private/Admin
+ */
+const updateUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+    const userId = req.params.id;
+    
+    if (!username || username.trim() === '') {
+      return res.status(400).json({ message: 'Nom d\'utilisateur requis' });
+    }
+    
+    // Check if username already exists
+    const existingUser = await User.findOne({ username, _id: { $ne: userId } });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Ce nom d\'utilisateur est déjà pris' });
+    }
+    
+    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: 'ID utilisateur invalide' });
+    }
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    
+    const oldUsername = user.username;
+    user.username = username;
+    await user.save();
+    
+    res.status(200).json({
+      success: true,
+      message: `Le nom d'utilisateur a été modifié de "${oldUsername}" à "${username}"`,
+      user: {
+        _id: user._id,
+        username: user.username,
+        role: user.role
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in updateUsername:', error);
+    res.status(500).json({
+      message: 'Erreur lors de la mise à jour du nom d\'utilisateur',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getPendingPosts,
   getAllPosts,
@@ -225,5 +339,8 @@ module.exports = {
   rejectPost,
   deletePostAdmin,
   updateUserRole,
-  findUserByUsername
+  findUserByUsername,
+  getAllUsers,
+  deleteUser,
+  updateUsername
 }; 
