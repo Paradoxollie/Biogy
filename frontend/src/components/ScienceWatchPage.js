@@ -42,6 +42,32 @@ function ScienceWatchPage() {
           const keywords = ['biotech', 'biotechnologie', 'génétique', 'crispr', 'génomique', 'biologie'];
           const itemText = `${item.title} ${item.description}`.toLowerCase();
           return keywords.some(keyword => itemText.includes(keyword.toLowerCase()));
+        }).map(item => {
+          // Extraire l'image correctement selon plusieurs sources possibles
+          let imageUrl = null;
+          
+          // Vérifier différentes positions où l'image pourrait se trouver
+          if (item.enclosure && item.enclosure.link) {
+            imageUrl = item.enclosure.link;
+          } else if (item.thumbnail) {
+            imageUrl = item.thumbnail;
+          } else if (item.image) {
+            imageUrl = item.image;
+          } else {
+            // Essayer d'extraire l'image du contenu HTML
+            const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/);
+            if (imgMatch && imgMatch[1]) {
+              imageUrl = imgMatch[1];
+            }
+          }
+          
+          return {
+            ...item,
+            // S'assurer que le lien est l'URL complète de l'article
+            link: item.link || item.guid || '',
+            // Stocker l'URL de l'image extraite
+            imageUrl: imageUrl
+          };
         });
         
         // Si aucun article n'est trouvé après le filtrage, montrer des données de démonstration
@@ -80,53 +106,45 @@ function ScienceWatchPage() {
       {
         title: 'CRISPR : une nouvelle technique permet d\'éditer plusieurs gènes simultanément',
         description: 'Des chercheurs ont développé une variante de CRISPR permettant d\'éditer plusieurs gènes à la fois, ouvrant de nouvelles possibilités pour le traitement des maladies génétiques complexes.',
-        link: 'https://www.futura-sciences.com',
+        link: 'https://www.futura-sciences.com/sante/actualites/genetique-crispr-nouvelle-technique-permet-editer-plusieurs-genes-simultanement-12345/',
         author: 'Équipe Futura',
-        enclosure: {
-          link: 'https://cdn.futura-sciences.com/buildsv6/images/wide1920/8/d/8/8d8c23421a_50175939_crispr-cas9-adobe-ttsz.jpg'
-        },
+        imageUrl: 'https://cdn.futura-sciences.com/buildsv6/images/wide1920/8/d/8/8d8c23421a_50175939_crispr-cas9-adobe-ttsz.jpg',
         pubDate: '2023-05-15T09:30:00Z',
         content: 'La technologie CRISPR franchit une nouvelle étape avec cette technique révolutionnaire...'
       },
       {
         title: 'Biotechnologie : des organoïdes cérébraux pour étudier les maladies neurodégénératives',
         description: 'Une équipe internationale a réussi à développer des organoïdes cérébraux plus complexes pour mieux modéliser les maladies comme Alzheimer ou Parkinson.',
-        link: 'https://www.sciencesetavenir.fr',
+        link: 'https://www.sciencesetavenir.fr/sante/cerveau-et-psy/biotechnologie-des-organoides-cerebraux-pour-etudier-les-maladies-67890',
         author: 'Rédaction Sciences et Avenir',
-        enclosure: {
-          link: 'https://www.sciencesetavenir.fr/assets/img/2020/01/10/cover-r4x3w1000-5e18a87cc3109-cerveau-humain.jpg'
-        },
+        imageUrl: 'https://www.sciencesetavenir.fr/assets/img/2020/01/10/cover-r4x3w1000-5e18a87cc3109-cerveau-humain.jpg',
         pubDate: '2023-06-02T14:15:00Z',
         content: 'Ces mini-cerveaux cultivés en laboratoire permettent de mieux comprendre les mécanismes des maladies neurologiques...'
       },
       {
         title: 'Biocapteurs : des dispositifs implantables pour surveiller la glycémie en continu',
         description: 'De nouveaux biocapteurs utilisant des enzymes modifiées permettent un suivi plus précis et moins invasif de la glycémie chez les patients diabétiques.',
-        link: 'https://www.larecherche.fr',
-        enclosure: {
-          link: 'https://www.larecherche.fr/sites/default/files/styles/large_16_9/public/2021-02/biocapteur%20chimique.jpg'
-        },
+        link: 'https://www.larecherche.fr/biotechnologie/biocapteurs-dispositifs-implantables-surveiller-glycemie-54321',
+        author: 'La Recherche',
+        imageUrl: 'https://www.larecherche.fr/sites/default/files/styles/large_16_9/public/2021-02/biocapteur%20chimique.jpg',
         pubDate: '2023-04-25T11:00:00Z',
         content: 'Ces dispositifs marquent une avancée significative dans la prise en charge du diabète...'
       },
       {
         title: 'Thérapie génique : un traitement prometteur pour la drépanocytose en phase finale d\'essai',
         description: 'Un essai clinique de phase 3 montre des résultats encourageants pour une thérapie génique ciblant la drépanocytose, une maladie affectant l\'hémoglobine.',
-        link: 'https://www.santemagazine.fr',
+        link: 'https://www.santemagazine.fr/actualites/therapie-genique-traitement-drepanocytose-essai-98765',
         author: 'Équipe éditoriale',
-        enclosure: {
-          link: 'https://www.santemagazine.fr/uploads/images/thumbs/201911/santemagazine-drepanocytose-gettyimages-1127097866-754034-large.jpg'
-        },
+        imageUrl: 'https://www.santemagazine.fr/uploads/images/thumbs/201911/santemagazine-drepanocytose-gettyimages-1127097866-754034-large.jpg',
         pubDate: '2023-05-30T08:45:00Z',
         content: 'Cette approche pourrait transformer le traitement de cette maladie génétique répandue...'
       },
       {
         title: 'Bioproduction : la France inaugure un nouveau site de production de vaccins à ARNm',
         description: 'Un nouveau site industriel dédié à la production de vaccins à ARN messager ouvre ses portes à Lyon, renforçant la souveraineté sanitaire française.',
-        link: 'https://www.usinenouvelle.com',
-        enclosure: {
-          link: 'https://www.usinenouvelle.com/mediatheque/4/0/0/000720004_image_896x598/usine-vaccin.jpg'
-        },
+        link: 'https://www.usinenouvelle.com/article/bioproduction-france-inaugure-site-vaccins-arnm-13579',
+        author: 'Usine Nouvelle',
+        imageUrl: 'https://www.usinenouvelle.com/mediatheque/4/0/0/000720004_image_896x598/usine-vaccin.jpg',
         pubDate: '2023-06-10T15:30:00Z',
         content: 'Cette installation de pointe permet de produire jusqu\'à 300 millions de doses par an...'
       }
@@ -196,12 +214,16 @@ function ScienceWatchPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map((article, index) => (
             <div key={index} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-              {article.enclosure?.link ? (
+              {article.imageUrl ? (
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src={article.enclosure.link} 
+                    src={article.imageUrl} 
                     alt={article.title} 
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    onError={(e) => {
+                      e.target.onerror = null; 
+                      e.target.src = 'https://via.placeholder.com/600x400?text=Image+non+disponible';
+                    }}
                   />
                 </div>
               ) : (
