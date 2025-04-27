@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -110,8 +110,12 @@ function AdminPage() {
   const { userInfo } = useAuth();
   const navigate = useNavigate();
 
-  // Récupérer les posts en attente
-  const fetchPendingPosts = async () => {
+  // Récupérer les posts en attente - mémorisé avec useCallback
+  const fetchPendingPosts = useCallback(async () => {
+    if (!userInfo || !userInfo.token) {
+      return;
+    }
+    
     setLoading(true);
     setError('');
     
@@ -136,10 +140,10 @@ function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userInfo]);
 
   // Approuver un post
-  const approvePost = async (postId) => {
+  const approvePost = useCallback(async (postId) => {
     setError('');
     setSuccess('');
     
@@ -167,10 +171,10 @@ function AdminPage() {
       setError(err.message || 'Une erreur est survenue');
       return Promise.reject(err);
     }
-  };
+  }, [userInfo, pendingPosts]);
 
   // Rejeter un post
-  const rejectPost = async (postId) => {
+  const rejectPost = useCallback(async (postId) => {
     setError('');
     setSuccess('');
     
@@ -198,10 +202,10 @@ function AdminPage() {
       setError(err.message || 'Une erreur est survenue');
       return Promise.reject(err);
     }
-  };
+  }, [userInfo, pendingPosts]);
 
   // Supprimer un post
-  const deletePost = async (postId) => {
+  const deletePost = useCallback(async (postId) => {
     setError('');
     setSuccess('');
     
@@ -228,7 +232,7 @@ function AdminPage() {
       setError(err.message || 'Une erreur est survenue');
       return Promise.reject(err);
     }
-  };
+  }, [userInfo, pendingPosts]);
 
   // Vérifier si l'utilisateur est admin au chargement
   useEffect(() => {
