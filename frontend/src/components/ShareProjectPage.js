@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 // import axios from 'axios'; // On utilisera fetch pour l'instant, mais axios est une option
 
 // Icône SVG pour l'upload (style crayonné)
@@ -69,7 +69,7 @@ function ShareProjectPage() {
     setLoading(true);
 
     const formData = new FormData();
-    formData.append('file', file); // 'file' doit correspondre au nom attendu par Multer
+    formData.append('file', file);
     formData.append('caption', caption);
 
     // Récupérer le token depuis le localStorage (ou contexte/état global)
@@ -82,19 +82,17 @@ function ShareProjectPage() {
     if (!token) {
       setError('Vous devez être connecté pour partager un projet.');
       setLoading(false);
-      // Rediriger vers la page de connexion ?
       return;
     }
 
     try {
-      // Temporairement utiliser une URL codée en dur
-      // const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; 
-      const postUrl = 'http://localhost:5000/api/posts'; // URL codée en dur
+      // Utiliser la variable d'environnement pour l'URL de l'API
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; 
+      const postUrl = `${apiUrl}/api/posts`; // Construire l'URL complète
       
       const response = await fetch(postUrl, { 
         method: 'POST',
         headers: {
-          // Pas besoin de 'Content-Type': 'multipart/form-data', fetch le gère avec FormData
           'Authorization': `Bearer ${token}`,
         },
         body: formData,
@@ -124,12 +122,12 @@ function ShareProjectPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-3xl p-6 md:p-10 my-10 bg-gradient-to-br from-yellow-50/50 via-amber-50/50 to-orange-50/50 rounded-xl shadow-lg border-t-4 border-amber-600 relative overflow-hidden font-handwriting">
+    <div className="container mx-auto max-w-3xl p-6 md:p-10 my-10 bg-gradient-to-br from-yellow-50/50 via-amber-50/50 to-orange-50/50 rounded-xl shadow-lg border-t-4 border-amber-600 relative overflow-hidden text-lg">
       {/* Fond texturé papier/carnet */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsPSIjZmVmMmU4IiBmaWxsLW9wYWNpdHk9IjAuMSI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIi8+PHJlY3QgeD0iMTAiIHk9IjAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIvPjxyZWN0IHg9IjMwIiB5PSIwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiLz48cmVjdCB4PSIwIiB5PSIxMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIi8+PHJlY3QgeD0iMjAiIHk9IjEwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIi8+PHJlY3QgeD0iMjAiIHk9IjIwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiLz48cmVjdCB4PSIxMCIgeT0iMzAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIvPjxyZWN0IHg9IjMwIiB5PSIzMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIi8+PC9nPjwvc3ZnPg==')] opacity-30 -z-10"></div>
       <div className="absolute inset-0 border-l-4 border-red-300/50 -z-10 ml-10"></div>{/* Marge de cahier */}
 
-      <h1 className="text-4xl font-bold text-center mb-10 text-amber-800/90 tracking-wide">
+      <h1 className="text-4xl font-bold text-center mb-10 text-amber-800/90 tracking-wide font-handwriting">
         Partager une Expérience
       </h1>
       
@@ -151,13 +149,13 @@ function ShareProjectPage() {
               {!preview && <UploadIcon />}
               
               <div className="flex justify-center text-base">
-                <label htmlFor="file-input" className="relative cursor-pointer bg-amber-100/50 rounded-md py-1 px-3 font-medium text-amber-700 hover:text-amber-900 hover:bg-amber-100 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-amber-500 border border-amber-300 shadow-sm">
+                <label htmlFor="file-input" className="relative cursor-pointer bg-amber-100/50 rounded-md py-1 px-3 font-medium text-amber-700 hover:text-amber-900 hover:bg-amber-100 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-amber-500 border border-amber-300 shadow-sm text-lg">
                   <span>Choisir un fichier...</span>
                   <input id="file-input" name="file" type="file" className="sr-only" onChange={handleFileChange} accept="image/*,video/*" />
                 </label>
               </div>
-              <p className="text-sm text-gray-500 pt-1">Max 50MB.</p>
-              {file && <p className="text-sm text-gray-600 font-medium mt-2 pt-2 border-t border-gray-200">Fichier: {file.name}</p>} 
+              <p className="text-base text-gray-500 pt-1">Max 50MB.</p>
+              {file && <p className="text-base text-gray-600 font-medium mt-2 pt-2 border-t border-gray-200">Fichier: {file.name}</p>}
             </div>
           </div>
         </div>
@@ -172,13 +170,13 @@ function ShareProjectPage() {
               id="caption"
               name="caption"
               rows={4} 
-              className="text-lg font-handwriting shadow-inner focus:ring-amber-500 focus:border-amber-500 block w-full border border-gray-300/80 rounded-md p-3 bg-white/50 backdrop-blur-sm placeholder:text-gray-400"
+              className="text-lg shadow-inner focus:ring-amber-500 focus:border-amber-500 block w-full border border-gray-300/80 rounded-md p-3 bg-white/50 backdrop-blur-sm placeholder:text-gray-400"
               placeholder="Racontez votre TP, décrivez l'image/vidéo..."
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               maxLength={500}
             ></textarea>
-            <p className="text-sm text-gray-500 mt-1 text-right pr-1">{caption.length}/500</p>
+            <p className="text-base text-gray-500 mt-1 text-right pr-1">{caption.length}/500</p>
           </div>
         </div>
         
@@ -197,7 +195,7 @@ function ShareProjectPage() {
             </div>
             <div className="ml-4 text-base">
                 <label htmlFor="consent" className="font-medium text-amber-800/90 cursor-pointer">J'accepte les conditions</label>
-                <p id="consent-description" className="text-gray-600/90 text-sm mt-1">
+                <p id="consent-description" className="text-gray-600/90 text-base mt-1">
                     Je comprends que ma contribution sera vérifiée avant publication.
                     J'autorise Biogy à stocker et afficher ce contenu (voir politique de confidentialité).
                 </p>
