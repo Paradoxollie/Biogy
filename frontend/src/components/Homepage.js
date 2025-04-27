@@ -34,15 +34,12 @@ function Homepage() {
                 <div className="absolute top-1/2 right-0 w-1 h-1 rounded-full bg-white/40 animate-pulse"></div>
                 
                 {/* Logo avec conteneur */}
-                <div className="relative bg-green-900/60 backdrop-blur-sm rounded-full p-8 shadow-inner overflow-hidden border border-white/10 aspect-square flex items-center justify-center">
-                  {/* Effet de texture de tableau */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-30 rounded-full"></div>
-                  
+                <div className="relative backdrop-blur-sm rounded-full p-8 shadow-sm overflow-hidden border border-lab-blue/20 aspect-square flex items-center justify-center">
                   {/* Orbites moléculaires */}
-                  <div className="absolute inset-0 rounded-full border border-white/20 animate-spin" style={{ animationDuration: '20s' }}></div>
-                  <div className="absolute inset-2 rounded-full border border-white/15 animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
-                  <div className="absolute inset-4 rounded-full border border-white/10 animate-spin" style={{ animationDuration: '10s' }}></div>
-                  <div className="absolute inset-6 rounded-full border-dashed border border-white/5 animate-spin" style={{ animationDuration: '25s' }}></div>
+                  <div className="absolute inset-0 rounded-full border border-lab-blue/30 animate-spin" style={{ animationDuration: '20s' }}></div>
+                  <div className="absolute inset-2 rounded-full border border-lab-purple/25 animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
+                  <div className="absolute inset-4 rounded-full border border-lab-teal/20 animate-spin" style={{ animationDuration: '10s' }}></div>
+                  <div className="absolute inset-6 rounded-full border-dashed border border-lab-green/15 animate-spin" style={{ animationDuration: '25s' }}></div>
                   
                   {/* Atomes/molécules en orbite */}
                   <div className="absolute w-4 h-4 bg-lab-blue rounded-full shadow-glow animate-orbit-1" 
@@ -64,7 +61,7 @@ function Homepage() {
                   
                   {/* Logo avec animation subtile */}
                   <div className="relative animate-float-gentle transform w-3/4 h-3/4 rounded-full overflow-hidden">
-                    <div className="w-full h-full flex items-center justify-center rounded-full overflow-hidden bg-green-900/80">
+                    <div className="w-full h-full flex items-center justify-center rounded-full overflow-hidden">
                       <img 
                         src="/images/biogy-logo.png" 
                         alt="Biogy Logo" 
