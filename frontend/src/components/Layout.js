@@ -179,21 +179,29 @@ function Layout({ children }) {
               <h3 className="font-semibold mb-3 text-gray-700">Navigation</h3>
               <ul className="space-y-2">
                 <li><Link to="/apprendre" className="text-gray-600 hover:text-lab-blue transition duration-300">Apprendre</Link></li>
-                <li><Link to="/recherche" className="text-gray-600 hover:text-lab-purple transition duration-300">Recherche</Link></li>
-                <li><Link to="/actualites" className="text-gray-600 hover:text-lab-teal transition duration-300">Actualités</Link></li>
                 <li><Link to="/methodes" className="text-gray-600 hover:text-lab-green transition duration-300">Méthodes</Link></li>
+                <li><Link to="/actualites" className="text-gray-600 hover:text-lab-teal transition duration-300">Actualités</Link></li>
+                <li><Link to="/partager-projet" className="text-gray-600 hover:text-lab-purple transition duration-300">Partager un Projet</Link></li> 
+                {/* Nous pourrions ajouter /recherche plus tard si pertinent */}
               </ul>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-3 text-gray-700">Contact</h3>
-              <p className="text-gray-600">
-                Envie d'en savoir plus ou de contribuer ?<br />
-                Contactez-nous via le formulaire en ligne.
-              </p>
-              <Link to="/contact" className="inline-block mt-3 px-4 py-2 bg-gradient-to-r from-lab-blue to-lab-purple text-white rounded-md shadow-sm hover:shadow-md transition duration-300">
-                Contact
-              </Link>
+              <h3 className="font-semibold mb-3 text-gray-700">Communauté</h3>
+              <ul className="space-y-2">
+                  <li><Link to="/projets" className="text-gray-600 hover:text-lab-purple transition duration-300">Voir les Projets</Link></li> {/* Lien vers le futur fil d'actualité */} 
+                  <li><Link to="/contact" className="text-gray-600 hover:text-lab-blue transition duration-300">Contact</Link></li>
+              </ul>
+              {/* Ancien bouton Contact déplacé */}
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-3 text-gray-700">Mon Compte</h3>
+                {/* Liens à ajouter ici pour connexion/inscription/profil */}
+                 <ul className="space-y-2">
+                  <li><Link to="/login" className="text-gray-600 hover:text-lab-blue transition duration-300">Se Connecter</Link></li>
+                  <li><Link to="/register" className="text-gray-600 hover:text-lab-purple transition duration-300">S'inscrire</Link></li>
+              </ul>
             </div>
           </div>
           

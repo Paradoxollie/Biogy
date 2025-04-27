@@ -2,6 +2,9 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Homepage from './components/Homepage';
 import Layout from './components/Layout';
+import ShareProjectPage from './components/ShareProjectPage';
+import LoginPage from './components/LoginPage';
+import RegisterPage from './components/RegisterPage';
 
 function App() {
   return (
@@ -13,6 +16,9 @@ function App() {
         <Route path="/actualites" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-teal">Section Actualités</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
         <Route path="/methodes" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-green">Section Méthodes</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
         <Route path="/contact" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-lab-blue to-lab-purple">Contact</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
+        <Route path="/partager-projet" element={<ShareProjectPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Routes>
     </Layout>
   );
