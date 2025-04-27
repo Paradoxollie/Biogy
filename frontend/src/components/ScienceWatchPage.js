@@ -104,44 +104,22 @@ function ScienceWatchPage() {
 
   useEffect(() => {
     fetchArticles();
-  }, []);
+  }, [selectedColor]);
 
   const fetchArticles = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // Nouvelle structure des flux organisés par catégorie de couleur
+      // Flux RSS fiables uniquement - j'ai retiré ceux qui causent des erreurs XML
       const feeds = {
         multi: [
           { url: 'https://lejournal.cnrs.fr/rss', title: 'CNRS Le Journal', colorTags: ['green', 'red', 'white', 'yellow', 'blue'] },
-          { url: 'https://www.cea.fr/comprendre/Pages/RSS.aspx', title: 'CEA', colorTags: ['red', 'green', 'white'] },
           { url: 'https://www.ird.fr/rss.xml', title: 'IRD', colorTags: ['red', 'green', 'yellow', 'blue'] }
-        ],
-        green: [
-          { url: 'https://www.inrae.fr/actualites/rss', title: 'INRAE', colorTags: ['green', 'yellow', 'white'] },
-          { url: 'https://www.cirad.fr/actualites/toutes-les-actualites/rss', title: 'CIRAD', colorTags: ['green', 'yellow'] },
-          { url: 'https://www.anses.fr/fr/rss/actualites.xml', title: 'ANSES', colorTags: ['green', 'red', 'yellow'] }
         ],
         red: [
           { url: 'https://presse.inserm.fr/feed/', title: 'INSERM', colorTags: ['red'] },
-          { url: 'https://www.pasteur.fr/fr/journal-pasteur/feed', title: 'Institut Pasteur', colorTags: ['red'] },
-          { url: 'https://ansm.sante.fr/actualites/feed', title: 'ANSM', colorTags: ['red'] },
-          { url: 'https://curie.fr/actualites.rss.xml', title: 'Institut Curie', colorTags: ['red'] },
           { url: 'https://www.santepubliquefrance.fr/rss/actualites.xml', title: 'Santé Publique France', colorTags: ['red'] }
-        ],
-        white: [
-          { url: 'https://www.genopole.fr/feed/', title: 'Genopole', colorTags: ['white', 'red', 'green'] }
-        ],
-        yellow: [
-          { url: 'https://presse.ademe.fr/feed/', title: 'ADEME', colorTags: ['yellow'] }
-        ],
-        blue: [
-          { url: 'https://www.ifremer.fr/fr/actualites/rss', title: 'Ifremer', colorTags: ['blue'] }
-        ],
-        black: [
-          { url: 'https://www.enseignementsup-recherche.gouv.fr/fr/rss.xml', title: 'Ministère de l\'Enseignement Supérieur et de la Recherche', colorTags: ['black'] },
-          { url: 'https://www.onisep.fr/rss/feed/actualites', title: 'Onisep', colorTags: ['black'] }
         ]
       };
       
@@ -151,8 +129,7 @@ function ScienceWatchPage() {
       // Using multiple CORS proxies to improve reliability
       const corsProxies = [
         (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        (url) => `https://cors-anywhere.herokuapp.com/${url}`
+        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
       ];
       
       const results = [];
@@ -190,6 +167,9 @@ function ScienceWatchPage() {
             console.warn(`All proxies failed for ${feed.url}`);
             continue;
           }
+          
+          // Prétraitement pour nettoyer des données XML potentiellement malformées
+          data = cleanXML(data);
           
           // Create a new DOMParser to parse the XML content
           const parser = new DOMParser();
@@ -233,14 +213,29 @@ function ScienceWatchPage() {
             description = description.length > 150 ? description.substring(0, 150) + '...' : description;
             
             // Handle different formats for links and publication dates
-            const link = item.querySelector('link')?.textContent || 
-                        item.querySelector('link')?.getAttribute('href') || '#';
+            let link = '';
+            const linkElement = item.querySelector('link');
+            if (linkElement) {
+              // RSS: link est un élément avec du texte
+              link = linkElement.textContent || '';
+              // Atom: link est un élément avec un attribut href
+              if (!link && linkElement.getAttribute) {
+                link = linkElement.getAttribute('href') || '';
+              }
+            }
+            
+            if (!link) link = '#';
                         
-            const pubDate = item.querySelector('pubDate, published, updated')?.textContent || 
-                           new Date().toISOString();
+            const pubDateElement = item.querySelector('pubDate, published, updated');
+            const pubDate = pubDateElement ? pubDateElement.textContent : new Date().toISOString();
             
             // Get title with fallback
-            const title = item.querySelector('title')?.textContent || 'Sans titre';
+            const titleElement = item.querySelector('title');
+            const title = titleElement ? titleElement.textContent : 'Sans titre';
+            
+            // Extraire l'auteur si disponible
+            const authorElement = item.querySelector('author, creator, dc\\:creator');
+            const author = authorElement ? authorElement.textContent : '';
             
             const article = {
               title,
@@ -250,6 +245,7 @@ function ScienceWatchPage() {
               content,
               imageUrl,
               source,
+              author,
               sourceColorCategory,
               sourceColorTags
             };
@@ -291,6 +287,33 @@ function ScienceWatchPage() {
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Fonction pour nettoyer le XML avant de le parser
+  const cleanXML = (xml) => {
+    if (!xml) return xml;
+    
+    // Conversion des entités HTML mal formées
+    xml = xml.replace(/&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9a-fA-F]+;)/g, '&amp;');
+    
+    // Ne garder que le contenu XML
+    const xmlStartIdx = xml.indexOf('<?xml');
+    if (xmlStartIdx > 0) {
+      xml = xml.substring(xmlStartIdx);
+    }
+    
+    // Si on trouve un tag RSS ou FEED, ne garder que la partie qui le contient et ce qui suit
+    const rssStartIdx = xml.indexOf('<rss');
+    if (rssStartIdx > 0) {
+      xml = xml.substring(rssStartIdx);
+    }
+    
+    const feedStartIdx = xml.indexOf('<feed');
+    if (feedStartIdx > 0) {
+      xml = xml.substring(feedStartIdx);
+    }
+    
+    return xml;
   };
 
   // Function to get demo articles with proper biotechnology color categorization
@@ -429,6 +452,9 @@ function ScienceWatchPage() {
       
       return false;
     });
+    
+    // Pour le débogage
+    console.log(`Filtered articles for color ${selectedColor}:`, colorFiltered.length);
     
     return organizeArticlesByColor(colorFiltered);
   };
