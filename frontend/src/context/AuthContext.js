@@ -1,61 +1,96 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
-// 1. Créer le contexte
-const AuthContext = createContext(null);
+// Création du contexte
+const AuthContext = createContext();
 
-// 2. Créer le fournisseur (Provider) de contexte
+// Hook personnalisé pour accéder facilement au contexte
+export const useAuth = () => useContext(AuthContext);
+
+// Composant Provider qui va envelopper l'application
 export const AuthProvider = ({ children }) => {
+  // État pour stocker les informations de l'utilisateur
   const [userInfo, setUserInfo] = useState(null);
-  const [loading, setLoading] = useState(true); // Pour gérer le chargement initial depuis localStorage
+  // État pour suivre si les données sont en cours de chargement
+  const [loadingAuth, setLoadingAuth] = useState(true);
 
-  // Charger les informations utilisateur depuis localStorage au montage initial
-  useEffect(() => {
-    const storedUserInfo = localStorage.getItem('userInfo');
-    if (storedUserInfo) {
-      try {
-        setUserInfo(JSON.parse(storedUserInfo));
-      } catch (error) {
-        console.error("Failed to parse userInfo from localStorage", error);
-        localStorage.removeItem('userInfo'); // Supprimer si invalide
-      }
+  // Fonction pour connecter l'utilisateur
+  const login = (data) => {
+    console.log('Login appelé avec les données:', data);
+    
+    // S'assurer que data contient toutes les informations nécessaires
+    if (!data || !data.token) {
+      console.error('Données de connexion incomplètes:', data);
+      return;
     }
-    setLoading(false); // Fin du chargement initial
+    
+    try {
+      // Stocker les données utilisateur dans localStorage
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      // Mettre à jour l'état
+      setUserInfo(data);
+      console.log('Utilisateur connecté:', data);
+    } catch (error) {
+      console.error('Erreur lors de la connexion:', error);
+    }
+  };
+
+  // Fonction pour déconnecter l'utilisateur
+  const logout = () => {
+    console.log('Déconnexion appelée');
+    try {
+      // Supprimer les données du localStorage
+      localStorage.removeItem('userInfo');
+      // Réinitialiser l'état
+      setUserInfo(null);
+      console.log('Utilisateur déconnecté');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
+  // Charger les données utilisateur depuis localStorage au démarrage
+  useEffect(() => {
+    console.log('useEffect de AuthContext exécuté');
+    setLoadingAuth(true);
+    
+    try {
+      // Récupérer les données utilisateur du localStorage
+      const storedUserInfo = localStorage.getItem('userInfo');
+      console.log('Données utilisateur récupérées du localStorage:', storedUserInfo);
+      
+      if (storedUserInfo) {
+        // Parser les données JSON
+        const parsedInfo = JSON.parse(storedUserInfo);
+        console.log('Données utilisateur parsées:', parsedInfo);
+        
+        // Vérifier que les données contiennent un token
+        if (parsedInfo && parsedInfo.token) {
+          console.log('Token trouvé, définition de userInfo');
+          setUserInfo(parsedInfo);
+        } else {
+          console.log('Aucun token trouvé, réinitialisation de userInfo');
+          localStorage.removeItem('userInfo'); // Supprimer les données invalides
+          setUserInfo(null);
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des données utilisateur:', error);
+      localStorage.removeItem('userInfo'); // Supprimer les données invalides
+      setUserInfo(null);
+    } finally {
+      setLoadingAuth(false);
+    }
   }, []);
 
-  // Fonction pour gérer la connexion
-  const login = (userData) => {
-    localStorage.setItem('userInfo', JSON.stringify(userData));
-    setUserInfo(userData);
-    // La redirection se fera dans le composant LoginPage après appel de cette fonction
-  };
-
-  // Fonction pour gérer la déconnexion
-  const logout = () => {
-    localStorage.removeItem('userInfo');
-    setUserInfo(null);
-    // La redirection se fera dans le composant Layout après appel de cette fonction
-  };
-
-  // La valeur fournie par le contexte
+  // Valeurs exposées par le contexte
   const value = {
     userInfo,
-    loadingAuth: loading, // Renommer pour clarté
+    loadingAuth,
     login,
     logout,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// 3. Créer un hook personnalisé pour utiliser facilement le contexte
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}; 
+export default AuthContext; 

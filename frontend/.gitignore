@@ -1,31 +1,44 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Voir https://github.com/facebook/create-react-app/blob/main/packages/react-scripts/template/gitignore
 
-# dependencies
-/node_modules
-/.pnp
+# Dépendances
+node_modules
+.pnp
 .pnp.js
 
-# testing
-/coverage
+# Fichiers de build
+build
 
-# production
-/build
-
-# misc
+# Fichiers temporaires
 .DS_Store
+*.pem
+
+# Fichiers de logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Fichiers d'environnement locaux (ne jamais commiter les clés secrètes !)
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Fichiers spécifiques IDE
+.idea
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# testing
+/coverage
+
+# misc
 .env
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
 # IDE
-.idea/
-.vscode/
 *.sublime-*
 
 # Cache

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext'; // Importer useAuth
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 // import axios from 'axios'; // On utilisera fetch pour l'instant, mais axios est une option
 
 // Icône SVG pour l'upload (style crayonné)
@@ -24,7 +25,30 @@ function ShareProjectPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [consent, setConsent] = useState(false); // Pour le consentement RGPD
-  const { userInfo } = useAuth(); // Obtenir userInfo depuis le contexte
+  const { userInfo, loadingAuth } = useAuth(); // Obtenir userInfo ET loadingAuth depuis le contexte
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Attendre que l'authentification soit chargée avant de vérifier
+    if (!loadingAuth) {
+      console.log('ShareProjectPage - Auth chargé. État utilisateur:', userInfo);
+      if (!userInfo || !userInfo.token) {
+        console.log('Utilisateur non connecté après chargement, redirection après 3 secondes');
+        setError('Vous devez être connecté pour partager un projet. Redirection vers la page de connexion...');
+        
+        const redirectTimer = setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+        
+        return () => clearTimeout(redirectTimer);
+      } else {
+         // Si l'utilisateur est connecté, s'assurer qu'il n'y a pas de message d'erreur de connexion
+         setError('');
+      }
+    } else {
+       console.log('ShareProjectPage - Authentification en cours de chargement...');
+    }
+  }, [userInfo, loadingAuth, navigate]); // Ajouter loadingAuth aux dépendances
 
   // Gérer la sélection de fichier et l'aperçu
   const handleFileChange = (e) => {
@@ -68,37 +92,36 @@ function ShareProjectPage() {
       return;
     }
     
-    // Vérifier si l'utilisateur est connecté via le contexte
+    // Vérifier à nouveau si l'utilisateur est connecté (cette vérification est toujours utile)
     if (!userInfo || !userInfo.token) {
       setError('Vous devez être connecté pour partager un projet.');
-      // Optionnel: rediriger vers login ? 
-      // import { useNavigate } from 'react-router-dom';
-      // const navigate = useNavigate();
-      // navigate('/login');
+      navigate('/login');
       return;
     }
     
     setLoading(true);
+    console.log('Début de l\'upload avec le token:', userInfo.token);
 
     const formData = new FormData();
     formData.append('file', file);
     formData.append('caption', caption);
 
-    const token = userInfo.token; // Utiliser le token du contexte
-
     try {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; 
       const postUrl = `${apiUrl}/api/posts`;
       
+      console.log('Envoi de la requête d\'upload à:', postUrl);
+      
       const response = await fetch(postUrl, { 
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${userInfo.token}`,
         },
         body: formData,
       });
 
       const data = await response.json();
+      console.log('Réponse du serveur:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Erreur lors de l\'upload');
@@ -114,12 +137,39 @@ function ShareProjectPage() {
       }
 
     } catch (err) {
+      console.error('Erreur d\'upload:', err);
       setError(err.message || 'Une erreur est survenue.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Afficher un état de chargement si l'authentification n'est pas encore prête
+   if (loadingAuth) {
+    return (
+      <div className="container mx-auto max-w-3xl p-6 md:p-10 my-10 flex justify-center items-center">
+        <p className="text-lg text-gray-600">Chargement des informations d'authentification...</p>
+         {/* Optionnel: ajouter un spinner ici */}
+      </div>
+    );
+  }
+
+  // Si l'utilisateur n'est pas connecté APRÈS le chargement, afficher le message d'erreur
+  if (!userInfo || !userInfo.token) {
+    return (
+      <div className="container mx-auto max-w-3xl p-6 md:p-10 my-10 bg-gradient-to-br from-yellow-50/50 via-amber-50/50 to-orange-50/50 rounded-xl shadow-lg border-t-4 border-amber-600 relative overflow-hidden text-lg">
+        <h1 className="text-4xl font-bold text-center mb-10 text-amber-800/90 tracking-wide font-handwriting">
+          Partager une Expérience
+        </h1>
+        
+        <p className="bg-red-200/50 border border-red-400 text-red-800 p-3 rounded mb-6 text-center text-lg">
+          ⚠️ {error || 'Vous devez être connecté pour partager un projet.'}
+        </p>
+      </div>
+    );
+  }
+
+  // Si l'utilisateur est connecté et l'auth chargée, afficher le formulaire
   return (
     <div className="container mx-auto max-w-3xl p-6 md:p-10 my-10 bg-gradient-to-br from-yellow-50/50 via-amber-50/50 to-orange-50/50 rounded-xl shadow-lg border-t-4 border-amber-600 relative overflow-hidden text-lg">
       {/* Fond texturé papier/carnet */}

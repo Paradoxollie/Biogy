@@ -17,6 +17,7 @@ function LoginPage() {
 
     try {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; 
+      console.log('Envoi de la demande de connexion à:', `${apiUrl}/api/auth/login`);
       
       const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: 'POST',
@@ -27,19 +28,28 @@ function LoginPage() {
       });
 
       const data = await response.json();
+      console.log('Réponse du serveur:', data);
 
       if (!response.ok) {
         throw new Error(data.message || `Erreur HTTP: ${response.status}`); 
       }
 
-      // Connexion réussie
-      console.log('Connexion réussie:', data); 
+      // Vérifier que data contient les informations nécessaires
+      if (!data || !data.token) {
+        throw new Error('Les données d\'authentification sont incomplètes');
+      }
       
-      // Appeler la fonction login du contexte pour mettre à jour l'état global et localStorage
+      console.log('Connexion réussie, données utilisateur:', data);
+      
+      // Appeler la fonction login du contexte avec toutes les données
       login(data); 
       
-      // Rediriger l'utilisateur vers la page d'accueil
-      navigate('/'); 
+      // Attendre un court instant pour laisser le temps au localStorage d'être mis à jour
+      setTimeout(() => {
+        // Rediriger l'utilisateur vers la page d'accueil
+        navigate('/');
+        console.log('Redirection vers la page d\'accueil');
+      }, 200);
 
     } catch (err) {
       console.error('Erreur de connexion:', err);
