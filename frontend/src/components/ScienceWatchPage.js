@@ -16,8 +16,8 @@ function ScienceWatchPage() {
       
       // Sélection des flux RSS selon la source choisie
       if (selectedSource === 'all' || selectedSource === 'science') {
-        // Futura Sciences - Santé
-        feedUrl = 'https://www.futura-sciences.com/rss/sante/actualites.xml';
+        // Futura Sciences - Santé et Sciences
+        feedUrl = 'https://www.futura-sciences.com/rss/actualites.xml';
       } else if (selectedSource === 'medical') {
         // Sciences et Avenir - Santé
         feedUrl = 'https://www.sciencesetavenir.fr/rss/sante.xml';
@@ -37,12 +37,18 @@ function ScienceWatchPage() {
       
       // Vérifier si la réponse contient des articles
       if (data.status === 'ok' && data.items && data.items.length > 0) {
-        // Filtrer pour ne garder que les articles liés à la biotechnologie
-        const filteredArticles = data.items.filter(item => {
-          const keywords = ['biotech', 'biotechnologie', 'génétique', 'crispr', 'génomique', 'biologie'];
-          const itemText = `${item.title} ${item.description}`.toLowerCase();
-          return keywords.some(keyword => itemText.includes(keyword.toLowerCase()));
-        }).map(item => {
+        // Liste élargie de mots-clés liés à la biotechnologie et sciences de la vie
+        const keywords = [
+          'biotech', 'biotechnologie', 'génétique', 'crispr', 'génomique', 'biologie',
+          'adn', 'arn', 'cellule', 'moléculaire', 'protéine', 'enzyme', 'génome',
+          'thérapie génique', 'cellules souches', 'clonage', 'ogm', 'organisme',
+          'bactérie', 'virus', 'micro-organisme', 'biomédical', 'biomatériau',
+          'biocapteur', 'biosynthèse', 'fermentation', 'anticorps', 'immunologie',
+          'vaccin', 'biodiversité', 'biochimie', 'séquençage', 'pcr'
+        ];
+        
+        // Mappez les articles pour extraire les images et préparer les données
+        const processedArticles = data.items.map(item => {
           // Extraire l'image correctement selon plusieurs sources possibles
           let imageUrl = null;
           
@@ -70,12 +76,8 @@ function ScienceWatchPage() {
           };
         });
         
-        // Si aucun article n'est trouvé après le filtrage, montrer des données de démonstration
-        if (filteredArticles.length > 0) {
-          setArticles(filteredArticles);
-        } else {
-          throw new Error('Aucun article de biotechnologie trouvé dans ce flux');
-        }
+        // Utiliser tous les articles sans filtrage
+        setArticles(processedArticles);
       } else {
         throw new Error('Le flux RSS ne contient pas d\'articles');
       }
