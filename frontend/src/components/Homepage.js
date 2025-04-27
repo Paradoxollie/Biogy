@@ -33,8 +33,8 @@ function Homepage() {
                 <div className="absolute bottom-1/3 right-4 w-0.5 h-0.5 rounded-full bg-white/40 animate-pulse"></div>
                 <div className="absolute top-1/2 right-0 w-1 h-1 rounded-full bg-white/40 animate-pulse"></div>
                 
-                {/* Logo avec conteneur */}
-                <div className="relative backdrop-blur-sm rounded-full p-8 shadow-sm overflow-hidden border border-lab-blue/20 aspect-square flex items-center justify-center">
+                {/* Logo Atomique avec orbites */}
+                <div className="relative rounded-full p-8 aspect-square flex items-center justify-center">
                   {/* Orbites moléculaires */}
                   <div className="absolute inset-0 rounded-full border border-lab-blue/30 animate-spin" style={{ animationDuration: '20s' }}></div>
                   <div className="absolute inset-2 rounded-full border border-lab-purple/25 animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
@@ -59,19 +59,17 @@ function Homepage() {
                   <div className="absolute w-2 h-2 bg-indigo-300 rounded-full shadow-glow animate-orbit-2" 
                        style={{ top: '40%', left: '5%', animationDelay: '0.3s' }}></div>
                   
-                  {/* Logo avec animation subtile */}
+                  {/* Logo parfaitement rond */}
                   <div className="relative animate-float-gentle transform w-3/4 h-3/4 rounded-full overflow-hidden">
-                    <div className="w-full h-full flex items-center justify-center rounded-full overflow-hidden">
-                      <img 
-                        src="/images/biogy-logo.png" 
-                        alt="Biogy Logo" 
-                        className="w-[85%] h-[85%] object-contain z-10 relative drop-shadow-lg"
-                        style={{
-                          borderRadius: '50%',
-                          clipPath: 'circle(50% at center)'
-                        }}
-                      />
-                    </div>
+                    <img 
+                      src="/images/biogy-logo.png" 
+                      alt="Biogy Logo" 
+                      className="w-full h-full object-contain z-10 relative drop-shadow-lg"
+                      style={{
+                        borderRadius: '50%',
+                        clipPath: 'circle(50% at center)'
+                      }}
+                    />
                   </div>
                 </div>
               </div>
