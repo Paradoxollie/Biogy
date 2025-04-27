@@ -5,6 +5,7 @@ function ScienceWatchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSource, setSelectedSource] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   // Définition des catégories de biotechnologie par couleur
   const biotechColors = {
@@ -87,180 +88,131 @@ function ScienceWatchPage() {
     return null;
   };
 
-  const fetchArticles = useCallback(async () => {
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  const fetchArticles = async (sourceFilter = 'all') => {
     setLoading(true);
     setError(null);
     
     try {
-      // Au lieu d'utiliser l'API News qui nécessite une clé, on utilise un service de proxy RSS vers JSON
-      let feedUrls = [];
+      const feeds = {
+        biotechnology: [
+          'https://www.industrie.com/pharma/rss',
+          'https://biofutur.info/feed/'
+        ],
+        business: [
+          'https://www.biotech-finances.com/feed/',
+          'https://www.industriepharma.fr/rss'
+        ],
+        research: [
+          'https://www.inrae.fr/actualites.xml',
+          'https://www.cnrs.fr/fr/rss.xml',
+          'https://www.inserm.fr/feed/'
+        ]
+      };
       
-      // Mise à jour des flux RSS avec les sources françaises
-      if (selectedSource === 'all') {
-        // Tous les flux
-        feedUrls = [
-          // Biotechnologies vertes
-          'https://www.inrae.fr/actualites/biotechnologies-vertes',
-          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-verte',
-          
-          // Biotechnologies rouges
-          'https://www.inserm.fr/flux-rss/',
-          'https://www.techniques-ingenieur.fr/actualite/articles/bioethique-et-sante-revue-express-des-biotechnologies-phares-88241/',
-          
-          // Biotechnologies blanches
-          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-blanche',
-          'https://www.bgene.fr/blog/',
-          
-          // Biotechnologies jaunes
-          'https://www.brgm.fr/fr/flux-rss',
-          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-jaune',
-          
-          // Biotechnologies bleues
-          'https://nouvelle-caledonie.ifremer.fr/Biodiversite-et-ressources',
-          'https://www.techniques-ingenieur.fr/base-documentaire/procedes-chimie-bio-agro-th2/ressources-marines-et-biotechnologies-bleues-42834210/',
-          
-          // Biotechnologies noires (éducation)
-          'https://eduscol.education.fr/flux-rss',
-          'https://pedagogie.ac-reims.fr/index.php/lycee/sciences-et-technologies/biotec-bioch-lycee'
-        ];
-      } else if (selectedSource === 'green') {
-        // Biotechnologies vertes
-        feedUrls = [
-          'https://www.inrae.fr/actualites/biotechnologies-vertes',
-          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-verte'
-        ];
-      } else if (selectedSource === 'red') {
-        // Biotechnologies rouges
-        feedUrls = [
-          'https://www.inserm.fr/flux-rss/',
-          'https://www.techniques-ingenieur.fr/actualite/articles/bioethique-et-sante-revue-express-des-biotechnologies-phares-88241/'
-        ];
-      } else if (selectedSource === 'white') {
-        // Biotechnologies blanches
-        feedUrls = [
-          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-blanche',
-          'https://www.bgene.fr/blog/'
-        ];
-      } else if (selectedSource === 'yellow') {
-        // Biotechnologies jaunes
-        feedUrls = [
-          'https://www.brgm.fr/fr/flux-rss',
-          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-jaune'
-        ];
-      } else if (selectedSource === 'blue') {
-        // Biotechnologies bleues
-        feedUrls = [
-          'https://nouvelle-caledonie.ifremer.fr/Biodiversite-et-ressources',
-          'https://www.techniques-ingenieur.fr/base-documentaire/procedes-chimie-bio-agro-th2/ressources-marines-et-biotechnologies-bleues-42834210/'
-        ];
-      } else if (selectedSource === 'education') {
-        // Biotechnologies noires (éducation)
-        feedUrls = [
-          'https://eduscol.education.fr/flux-rss',
-          'https://pedagogie.ac-reims.fr/index.php/lycee/sciences-et-technologies/biotec-bioch-lycee'
-        ];
+      // Select feeds based on source filter
+      let feedsToFetch = [];
+      if (sourceFilter === 'all') {
+        Object.values(feeds).forEach(sourceFeed => {
+          feedsToFetch = [...feedsToFetch, ...sourceFeed];
+        });
+      } else if (feeds[sourceFilter]) {
+        feedsToFetch = feeds[sourceFilter];
       }
       
-      // Parcourir tous les flux sélectionnés et collecter les articles
-      let allArticles = [];
+      // Using a CORS proxy to avoid cross-origin issues
+      const corsProxy = 'https://api.allorigins.win/raw?url=';
       
-      // Pour chaque flux, récupérer les articles
-      for (const feedUrl of feedUrls) {
-        try {
-          // Utilisation d'un service gratuit de conversion RSS vers JSON
-          const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
-          
-          if (!response.ok) {
-            console.warn(`Problème avec le flux ${feedUrl}: ${response.status}`);
-            continue; // Passer au flux suivant en cas d'erreur
-          }
-          
-          const data = await response.json();
-          
-          // Vérifier si la réponse contient des articles
-          if (data.status === 'ok' && data.items && data.items.length > 0) {
-            // Traiter les articles
-            const processedArticles = data.items
-              .filter(item => {
-                // Pré-filtrer les articles pour ne garder que ceux liés à la biotechnologie
-                const combinedText = `${item.title} ${item.description || ''} ${item.content || ''}`.toLowerCase();
-                return isBiotechArticle({title: item.title, description: item.description, content: item.content});
-              })
-              .map(item => {
-                // Extraire l'image correctement selon plusieurs sources possibles
-                let imageUrl = null;
-                
-                // Vérifier différentes positions où l'image pourrait se trouver
-                if (item.enclosure && item.enclosure.link) {
-                  imageUrl = item.enclosure.link;
-                } else if (item.thumbnail) {
-                  imageUrl = item.thumbnail;
-                } else if (item.image) {
-                  imageUrl = item.image;
-                } else {
-                  // Essayer d'extraire l'image du contenu HTML
-                  const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/);
-                  if (imgMatch && imgMatch[1]) {
-                    imageUrl = imgMatch[1];
-                  }
-                }
-                
-                const processedItem = {
-                  ...item,
-                  // S'assurer que le lien est l'URL complète de l'article
-                  link: item.link || item.guid || '',
-                  // Stocker l'URL de l'image extraite
-                  imageUrl: imageUrl,
-                  // Ajouter la source pour le filtrage
-                  source: data.feed?.title || feedUrl
-                };
-                
-                // Déterminer la catégorie de couleur de l'article
-                processedItem.biotechColor = determineBiotechColor(processedItem);
-                
-                return processedItem;
-              });
-            
-            // Ajouter les articles de ce flux à l'ensemble
-            allArticles = [...allArticles, ...processedArticles];
-          }
-        } catch (feedErr) {
-          console.error(`Erreur lors de la récupération du flux ${feedUrl}:`, feedErr);
-          // Continuer avec les autres flux en cas d'erreur
+      const fetchPromises = feedsToFetch.map(async feed => {
+        const encodedFeedUrl = encodeURIComponent(feed);
+        const response = await fetch(`${corsProxy}${encodedFeedUrl}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${feed}`);
         }
-      }
-      
-      // Si aucun article n'a été récupéré, utiliser les données de démonstration
-      if (allArticles.length === 0) {
-        throw new Error('Aucun article n\'a pu être récupéré');
-      }
-      
-      // Trier les articles par date (du plus récent au plus ancien)
-      allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-      
-      // Limiter le nombre d'articles à afficher (pour éviter une surcharge)
-      setArticles(allArticles.slice(0, 40));
-      
-    } catch (err) {
-      console.error('Erreur lors de la récupération des articles:', err);
-      setError(err.message || 'Une erreur est survenue');
-      
-      // Utiliser des données de démonstration en cas d'erreur ou pour le développement
-      const demoArticles = getDemoArticles();
-      // Ajouter les catégories de couleur aux articles de démonstration
-      demoArticles.forEach(article => {
-        article.biotechColor = determineBiotechColor(article);
+        
+        const data = await response.text();
+        
+        // Create a new DOMParser to parse the XML content
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data, 'text/xml');
+        
+        // Get category based on feed URL
+        let sourceCategory = '';
+        Object.entries(feeds).forEach(([category, urls]) => {
+          if (urls.includes(feed)) {
+            sourceCategory = category;
+          }
+        });
+        
+        // Extract source from URL
+        const source = new URL(feed).hostname.replace('www.', '');
+        
+        // Parse the items from the feed
+        const items = xmlDoc.querySelectorAll('item');
+        
+        return Array.from(items).map(item => {
+          // Extract image URL from content if it exists
+          const content = item.querySelector('content\\:encoded, encoded')?.textContent || 
+                          item.querySelector('description')?.textContent || '';
+          
+          const imageRegex = /<img[^>]+src="?([^"\s]+)"?\s*[^>]*>/g;
+          const match = imageRegex.exec(content);
+          const imageUrl = match ? match[1] : null;
+          
+          // Extract description, removing HTML tags
+          let description = item.querySelector('description')?.textContent || '';
+          description = description.replace(/<[^>]*>?/gm, '').trim();
+          description = description.length > 150 ? description.substring(0, 150) + '...' : description;
+          
+          return {
+            title: item.querySelector('title')?.textContent || 'Sans titre',
+            link: item.querySelector('link')?.textContent || '#',
+            pubDate: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
+            description,
+            imageUrl,
+            source,
+            sourceCategory
+          };
+        });
       });
-      setArticles(demoArticles);
+      
+      try {
+        const results = await Promise.allSettled(fetchPromises);
+        
+        // Filter for fulfilled promises and flatten the array
+        const articlesArray = results
+          .filter(result => result.status === 'fulfilled')
+          .flatMap(result => result.value);
+        
+        // Sort by publication date (newest first)
+        const sortedArticles = articlesArray.sort((a, b) => 
+          new Date(b.pubDate) - new Date(a.pubDate)
+        );
+        
+        if (sortedArticles.length === 0) {
+          // If no articles were fetched, fallback to demo articles
+          setArticles(getDemoArticles());
+          setError("Impossible de récupérer les articles. Affichage des données de démonstration.");
+        } else {
+          setArticles(sortedArticles);
+        }
+      } catch (error) {
+        console.error("Error processing feeds:", error);
+        setArticles(getDemoArticles());
+        setError("Erreur lors du traitement des flux RSS. Affichage des données de démonstration.");
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setArticles(getDemoArticles());
+      setError("Erreur de connexion. Affichage des données de démonstration.");
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSource]);
-
-  useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
+  };
 
   // Fonction pour formater la date
   const formatDate = (dateString) => {
@@ -272,84 +224,49 @@ function ScienceWatchPage() {
   const getDemoArticles = () => {
     return [
       {
-        title: 'CRISPR : une nouvelle technique permet d\'éditer plusieurs gènes simultanément',
-        description: 'Des chercheurs ont développé une variante de CRISPR permettant d\'éditer plusieurs gènes à la fois, ouvrant de nouvelles possibilités pour le traitement des maladies génétiques complexes.',
-        link: 'https://www.futura-sciences.com/sante/actualites/genetique-crispr-nouvelle-technique-permet-editer-plusieurs-genes-simultanement-12345/',
-        author: 'Équipe Futura',
-        imageUrl: 'https://cdn.futura-sciences.com/buildsv6/images/wide1920/8/d/8/8d8c23421a_50175939_crispr-cas9-adobe-ttsz.jpg',
-        pubDate: '2023-05-15T09:30:00Z',
-        content: 'La technologie CRISPR franchit une nouvelle étape avec cette technique révolutionnaire...',
-        source: 'Futura Sciences'
+        title: "De nouvelles avancées dans la thérapie génique pour les maladies rares",
+        link: "https://example.com/article1",
+        pubDate: "2023-08-15T10:00:00Z",
+        description: "Des chercheurs ont développé une nouvelle approche de thérapie génique qui montre des résultats prometteurs pour le traitement de maladies génétiques rares.",
+        imageUrl: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+        source: "biofutur.info",
+        sourceCategory: "biotechnology"
       },
       {
-        title: 'Biotechnologie : des organoïdes cérébraux pour étudier les maladies neurodégénératives',
-        description: 'Une équipe internationale a réussi à développer des organoïdes cérébraux plus complexes pour mieux modéliser les maladies comme Alzheimer ou Parkinson.',
-        link: 'https://www.sciencesetavenir.fr/sante/cerveau-et-psy/biotechnologie-des-organoides-cerebraux-pour-etudier-les-maladies-67890',
-        author: 'Rédaction Sciences et Avenir',
-        imageUrl: 'https://www.sciencesetavenir.fr/assets/img/2020/01/10/cover-r4x3w1000-5e18a87cc3109-cerveau-humain.jpg',
-        pubDate: '2023-06-02T14:15:00Z',
-        content: 'Ces mini-cerveaux cultivés en laboratoire permettent de mieux comprendre les mécanismes des maladies neurologiques...',
-        source: 'Sciences et Avenir'
+        title: "Collaboration entre l'INRAE et une biotech pour développer des biofertilisants",
+        link: "https://example.com/article2",
+        pubDate: "2023-08-10T14:30:00Z",
+        description: "L'INRAE et une entreprise de biotechnologie ont signé un accord de collaboration pour développer une nouvelle génération de biofertilisants.",
+        imageUrl: "https://images.unsplash.com/photo-1574707100262-7a26b64d3fd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+        source: "inrae.fr",
+        sourceCategory: "research"
       },
       {
-        title: 'Biocapteurs : des dispositifs implantables pour surveiller la glycémie en continu',
-        description: 'De nouveaux biocapteurs utilisant des enzymes modifiées permettent un suivi plus précis et moins invasif de la glycémie chez les patients diabétiques.',
-        link: 'https://www.larecherche.fr/biotechnologie/biocapteurs-dispositifs-implantables-surveiller-glycemie-54321',
-        author: 'La Recherche',
-        imageUrl: 'https://www.larecherche.fr/sites/default/files/styles/large_16_9/public/2021-02/biocapteur%20chimique.jpg',
-        pubDate: '2023-04-25T11:00:00Z',
-        content: 'Ces dispositifs marquent une avancée significative dans la prise en charge du diabète...',
-        source: 'La Recherche'
+        title: "Levée de fonds record pour une startup française de bioimpression 3D",
+        link: "https://example.com/article3",
+        pubDate: "2023-08-05T09:15:00Z",
+        description: "Une startup spécialisée dans la bioimpression 3D annonce une levée de fonds de 40 millions d'euros pour accélérer le développement de ses technologies.",
+        imageUrl: "https://images.unsplash.com/photo-1574169208507-84376144848b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1445&q=80",
+        source: "biotech-finances.com",
+        sourceCategory: "business"
       },
       {
-        title: 'Thérapie génique : un traitement prometteur pour la drépanocytose en phase finale d\'essai',
-        description: 'Un essai clinique de phase 3 montre des résultats encourageants pour une thérapie génique ciblant la drépanocytose, une maladie affectant l\'hémoglobine.',
-        link: 'https://www.santemagazine.fr/actualites/therapie-genique-traitement-drepanocytose-essai-98765',
-        author: 'Équipe éditoriale',
-        imageUrl: 'https://www.santemagazine.fr/uploads/images/thumbs/201911/santemagazine-drepanocytose-gettyimages-1127097866-754034-large.jpg',
-        pubDate: '2023-05-30T08:45:00Z',
-        content: 'Cette approche pourrait transformer le traitement de cette maladie génétique répandue...',
-        source: 'Santé Magazine'
+        title: "Nouveau procédé industriel pour la production de biocarburants",
+        link: "https://example.com/article4",
+        pubDate: "2023-08-01T11:45:00Z",
+        description: "Une entreprise a mis au point un procédé industriel innovant permettant de produire des biocarburants à partir de déchets agricoles avec un rendement accru.",
+        imageUrl: "https://images.unsplash.com/photo-1620523162656-4f968dca355a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+        source: "industrie.com",
+        sourceCategory: "biotechnology"
       },
       {
-        title: 'Bioproduction : la France inaugure un nouveau site de production de vaccins à ARNm',
-        description: 'Un nouveau site industriel dédié à la production de vaccins à ARN messager ouvre ses portes à Lyon, renforçant la souveraineté sanitaire française.',
-        link: 'https://www.usinenouvelle.com/article/bioproduction-france-inaugure-site-vaccins-arnm-13579',
-        author: 'Usine Nouvelle',
-        imageUrl: 'https://www.usinenouvelle.com/mediatheque/4/0/0/000720004_image_896x598/usine-vaccin.jpg',
-        pubDate: '2023-06-10T15:30:00Z',
-        content: 'Cette installation de pointe permet de produire jusqu\'à 300 millions de doses par an...',
-        source: 'Usine Nouvelle'
-      },
-      {
-        title: 'Des chercheurs développent une nouvelle méthode pour cultiver des algues à haute valeur ajoutée',
-        description: 'Une technique innovante permet de multiplier par cinq la production de microalgues riches en oméga-3, ouvrant des perspectives pour l\'alimentation et la cosmétique.',
-        link: 'https://www.example.com/algues-biotechnologie-bleue',
-        author: 'Ifremer',
-        imageUrl: 'https://via.placeholder.com/600x400?text=Microalgues',
-        pubDate: '2023-06-05T10:20:00Z',
-        content: 'Cette avancée dans la culture des microalgues en milieu contrôlé pourrait révolutionner l\'aquaculture et la production de compléments alimentaires...',
-        source: 'Institut Français de Recherche pour l\'Exploitation de la Mer'
-      },
-      {
-        title: 'Une enzyme issue de bactéries du sol décompose les plastiques en temps record',
-        description: 'Des microbiologistes ont identifié et optimisé une enzyme capable de dégrader les plastiques PET en seulement 24 heures, une avancée majeure pour le traitement des déchets.',
-        link: 'https://www.example.com/enzyme-degradation-plastique',
-        author: 'Revue Nature',
-        imageUrl: 'https://via.placeholder.com/600x400?text=Dépollution+Enzymatique',
-        pubDate: '2023-05-28T14:10:00Z',
-        content: 'Cette découverte pourrait transformer notre approche du recyclage et de la gestion des déchets plastiques qui polluent l\'environnement...',
-        source: 'Nature Biotechnology'
-      },
-      {
-        title: 'Nouvelle variété de blé résistant à la sécheresse développée par génie génétique',
-        description: 'Des chercheurs ont créé une variété de blé génétiquement modifiée qui nécessite 40% moins d\'eau tout en maintenant des rendements équivalents aux variétés conventionnelles.',
-        link: 'https://www.example.com/ble-resistant-secheresse',
-        author: 'Agronomie Moderne',
-        imageUrl: 'https://via.placeholder.com/600x400?text=Blé+Résistant',
-        pubDate: '2023-06-07T09:15:00Z',
-        content: 'Cette avancée pourrait révolutionner l\'agriculture dans les régions touchées par le changement climatique...',
-        source: 'Journal of Agricultural Biotechnology'
+        title: "Découverte d'une enzyme capable de dégrader efficacement le plastique",
+        link: "https://example.com/article5",
+        pubDate: "2023-07-28T08:20:00Z",
+        description: "Des chercheurs du CNRS ont identifié une enzyme capable de dégrader plusieurs types de plastiques, ouvrant la voie à de nouvelles solutions de recyclage biologique.",
+        imageUrl: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+        source: "cnrs.fr",
+        sourceCategory: "research"
       }
     ];
   };
@@ -454,162 +371,150 @@ function ScienceWatchPage() {
 
   // Amélioration du filtrage des articles
   const isBiotechArticle = (article) => {
-    const searchText = `${article.title} ${article.description || ''} ${article.content || ''}`.toLowerCase();
+    const searchText = `${article.title || ''} ${article.description || ''} ${article.content || ''}`.toLowerCase();
     
     // Mots-clés généraux de la biotechnologie
     const biotechGeneralKeywords = [
       'biotech', 'biotechnologie', 'biologique', 'génétique', 'génome', 
       'crispr', 'adn', 'arn', 'cellule', 'biologie', 'enzyme', 
       'protéine', 'thérapie génique', 'biopharma', 'biomédical', 
-      'biocarburant', 'biosourcé', 'biomatériau', 'bioremédiation'
+      'biocarburant', 'biosourcé', 'biomatériau', 'bioremédiation',
+      'microorganisme', 'fermentation', 'clonage', 'ogm', 'transgénique',
+      'in vitro', 'in vivo', 'microbiologie', 'bactérie', 'levure',
+      'biochimie', 'bioplastique', 'métabolisme', 'recombinant',
+      'biodégradable', 'biomasse', 'procaryote', 'eucaryote'
     ];
     
     // Vérifier si l'article contient au moins un mot-clé général de biotechnologie
-    let isBiotech = false;
     for (const keyword of biotechGeneralKeywords) {
       if (searchText.includes(keyword.toLowerCase())) {
-        isBiotech = true;
-        break;
+        return true;
       }
     }
     
-    return isBiotech;
+    return false;
   };
 
+  // Filter articles based on selected category
+  const filteredArticles = selectedCategory === 'all' 
+    ? articles 
+    : articles.filter(article => article.sourceCategory === selectedCategory);
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center text-lab-teal mb-8">Veille Scientifique Biotechnologie</h1>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold text-center mb-6">Veille Scientifique</h1>
       
-      {/* Légende des couleurs des biotechnologies */}
-      {renderBiotechLegend()}
-      
-      {/* Filtres par source */}
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-2">Filtrer par catégorie</h3>
-        <div className="flex flex-wrap justify-center mb-4">
-          <div className="inline-flex rounded-md shadow-sm flex-wrap justify-center" role="group">
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg ${
-                selectedSource === 'all' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => setSelectedSource('all')}
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+          <div>
+            <label htmlFor="sourceSelect" className="block mb-2 text-sm font-medium">Source:</label>
+            <select
+              id="sourceSelect"
+              value={selectedSource}
+              onChange={(e) => setSelectedSource(e.target.value)}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             >
-              Toutes les catégories
-            </button>
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-                selectedSource === 'green' ? 'bg-green-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => setSelectedSource('green')}
+              <option value="all">Toutes les sources</option>
+              <option value="biotechnology">Biotechnologie</option>
+              <option value="business">Business</option>
+              <option value="research">Recherche</option>
+            </select>
+          </div>
+          
+          <div>
+            <label htmlFor="categorySelect" className="block mb-2 text-sm font-medium">Catégorie:</label>
+            <select
+              id="categorySelect"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             >
-              Verte
-            </button>
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-                selectedSource === 'red' ? 'bg-red-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => setSelectedSource('red')}
-            >
-              Rouge
-            </button>
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-                selectedSource === 'white' ? 'bg-gray-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => setSelectedSource('white')}
-            >
-              Blanche
-            </button>
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-                selectedSource === 'yellow' ? 'bg-yellow-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => setSelectedSource('yellow')}
-            >
-              Jaune
-            </button>
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-                selectedSource === 'blue' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => setSelectedSource('blue')}
-            >
-              Bleue
-            </button>
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 rounded-r-md ${
-                selectedSource === 'education' ? 'bg-gray-800 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => setSelectedSource('education')}
-            >
-              Éducation
-            </button>
+              <option value="all">Toutes les catégories</option>
+              <option value="biotechnology">Biotechnologie</option>
+              <option value="business">Business</option>
+              <option value="research">Recherche</option>
+            </select>
           </div>
         </div>
+        
+        <button
+          onClick={() => {
+            setLoading(true);
+            fetchArticles(selectedSource);
+          }}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Rafraîchir
+        </button>
       </div>
-      
-      {/* Affichage des erreurs */}
+
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
-          <p>{error}</p>
-          <p className="mt-2 text-sm">Affichage de données de démonstration</p>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <strong className="font-bold">Erreur!</strong>
+          <span className="block sm:inline"> {error}</span>
         </div>
       )}
-      
-      {/* Indicateur de chargement */}
+
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-lab-teal"></div>
+        <div className="text-center py-10">
+          <div className="spinner-border text-primary" role="status">
+            <span className="sr-only">Chargement...</span>
+          </div>
         </div>
       ) : (
-        <div className="space-y-12">
-          {/* Affichage des articles par catégorie */}
-          {Object.entries(getArticlesByCategory()).map(([category, categoryArticles]) => {
-            // Ne pas afficher les catégories vides
-            if (categoryArticles.length === 0) return null;
-            
-            const colorData = category !== 'unclassified' 
-              ? biotechColors[category] 
-              : { name: 'Non classé', description: 'Articles ne correspondant pas aux catégories définies', bgColorLight: 'bg-gray-50', borderColor: 'border-gray-300' };
-            
-            return (
-              <div key={category} className={`p-6 rounded-lg ${colorData.bgColorLight} border-l-4 ${colorData.borderColor}`}>
-                <h2 className="text-2xl font-bold mb-6">
-                  Biotechnologie {colorData.name}
-                  <span className="block text-sm font-normal mt-1 text-gray-600">{colorData.description}</span>
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {categoryArticles.slice(0, 6).map((article, index) => renderArticleCard(article, `${category}-${index}`))}
-                </div>
-                
-                {categoryArticles.length > 6 && (
-                  <div className="mt-4 text-center">
-                    <button
-                      className="inline-block bg-white text-lab-teal font-semibold py-2 px-4 rounded hover:bg-gray-100 transition-colors duration-300 border border-lab-teal"
-                    >
-                      Voir plus d'articles ({categoryArticles.length - 6} supplémentaires)
-                    </button>
-                  </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredArticles.length > 0 ? (
+            filteredArticles.map((article, index) => (
+              <div key={index} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                {article.imageUrl && (
+                  <img
+                    src={article.imageUrl}
+                    alt={article.title}
+                    className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://via.placeholder.com/400x200?text=Image+non+disponible';
+                    }}
+                  />
                 )}
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                      {article.source}
+                    </span>
+                    <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                      {article.sourceCategory === 'biotechnology' && 'Biotechnologie'}
+                      {article.sourceCategory === 'business' && 'Business'}
+                      {article.sourceCategory === 'research' && 'Recherche'}
+                    </span>
+                  </div>
+                  <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
+                  <p className="text-gray-700 mb-4">
+                    {article.description}
+                  </p>
+                  <div className="flex justify-between items-center">
+                    <a
+                      href={article.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:text-blue-700 font-medium"
+                    >
+                      Lire l'article
+                    </a>
+                    <span className="text-sm text-gray-500">
+                      {new Date(article.pubDate).toLocaleDateString('fr-FR')}
+                    </span>
+                  </div>
+                </div>
               </div>
-            );
-          })}
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-10">
+              <p className="text-xl">Aucun article trouvé</p>
+            </div>
+          )}
         </div>
       )}
-      
-      {/* Note d'information */}
-      <div className="mt-10 text-center text-gray-500 text-sm">
-        <p>Pour rester informé des dernières avancées en biotechnologie</p>
-        <p className="mt-1">La veille scientifique est actualisée quotidiennement</p>
-      </div>
     </div>
   );
 }
