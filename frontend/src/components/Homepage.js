@@ -99,7 +99,7 @@ function Homepage() {
       {/* Canvas d'arrière-plan pour l'animation des boîtes de Petri */}
       <canvas 
         ref={canvasRef} 
-        className="absolute top-0 left-0 w-full h-full -z-10 opacity-30"
+        className="absolute top-0 left-0 w-full h-full -z-10 opacity-50"
       ></canvas>
       
       {/* Section héro avec illustrations de labo */}
@@ -500,7 +500,7 @@ function Homepage() {
               </Link>
             </div>
           </div>
-        </div>
+      </div>
       </section>
     </div>
   );
