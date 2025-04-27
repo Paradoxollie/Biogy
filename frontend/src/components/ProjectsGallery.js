@@ -125,6 +125,72 @@ function ProjectsGallery() {
     }
   };
 
+  // Ajouter une nouvelle fonction pour supprimer un post
+  const handleDeletePost = async (projectId) => {
+    if (!userInfo || userInfo.role !== 'admin') return;
+    
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) return;
+    
+    try {
+      const response = await fetch(`${apiUrl}/api/posts/${projectId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userInfo.token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Erreur lors de la suppression du post');
+      }
+      
+      // Mettre à jour l'état en retirant le post supprimé
+      setProjects(projects.filter(project => project._id !== projectId));
+      
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      alert(`Erreur: ${error.message}`);
+    }
+  };
+
+  // Ajouter une fonction pour supprimer un commentaire
+  const handleDeleteComment = async (projectId, commentId) => {
+    if (!userInfo || userInfo.role !== 'admin') return;
+    
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) return;
+    
+    try {
+      const response = await fetch(`${apiUrl}/api/posts/${projectId}/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userInfo.token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Erreur lors de la suppression du commentaire');
+      }
+      
+      // Mettre à jour l'état en retirant le commentaire supprimé
+      setProjects(projects.map(project => {
+        if (project._id === projectId) {
+          return {
+            ...project,
+            comments: project.comments.filter(comment => comment._id !== commentId)
+          };
+        }
+        return project;
+      }));
+      
+    } catch (error) {
+      console.error('Erreur lors de la suppression du commentaire:', error);
+      alert(`Erreur: ${error.message}`);
+    }
+  };
+
   return (
     <div className="container mx-auto max-w-3xl px-4 py-12">
       {/* En-tête avec style laboratoire avancé */}
@@ -319,6 +385,17 @@ function ProjectsGallery() {
                 <div className="flex flex-col items-end">
                   <span className="text-xs text-gray-400 font-scientific">{formatDate(project.createdAt)}</span>
                   <div className="text-xs text-gray-300 sketch-linestyle mt-1">Projet N°{project._id.substring(project._id.length - 4)}</div>
+                  
+                  {/* Bouton Admin pour supprimer le post - visible uniquement pour les admins */}
+                  {userInfo && userInfo.role === 'admin' && (
+                    <button 
+                      onClick={() => handleDeletePost(project._id)}
+                      className="mt-2 text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                      title="Supprimer ce projet (Admin uniquement)"
+                    >
+                      Supprimer
+                    </button>
+                  )}
                 </div>
               </div>
               
@@ -419,9 +496,24 @@ function ProjectsGallery() {
                     </h4>
                     <div className="max-h-60 overflow-y-auto pr-2 styled-scrollbar">
                       {project.comments.map(comment => (
-                        <div key={comment._id} className="flex space-x-2 py-1.5 sketch-comment">
-                          <span className="font-medium text-lab-blue">{comment.user.username}</span>
-                          <span className="text-gray-700 font-scientific">{comment.text}</span>
+                        <div key={comment._id} className="flex justify-between items-start py-1.5 sketch-comment group">
+                          <div className="flex space-x-2">
+                            <span className="font-medium text-lab-blue">{comment.user.username}</span>
+                            <span className="text-gray-700 font-scientific">{comment.text}</span>
+                          </div>
+                          
+                          {/* Bouton Admin pour supprimer un commentaire - visible uniquement pour les admins */}
+                          {userInfo && userInfo.role === 'admin' && (
+                            <button
+                              onClick={() => handleDeleteComment(project._id, comment._id)}
+                              className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-xs ml-2"
+                              title="Supprimer ce commentaire (Admin uniquement)"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>

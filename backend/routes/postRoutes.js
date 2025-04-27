@@ -1,6 +1,6 @@
 const express = require('express');
-const { createPost, getApprovedPosts, likePost, commentPost, deletePost } = require('../controllers/postController');
-const { protect } = require('../middleware/authMiddleware');
+const { createPost, getApprovedPosts, likePost, commentPost, deletePost, deleteComment } = require('../controllers/postController');
+const { protect, admin } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware'); // Middleware pour gérer l'upload
 
 const router = express.Router();
@@ -20,5 +20,8 @@ router.post('/:id/like', protect, likePost);
 
 // Route pour commenter un post (protégée, nécessite connexion)
 router.post('/:id/comment', protect, commentPost);
+
+// Route pour supprimer un commentaire (protégée, nécessite être admin)
+router.delete('/:id/comments/:commentId', protect, admin, deleteComment);
 
 module.exports = router; 

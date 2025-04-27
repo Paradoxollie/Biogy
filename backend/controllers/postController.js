@@ -199,5 +199,41 @@ const deletePost = async (req, res, next) => {
     }
 };
 
+// @desc    Supprimer un commentaire (par un admin)
+// @route   DELETE /api/posts/:id/comments/:commentId
+// @access  Private (admin uniquement)
+const deleteComment = async (req, res) => {
+  try {
+    const { id, commentId } = req.params;
+    
+    const post = await Post.findById(id);
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Post non trouvé' });
+    }
+    
+    // Vérifier si le commentaire existe
+    const commentIndex = post.comments.findIndex(
+      comment => comment._id.toString() === commentId
+    );
+    
+    if (commentIndex === -1) {
+      return res.status(404).json({ message: 'Commentaire non trouvé' });
+    }
+    
+    // Supprimer le commentaire
+    post.comments.splice(commentIndex, 1);
+    await post.save();
+    
+    res.json({ 
+      message: 'Commentaire supprimé avec succès',
+      commentId
+    });
+    
+  } catch (error) {
+    console.error('Error in deleteComment:', error);
+    res.status(500).json({ message: 'Erreur lors de la suppression du commentaire' });
+  }
+};
 
-module.exports = { createPost, getApprovedPosts, likePost, commentPost, deletePost }; 
+module.exports = { createPost, getApprovedPosts, likePost, commentPost, deletePost, deleteComment }; 
