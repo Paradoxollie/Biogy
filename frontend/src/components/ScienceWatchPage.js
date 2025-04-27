@@ -12,75 +12,121 @@ function ScienceWatchPage() {
     
     try {
       // Au lieu d'utiliser l'API News qui nécessite une clé, on utilise un service de proxy RSS vers JSON
-      let feedUrl = '';
+      let feedUrls = [];
       
       // Sélection des flux RSS selon la source choisie
-      if (selectedSource === 'all' || selectedSource === 'science') {
-        // Futura Sciences - Santé et Sciences
-        feedUrl = 'https://www.futura-sciences.com/rss/actualites.xml';
-      } else if (selectedSource === 'medical') {
-        // Sciences et Avenir - Santé
-        feedUrl = 'https://www.sciencesetavenir.fr/rss/sante.xml';
-      } else if (selectedSource === 'innovation') {
-        // La Recherche
-        feedUrl = 'https://www.larecherche.fr/feed/rss.xml';
-      }
-      
-      // Utilisation d'un service gratuit de conversion RSS vers JSON
-      const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
-      
-      if (!response.ok) {
-        throw new Error('Une erreur est survenue lors de la récupération des articles');
-      }
-      
-      const data = await response.json();
-      
-      // Vérifier si la réponse contient des articles
-      if (data.status === 'ok' && data.items && data.items.length > 0) {
-        // Liste élargie de mots-clés liés à la biotechnologie et sciences de la vie
-        const keywords = [
-          'biotech', 'biotechnologie', 'génétique', 'crispr', 'génomique', 'biologie',
-          'adn', 'arn', 'cellule', 'moléculaire', 'protéine', 'enzyme', 'génome',
-          'thérapie génique', 'cellules souches', 'clonage', 'ogm', 'organisme',
-          'bactérie', 'virus', 'micro-organisme', 'biomédical', 'biomatériau',
-          'biocapteur', 'biosynthèse', 'fermentation', 'anticorps', 'immunologie',
-          'vaccin', 'biodiversité', 'biochimie', 'séquençage', 'pcr'
+      if (selectedSource === 'all') {
+        // Tous les flux
+        feedUrls = [
+          'https://www.futura-sciences.com/rss/actualites.xml', // Futura Sciences - Santé et Sciences
+          'https://www.sciencesetavenir.fr/rss/sante.xml', // Sciences et Avenir - Santé
+          'https://www.larecherche.fr/feed/rss.xml', // La Recherche
+          'https://www.sciencedaily.com/rss/plants_animals/biotechnology.xml', // ScienceDaily - Biotechnology
+          'https://feeds.feedburner.com/GenGenNews', // GEN - Genetic Engineering & Biotechnology News
+          'https://labiotech.eu/feed', // Labiotech.eu - European Biotech News
+          'https://phys.org/rss-feed/biology-news/biotechnology/', // Phys.org - Biotechnology
+          'https://www.biotech.fr/feed/', // Biotech.fr
+          'https://biofutur.revuesonline.com/rss.jsp', // BioFutur
+          'https://www.biofutur.com/feed/' // BioFutur (alternative)
         ];
-        
-        // Mappez les articles pour extraire les images et préparer les données
-        const processedArticles = data.items.map(item => {
-          // Extraire l'image correctement selon plusieurs sources possibles
-          let imageUrl = null;
+      } else if (selectedSource === 'science') {
+        // Flux scientifiques généraux
+        feedUrls = [
+          'https://www.futura-sciences.com/rss/actualites.xml',
+          'https://www.sciencedaily.com/rss/plants_animals/biotechnology.xml',
+          'https://phys.org/rss-feed/biology-news/biotechnology/'
+        ];
+      } else if (selectedSource === 'medical') {
+        // Flux médicaux
+        feedUrls = [
+          'https://www.sciencesetavenir.fr/rss/sante.xml',
+          'https://www.bioworld.com/rss/topic/251-infection'
+        ];
+      } else if (selectedSource === 'innovation') {
+        // Flux d'innovation biotechnologique
+        feedUrls = [
+          'https://www.larecherche.fr/feed/rss.xml',
+          'https://feeds.feedburner.com/GenGenNews',
+          'https://labiotech.eu/feed'
+        ];
+      } else if (selectedSource === 'education') {
+        // Flux éducatifs
+        feedUrls = [
+          'https://eduscol.education.fr/sti/rss.xml', // Éduscol - ressources pédagogiques
+          'https://www.supbiotech.fr/actualites/feed', // SupBiotech actualités (si disponible)
+          'https://biotechnologies.ac-versailles.fr/spip.php?page=backend' // Académie de Versailles - Biotechnologies
+        ];
+      }
+      
+      // Parcourir tous les flux sélectionnés et collecter les articles
+      let allArticles = [];
+      
+      // Pour chaque flux, récupérer les articles
+      for (const feedUrl of feedUrls) {
+        try {
+          // Utilisation d'un service gratuit de conversion RSS vers JSON
+          const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
           
-          // Vérifier différentes positions où l'image pourrait se trouver
-          if (item.enclosure && item.enclosure.link) {
-            imageUrl = item.enclosure.link;
-          } else if (item.thumbnail) {
-            imageUrl = item.thumbnail;
-          } else if (item.image) {
-            imageUrl = item.image;
-          } else {
-            // Essayer d'extraire l'image du contenu HTML
-            const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/);
-            if (imgMatch && imgMatch[1]) {
-              imageUrl = imgMatch[1];
-            }
+          if (!response.ok) {
+            console.warn(`Problème avec le flux ${feedUrl}: ${response.status}`);
+            continue; // Passer au flux suivant en cas d'erreur
           }
           
-          return {
-            ...item,
-            // S'assurer que le lien est l'URL complète de l'article
-            link: item.link || item.guid || '',
-            // Stocker l'URL de l'image extraite
-            imageUrl: imageUrl
-          };
-        });
-        
-        // Utiliser tous les articles sans filtrage
-        setArticles(processedArticles);
-      } else {
-        throw new Error('Le flux RSS ne contient pas d\'articles');
+          const data = await response.json();
+          
+          // Vérifier si la réponse contient des articles
+          if (data.status === 'ok' && data.items && data.items.length > 0) {
+            // Traiter les articles
+            const processedArticles = data.items.map(item => {
+              // Extraire l'image correctement selon plusieurs sources possibles
+              let imageUrl = null;
+              
+              // Vérifier différentes positions où l'image pourrait se trouver
+              if (item.enclosure && item.enclosure.link) {
+                imageUrl = item.enclosure.link;
+              } else if (item.thumbnail) {
+                imageUrl = item.thumbnail;
+              } else if (item.image) {
+                imageUrl = item.image;
+              } else {
+                // Essayer d'extraire l'image du contenu HTML
+                const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/);
+                if (imgMatch && imgMatch[1]) {
+                  imageUrl = imgMatch[1];
+                }
+              }
+              
+              return {
+                ...item,
+                // S'assurer que le lien est l'URL complète de l'article
+                link: item.link || item.guid || '',
+                // Stocker l'URL de l'image extraite
+                imageUrl: imageUrl,
+                // Ajouter la source pour le filtrage
+                source: data.feed?.title || feedUrl
+              };
+            });
+            
+            // Ajouter les articles de ce flux à l'ensemble
+            allArticles = [...allArticles, ...processedArticles];
+          }
+        } catch (feedErr) {
+          console.error(`Erreur lors de la récupération du flux ${feedUrl}:`, feedErr);
+          // Continuer avec les autres flux en cas d'erreur
+        }
       }
+      
+      // Si aucun article n'a été récupéré, utiliser les données de démonstration
+      if (allArticles.length === 0) {
+        throw new Error('Aucun article n\'a pu être récupéré');
+      }
+      
+      // Trier les articles par date (du plus récent au plus ancien)
+      allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+      
+      // Limiter le nombre d'articles à afficher (pour éviter une surcharge)
+      setArticles(allArticles.slice(0, 30));
+      
     } catch (err) {
       console.error('Erreur lors de la récupération des articles:', err);
       setError(err.message || 'Une erreur est survenue');
@@ -112,7 +158,8 @@ function ScienceWatchPage() {
         author: 'Équipe Futura',
         imageUrl: 'https://cdn.futura-sciences.com/buildsv6/images/wide1920/8/d/8/8d8c23421a_50175939_crispr-cas9-adobe-ttsz.jpg',
         pubDate: '2023-05-15T09:30:00Z',
-        content: 'La technologie CRISPR franchit une nouvelle étape avec cette technique révolutionnaire...'
+        content: 'La technologie CRISPR franchit une nouvelle étape avec cette technique révolutionnaire...',
+        source: 'Futura Sciences'
       },
       {
         title: 'Biotechnologie : des organoïdes cérébraux pour étudier les maladies neurodégénératives',
@@ -121,7 +168,8 @@ function ScienceWatchPage() {
         author: 'Rédaction Sciences et Avenir',
         imageUrl: 'https://www.sciencesetavenir.fr/assets/img/2020/01/10/cover-r4x3w1000-5e18a87cc3109-cerveau-humain.jpg',
         pubDate: '2023-06-02T14:15:00Z',
-        content: 'Ces mini-cerveaux cultivés en laboratoire permettent de mieux comprendre les mécanismes des maladies neurologiques...'
+        content: 'Ces mini-cerveaux cultivés en laboratoire permettent de mieux comprendre les mécanismes des maladies neurologiques...',
+        source: 'Sciences et Avenir'
       },
       {
         title: 'Biocapteurs : des dispositifs implantables pour surveiller la glycémie en continu',
@@ -130,7 +178,8 @@ function ScienceWatchPage() {
         author: 'La Recherche',
         imageUrl: 'https://www.larecherche.fr/sites/default/files/styles/large_16_9/public/2021-02/biocapteur%20chimique.jpg',
         pubDate: '2023-04-25T11:00:00Z',
-        content: 'Ces dispositifs marquent une avancée significative dans la prise en charge du diabète...'
+        content: 'Ces dispositifs marquent une avancée significative dans la prise en charge du diabète...',
+        source: 'La Recherche'
       },
       {
         title: 'Thérapie génique : un traitement prometteur pour la drépanocytose en phase finale d\'essai',
@@ -139,7 +188,8 @@ function ScienceWatchPage() {
         author: 'Équipe éditoriale',
         imageUrl: 'https://www.santemagazine.fr/uploads/images/thumbs/201911/santemagazine-drepanocytose-gettyimages-1127097866-754034-large.jpg',
         pubDate: '2023-05-30T08:45:00Z',
-        content: 'Cette approche pourrait transformer le traitement de cette maladie génétique répandue...'
+        content: 'Cette approche pourrait transformer le traitement de cette maladie génétique répandue...',
+        source: 'Santé Magazine'
       },
       {
         title: 'Bioproduction : la France inaugure un nouveau site de production de vaccins à ARNm',
@@ -148,7 +198,8 @@ function ScienceWatchPage() {
         author: 'Usine Nouvelle',
         imageUrl: 'https://www.usinenouvelle.com/mediatheque/4/0/0/000720004_image_896x598/usine-vaccin.jpg',
         pubDate: '2023-06-10T15:30:00Z',
-        content: 'Cette installation de pointe permet de produire jusqu\'à 300 millions de doses par an...'
+        content: 'Cette installation de pointe permet de produire jusqu\'à 300 millions de doses par an...',
+        source: 'Usine Nouvelle'
       }
     ];
   };
@@ -159,7 +210,7 @@ function ScienceWatchPage() {
       
       {/* Filtres */}
       <div className="flex justify-center mb-8">
-        <div className="inline-flex rounded-md shadow-sm" role="group">
+        <div className="inline-flex rounded-md shadow-sm flex-wrap justify-center" role="group">
           <button
             type="button"
             className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg ${
@@ -189,12 +240,21 @@ function ScienceWatchPage() {
           </button>
           <button
             type="button"
-            className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 rounded-r-md ${
+            className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
               selectedSource === 'innovation' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
             onClick={() => setSelectedSource('innovation')}
           >
             Innovation
+          </button>
+          <button
+            type="button"
+            className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 rounded-r-md ${
+              selectedSource === 'education' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+            onClick={() => setSelectedSource('education')}
+          >
+            Education
           </button>
         </div>
       </div>
@@ -239,7 +299,7 @@ function ScienceWatchPage() {
               <div className="p-5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold bg-lab-teal bg-opacity-20 text-lab-teal px-2 py-1 rounded-full">
-                    {article.author || 'Source scientifique'}
+                    {article.source || article.author || 'Source scientifique'}
                   </span>
                   <span className="text-xs text-gray-500">
                     {formatDate(article.pubDate)}
