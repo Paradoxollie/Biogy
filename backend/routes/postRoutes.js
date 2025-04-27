@@ -1,0 +1,19 @@
+const express = require('express');
+const { createPost, getApprovedPosts, deletePost } = require('../controllers/postController');
+const { protect } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware'); // Middleware pour gérer l'upload
+
+const router = express.Router();
+
+// Route pour récupérer tous les posts approuvés (accessible publiquement)
+router.get('/', getApprovedPosts);
+
+// Route pour créer un nouveau post (protégée, nécessite connexion)
+// upload.single('file') : Middleware Multer pour traiter UN fichier du champ 'file'
+router.post('/', protect, upload.single('file'), createPost);
+
+// Route pour supprimer un post (protégée, nécessite connexion et auteur/admin)
+router.delete('/:id', protect, deletePost);
+
+
+module.exports = router; 
