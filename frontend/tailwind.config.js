@@ -30,6 +30,8 @@ module.exports = {
         'orbit-1': 'orbit 12s linear infinite',
         'orbit-2': 'orbit 15s linear infinite reverse',
         'orbit-3': 'orbit 10s linear infinite',
+        'orbit-4': 'orbit 18s linear infinite',
+        'orbit-5': 'orbit 20s linear infinite reverse',
         'spin': 'spin 20s linear infinite',
       },
       keyframes: {
@@ -91,7 +93,8 @@ module.exports = {
     'text-lab-blue', 'text-lab-purple', 'text-lab-teal', 'text-lab-green',
     'bg-lab-blue', 'bg-lab-purple', 'bg-lab-teal', 'bg-lab-green',
     'hover:text-lab-blue', 'hover:text-lab-purple', 'hover:text-lab-teal', 'hover:text-lab-green',
-    'animate-orbit-1', 'animate-orbit-2', 'animate-orbit-3', 'shadow-glow',
+    'animate-orbit-1', 'animate-orbit-2', 'animate-orbit-3', 'animate-orbit-4', 'animate-orbit-5', 'shadow-glow',
+    'bg-amber-400', 'bg-green-400', 'bg-red-400', 'bg-yellow-300', 'bg-indigo-300'
   ],
   plugins: [],
 } 
