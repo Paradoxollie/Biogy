@@ -57,6 +57,16 @@ function ScienceWatchPage() {
       bgColorLight: 'bg-blue-100',
       borderColor: 'border-blue-500',
       keywords: ['biotechnologie marine', 'aquaculture', 'algue', 'microalgue', 'biotechnologie bleue', 'ressource marine', 'cosmétique marine', 'milieu aquatique biotechnologie', 'bio-océanographie', 'spiruline', 'organisme marin', 'biodiversité marine', 'aquatique biotechnologie', 'phytoplancton']
+    },
+    black: {
+      name: 'Noire',
+      description: 'Éducation, formations, ressources pédagogiques',
+      color: 'black',
+      bgColor: 'bg-gray-800',
+      textColor: 'text-gray-100',
+      bgColorLight: 'bg-gray-200',
+      borderColor: 'border-gray-800',
+      keywords: ['éducation', 'formation', 'académie', 'pédagogie', 'didactique', 'enseignement', 'apprendre', 'étudiant', 'lycée', 'université', 'cours', 'programme', 'curriculum', 'apprentissage', 'ressource éducative']
     }
   };
 
@@ -85,51 +95,69 @@ function ScienceWatchPage() {
       // Au lieu d'utiliser l'API News qui nécessite une clé, on utilise un service de proxy RSS vers JSON
       let feedUrls = [];
       
-      // Sélection des flux RSS selon la source choisie
+      // Mise à jour des flux RSS avec les sources françaises
       if (selectedSource === 'all') {
         // Tous les flux
         feedUrls = [
-          'https://www.futura-sciences.com/rss/sante/biologie-genetique.xml', // Futura Sciences - Biologie-Génétique
-          'https://www.sciencesetavenir.fr/rss/sante/biologie-genetique.xml', // Sciences et Avenir - Biologie-Génétique
-          'https://www.larecherche.fr/feed/rss.xml', // La Recherche
-          'https://www.sciencedaily.com/rss/plants_animals/biotechnology.xml', // ScienceDaily - Biotechnology
-          'https://feeds.feedburner.com/GenGenNews', // GEN - Genetic Engineering & Biotechnology News
-          'https://labiotech.eu/feed', // Labiotech.eu - European Biotech News
-          'https://phys.org/rss-feed/biology-news/biotechnology/', // Phys.org - Biotechnology
-          'https://www.biotech.fr/feed/', // Biotech.fr
-          'https://biotechnologies.ac-versailles.fr/spip.php?page=backend', // Académie de Versailles - Biotechnologies
-          'https://enseigner.biotechnologies.free.fr/backend.php', // Ressources pour l'enseignement en biotechnologies
-          'https://www.supbiotech.fr/actualites/feed', // SupBiotech - École d'ingénieurs en biotechnologies
+          // Biotechnologies vertes
+          'https://www.inrae.fr/actualites/biotechnologies-vertes',
+          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-verte',
+          
+          // Biotechnologies rouges
+          'https://www.inserm.fr/flux-rss/',
+          'https://www.techniques-ingenieur.fr/actualite/articles/bioethique-et-sante-revue-express-des-biotechnologies-phares-88241/',
+          
+          // Biotechnologies blanches
+          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-blanche',
+          'https://www.bgene.fr/blog/',
+          
+          // Biotechnologies jaunes
+          'https://www.brgm.fr/fr/flux-rss',
+          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-jaune',
+          
+          // Biotechnologies bleues
+          'https://nouvelle-caledonie.ifremer.fr/Biodiversite-et-ressources',
+          'https://www.techniques-ingenieur.fr/base-documentaire/procedes-chimie-bio-agro-th2/ressources-marines-et-biotechnologies-bleues-42834210/',
+          
+          // Biotechnologies noires (éducation)
+          'https://eduscol.education.fr/flux-rss',
+          'https://pedagogie.ac-reims.fr/index.php/lycee/sciences-et-technologies/biotec-bioch-lycee'
         ];
-      } else if (selectedSource === 'science') {
-        // Flux scientifiques généraux
+      } else if (selectedSource === 'green') {
+        // Biotechnologies vertes
         feedUrls = [
-          'https://www.futura-sciences.com/rss/sante/biologie-genetique.xml',
-          'https://www.sciencedaily.com/rss/plants_animals/biotechnology.xml',
-          'https://phys.org/rss-feed/biology-news/biotechnology/'
+          'https://www.inrae.fr/actualites/biotechnologies-vertes',
+          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-verte'
         ];
-      } else if (selectedSource === 'medical') {
-        // Flux médicaux
+      } else if (selectedSource === 'red') {
+        // Biotechnologies rouges
         feedUrls = [
-          'https://www.sciencesetavenir.fr/rss/sante/biologie-genetique.xml',
-          'https://www.bioworld.com/rss/topic/251-infection',
-          'https://www.bioworld.com/rss/topic/543-biomarkers'
+          'https://www.inserm.fr/flux-rss/',
+          'https://www.techniques-ingenieur.fr/actualite/articles/bioethique-et-sante-revue-express-des-biotechnologies-phares-88241/'
         ];
-      } else if (selectedSource === 'innovation') {
-        // Flux d'innovation biotechnologique
+      } else if (selectedSource === 'white') {
+        // Biotechnologies blanches
         feedUrls = [
-          'https://www.larecherche.fr/feed/rss.xml',
-          'https://feeds.feedburner.com/GenGenNews',
-          'https://labiotech.eu/feed'
+          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-blanche',
+          'https://www.bgene.fr/blog/'
+        ];
+      } else if (selectedSource === 'yellow') {
+        // Biotechnologies jaunes
+        feedUrls = [
+          'https://www.brgm.fr/fr/flux-rss',
+          'https://www.techniques-ingenieur.fr/glossaire/biotechnologie-jaune'
+        ];
+      } else if (selectedSource === 'blue') {
+        // Biotechnologies bleues
+        feedUrls = [
+          'https://nouvelle-caledonie.ifremer.fr/Biodiversite-et-ressources',
+          'https://www.techniques-ingenieur.fr/base-documentaire/procedes-chimie-bio-agro-th2/ressources-marines-et-biotechnologies-bleues-42834210/'
         ];
       } else if (selectedSource === 'education') {
-        // Flux éducatifs
+        // Biotechnologies noires (éducation)
         feedUrls = [
-          'https://biotechnologies.ac-versailles.fr/spip.php?page=backend', // Académie de Versailles - Biotechnologies
-          'https://enseigner.biotechnologies.free.fr/backend.php', // Ressources pour l'enseignement en biotechnologies
-          'https://www.supbiotech.fr/actualites/feed', // SupBiotech actualités
-          'https://biotech.ac-amiens.fr/spip.php?page=backend', // Académie d'Amiens - Biotechnologies
-          'http://acces.ens-lyon.fr/biotic/feed/' // ENS Lyon - Biotechnologies
+          'https://eduscol.education.fr/flux-rss',
+          'https://pedagogie.ac-reims.fr/index.php/lycee/sciences-et-technologies/biotec-bioch-lycee'
         ];
       }
       
@@ -408,6 +436,7 @@ function ScienceWatchPage() {
       white: [],
       yellow: [],
       blue: [],
+      black: [],
       unclassified: []
     };
     
@@ -456,7 +485,7 @@ function ScienceWatchPage() {
       
       {/* Filtres par source */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-2">Filtrer par source</h3>
+        <h3 className="text-lg font-semibold mb-2">Filtrer par catégorie</h3>
         <div className="flex flex-wrap justify-center mb-4">
           <div className="inline-flex rounded-md shadow-sm flex-wrap justify-center" role="group">
             <button
@@ -466,39 +495,57 @@ function ScienceWatchPage() {
               }`}
               onClick={() => setSelectedSource('all')}
             >
-              Toutes les sources
+              Toutes les catégories
             </button>
             <button
               type="button"
               className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-                selectedSource === 'science' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                selectedSource === 'green' ? 'bg-green-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
-              onClick={() => setSelectedSource('science')}
+              onClick={() => setSelectedSource('green')}
             >
-              Sciences
+              Verte
             </button>
             <button
               type="button"
               className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-                selectedSource === 'medical' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                selectedSource === 'red' ? 'bg-red-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
-              onClick={() => setSelectedSource('medical')}
+              onClick={() => setSelectedSource('red')}
             >
-              Médical
+              Rouge
             </button>
             <button
               type="button"
               className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-                selectedSource === 'innovation' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                selectedSource === 'white' ? 'bg-gray-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
-              onClick={() => setSelectedSource('innovation')}
+              onClick={() => setSelectedSource('white')}
             >
-              Innovation
+              Blanche
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
+                selectedSource === 'yellow' ? 'bg-yellow-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setSelectedSource('yellow')}
+            >
+              Jaune
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
+                selectedSource === 'blue' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setSelectedSource('blue')}
+            >
+              Bleue
             </button>
             <button
               type="button"
               className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 rounded-r-md ${
-                selectedSource === 'education' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                selectedSource === 'education' ? 'bg-gray-800 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
               onClick={() => setSelectedSource('education')}
             >
