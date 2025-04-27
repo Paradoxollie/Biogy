@@ -121,6 +121,7 @@ function Layout({ children }) {
             {[
               { name: 'Apprendre', path: '/apprendre', color: 'lab-blue' },
               { name: 'Recherche', path: '/recherche', color: 'lab-purple' },
+              { name: 'Projets', path: '/projets', color: 'lab-teal' },
               { name: 'Actualités', path: '/actualites', color: 'lab-teal' },
               { name: 'Méthodes', path: '/methodes', color: 'lab-green' }
             ].map((item) => (

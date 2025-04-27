@@ -189,6 +189,9 @@ function Homepage() {
                 <Link to="/methodes" className="px-6 py-3 bg-white text-lab-blue border border-lab-blue rounded-lg hover:bg-lab-blue/5 transition-all duration-300">
                   Découvrir les méthodes
                 </Link>
+                <Link to="/projets" className="px-6 py-3 bg-white text-lab-teal border border-lab-teal rounded-lg hover:bg-lab-teal/5 transition-all duration-300">
+                  Voir les Projets
+                </Link>
               </div>
             </div>
             
@@ -448,9 +451,12 @@ function Homepage() {
               <p className="text-gray-600 text-center">
                 Inspirez-vous et partagez vos <span className="font-medium">réalisations expérimentales</span> (photos, vidéos, rapports).
               </p>
-              <div className="text-center mt-4">
-                <Link to="/projets" className="text-lab-teal hover:text-lab-teal/80 font-medium">
-                  Voir les projets →
+              <div className="flex flex-col gap-2 items-center mt-4">
+                <Link to="/projets" className="text-white bg-lab-teal hover:bg-lab-teal/90 px-4 py-2 rounded-lg transition-colors duration-300 text-sm font-medium w-full text-center">
+                  Voir les projets
+                </Link>
+                <Link to="/partager-projet" className="text-lab-teal border border-lab-teal hover:bg-lab-teal/5 px-4 py-2 rounded-lg transition-colors duration-300 text-sm font-medium w-full text-center">
+                  Créer un projet
                 </Link>
               </div>
             </div>
@@ -466,6 +472,102 @@ function Homepage() {
               <p className="text-gray-600 text-center">
                 Échangez avec <span className="font-medium">étudiants et enseignants</span>, posez vos questions et partagez vos astuces.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Section Projets */}
+      <section className="py-16 bg-gradient-to-br from-white to-lab-teal/5 relative overflow-hidden">
+        {/* Éléments décoratifs */}
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-lab-teal/10 rounded-full blur-xl"></div>
+        <div className="absolute bottom-10 right-10 w-60 h-60 bg-lab-purple/5 rounded-full blur-xl"></div>
+        
+        <div className="container mx-auto max-w-6xl px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-3 text-gray-800">Galerie de Projets <span className="text-lab-teal">Biogy</span></h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Découvrez les expériences partagées par notre communauté et publiez vos propres projets pour inspirer les autres.
+            </p>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-xl p-8 relative overflow-hidden">
+            {/* Effet décoratif */}
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-lab-teal/5 rounded-full"></div>
+            <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-lab-purple/5 rounded-full"></div>
+            
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="md:w-1/2">
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">Partagez vos <span className="text-lab-teal">expériences</span></h3>
+                <p className="text-gray-600 mb-6">
+                  Que vous soyez étudiant, enseignant ou chercheur, partagez vos réalisations en laboratoire, vos observations microscopiques, ou vos expériences innovantes.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center">
+                    <svg className="w-5 h-5 text-lab-teal mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>Partagez des photos et vidéos de vos cultures cellulaires</span>
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-5 h-5 text-lab-teal mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>Documentez vos manipulations génétiques</span>
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-5 h-5 text-lab-teal mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>Échangez sur vos résultats et recevez des retours</span>
+                  </li>
+                </ul>
+                <div className="flex flex-wrap gap-4">
+                  <Link to="/projets" className="px-6 py-3 bg-gradient-to-r from-lab-teal to-lab-purple text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    Explorer la galerie
+                  </Link>
+                  <Link to="/partager-projet" className="px-6 py-3 bg-white text-lab-teal border border-lab-teal rounded-lg hover:bg-lab-teal/5 transition-all duration-300">
+                    Publier un projet
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="md:w-1/2 relative">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="aspect-square rounded-lg overflow-hidden shadow-lg transform rotate-2 hover:rotate-0 transition-all duration-500">
+                    <div className="w-full h-full bg-lab-teal/20 flex items-center justify-center">
+                      <svg className="w-16 h-16 text-lab-teal/40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="aspect-square rounded-lg overflow-hidden shadow-lg transform -rotate-1 hover:rotate-0 transition-all duration-500">
+                    <div className="w-full h-full bg-lab-purple/20 flex items-center justify-center">
+                      <svg className="w-16 h-16 text-lab-purple/40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14.5 3.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M7 13.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M14.5 19.92l-5.08-2.35a2.5 2.5 0 01-1.32-3.48l4.56-9.4a2.5 2.5 0 013.48-1.32l5.08 2.35a2.5 2.5 0 011.32 3.48l-4.56 9.4a2.5 2.5 0 01-3.48 1.32z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="aspect-square rounded-lg overflow-hidden shadow-lg transform -rotate-2 hover:rotate-0 transition-all duration-500">
+                    <div className="w-full h-full bg-lab-blue/20 flex items-center justify-center">
+                      <svg className="w-16 h-16 text-lab-blue/40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19.428 15.428a2.5 2.5 0 00-3.535 0l-4.95 4.95a2.5 2.5 0 103.536 3.535l4.95-4.95a2.5 2.5 0 000-3.535z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M7.242 13.242l-3.535-3.535a2.5 2.5 0 010-3.536l4.95-4.95a2.5 2.5 0 013.535 0l3.536 3.536" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M9.9 14.121L14.122 9.9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="aspect-square rounded-lg overflow-hidden shadow-lg transform rotate-3 hover:rotate-0 transition-all duration-500">
+                    <div className="w-full h-full bg-green-500/20 flex items-center justify-center">
+                      <svg className="w-16 h-16 text-green-500/40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 16.5l-.35-.35a2.5 2.5 0 00-3.53 0 2.5 2.5 0 000 3.53l.35.35m0 0l10.6-10.6a2.5 2.5 0 010-3.54 2.5 2.5 0 013.54 0L21 9.5M3.47 20.03L11.5 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
