@@ -5,7 +5,6 @@ function ScienceWatchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSource, setSelectedSource] = useState('all');
-  const [selectedColor, setSelectedColor] = useState('all');
 
   // Définition des catégories de biotechnologie par couleur
   const biotechColors = {
@@ -13,30 +12,50 @@ function ScienceWatchPage() {
       name: 'Verte',
       description: 'Agro-alimentaire, production végétale, biomatériaux, énergie',
       color: 'green',
+      bgColor: 'bg-green-500',
+      textColor: 'text-green-800',
+      bgColorLight: 'bg-green-100',
+      borderColor: 'border-green-500',
       keywords: ['agro-alimentaire', 'agro alimentaire', 'agriculture', 'plante', 'végétal', 'biomatériau', 'biocarburant', 'énergie', 'biomasse', 'culture', 'plantation', 'semence', 'OGM', 'céréale', 'agroalimentaire', 'agronomie', 'fermentation', 'ferment']
     },
     red: {
       name: 'Rouge',
       description: 'Santé, pharmaceutique, médecine',
       color: 'red',
+      bgColor: 'bg-red-500',
+      textColor: 'text-red-800',
+      bgColorLight: 'bg-red-100',
+      borderColor: 'border-red-500',
       keywords: ['santé', 'médic', 'pharmac', 'thérapie', 'médicament', 'vaccin', 'clinique', 'patient', 'maladie', 'sang', 'cellule', 'cancer', 'diagnostic', 'génétique', 'crispr', 'ADN', 'ARN', 'organe', 'cerveau', 'biocapteur', 'glycémie', 'diabète']
     },
     white: {
       name: 'Blanche',
       description: 'Applications industrielles, procédés biologiques',
       color: 'gray',
+      bgColor: 'bg-gray-500',
+      textColor: 'text-gray-800',
+      bgColorLight: 'bg-gray-100',
+      borderColor: 'border-gray-500',
       keywords: ['industrie', 'chimie', 'enzyme', 'biocatalyse', 'bioproduction', 'polymère', 'textile', 'procédé', 'fermentation industrielle', 'biocarburant', 'bioraffinerie', 'solvant', 'synthèse', 'biochimie', 'biotech industrielle', 'bioréacteur', 'production']
     },
     yellow: {
       name: 'Jaune',
       description: 'Protection de l\'environnement, traitement des pollutions',
       color: 'yellow',
+      bgColor: 'bg-yellow-500',
+      textColor: 'text-yellow-800',
+      bgColorLight: 'bg-yellow-100',
+      borderColor: 'border-yellow-500',
       keywords: ['environnement', 'pollution', 'dépollution', 'traitement', 'déchet', 'recyclage', 'biodégradation', 'écologie', 'écosystème', 'biodiversité', 'bioremédiation', 'sol', 'eau', 'assainissement', 'développement durable', 'impact environnemental', 'microorganisme']
     },
     blue: {
       name: 'Bleue',
       description: 'Biodiversité marine, aquaculture, cosmétique marine',
       color: 'blue',
+      bgColor: 'bg-blue-500',
+      textColor: 'text-blue-800',
+      bgColorLight: 'bg-blue-100',
+      borderColor: 'border-blue-500',
       keywords: ['marin', 'aquaculture', 'algue', 'océan', 'mer', 'poisson', 'cosmétique marine', 'ressource marine', 'biotechnologie marine', 'milieu aquatique', 'microalgue', 'spiruline', 'pêche', 'aquatique', 'maritime']
     }
   };
@@ -181,18 +200,8 @@ function ScienceWatchPage() {
       // Trier les articles par date (du plus récent au plus ancien)
       allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
       
-      // Filtrer les articles par couleur si nécessaire
-      let filteredArticles = allArticles;
-      if (selectedColor !== 'all') {
-        filteredArticles = allArticles.filter(article => article.biotechColor === selectedColor);
-        // Si aucun article dans cette catégorie, on affiche tous les articles
-        if (filteredArticles.length === 0) {
-          filteredArticles = allArticles;
-        }
-      }
-      
       // Limiter le nombre d'articles à afficher (pour éviter une surcharge)
-      setArticles(filteredArticles.slice(0, 30));
+      setArticles(allArticles.slice(0, 40));
       
     } catch (err) {
       console.error('Erreur lors de la récupération des articles:', err);
@@ -209,7 +218,7 @@ function ScienceWatchPage() {
       setLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSource, selectedColor]);
+  }, [selectedSource]);
 
   useEffect(() => {
     fetchArticles();
@@ -293,20 +302,30 @@ function ScienceWatchPage() {
         pubDate: '2023-05-28T14:10:00Z',
         content: 'Cette découverte pourrait transformer notre approche du recyclage et de la gestion des déchets plastiques qui polluent l\'environnement...',
         source: 'Nature Biotechnology'
+      },
+      {
+        title: 'Nouvelle variété de blé résistant à la sécheresse développée par génie génétique',
+        description: 'Des chercheurs ont créé une variété de blé génétiquement modifiée qui nécessite 40% moins d\'eau tout en maintenant des rendements équivalents aux variétés conventionnelles.',
+        link: 'https://www.example.com/ble-resistant-secheresse',
+        author: 'Agronomie Moderne',
+        imageUrl: 'https://via.placeholder.com/600x400?text=Blé+Résistant',
+        pubDate: '2023-06-07T09:15:00Z',
+        content: 'Cette avancée pourrait révolutionner l\'agriculture dans les régions touchées par le changement climatique...',
+        source: 'Journal of Agricultural Biotechnology'
       }
     ];
   };
 
   // Obtenir la légende des couleurs de biotech
-  const getLegend = () => {
+  const renderBiotechLegend = () => {
     return (
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm">
-        <h3 className="text-lg font-semibold mb-2">Les couleurs des biotechnologies</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
+      <div className="mb-8 p-6 rounded-lg shadow-md bg-white">
+        <h2 className="text-2xl font-bold mb-4 text-center">Les couleurs des biotechnologies</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {Object.entries(biotechColors).map(([key, data]) => (
-            <div key={key} className="flex items-center">
-              <div className={`w-4 h-4 rounded-full bg-${data.color}-500 mr-2`}></div>
-              <span className="text-sm">{data.name}: {data.description}</span>
+            <div key={key} className={`p-4 rounded-lg ${data.bgColorLight} border-l-4 ${data.borderColor}`}>
+              <h3 className={`font-bold ${data.textColor}`}>{data.name}</h3>
+              <p className="text-sm">{data.description}</p>
             </div>
           ))}
         </div>
@@ -314,30 +333,95 @@ function ScienceWatchPage() {
     );
   };
 
-  // Obtenir la couleur tailwind pour le badge
-  const getBadgeColor = (colorKey) => {
-    if (!colorKey) return 'gray';
-    
-    const colorMap = {
-      'green': 'green',
-      'red': 'red',
-      'white': 'gray',
-      'yellow': 'yellow',
-      'blue': 'blue'
+  // Rendu d'une carte d'article
+  const renderArticleCard = (article, index) => {
+    return (
+      <div key={index} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+        {article.imageUrl ? (
+          <div className="h-48 overflow-hidden">
+            <img 
+              src={article.imageUrl} 
+              alt={article.title} 
+              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+              onError={(e) => {
+                e.target.onerror = null; 
+                e.target.src = 'https://via.placeholder.com/600x400?text=Image+non+disponible';
+              }}
+            />
+          </div>
+        ) : (
+          <div className="h-48 bg-gray-200 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        )}
+        
+        <div className="p-5">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-wrap gap-1">
+              {/* Badge de source */}
+              <span className="text-xs font-semibold bg-lab-teal bg-opacity-20 text-lab-teal px-2 py-1 rounded-full">
+                {article.source || article.author || 'Source scientifique'}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">
+              {formatDate(article.pubDate)}
+            </span>
+          </div>
+          
+          <h2 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2">{article.title}</h2>
+          
+          <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+            {article.description || article.content?.substring(0, 150) || 'Aucune description disponible'}
+          </p>
+          
+          <a 
+            href={article.link} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-block bg-lab-teal text-white font-semibold py-2 px-4 rounded hover:bg-teal-600 transition-colors duration-300"
+          >
+            Lire l'article
+          </a>
+        </div>
+      </div>
+    );
+  };
+
+  // Grouper les articles par catégorie de biotechnologie
+  const getArticlesByCategory = () => {
+    // Créer un objet avec les différentes catégories de couleur
+    const categorizedArticles = {
+      green: [],
+      red: [],
+      white: [],
+      yellow: [],
+      blue: [],
+      unclassified: []
     };
     
-    return colorMap[colorKey] || 'gray';
+    // Répartir les articles dans leurs catégories respectives
+    articles.forEach(article => {
+      if (article.biotechColor && categorizedArticles[article.biotechColor]) {
+        categorizedArticles[article.biotechColor].push(article);
+      } else {
+        categorizedArticles.unclassified.push(article);
+      }
+    });
+    
+    return categorizedArticles;
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center text-lab-teal mb-8">Veille Scientifique Biotechnologie</h1>
       
-      {/* Légende des couleurs */}
-      {getLegend()}
+      {/* Légende des couleurs des biotechnologies */}
+      {renderBiotechLegend()}
       
       {/* Filtres par source */}
-      <div className="mb-4">
+      <div className="mb-8">
         <h3 className="text-lg font-semibold mb-2">Filtrer par source</h3>
         <div className="flex flex-wrap justify-center mb-4">
           <div className="inline-flex rounded-md shadow-sm flex-wrap justify-center" role="group">
@@ -390,38 +474,6 @@ function ScienceWatchPage() {
         </div>
       </div>
       
-      {/* Filtres par couleur de biotechnologie */}
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-2">Filtrer par couleur de biotechnologie</h3>
-        <div className="flex flex-wrap justify-center">
-          <div className="inline-flex rounded-md shadow-sm flex-wrap justify-center" role="group">
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg ${
-                selectedColor === 'all' ? 'bg-lab-teal text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => setSelectedColor('all')}
-            >
-              Toutes
-            </button>
-            {Object.entries(biotechColors).map(([key, data], index) => (
-              <button
-                key={key}
-                type="button"
-                className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${
-                  index === Object.keys(biotechColors).length - 1 ? 'rounded-r-md' : ''
-                } ${
-                  selectedColor === key ? `bg-${data.color}-500 text-white` : 'bg-white text-gray-700 hover:bg-gray-100'
-                }`}
-                onClick={() => setSelectedColor(key)}
-              >
-                {data.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-      
       {/* Affichage des erreurs */}
       {error && (
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
@@ -436,66 +488,39 @@ function ScienceWatchPage() {
           <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-lab-teal"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {articles.map((article, index) => (
-            <div key={index} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-              {article.imageUrl ? (
-                <div className="h-48 overflow-hidden">
-                  <img 
-                    src={article.imageUrl} 
-                    alt={article.title} 
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                    onError={(e) => {
-                      e.target.onerror = null; 
-                      e.target.src = 'https://via.placeholder.com/600x400?text=Image+non+disponible';
-                    }}
-                  />
+        <div className="space-y-12">
+          {/* Affichage des articles par catégorie */}
+          {Object.entries(getArticlesByCategory()).map(([category, categoryArticles]) => {
+            // Ne pas afficher les catégories vides
+            if (categoryArticles.length === 0) return null;
+            
+            const colorData = category !== 'unclassified' 
+              ? biotechColors[category] 
+              : { name: 'Non classé', description: 'Articles ne correspondant pas aux catégories définies', bgColorLight: 'bg-gray-50', borderColor: 'border-gray-300' };
+            
+            return (
+              <div key={category} className={`p-6 rounded-lg ${colorData.bgColorLight} border-l-4 ${colorData.borderColor}`}>
+                <h2 className="text-2xl font-bold mb-6">
+                  Biotechnologie {colorData.name}
+                  <span className="block text-sm font-normal mt-1 text-gray-600">{colorData.description}</span>
+                </h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {categoryArticles.slice(0, 6).map((article, index) => renderArticleCard(article, `${category}-${index}`))}
                 </div>
-              ) : (
-                <div className="h-48 bg-gray-200 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              )}
-              
-              <div className="p-5">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex flex-wrap gap-1">
-                    {/* Badge de source */}
-                    <span className="text-xs font-semibold bg-lab-teal bg-opacity-20 text-lab-teal px-2 py-1 rounded-full">
-                      {article.source || article.author || 'Source scientifique'}
-                    </span>
-                    
-                    {/* Badge de couleur de biotechnologie */}
-                    {article.biotechColor && (
-                      <span className={`text-xs font-semibold bg-${getBadgeColor(article.biotechColor)}-500 bg-opacity-20 text-${getBadgeColor(article.biotechColor)}-700 px-2 py-1 rounded-full`}>
-                        {biotechColors[article.biotechColor]?.name || 'Non classé'}
-                      </span>
-                    )}
+                
+                {categoryArticles.length > 6 && (
+                  <div className="mt-4 text-center">
+                    <button
+                      className="inline-block bg-white text-lab-teal font-semibold py-2 px-4 rounded hover:bg-gray-100 transition-colors duration-300 border border-lab-teal"
+                    >
+                      Voir plus d'articles ({categoryArticles.length - 6} supplémentaires)
+                    </button>
                   </div>
-                  <span className="text-xs text-gray-500">
-                    {formatDate(article.pubDate)}
-                  </span>
-                </div>
-                
-                <h2 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2">{article.title}</h2>
-                
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                  {article.description || article.content?.substring(0, 150) || 'Aucune description disponible'}
-                </p>
-                
-                <a 
-                  href={article.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-block bg-lab-teal text-white font-semibold py-2 px-4 rounded hover:bg-teal-600 transition-colors duration-300"
-                >
-                  Lire l'article
-                </a>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
       
