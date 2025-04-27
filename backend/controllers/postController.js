@@ -206,6 +206,19 @@ const deleteComment = async (req, res) => {
   try {
     const { id, commentId } = req.params;
     
+    if (!id || !commentId) {
+      return res.status(400).json({ 
+        message: 'ID du post et ID du commentaire requis'
+      });
+    }
+    
+    // Valider que les IDs sont au format MongoDB
+    if (!id.match(/^[0-9a-fA-F]{24}$/) || !commentId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ 
+        message: 'Format d\'ID invalide'
+      });
+    }
+    
     const post = await Post.findById(id);
     
     if (!post) {
@@ -213,26 +226,33 @@ const deleteComment = async (req, res) => {
     }
     
     // Vérifier si le commentaire existe
-    const commentIndex = post.comments.findIndex(
+    const commentExists = post.comments.some(
       comment => comment._id.toString() === commentId
     );
     
-    if (commentIndex === -1) {
+    if (!commentExists) {
       return res.status(404).json({ message: 'Commentaire non trouvé' });
     }
     
     // Supprimer le commentaire
-    post.comments.splice(commentIndex, 1);
+    post.comments = post.comments.filter(
+      comment => comment._id.toString() !== commentId
+    );
+    
     await post.save();
     
-    res.json({ 
+    res.status(200).json({ 
+      success: true,
       message: 'Commentaire supprimé avec succès',
       commentId
     });
     
   } catch (error) {
     console.error('Error in deleteComment:', error);
-    res.status(500).json({ message: 'Erreur lors de la suppression du commentaire' });
+    res.status(500).json({ 
+      message: 'Erreur lors de la suppression du commentaire',
+      error: error.message 
+    });
   }
 };
 

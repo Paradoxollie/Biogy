@@ -161,6 +161,10 @@ function ProjectsGallery() {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) return;
     
     try {
+      console.log('Tentative de suppression du commentaire:', { projectId, commentId });
+      console.log('URL:', `${apiUrl}/api/posts/${projectId}/comments/${commentId}`);
+      console.log('Token:', userInfo.token.substring(0, 10) + '...');
+      
       const response = await fetch(`${apiUrl}/api/posts/${projectId}/comments/${commentId}`, {
         method: 'DELETE',
         headers: {
@@ -169,8 +173,10 @@ function ProjectsGallery() {
         }
       });
       
+      const data = await response.json();
+      console.log('Réponse du serveur:', data);
+      
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.message || 'Erreur lors de la suppression du commentaire');
       }
       
@@ -186,7 +192,7 @@ function ProjectsGallery() {
       }));
       
     } catch (error) {
-      console.error('Erreur lors de la suppression du commentaire:', error);
+      console.error('Erreur complète lors de la suppression du commentaire:', error);
       alert(`Erreur: ${error.message}`);
     }
   };

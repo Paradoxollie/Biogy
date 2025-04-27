@@ -16,7 +16,7 @@ function ScienceWatchPage() {
       textColor: 'text-green-800',
       bgColorLight: 'bg-green-100',
       borderColor: 'border-green-500',
-      keywords: ['agro-alimentaire', 'agro alimentaire', 'agriculture', 'plante', 'végétal', 'biomatériau', 'biocarburant', 'énergie', 'biomasse', 'culture', 'plantation', 'semence', 'OGM', 'céréale', 'agroalimentaire', 'agronomie', 'fermentation', 'ferment']
+      keywords: ['agro-alimentaire', 'agro alimentaire', 'agriculture biotechnologie', 'plante transgénique', 'amélioration végétale', 'biomatériau', 'biocarburant', 'énergie verte', 'biomasse', 'bioéthanol', 'OGM', 'céréale génétiquement', 'agroalimentaire biotech', 'biotechnologie végétale', 'fermentation']
     },
     red: {
       name: 'Rouge',
@@ -26,7 +26,7 @@ function ScienceWatchPage() {
       textColor: 'text-red-800',
       bgColorLight: 'bg-red-100',
       borderColor: 'border-red-500',
-      keywords: ['santé', 'médic', 'pharmac', 'thérapie', 'médicament', 'vaccin', 'clinique', 'patient', 'maladie', 'sang', 'cellule', 'cancer', 'diagnostic', 'génétique', 'crispr', 'ADN', 'ARN', 'organe', 'cerveau', 'biocapteur', 'glycémie', 'diabète']
+      keywords: ['biotechnologie médicale', 'médic', 'pharmac', 'thérapie génique', 'médicament biotechnologique', 'vaccin', 'anticorps', 'anticorps monoclonal', 'biopharmaceutique', 'cellule souche', 'génétique', 'crispr', 'ADN', 'ARN', 'génomique', 'biocapteur', 'glycémie', 'diabète', 'biotechnologie santé']
     },
     white: {
       name: 'Blanche',
@@ -36,7 +36,7 @@ function ScienceWatchPage() {
       textColor: 'text-gray-800',
       bgColorLight: 'bg-gray-100',
       borderColor: 'border-gray-500',
-      keywords: ['industrie', 'chimie', 'enzyme', 'biocatalyse', 'bioproduction', 'polymère', 'textile', 'procédé', 'fermentation industrielle', 'biocarburant', 'bioraffinerie', 'solvant', 'synthèse', 'biochimie', 'biotech industrielle', 'bioréacteur', 'production']
+      keywords: ['biotechnologie industrielle', 'biocatalyse', 'bioproduction', 'biochimie industrielle', 'polymère biosourcé', 'textile biotechnologie', 'procédé biologique', 'fermentation industrielle', 'bioréacteur', 'bioraffinerie', 'solvant biosourcé', 'biosynthèse', 'enzyme industrielle', 'biotech industrielle', 'catalyseur biologique']
     },
     yellow: {
       name: 'Jaune',
@@ -46,7 +46,7 @@ function ScienceWatchPage() {
       textColor: 'text-yellow-800',
       bgColorLight: 'bg-yellow-100',
       borderColor: 'border-yellow-500',
-      keywords: ['environnement', 'pollution', 'dépollution', 'traitement', 'déchet', 'recyclage', 'biodégradation', 'écologie', 'écosystème', 'biodiversité', 'bioremédiation', 'sol', 'eau', 'assainissement', 'développement durable', 'impact environnemental', 'microorganisme']
+      keywords: ['bioremédiation', 'biodépollution', 'traitement biologique', 'déchet biologique', 'biodégradation', 'dépollution', 'écologie industrielle', 'biotechnologie environnementale', 'bioréhabilitation', 'sol pollué', 'eau traitement biologique', 'assainissement', 'développement durable biotech', 'impact environnemental', 'microorganisme dépolluant']
     },
     blue: {
       name: 'Bleue',
@@ -56,7 +56,7 @@ function ScienceWatchPage() {
       textColor: 'text-blue-800',
       bgColorLight: 'bg-blue-100',
       borderColor: 'border-blue-500',
-      keywords: ['marin', 'aquaculture', 'algue', 'océan', 'mer', 'poisson', 'cosmétique marine', 'ressource marine', 'biotechnologie marine', 'milieu aquatique', 'microalgue', 'spiruline', 'pêche', 'aquatique', 'maritime']
+      keywords: ['biotechnologie marine', 'aquaculture', 'algue', 'microalgue', 'biotechnologie bleue', 'ressource marine', 'cosmétique marine', 'milieu aquatique biotechnologie', 'bio-océanographie', 'spiruline', 'organisme marin', 'biodiversité marine', 'aquatique biotechnologie', 'phytoplancton']
     }
   };
 
@@ -89,29 +89,31 @@ function ScienceWatchPage() {
       if (selectedSource === 'all') {
         // Tous les flux
         feedUrls = [
-          'https://www.futura-sciences.com/rss/actualites.xml', // Futura Sciences - Santé et Sciences
-          'https://www.sciencesetavenir.fr/rss/sante.xml', // Sciences et Avenir - Santé
+          'https://www.futura-sciences.com/rss/sante/biologie-genetique.xml', // Futura Sciences - Biologie-Génétique
+          'https://www.sciencesetavenir.fr/rss/sante/biologie-genetique.xml', // Sciences et Avenir - Biologie-Génétique
           'https://www.larecherche.fr/feed/rss.xml', // La Recherche
           'https://www.sciencedaily.com/rss/plants_animals/biotechnology.xml', // ScienceDaily - Biotechnology
           'https://feeds.feedburner.com/GenGenNews', // GEN - Genetic Engineering & Biotechnology News
           'https://labiotech.eu/feed', // Labiotech.eu - European Biotech News
           'https://phys.org/rss-feed/biology-news/biotechnology/', // Phys.org - Biotechnology
           'https://www.biotech.fr/feed/', // Biotech.fr
-          'https://biofutur.revuesonline.com/rss.jsp', // BioFutur
-          'https://www.biofutur.com/feed/' // BioFutur (alternative)
+          'https://biotechnologies.ac-versailles.fr/spip.php?page=backend', // Académie de Versailles - Biotechnologies
+          'https://enseigner.biotechnologies.free.fr/backend.php', // Ressources pour l'enseignement en biotechnologies
+          'https://www.supbiotech.fr/actualites/feed', // SupBiotech - École d'ingénieurs en biotechnologies
         ];
       } else if (selectedSource === 'science') {
         // Flux scientifiques généraux
         feedUrls = [
-          'https://www.futura-sciences.com/rss/actualites.xml',
+          'https://www.futura-sciences.com/rss/sante/biologie-genetique.xml',
           'https://www.sciencedaily.com/rss/plants_animals/biotechnology.xml',
           'https://phys.org/rss-feed/biology-news/biotechnology/'
         ];
       } else if (selectedSource === 'medical') {
         // Flux médicaux
         feedUrls = [
-          'https://www.sciencesetavenir.fr/rss/sante.xml',
-          'https://www.bioworld.com/rss/topic/251-infection'
+          'https://www.sciencesetavenir.fr/rss/sante/biologie-genetique.xml',
+          'https://www.bioworld.com/rss/topic/251-infection',
+          'https://www.bioworld.com/rss/topic/543-biomarkers'
         ];
       } else if (selectedSource === 'innovation') {
         // Flux d'innovation biotechnologique
@@ -123,9 +125,11 @@ function ScienceWatchPage() {
       } else if (selectedSource === 'education') {
         // Flux éducatifs
         feedUrls = [
-          'https://eduscol.education.fr/sti/rss.xml', // Éduscol - ressources pédagogiques
-          'https://www.supbiotech.fr/actualites/feed', // SupBiotech actualités (si disponible)
-          'https://biotechnologies.ac-versailles.fr/spip.php?page=backend' // Académie de Versailles - Biotechnologies
+          'https://biotechnologies.ac-versailles.fr/spip.php?page=backend', // Académie de Versailles - Biotechnologies
+          'https://enseigner.biotechnologies.free.fr/backend.php', // Ressources pour l'enseignement en biotechnologies
+          'https://www.supbiotech.fr/actualites/feed', // SupBiotech actualités
+          'https://biotech.ac-amiens.fr/spip.php?page=backend', // Académie d'Amiens - Biotechnologies
+          'http://acces.ens-lyon.fr/biotic/feed/' // ENS Lyon - Biotechnologies
         ];
       }
       
@@ -148,40 +152,46 @@ function ScienceWatchPage() {
           // Vérifier si la réponse contient des articles
           if (data.status === 'ok' && data.items && data.items.length > 0) {
             // Traiter les articles
-            const processedArticles = data.items.map(item => {
-              // Extraire l'image correctement selon plusieurs sources possibles
-              let imageUrl = null;
-              
-              // Vérifier différentes positions où l'image pourrait se trouver
-              if (item.enclosure && item.enclosure.link) {
-                imageUrl = item.enclosure.link;
-              } else if (item.thumbnail) {
-                imageUrl = item.thumbnail;
-              } else if (item.image) {
-                imageUrl = item.image;
-              } else {
-                // Essayer d'extraire l'image du contenu HTML
-                const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/);
-                if (imgMatch && imgMatch[1]) {
-                  imageUrl = imgMatch[1];
+            const processedArticles = data.items
+              .filter(item => {
+                // Pré-filtrer les articles pour ne garder que ceux liés à la biotechnologie
+                const combinedText = `${item.title} ${item.description || ''} ${item.content || ''}`.toLowerCase();
+                return isBiotechArticle({title: item.title, description: item.description, content: item.content});
+              })
+              .map(item => {
+                // Extraire l'image correctement selon plusieurs sources possibles
+                let imageUrl = null;
+                
+                // Vérifier différentes positions où l'image pourrait se trouver
+                if (item.enclosure && item.enclosure.link) {
+                  imageUrl = item.enclosure.link;
+                } else if (item.thumbnail) {
+                  imageUrl = item.thumbnail;
+                } else if (item.image) {
+                  imageUrl = item.image;
+                } else {
+                  // Essayer d'extraire l'image du contenu HTML
+                  const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/);
+                  if (imgMatch && imgMatch[1]) {
+                    imageUrl = imgMatch[1];
+                  }
                 }
-              }
-              
-              const processedItem = {
-                ...item,
-                // S'assurer que le lien est l'URL complète de l'article
-                link: item.link || item.guid || '',
-                // Stocker l'URL de l'image extraite
-                imageUrl: imageUrl,
-                // Ajouter la source pour le filtrage
-                source: data.feed?.title || feedUrl
-              };
-              
-              // Déterminer la catégorie de couleur de l'article
-              processedItem.biotechColor = determineBiotechColor(processedItem);
-              
-              return processedItem;
-            });
+                
+                const processedItem = {
+                  ...item,
+                  // S'assurer que le lien est l'URL complète de l'article
+                  link: item.link || item.guid || '',
+                  // Stocker l'URL de l'image extraite
+                  imageUrl: imageUrl,
+                  // Ajouter la source pour le filtrage
+                  source: data.feed?.title || feedUrl
+                };
+                
+                // Déterminer la catégorie de couleur de l'article
+                processedItem.biotechColor = determineBiotechColor(processedItem);
+                
+                return processedItem;
+              });
             
             // Ajouter les articles de ce flux à l'ensemble
             allArticles = [...allArticles, ...processedArticles];
@@ -411,6 +421,30 @@ function ScienceWatchPage() {
     });
     
     return categorizedArticles;
+  };
+
+  // Amélioration du filtrage des articles
+  const isBiotechArticle = (article) => {
+    const searchText = `${article.title} ${article.description || ''} ${article.content || ''}`.toLowerCase();
+    
+    // Mots-clés généraux de la biotechnologie
+    const biotechGeneralKeywords = [
+      'biotech', 'biotechnologie', 'biologique', 'génétique', 'génome', 
+      'crispr', 'adn', 'arn', 'cellule', 'biologie', 'enzyme', 
+      'protéine', 'thérapie génique', 'biopharma', 'biomédical', 
+      'biocarburant', 'biosourcé', 'biomatériau', 'bioremédiation'
+    ];
+    
+    // Vérifier si l'article contient au moins un mot-clé général de biotechnologie
+    let isBiotech = false;
+    for (const keyword of biotechGeneralKeywords) {
+      if (searchText.includes(keyword.toLowerCase())) {
+        isBiotech = true;
+        break;
+      }
+    }
+    
+    return isBiotech;
   };
 
   return (

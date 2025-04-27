@@ -23,19 +23,22 @@ const protect = async (req, res, next) => {
       req.user = await User.findById(decoded.id).select('-password');
 
       if (!req.user) {
-        res.status(401);
-        throw new Error('Non autorisé, utilisateur non trouvé');
+        return res.status(401).json({
+          message: 'Non autorisé, utilisateur non trouvé'
+        });
       }
 
       next(); // Passer au prochain middleware/route
     } catch (error) {
       console.error('Token verification failed:', error);
-      res.status(401); // Unauthorized
-      next(new Error('Non autorisé, token invalide')); // Transmettre l'erreur
+      return res.status(401).json({
+        message: 'Non autorisé, token invalide'
+      });
     }
   } else {
-    res.status(401);
-    next(new Error('Non autorisé, pas de token fourni'));
+    return res.status(401).json({
+      message: 'Non autorisé, pas de token fourni'
+    });
   }
 };
 
@@ -44,8 +47,10 @@ const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next(); // L'utilisateur est admin, continuer
   } else {
-    res.status(403); // Forbidden
-    next(new Error('Accès refusé. Rôle administrateur requis.'));
+    res.status(403).json({ 
+      message: 'Accès refusé. Rôle administrateur requis.' 
+    });
+    // Ne pas appeler next() pour arrêter l'exécution ici
   }
 };
 
