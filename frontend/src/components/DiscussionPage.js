@@ -50,14 +50,14 @@ const DiscussionPage = () => {
     
     try {
       console.log(`Tentative de récupération de la discussion ID:${discussionId}`);
-      const discussionResponse = await api.get(`/forum/discussions/${discussionId}`);
+      const discussionResponse = await api.get(`/discussions/${discussionId}`);
       console.log("Réponse discussion:", discussionResponse.data);
       setDiscussion(discussionResponse.data.discussion);
       
       if (userInfo) {
         try {
           console.log("Vérification du statut de like");
-          const likeStatusResponse = await api.get(`/forum/discussions/${discussionId}/like-status`, {
+          const likeStatusResponse = await api.get(`/discussions/${discussionId}/like-status`, {
             headers: {
               Authorization: `Bearer ${userInfo.token}`
             }
@@ -70,7 +70,7 @@ const DiscussionPage = () => {
       }
       
       console.log(`Récupération des réponses avec tri: ${sortOrder}`);
-      const repliesResponse = await api.get(`/forum/discussions/${discussionId}/replies?sort=${sortOrder}`);
+      const repliesResponse = await api.get(`/discussions/${discussionId}/replies?sort=${sortOrder}`);
       console.log("Réponse replies:", repliesResponse.data);
       setReplies(repliesResponse.data.replies);
     } catch (err) {
@@ -104,7 +104,7 @@ const DiscussionPage = () => {
     setReplyError('');
     
     try {
-      const response = await api.post(`/forum/discussions/${discussionId}/replies`, {
+      const response = await api.post(`/discussions/${discussionId}/replies`, {
         content: replyContent
       }, {
         headers: {
@@ -131,7 +131,7 @@ const DiscussionPage = () => {
     }
     
     try {
-      const response = await api.post(`/forum/discussions/${discussionId}/like`, {}, {
+      const response = await api.post(`/discussions/${discussionId}/like`, {}, {
         headers: {
           Authorization: `Bearer ${userInfo.token}`
         }

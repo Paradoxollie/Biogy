@@ -35,7 +35,7 @@ const ForumPage = () => {
     setError('');
     
     try {
-      let endpoint = `/forum/discussions?page=${currentPage}`;
+      let endpoint = `/discussions?page=${currentPage}`;
       
       if (activeCategory !== 'all') {
         endpoint += `&category=${activeCategory}`;

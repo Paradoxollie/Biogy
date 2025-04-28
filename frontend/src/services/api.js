@@ -15,29 +15,43 @@ const api = axios.create({
   withCredentials: false
 });
 
-// Fonction helper pour ajouter /api au début des chemins si nécessaire
+// Fonction helper pour corriger les chemins d'API
 export const fixApiPath = (path) => {
-  // Si le chemin commence par '/api', ne pas modifier
+  // Si le chemin commence déjà par '/api', ne pas ajouter un autre '/api'
   if (path.startsWith('/api/')) {
     return path;
   }
   
-  // Si le chemin ne commence pas par '/', ajouter '/'
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  // Ne pas préfixer les URL complètes
+  if (path.startsWith('http')) {
+    return path;
+  }
   
-  // Ajouter '/api' au début
-  return `/api${normalizedPath}`;
+  // Enlever le préfixe "/forum" s'il existe
+  let normalizedPath = path;
+  if (path.startsWith('/forum/')) {
+    normalizedPath = path.replace('/forum/', '/');
+  }
+  
+  // Si le chemin ne commence pas par '/', ajouter '/'
+  if (!normalizedPath.startsWith('/')) {
+    normalizedPath = `/${normalizedPath}`;
+  }
+  
+  return normalizedPath;
 };
 
 // Intercepteur pour ajouter le token d'authentification à chaque requête
 api.interceptors.request.use(
   config => {
-    // Corriger le chemin de l'API si nécessaire
+    // Corriger le chemin uniquement pour les chemins relatifs
     if (!config.url.startsWith('http')) {
+      // Ne pas ajouter /api ici, car baseURL le contient déjà
       config.url = fixApiPath(config.url);
+      console.log('URL corrigée :', config.url);
     }
     
-    console.log('Appel API vers:', config.url);
+    console.log('Appel API complet vers:', config.baseURL + config.url);
     
     const userInfo = localStorage.getItem('userInfo');
     if (userInfo) {
