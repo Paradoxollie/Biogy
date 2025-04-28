@@ -2,6 +2,9 @@
   "name": "frontend",
   "version": "1.0.0",
   "main": "index.js",
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "build": "react-scripts build",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,6 +12,7 @@
   },
   "dependencies": {
     "autoprefixer": "^10.4.19",
+    "axios": "^1.6.5",
     "dompurify": "^3.2.5",
     "postcss": "^8.4.35",
     "react": "^18.2.0",
@@ -40,5 +44,10 @@
       "react-app"
     ]
   },
-  "proxy": "http://localhost:9000"
+  "proxy": "http://localhost:9000",
+  "resolutions": {
+    "nth-check": "^2.0.1",
+    "postcss": "^8.4.31",
+    "quill": "^2.0.0"
+  }
 }
