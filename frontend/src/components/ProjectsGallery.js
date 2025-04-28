@@ -12,7 +12,8 @@ function ProjectsGallery() {
   const [likeLoading, setLikeLoading] = useState(null); // ID du projet en cours de like
   const { userInfo } = useAuth();
 
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  // Update the API URL to point to the production backend if not in development
+  const apiUrl = process.env.REACT_APP_API_URL || 'https://biogy.onrender.com';
 
   // Utiliser useCallback pour éviter les boucles infinies avec useEffect
   const fetchProjects = useCallback(async () => {
