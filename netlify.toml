@@ -1,6 +1,6 @@
 [build]
   base = "/"
-  command = "npm run build --no-warnings --loglevel=error"
+  command = "npm run build"
   publish = "frontend/build"
   functions = "netlify/functions"
   
@@ -8,6 +8,9 @@
   NODE_VERSION = "18"
   NPM_VERSION = "9"
   PYTHON_VERSION = "3.9"
+  NODE_OPTIONS = "--max-old-space-size=4096"
+  CI = "false"
+  GENERATE_SOURCEMAP = "false"
 
 [[redirects]]
   from = "/api/*"
