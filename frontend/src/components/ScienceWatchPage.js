@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 
 function ScienceWatchPage() {
   const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [forceRefresh, setForceRefresh] = useState(false);
-  const [currentBatch, setCurrentBatch] = useState(0);
-  const [batchInfo, setBatchInfo] = useState(null);
-  const [loadingMore, setLoadingMore] = useState(false);
 
   // Définition des catégories de biotechnologie par couleur
   const biotechColors = {
@@ -84,137 +81,50 @@ function ScienceWatchPage() {
     }
   };
 
-  // Fonction pour charger les articles
-  const fetchArticles = async (colorFilter = null, skipCache = false, batchNumber = 0) => {
-    const isInitialLoad = batchNumber === 0 && !loadingMore;
+  // Fonction pour charger les articles d'une couleur spécifique
+  const fetchArticlesByColor = async (colorKey) => {
+    setLoading(true);
+    setError(null);
     
-    if (isInitialLoad) {
-      setLoading(true);
-      setError(null);
-      setArticles([]);
-      setBatchInfo(null);
-    } else {
-      setLoadingMore(true);
-    }
-    
-    // Maximum number of retries
-    const MAX_RETRIES = 3;
-    let retries = 0;
-    
-    const attemptFetch = async () => {
-      try {
-        // Construire l'URL de l'API avec ou sans filtre de couleur
-        let apiUrl = '/.netlify/functions/fetch-biotech-articles';
-        const params = [];
-        
-        if (colorFilter) {
-          params.push(`color=${colorFilter}`);
-        }
-        
-        if (skipCache) {
-          params.push('skipCache=true');
-        }
-        
-        // Ajouter le numéro de lot pour le chargement progressif
-        params.push(`batch=${batchNumber}`);
-        
-        if (params.length > 0) {
-          apiUrl += `?${params.join('&')}`;
-        }
-        
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': skipCache ? 'no-cache' : 'default',
-          },
-          // Augmenter le timeout côté client
-          signal: AbortSignal.timeout(30000), // 30 secondes de timeout
-        });
-        
-        if (!response.ok) {
-          if (response.status === 502) {
-            throw new Error(`La fonction Netlify a pris trop de temps à s'exécuter. Limitez le nombre de sources ou augmentez la capacité de la fonction.`);
-          } else {
-            throw new Error(`Erreur HTTP: ${response.status}`);
-          }
-        }
-        
-        const data = await response.json();
-        
-        if (!data || (!data.articles && !Array.isArray(data))) {
-          throw new Error('Format de réponse invalide');
-        }
-        
-        // Extraire les articles et les métadonnées
-        const fetchedArticles = data.articles || data;
-        const metadata = data.metadata || null;
-        
-        if (Array.isArray(fetchedArticles) && fetchedArticles.length === 0 && batchNumber === 0) {
-          console.warn('Aucun article retourné par la fonction Netlify.');
-          // If we have no articles and have retries left, try again
-          if (retries < MAX_RETRIES) {
-            retries++;
-            console.log(`Nouvelle tentative (${retries}/${MAX_RETRIES})...`);
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
-            return attemptFetch();
-          } else {
-            // Set articles to empty array rather than throwing an error
-            setArticles([]);
-            setError('Aucun article n\'a pu être récupéré après plusieurs tentatives. Vérifiez la connexion aux flux RSS.');
-          }
-        } else {
-          console.log(`Total articles chargés depuis la fonction Netlify: ${fetchedArticles.length}`);
-          
-          // Si c'est un chargement initial, remplacer les articles, sinon ajouter
-          if (isInitialLoad) {
-            setArticles(fetchedArticles);
-          } else {
-            setArticles(prevArticles => [...prevArticles, ...fetchedArticles]);
-          }
-          
-          // Si nous avons des métadonnées, les enregistrer pour charger des batchs ultérieurs
-          if (metadata) {
-            setBatchInfo(metadata);
-            setCurrentBatch(0);
-          }
-        }
-        
-      } catch (err) {
-        console.error("Erreur lors du chargement des articles depuis la fonction Netlify:", err);
-        
-        // Retry logic for certain errors, but not for timeout errors
-        if (retries < MAX_RETRIES && !err.message.includes('pris trop de temps') && !err.message.includes('aborted')) {
-          retries++;
-          console.log(`Nouvelle tentative (${retries}/${MAX_RETRIES}) après erreur...`);
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
-          return attemptFetch();
-        }
-        
-        // Message d'erreur plus explicite pour les timeouts Netlify
-        if (err.message.includes('pris trop de temps') || err.name === 'TimeoutError' || err.message.includes('aborted')) {
-          setError(`La fonction de récupération des articles a expiré. La version gratuite de Netlify limite l'exécution des fonctions à 10 secondes, ce qui peut être insuffisant pour interroger tous les flux RSS.`);
-        } else {
-          setError(`Impossible de charger les articles (${err.message}). Vérifiez la console pour plus de détails.`);
-        }
-      } finally {
-        if (isInitialLoad) {
-          setLoading(false);
-        } else {
-          setLoadingMore(false);
-        }
-      }
+    const colorEndpoints = {
+      red: "/.netlify/functions/redArticles",
+      blue: "/.netlify/functions/blueArticles",
+      yellow: "/.netlify/functions/yellowArticles",
+      green: "/.netlify/functions/greenArticles",
+      white: "/.netlify/functions/whiteArticles",
+      gray: "/.netlify/functions/grayArticles",
+      all: "/.netlify/functions/fetch-all" // Nouvel endpoint pour récupérer tous les articles
     };
     
-    attemptFetch();
-  };
-
-  // Fonction pour charger le prochain lot d'articles
-  const loadNextBatch = () => {
-    if (!batchInfo || currentBatch >= batchInfo.totalBatches - 1) return;
-    
-    const nextBatch = currentBatch + 1;
-    setCurrentBatch(nextBatch);
-    fetchArticles(selectedColor, forceRefresh, nextBatch);
+    try {
+      let selectedEndpoint = colorKey ? colorEndpoints[colorKey] : colorEndpoints.all;
+      
+      // Vérifier si l'endpoint existe
+      if (!selectedEndpoint) {
+        throw new Error(`Pas d'endpoint configuré pour ${colorKey || 'tous les articles'}`);
+      }
+      
+      // Construire l'URL avec le paramètre de rafraîchissement si nécessaire
+      let url = selectedEndpoint;
+      if (forceRefresh) {
+        url += `?refresh=true`;
+      }
+      
+      console.log(`Chargement des articles depuis: ${url}`);
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Erreur réseau: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setArticles(data);
+    } catch (err) {
+      setError(err.message);
+      console.error("Erreur lors du chargement des articles:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Charger les articles au montage du composant, sans filtre
@@ -225,10 +135,10 @@ function ScienceWatchPage() {
   }, []);
 
   // Gérer le changement de couleur sélectionnée
-  const handleColorSelect = (colorKey) => {
-    setSelectedColor(colorKey);
-    setCurrentBatch(0);
-    fetchArticles(colorKey, forceRefresh, 0);
+  const handleColorSelect = (color) => {
+    setSelectedColor(color);
+    setArticles([]);
+    fetchArticlesByColor(color);
   };
 
   // Sélecteur de couleur
@@ -373,36 +283,17 @@ function ScienceWatchPage() {
   // Get articles organized by biotech color with limit
   const articlesByBiotechColor = organizeArticlesByColor(articles);
 
-  // Afficher un bouton "Charger plus" si nécessaire
-  const renderLoadMoreButton = () => {
-    if (!batchInfo || currentBatch >= batchInfo.totalBatches - 1) return null;
-    
-    return (
-      <div className="flex justify-center my-6">
-        <button
-          onClick={loadNextBatch}
-          disabled={loadingMore}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-        >
-          {loadingMore ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Chargement...
-            </>
-          ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-              Charger plus d'articles
-            </>
-          )}
-        </button>
-      </div>
-    );
+  // Ajouter cette fonction pour gérer le rafraîchissement des articles:
+  const handleRefresh = () => {
+    if (selectedColor) {
+      setArticles([]);
+      fetchArticlesByColor(selectedColor);
+    }
+  };
+
+  // Ajouter cette fonction pour gérer le changement de l'option de rafraîchissement forcé:
+  const handleForceRefreshToggle = () => {
+    setForceRefresh(!forceRefresh);
   };
 
   return (
@@ -423,7 +314,6 @@ function ScienceWatchPage() {
               setArticles([]);
               setSelectedColor(null);
               setError(null);
-              setBatchInfo(null);
             }}
             className="mr-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300"
           >
@@ -432,11 +322,7 @@ function ScienceWatchPage() {
           
           <div className="flex flex-col items-center">
             <button 
-              onClick={() => {
-                setLoading(true);
-                setError(null);
-                fetchArticles(selectedColor, forceRefresh, 0);
-              }}
+              onClick={handleRefresh}
               disabled={loading}
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
@@ -453,7 +339,7 @@ function ScienceWatchPage() {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Actualiser les articles
+                  Rafraîchir
                 </>
               )}
             </button>
@@ -463,7 +349,7 @@ function ScienceWatchPage() {
                 type="checkbox" 
                 id="forceRefresh" 
                 checked={forceRefresh} 
-                onChange={() => setForceRefresh(!forceRefresh)} 
+                onChange={handleForceRefreshToggle} 
                 className="mr-2"
               />
               <label htmlFor="forceRefresh" className="text-sm text-gray-600">
@@ -577,9 +463,6 @@ function ScienceWatchPage() {
               </div>
             );
           })}
-          
-          {/* Bouton "Charger plus" */}
-          {renderLoadMoreButton()}
           
           {/* Display message if no articles loaded at all */} 
           {articles.length === 0 && !loading && error && (
