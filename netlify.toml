@@ -1,12 +1,12 @@
 [build]
   base = "/"
-  command = "npm run build"
+  command = "cd frontend && npm i --legacy-peer-deps && NODE_ENV=production npx react-scripts build"
   publish = "frontend/build"
   functions = "netlify/functions"
   
 [build.environment]
-  NODE_VERSION = "18"
-  NPM_VERSION = "9"
+  NODE_VERSION = "16"
+  NPM_VERSION = "8"
   PYTHON_VERSION = "3.9"
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "false"
