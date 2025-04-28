@@ -6,6 +6,7 @@ function ScienceWatchPage() {
   const [error, setError] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [forceRefresh, setForceRefresh] = useState(false);
+  const [biotechOnly, setBiotechOnly] = useState(true);
 
   // Définition des catégories de biotechnologie par couleur
   const biotechColors = {
@@ -98,6 +99,8 @@ function ScienceWatchPage() {
       if (forceRefresh) {
         params.append('refresh', 'true');
       }
+      // Ajouter le paramètre de filtrage biotech
+      params.append('biotechOnly', biotechOnly.toString());
       
       const fullUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
       console.log(`Chargement des articles depuis: ${fullUrl}`);
@@ -226,6 +229,16 @@ function ScienceWatchPage() {
     setForceRefresh(!forceRefresh);
   };
 
+  // Ajouter cette fonction pour gérer le changement du filtrage biotechnologie
+  const handleBiotechOnlyToggle = () => {
+    setBiotechOnly(!biotechOnly);
+    // Si des articles sont déjà chargés, rafraîchir avec le nouveau paramètre
+    if (articles.length > 0) {
+      setArticles([]);
+      setTimeout(() => fetchArticles(selectedColor), 100);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-6">Veille Scientifique Biotechnologie</h1>
@@ -274,17 +287,32 @@ function ScienceWatchPage() {
               )}
             </button>
             
-            <div className="mt-2 flex items-center">
-              <input 
-                type="checkbox" 
-                id="forceRefresh" 
-                checked={forceRefresh} 
-                onChange={handleForceRefreshToggle} 
-                className="mr-2"
-              />
-              <label htmlFor="forceRefresh" className="text-sm text-gray-600">
-                Ignorer le cache (plus frais mais plus lent)
-              </label>
+            <div className="flex flex-col space-y-2 mt-2">
+              <div className="flex items-center">
+                <input 
+                  type="checkbox" 
+                  id="forceRefresh" 
+                  checked={forceRefresh} 
+                  onChange={handleForceRefreshToggle} 
+                  className="mr-2"
+                />
+                <label htmlFor="forceRefresh" className="text-sm text-gray-600">
+                  Ignorer le cache (plus frais mais plus lent)
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <input 
+                  type="checkbox" 
+                  id="biotechOnly" 
+                  checked={biotechOnly} 
+                  onChange={handleBiotechOnlyToggle} 
+                  className="mr-2"
+                />
+                <label htmlFor="biotechOnly" className="text-sm text-gray-600">
+                  Filtrer strictement les articles de biotechnologie
+                </label>
+              </div>
             </div>
           </div>
         </div>
