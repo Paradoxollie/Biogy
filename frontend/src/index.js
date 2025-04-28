@@ -1,17 +1,20 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import App from './App'
 import { AuthProvider } from './context/AuthContext';
 import './index.css'; // Import Tailwind CSS
+import ErrorBoundary from './ErrorBoundary';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <React.StrictMode>
-        <BrowserRouter>
-            <AuthProvider>
-                <App />
-            </AuthProvider>
-        </BrowserRouter>
+        <ErrorBoundary>
+            <HashRouter>
+                <AuthProvider>
+                    <App />
+                </AuthProvider>
+            </HashRouter>
+        </ErrorBoundary>
     </React.StrictMode>
 );
