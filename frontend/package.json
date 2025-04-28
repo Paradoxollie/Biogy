@@ -11,6 +11,7 @@
     "start": "react-scripts start"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.7.0",
     "autoprefixer": "^10.4.19",
     "axios": "^1.6.5",
     "dompurify": "^3.2.5",
