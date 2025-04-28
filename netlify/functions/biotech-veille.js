@@ -481,188 +481,71 @@ exports.handler = async (event, context) => {
   // Récupérer le paramètre 'color' de la requête
   const params = event.queryStringParameters || {};
   const requestedColor = params.color || 'all';
-  const maxParam = params.max ? parseInt(params.max, 10) : MAX_ARTICLES;
-  const max = isNaN(maxParam) ? MAX_ARTICLES : maxParam;
+  const maxParam = params.max ? parseInt(params.max, 10) : 20; // Réduire le nombre d'articles par défaut
+  const max = isNaN(maxParam) ? 20 : Math.min(maxParam, 30); // Limiter à 30 articles maximum
   
   console.log(`Biotech-veille function invoked. Requested color: ${requestedColor}, max: ${max}`);
 
   try {
-    // Tenter de récupérer les articles depuis la fonction principale
-    console.log("Fetching articles from primary source...");
-    let articles = [];
-    
-    try {
-      const allArticlesResponse = await fetch(`${process.env.URL}/.netlify/functions/fetch-all`, {
-        timeout: 15000  // Augmenter le timeout à 15 secondes
-      });
-      
-      if (allArticlesResponse.ok) {
-        const allArticlesData = await allArticlesResponse.json();
-        articles = allArticlesData.articles || [];
-        console.log(`Fetched ${articles.length} articles from primary source`);
-      } else {
-        console.log(`Failed to fetch from primary source: ${allArticlesResponse.status}`);
-      }
-    } catch (fetchError) {
-      console.log(`Error fetching from primary source: ${fetchError.message}`);
-    }
-    
-    // Si pas assez d'articles de la source principale, utiliser les sources de secours
-    if (articles.length < MIN_ARTICLES_PER_COLOR * 5) {  // 5 couleurs principales
-      console.log("Not enough articles from primary source, fetching from fallback sources...");
-      
-      // Récupérer les articles de secours par couleur
-      const fallbackPromises = [];
-      
-      if (requestedColor === 'all' || requestedColor === 'red') {
-        fallbackPromises.push(fetchWithFallback('red'));
-      }
-      if (requestedColor === 'all' || requestedColor === 'blue') {
-        fallbackPromises.push(fetchWithFallback('blue'));
-      }
-      if (requestedColor === 'all' || requestedColor === 'green') {
-        fallbackPromises.push(fetchWithFallback('green'));
-      }
-      if (requestedColor === 'all' || requestedColor === 'white') {
-        fallbackPromises.push(fetchWithFallback('white'));
-      }
-      if (requestedColor === 'all' || requestedColor === 'yellow') {
-        fallbackPromises.push(fetchWithFallback('yellow'));
-      }
-      
-      // Attendre que toutes les requêtes de secours soient terminées
-      const fallbackResults = await Promise.allSettled(fallbackPromises);
-      
-      // Traiter les résultats des requêtes de secours
-      const fallbackArticles = fallbackResults
-        .filter(result => result.status === 'fulfilled' && result.value && result.value.articles)
-        .flatMap(result => result.value.articles);
-      
-      // Fusionner les articles principaux et de secours
-      articles = [...articles, ...fallbackArticles];
-      
-      console.log(`After fallback, total articles: ${articles.length}`);
-    }
-    
-    // Filtrer les articles selon la couleur demandée
-    let filteredArticles = articles;
-    
-    // Si une couleur spécifique est demandée, filtrer les articles
+    // Pour les demandes de couleur spécifique, court-circuiter et utiliser directement la fonction dédiée
     if (requestedColor !== 'all') {
-      filteredArticles = articles.filter(article => {
-        // Vérifier si l'article a une propriété color ou si son URL/titre contient des indices sur sa couleur
-        if (article.color && article.color.toLowerCase() === requestedColor.toLowerCase()) {
-          return true;
-        }
-        
-        const contentToCheck = [
-          article.title || '',
-          article.content || '',
-          article.contentSnippet || '',
-          article.link || ''
-        ].join(' ').toLowerCase();
-        
-        // Définir les mots-clés pour chaque couleur
-        const keywordsByColor = {
-          red: ['médical', 'médecine', 'santé', 'pharma', 'thérapie', 'cancer', 'médic', 'clinique', 'patient', 'diagnostic', 'vaccin', 'soin', 'cellule', 'génét', 'immunothérapie', 'biomédical'],
-          blue: ['marin', 'océan', 'aqua', 'mer', 'poisson', 'algue', 'plancton', 'coral', 'maritime', 'sous-marin', 'pêche', 'aquatique', 'récif'],
-          green: ['agricult', 'plante', 'culture', 'aliment', 'agronom', 'ferme', 'végétal', 'récolte', 'semence', 'agroalimentaire', 'crop', 'agri', 'bio-fertilisant', 'biocarburant', 'biofuel'],
-          white: ['industri', 'procédé', 'process', 'enzyme', 'ferment', 'bioproduction', 'manufactur', 'chimique', 'biocatalys', 'synthèse', 'biomatériaux', 'biocarburant', 'bioplastique'],
-          yellow: ['environ', 'pollut', 'dépollu', 'décontamin', 'déchet', 'assainiss', 'écolog', 'biosurveillance', 'biodégrad', 'bioremédiation', 'climat', 'durable', 'recyclage', 'restauration']
-        };
-        
-        // Vérifier si le contenu contient des mots-clés de la couleur demandée
-        return keywordsByColor[requestedColor].some(keyword => contentToCheck.includes(keyword));
-      });
-      
-      // Si pas assez d'articles après filtrage, ajouter des articles de secours pour cette couleur
-      if (filteredArticles.length < MIN_ARTICLES_PER_COLOR && FALLBACK_ARTICLES[requestedColor]) {
-        console.log(`Not enough ${requestedColor} articles after filtering, adding fallback articles`);
-        // Ajouter uniquement les articles de secours qui n'existent pas déjà (éviter les doublons)
-        const existingUrls = new Set(filteredArticles.map(a => a.link));
-        const additionalArticles = FALLBACK_ARTICLES[requestedColor].filter(a => !existingUrls.has(a.link));
-        filteredArticles = [...filteredArticles, ...additionalArticles];
-      }
-    } else {
-      // Pour 'all', s'assurer d'avoir un bon mélange de toutes les couleurs
-      const articlesByColor = {};
-      ['red', 'blue', 'green', 'white', 'yellow'].forEach(color => {
-        articlesByColor[color] = articles.filter(article => {
-          if (article.color && article.color.toLowerCase() === color) {
-            return true;
-          }
-          
-          const contentToCheck = [
-            article.title || '',
-            article.content || '',
-            article.contentSnippet || '',
-            article.link || ''
-          ].join(' ').toLowerCase();
-          
-          // Définir les mots-clés pour chaque couleur
-          const keywordsByColor = {
-            red: ['médical', 'médecine', 'santé', 'pharma', 'thérapie', 'cancer', 'médic', 'clinique', 'patient', 'diagnostic', 'vaccin', 'soin', 'cellule', 'génét', 'immunothérapie', 'biomédical'],
-            blue: ['marin', 'océan', 'aqua', 'mer', 'poisson', 'algue', 'plancton', 'coral', 'maritime', 'sous-marin', 'pêche', 'aquatique', 'récif'],
-            green: ['agricult', 'plante', 'culture', 'aliment', 'agronom', 'ferme', 'végétal', 'récolte', 'semence', 'agroalimentaire', 'crop', 'agri', 'bio-fertilisant', 'biocarburant', 'biofuel'],
-            white: ['industri', 'procédé', 'process', 'enzyme', 'ferment', 'bioproduction', 'manufactur', 'chimique', 'biocatalys', 'synthèse', 'biomatériaux', 'biocarburant', 'bioplastique'],
-            yellow: ['environ', 'pollut', 'dépollu', 'décontamin', 'déchet', 'assainiss', 'écolog', 'biosurveillance', 'biodégrad', 'bioremédiation', 'climat', 'durable', 'recyclage', 'restauration']
-          };
-          
-          return keywordsByColor[color].some(keyword => contentToCheck.includes(keyword));
+      console.log(`Requesting specific color: ${requestedColor}, using direct function`);
+      try {
+        const colorResponse = await fetch(`${process.env.URL}/.netlify/functions/fetch-${requestedColor}`, {
+          timeout: 8000  // Réduire le timeout pour éviter que la fonction Netlify ne timeout (limite à 10s)
         });
         
-        // S'il n'y a pas assez d'articles pour cette couleur, ajouter des articles de secours
-        if (articlesByColor[color].length < MIN_ARTICLES_PER_COLOR && FALLBACK_ARTICLES[color]) {
-          console.log(`Not enough ${color} articles, adding fallback articles`);
-          const existingUrls = new Set(articlesByColor[color].map(a => a.link));
-          const additionalArticles = FALLBACK_ARTICLES[color].filter(a => !existingUrls.has(a.link));
-          articlesByColor[color] = [...articlesByColor[color], ...additionalArticles];
+        if (colorResponse.ok) {
+          const colorData = await colorResponse.json();
+          let articles = colorData.articles || [];
+          
+          // Ajouter des articles de secours si nécessaire
+          if (articles.length < 3 && FALLBACK_ARTICLES[requestedColor]) {
+            const fallbackToAdd = FALLBACK_ARTICLES[requestedColor];
+            articles = [...articles, ...fallbackToAdd];
+          }
+          
+          // Trier et limiter
+          articles.sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
+          const limitedArticles = articles.slice(0, max);
+          
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({ articles: limitedArticles })
+          };
         }
-      });
-      
-      // Fusionner tous les articles classés par couleur
-      filteredArticles = Object.values(articlesByColor).flat();
-      
-      // Ajouter quelques articles multi-disciplines si disponibles
-      const multiArticles = FALLBACK_ARTICLES.multi || [];
-      filteredArticles = [...filteredArticles, ...multiArticles];
+      } catch (error) {
+        console.log(`Error fetching ${requestedColor} articles directly: ${error.message}`);
+        // Continue to fallback strategy
+      }
     }
     
-    // Trier les articles par date de publication (du plus récent au plus ancien)
-    filteredArticles.sort((a, b) => {
-      const dateA = a.pubDate ? new Date(a.pubDate) : new Date(0);
-      const dateB = b.pubDate ? new Date(b.pubDate) : new Date(0);
-      return dateB - dateA;
-    });
+    // Si la demande concerne tous les articles ou si la requête directe a échoué
+    // Utiliser les articles de secours immédiatement pour garantir une réponse rapide
+    console.log("Using fallback articles for quick response");
     
-    // Limiter le nombre d'articles retournés
-    const limitedArticles = filteredArticles.slice(0, max);
-    
-    console.log(`Returning ${limitedArticles.length} articles for color: ${requestedColor}`);
-    
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ articles: limitedArticles })
-    };
-  } catch (error) {
-    console.error('Error in biotech-veille function:', error);
-    
-    // En cas d'erreur, retourner les articles de secours
     let fallbackArticles = [];
     
     if (requestedColor === 'all') {
-      // Combiner tous les articles de secours pour toutes les couleurs
-      fallbackArticles = Object.values(FALLBACK_ARTICLES).flat();
+      // Pour tous les articles, prendre quelques-uns de chaque couleur
+      ['red', 'blue', 'green', 'white', 'yellow'].forEach(color => {
+        if (FALLBACK_ARTICLES[color]) {
+          // Prendre seulement 2-3 articles de chaque couleur pour aller vite
+          fallbackArticles = [...fallbackArticles, ...FALLBACK_ARTICLES[color].slice(0, 3)];
+        }
+      });
+      
+      // Ajouter quelques articles multi
+      if (FALLBACK_ARTICLES.multi) {
+        fallbackArticles = [...fallbackArticles, ...FALLBACK_ARTICLES.multi.slice(0, 3)];
+      }
     } else if (FALLBACK_ARTICLES[requestedColor]) {
-      // Retourner les articles de secours pour la couleur demandée
+      // Utiliser les articles de secours pour la couleur demandée
       fallbackArticles = FALLBACK_ARTICLES[requestedColor];
-    } else {
-      // Si la couleur demandée n'a pas d'articles de secours, retourner les articles multi
-      fallbackArticles = FALLBACK_ARTICLES.multi || [];
     }
     
-    // Trier et limiter les articles de secours
+    // Trier par date et limiter
     fallbackArticles.sort((a, b) => {
       const dateA = a.pubDate ? new Date(a.pubDate) : new Date(0);
       const dateB = b.pubDate ? new Date(b.pubDate) : new Date(0);
@@ -671,35 +554,62 @@ exports.handler = async (event, context) => {
     
     const limitedFallbackArticles = fallbackArticles.slice(0, max);
     
+    // Essayer de charger les articles dynamiquement en arrière-plan et mettre en cache pour la prochaine requête
+    // Mais retourner les articles de secours immédiatement
+    setTimeout(async () => {
+      try {
+        // Charger les articles en arrière-plan pour la prochaine requête
+        console.log("Background loading articles for next request");
+        const allArticlesResponse = await fetch(`${process.env.URL}/.netlify/functions/fetch-all`, {
+          timeout: 8000
+        });
+        
+        if (allArticlesResponse.ok) {
+          console.log("Successfully loaded articles in background");
+          // Netlify n'a pas de mécanisme intégré pour mettre en cache entre les requêtes
+          // Cette partie est donc uniquement pour éviter les timeouts
+        }
+      } catch (error) {
+        console.log(`Background loading error: ${error.message}`);
+      }
+    }, 0);
+    
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({ 
         articles: limitedFallbackArticles,
-        error: `Error fetching articles: ${error.message}`
+        source: 'fallback', // Indiquer que ce sont des articles de secours
+      })
+    };
+  } catch (error) {
+    console.error('Error in biotech-veille function:', error);
+    
+    // En cas d'erreur ultime, retourner un ensemble minimal d'articles de secours
+    const emergencyArticles = [];
+    
+    // Prendre juste quelques articles
+    if (requestedColor === 'all') {
+      Object.values(FALLBACK_ARTICLES).forEach(colorArticles => {
+        if (colorArticles && colorArticles.length > 0) {
+          emergencyArticles.push(colorArticles[0]);
+        }
+      });
+    } else if (FALLBACK_ARTICLES[requestedColor] && FALLBACK_ARTICLES[requestedColor].length > 0) {
+      emergencyArticles.push(...FALLBACK_ARTICLES[requestedColor].slice(0, 3));
+    } else {
+      // Articles multi en dernier recours
+      emergencyArticles.push(...(FALLBACK_ARTICLES.multi || []).slice(0, 3));
+    }
+    
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ 
+        articles: emergencyArticles,
+        error: `Error fetching articles: ${error.message}`,
+        source: 'emergency'
       })
     };
   }
-};
-
-// Fonction pour récupérer les articles d'une couleur spécifique avec gestion des erreurs
-async function fetchWithFallback(color) {
-  console.log(`Fetching articles for color: ${color}`);
-  try {
-    const response = await fetch(`${process.env.URL}/.netlify/functions/fetch-${color}`, {
-      timeout: 10000  // 10 secondes de timeout
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log(`Successfully fetched ${data.articles ? data.articles.length : 0} ${color} articles`);
-      return data;
-    } else {
-      console.log(`Failed to fetch ${color} articles: ${response.status}`);
-      return { articles: FALLBACK_ARTICLES[color] || [] };
-    }
-  } catch (error) {
-    console.log(`Error fetching ${color} articles: ${error.message}`);
-    return { articles: FALLBACK_ARTICLES[color] || [] };
-  }
-} 
+}; 

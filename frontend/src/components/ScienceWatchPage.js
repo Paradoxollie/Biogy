@@ -102,32 +102,87 @@ function ScienceWatchPage() {
       }
       // Ajouter le paramètre de filtrage biotech
       params.append('biotechOnly', biotechOnly.toString());
+      // Limiter le nombre d'articles pour réduire le risque de timeout
+      params.append('max', '20');
       
       const fullUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
       console.log(`Chargement des articles depuis: ${fullUrl}`);
       
-      const response = await fetch(fullUrl);
+      // Ajouter un timeout côté client
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
       
-      if (!response.ok) {
-        throw new Error(`Erreur réseau: ${response.status}`);
+      try {
+        const response = await fetch(fullUrl, {
+          signal: controller.signal,
+          // Préciser les options de cache pour éviter les problèmes côté client
+          cache: 'no-cache',
+          headers: {
+            'pragma': 'no-cache',
+            'cache-control': 'no-cache'
+          }
+        });
+        
+        // Nettoyer le timeout
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          // En cas d'erreur, afficher le code et message d'erreur
+          console.error(`Erreur réseau: ${response.status} ${response.statusText}`);
+          
+          if (response.status === 502 || response.status === 504) {
+            // Si on a une erreur de gateway ou de timeout, essayer directement la fonction de debug
+            console.log("Tentative de diagnostic du serveur...");
+            try {
+              const debugResponse = await fetch('/.netlify/functions/debug-status');
+              if (debugResponse.ok) {
+                const debugData = await debugResponse.json();
+                console.log("Diagnostic:", debugData);
+                
+                // Continuer avec les données de secours simulées
+                setArticles([]);
+                throw new Error(`La passerelle Netlify a renvoyé une erreur ${response.status}. Veuillez réessayer plus tard.`);
+              }
+            } catch (debugError) {
+              console.error("Échec du diagnostic:", debugError);
+            }
+          }
+          
+          throw new Error(`Erreur réseau: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        if (data.articles && Array.isArray(data.articles)) {
+          setArticles(data.articles);
+          
+          // Calculer le nombre d'articles par couleur
+          const countByColor = data.articles.reduce((acc, article) => {
+            const color = article.biotechColor || 'unclassified';
+            acc[color] = (acc[color] || 0) + 1;
+            return acc;
+          }, {});
+          
+          setArticleCount(countByColor);
+        } else {
+          console.error("Format de données incorrect:", data);
+          throw new Error("Format de données incorrect");
+        }
+      } catch (fetchError) {
+        // Nettoyer le timeout en cas d'erreur
+        clearTimeout(timeoutId);
+        
+        // Si l'erreur est due à un abort, c'est un timeout client
+        if (fetchError.name === 'AbortError') {
+          throw new Error("La requête a pris trop de temps. Veuillez réessayer plus tard.");
+        }
+        
+        throw fetchError;
       }
-      
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      setArticles(data);
-      
-      // Calculer le nombre d'articles par couleur
-      const countByColor = data.reduce((acc, article) => {
-        const color = article.biotechColor || 'unclassified';
-        acc[color] = (acc[color] || 0) + 1;
-        return acc;
-      }, {});
-      
-      setArticleCount(countByColor);
     } catch (err) {
       setError(err.message);
       console.error("Erreur lors du chargement des articles:", err);
