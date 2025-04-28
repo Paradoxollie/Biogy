@@ -25,7 +25,9 @@ app.get('/', (req, res) => {
 // Routes spécifiques (à compléter dans routes/)
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/posts', require('./routes/postRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes')); // Nouvelles routes admin
+app.use('/api/admin', require('./routes/adminRoutes')); // Routes admin
+app.use('/api/forum', require('./routes/forumRoutes')); // Nouvelles routes forum
+app.use('/api/social', require('./routes/socialRoutes')); // Nouvelles routes sociales
 
 // Gestionnaire d'erreurs global
 app.use((err, req, res, next) => {
