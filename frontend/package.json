@@ -22,9 +22,6 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "engines": {
-    "node": "18.x"
-  },
   "browserslist": {
     "production": [
       ">0.2%",
