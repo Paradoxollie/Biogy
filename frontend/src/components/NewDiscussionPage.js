@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import api from '../services/api';
 
 const NewDiscussionPage = () => {
   const navigate = useNavigate();
@@ -75,30 +76,35 @@ const NewDiscussionPage = () => {
       .filter(tag => tag.length > 0);
     
     try {
-      const response = await fetch('/api/discussions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title,
-          content,
-          category,
-          tags: tagArray,
-        }),
+      console.log('Envoi de la nouvelle discussion au serveur');
+      
+      const response = await api.post('/discussions', {
+        title,
+        content,
+        category,
+        tags: tagArray,
       });
       
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Une erreur est survenue');
-      }
+      console.log('Réponse du serveur:', response.data);
       
       // Redirection vers la nouvelle discussion
-      navigate(`/discussion/${data._id}`);
+      navigate(`/discussion/${response.data._id}`);
     } catch (err) {
-      console.error(err);
-      setError(err.message || 'Une erreur est survenue. Veuillez réessayer.');
+      console.error('Erreur lors de la création de la discussion:', err);
+      
+      if (err.response) {
+        // La requête a été faite et le serveur a répondu avec un code d'erreur
+        console.error('Réponse d\'erreur du serveur:', err.response.data);
+        setError(err.response.data.message || 'Erreur du serveur. Veuillez réessayer.');
+      } else if (err.request) {
+        // La requête a été faite mais aucune réponse n'a été reçue
+        console.error('Pas de réponse du serveur:', err.request);
+        setError('Impossible de joindre le serveur. Veuillez vérifier votre connexion et réessayer.');
+      } else {
+        // Une erreur s'est produite lors de la configuration de la requête
+        console.error('Erreur de requête:', err.message);
+        setError('Une erreur est survenue. Veuillez réessayer.');
+      }
     } finally {
       setLoading(false);
     }
