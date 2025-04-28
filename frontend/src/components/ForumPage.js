@@ -49,13 +49,15 @@ const ForumPage = () => {
         endpoint += '&sort=createdAt';
       }
       
+      console.log("Tentative d'appel API vers:", endpoint);
       const response = await api.get(endpoint);
+      console.log("Réponse reçue:", response.data);
       
       setDiscussions(response.data.discussions);
       setTotalPages(response.data.totalPages);
     } catch (err) {
+      console.error("Erreur complète:", err);
       setError(err.response?.data?.message || err.message || 'Une erreur est survenue. Veuillez réessayer.');
-      console.error(err);
     } finally {
       setLoading(false);
     }

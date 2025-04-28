@@ -49,27 +49,33 @@ const DiscussionPage = () => {
     setError(null);
     
     try {
+      console.log(`Tentative de récupération de la discussion ID:${discussionId}`);
       const discussionResponse = await api.get(`/forum/discussions/${discussionId}`);
+      console.log("Réponse discussion:", discussionResponse.data);
       setDiscussion(discussionResponse.data.discussion);
       
       if (userInfo) {
         try {
+          console.log("Vérification du statut de like");
           const likeStatusResponse = await api.get(`/forum/discussions/${discussionId}/like-status`, {
             headers: {
               Authorization: `Bearer ${userInfo.token}`
             }
           });
+          console.log("Réponse like status:", likeStatusResponse.data);
           setHasLiked(likeStatusResponse.data.hasLiked);
         } catch (err) {
           console.error('Error checking like status:', err);
         }
       }
       
+      console.log(`Récupération des réponses avec tri: ${sortOrder}`);
       const repliesResponse = await api.get(`/forum/discussions/${discussionId}/replies?sort=${sortOrder}`);
+      console.log("Réponse replies:", repliesResponse.data);
       setReplies(repliesResponse.data.replies);
     } catch (err) {
+      console.error("Erreur détaillée:", err);
       setError(err.response?.data?.message || 'Une erreur est survenue lors de la récupération des données');
-      console.error(err);
     } finally {
       setLoading(false);
     }

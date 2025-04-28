@@ -12,6 +12,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: false
 });
 
 // Intercepteur pour ajouter le token d'authentification à chaque requête
@@ -19,9 +20,13 @@ api.interceptors.request.use(
   config => {
     const userInfo = localStorage.getItem('userInfo');
     if (userInfo) {
-      const { token } = JSON.parse(userInfo);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      try {
+        const { token } = JSON.parse(userInfo);
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error('Erreur lors du parsing des données utilisateur:', error);
       }
     }
     return config;
