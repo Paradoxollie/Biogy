@@ -7,6 +7,7 @@ function ScienceWatchPage() {
   const [selectedColor, setSelectedColor] = useState(null);
   const [forceRefresh, setForceRefresh] = useState(false);
   const [biotechOnly, setBiotechOnly] = useState(true);
+  const [articleCount, setArticleCount] = useState({});
 
   // Définition des catégories de biotechnologie par couleur
   const biotechColors = {
@@ -118,6 +119,15 @@ function ScienceWatchPage() {
       }
       
       setArticles(data);
+      
+      // Calculer le nombre d'articles par couleur
+      const countByColor = data.reduce((acc, article) => {
+        const color = article.biotechColor || 'unclassified';
+        acc[color] = (acc[color] || 0) + 1;
+        return acc;
+      }, {});
+      
+      setArticleCount(countByColor);
     } catch (err) {
       setError(err.message);
       console.error("Erreur lors du chargement des articles:", err);
@@ -125,6 +135,26 @@ function ScienceWatchPage() {
       setLoading(false);
     }
   };
+
+  // Précalculer le nombre d'articles par couleur au montage initial
+  useEffect(() => {
+    // Obtenir un aperçu du nombre d'articles disponibles par couleur
+    const preloadArticleCounts = async () => {
+      try {
+        const response = await fetch('/.netlify/functions/biotech-veille?counts=true');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.counts) {
+            setArticleCount(data.counts);
+          }
+        }
+      } catch (error) {
+        console.error("Erreur lors du préchargement des compteurs:", error);
+      }
+    };
+    
+    preloadArticleCounts();
+  }, []);
 
   // Charger les articles au montage du composant, sans filtre
   useEffect(() => {
@@ -154,10 +184,17 @@ function ScienceWatchPage() {
               <button
                 key={key}
                 onClick={() => handleColorSelect(key)}
-                className={`p-4 rounded-lg ${data.bgColorLight} border-l-4 ${data.borderColor} transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${data.color}-500`}
+                className={`p-4 rounded-lg ${data.bgColorLight} border-l-4 ${data.borderColor} transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${data.color}-500 relative`}
               >
                 <h3 className={`font-bold ${data.textColor}`}>{data.name}</h3>
                 <p className="text-sm">{data.description}</p>
+                
+                {/* Badge du nombre d'articles si disponible */}
+                {articleCount[key] && (
+                  <span className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    {articleCount[key]}
+                  </span>
+                )}
               </button>
             ))}
         </div>
