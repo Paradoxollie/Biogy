@@ -6,7 +6,7 @@
     "node": "16.x"
   },
   "scripts": {
-    "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
+    "build": "cross-env DISABLE_ESLINT_PLUGIN=true react-scripts build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "react-scripts start"
   },
@@ -29,7 +29,8 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-replace": "^5.0.5",
     "@rollup/plugin-terser": "^0.4.4",
-    "@surma/rollup-plugin-off-main-thread": "^2.2.3"
+    "@surma/rollup-plugin-off-main-thread": "^2.2.3",
+    "cross-env": "^7.0.3"
   },
   "keywords": [],
   "author": "",
