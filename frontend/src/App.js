@@ -11,6 +11,9 @@ import ScienceWatchPage from './components/ScienceWatchPage';
 import AuthDebug from './context/AuthDebug';
 import ForumPage from './components/ForumPage';
 import ProfilePage from './components/ProfilePage';
+import DiscussionPage from './components/DiscussionPage';
+import NewDiscussionPage from './components/NewDiscussionPage';
+import EditProfilePage from './components/ProfilePage';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
