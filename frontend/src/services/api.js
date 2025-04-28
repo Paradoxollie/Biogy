@@ -17,11 +17,6 @@ const api = axios.create({
 
 // Fonction helper pour corriger les chemins d'API
 export const fixApiPath = (path) => {
-  // Si le chemin commence déjà par '/api', ne pas ajouter un autre '/api'
-  if (path.startsWith('/api/')) {
-    return path;
-  }
-  
   // Ne pas préfixer les URL complètes
   if (path.startsWith('http')) {
     return path;
@@ -30,7 +25,12 @@ export const fixApiPath = (path) => {
   // Enlever le préfixe "/forum" s'il existe
   let normalizedPath = path;
   if (path.startsWith('/forum/')) {
-    normalizedPath = path.replace('/forum/', '/');
+    normalizedPath = path.substring(6); // Remove '/forum' prefix
+  }
+  
+  // Si le chemin commence déjà par '/api/', enlever ce préfixe car baseURL le contient déjà
+  if (normalizedPath.startsWith('/api/')) {
+    normalizedPath = normalizedPath.substring(4); // Remove '/api' prefix
   }
   
   // Si le chemin ne commence pas par '/', ajouter '/'
@@ -38,6 +38,7 @@ export const fixApiPath = (path) => {
     normalizedPath = `/${normalizedPath}`;
   }
   
+  console.log(`Appel API vers: ${normalizedPath}`);
   return normalizedPath;
 };
 
@@ -46,12 +47,8 @@ api.interceptors.request.use(
   config => {
     // Corriger le chemin uniquement pour les chemins relatifs
     if (!config.url.startsWith('http')) {
-      // Ne pas ajouter /api ici, car baseURL le contient déjà
       config.url = fixApiPath(config.url);
-      console.log('URL corrigée :', config.url);
     }
-    
-    console.log('Appel API complet vers:', config.baseURL + config.url);
     
     const userInfo = localStorage.getItem('userInfo');
     if (userInfo) {

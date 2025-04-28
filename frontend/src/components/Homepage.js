@@ -476,7 +476,7 @@ function Homepage() {
                 <Link to="/forum" className="text-white bg-lab-green hover:bg-lab-green/90 px-4 py-2 rounded-lg transition-colors duration-300 text-sm font-medium w-full text-center">
                   Voir les discussions
                 </Link>
-                <Link to="/forum/nouvelle-discussion" className="text-lab-green border border-lab-green hover:bg-lab-green/5 px-4 py-2 rounded-lg transition-colors duration-300 text-sm font-medium w-full text-center">
+                <Link to="/nouvelle-discussion" className="text-lab-green border border-lab-green hover:bg-lab-green/5 px-4 py-2 rounded-lg transition-colors duration-300 text-sm font-medium w-full text-center">
                   Poser une question
                 </Link>
               </div>

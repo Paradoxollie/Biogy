@@ -56,7 +56,7 @@ const ForumHomePage = () => {
           queryParams.append('search', searchTerm);
         }
         
-        const response = await fetch(`/api/forum/discussions?${queryParams.toString()}`);
+        const response = await fetch(`/api/discussions?${queryParams.toString()}`);
         
         if (!response.ok) {
           throw new Error('Erreur lors de la récupération des discussions');
@@ -189,7 +189,7 @@ const ForumHomePage = () => {
           
           {userInfo ? (
             <Link
-              to="/forum/new"
+              to="/new-discussion"
               className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-lab-purple hover:bg-lab-purple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lab-purple"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -200,7 +200,7 @@ const ForumHomePage = () => {
           ) : (
             <Link
               to="/login"
-              state={{ from: '/forum/new' }}
+              state={{ from: '/new-discussion' }}
               className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lab-purple"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
@@ -295,7 +295,7 @@ const ForumHomePage = () => {
               {userInfo && (
                 <div className="mt-6">
                   <Link
-                    to="/forum/new"
+                    to="/new-discussion"
                     className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-lab-purple hover:bg-lab-purple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lab-purple"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -320,7 +320,7 @@ const ForumHomePage = () => {
                 
                 return (
                   <li key={discussion._id} className="hover:bg-gray-50">
-                    <Link to={`/forum/discussion/${discussion._id}`} className="block">
+                    <Link to={`/discussion/${discussion._id}`} className="block">
                       <div className="px-4 py-4 sm:px-6">
                         <div className="flex items-center mb-1">
                           <span className={`px-2.5 py-0.5 rounded text-xs font-medium ${categoryObj.color}`}>

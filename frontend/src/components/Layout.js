@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../actions/userActions';
 
 function Layout({ children }) {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { userInfo, logout, loadingAuth } = useAuth();
+  const { userInfo, logout: authLogout, loadingAuth } = useAuth();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -18,9 +22,19 @@ function Layout({ children }) {
   }, []);
   
   const handleLogout = () => {
-    logout();
+    dispatch(logout());
+    authLogout();
     navigate('/login');
   };
+
+  const handleMobileMenuToggle = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  // Close mobile menu when navigating to a new page
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   if (loadingAuth) {
     return (
@@ -170,12 +184,75 @@ function Layout({ children }) {
             )}
           </div>
           
-          <button className="md:hidden text-gray-700">
+          <button 
+            onClick={handleMobileMenuToggle}
+            className="md:hidden text-gray-700"
+            aria-label="Toggle mobile menu"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-200 py-3 shadow-lg animate-fadeIn">
+            <div className="px-4 space-y-3">
+              {[
+                { name: 'Apprendre', path: '/apprendre', color: 'lab-blue' },
+                { name: 'Recherche', path: '/recherche', color: 'lab-purple' },
+                { name: 'Projets', path: '/projets', color: 'lab-teal' },
+                { name: 'Forum', path: '/forum', color: 'lab-purple' },
+                { name: 'Actualités', path: '/actualites', color: 'lab-teal' },
+                { name: 'Méthodes', path: '/methodes', color: 'lab-green' }
+              ].map((item) => (
+                <Link 
+                  key={item.name}
+                  to={item.path}
+                  className={`block py-2 px-3 rounded-md font-medium transition-colors duration-300 ${
+                    location.pathname === item.path 
+                      ? `bg-${item.color}/10 text-${item.color}` 
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+              
+              <div className="border-t border-gray-100 my-3 pt-3">
+                {userInfo ? (
+                  <>
+                    <div className="px-3 mb-2 text-gray-700">Bonjour, {userInfo.username}!</div>
+                    {userInfo.role === 'admin' && (
+                      <Link 
+                        to="/admin" 
+                        className="block py-2 px-3 text-indigo-600 hover:bg-indigo-50 rounded-md font-medium"
+                      >
+                        Panneau Admin
+                      </Link>
+                    )}
+                    <button 
+                      onClick={handleLogout}
+                      className="block w-full text-left py-2 px-3 text-red-600 hover:bg-red-50 rounded-md font-medium"
+                    >
+                      Déconnexion
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" className="block py-2 px-3 text-gray-600 hover:bg-gray-50 rounded-md font-medium">
+                      Se Connecter
+                    </Link>
+                    <Link to="/register" className="block py-2 px-3 text-gray-600 hover:bg-gray-50 rounded-md font-medium">
+                      S'inscrire
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </header>
       
       <main className="flex-grow">

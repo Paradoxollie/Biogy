@@ -77,7 +77,7 @@ const ForumList = () => {
     
     try {
       // Construire l'URL avec les paramètres de filtrage
-      let url = `/api/forum/discussions?page=${currentPage}`;
+      let url = `/api/discussions?page=${currentPage}`;
       
       if (searchTerm) url += `&search=${encodeURIComponent(searchTerm)}`;
       if (sortBy) url += `&sort=${sortBy}`;
@@ -104,7 +104,7 @@ const ForumList = () => {
   // Fonction pour récupérer les tags populaires
   const fetchPopularTags = async () => {
     try {
-      const response = await fetch('/api/forum/tags/popular');
+      const response = await fetch('/api/tags/popular');
       const data = await response.json();
       
       if (!response.ok) {
@@ -206,7 +206,7 @@ const ForumList = () => {
             </form>
             
             <button
-              onClick={() => navigate('/forum/new')}
+              onClick={() => navigate('/new-discussion')}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-lab-purple hover:bg-lab-purple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lab-purple"
             >
               <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -389,7 +389,7 @@ const ForumList = () => {
             </p>
             <div className="mt-6">
               <button
-                onClick={() => navigate('/forum/new')}
+                onClick={() => navigate('/new-discussion')}
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-lab-purple hover:bg-lab-purple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lab-purple"
               >
                 <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -403,7 +403,7 @@ const ForumList = () => {
           <div className="space-y-4">
             {discussions.map((discussion) => (
               <div key={discussion._id} className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 hover:border-lab-purple transition-colors">
-                <Link to={`/forum/discussion/${discussion._id}`} className="block p-6">
+                <Link to={`/discussion/${discussion._id}`} className="block p-6">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-2 mb-2">

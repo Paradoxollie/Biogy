@@ -40,8 +40,8 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/forum" element={<ForumPage />} />
-          <Route path="/forum/discussion/:id" element={<DiscussionPage />} />
-          <Route path="/forum/new" element={<NewDiscussionPage />} />
+          <Route path="/discussion/:discussionId" element={<DiscussionPage />} />
+          <Route path="/new-discussion" element={<NewDiscussionPage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<EditProfilePage />} />
         </Routes>

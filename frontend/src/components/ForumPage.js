@@ -30,34 +30,29 @@ const ForumPage = () => {
     { id: 'active', label: 'Plus actives' }
   ];
   
-  const fetchDiscussions = async () => {
+  const fetchDiscussions = async (pageNumber = currentPage) => {
     setLoading(true);
     setError('');
     
     try {
-      let endpoint = `/discussions?page=${currentPage}`;
+      let endpoint = `/discussions?page=${pageNumber}`;
       
       if (activeCategory !== 'all') {
         endpoint += `&category=${activeCategory}`;
       }
       
-      if (activeFilter === 'popular') {
-        endpoint += '&sort=likes';
-      } else if (activeFilter === 'active') {
-        endpoint += '&sort=replies';
-      } else {
-        endpoint += '&sort=createdAt';
+      if (activeFilter !== 'recent') {
+        endpoint += `&filter=${activeFilter}`;
       }
       
-      console.log("Tentative d'appel API vers:", endpoint);
-      const response = await api.get(endpoint);
-      console.log("Réponse reçue:", response.data);
+      console.log(`Fetching discussions with endpoint: ${endpoint}`);
       
+      const response = await api.get(endpoint);
       setDiscussions(response.data.discussions);
       setTotalPages(response.data.totalPages);
-    } catch (err) {
-      console.error("Erreur complète:", err);
-      setError(err.response?.data?.message || err.message || 'Une erreur est survenue. Veuillez réessayer.');
+    } catch (error) {
+      console.error('Erreur lors du chargement des discussions:', error);
+      setError('Impossible de charger les discussions. Veuillez réessayer plus tard.');
     } finally {
       setLoading(false);
     }
@@ -85,6 +80,11 @@ const ForumPage = () => {
     }
   };
   
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+    fetchDiscussions(value);
+  };
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8 px-4">
@@ -95,7 +95,7 @@ const ForumPage = () => {
               
               {userInfo && (
                 <Link
-                  to="/forum/new"
+                  to="/new-discussion"
                   className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-lab-purple hover:bg-lab-purple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lab-purple"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -176,7 +176,7 @@ const ForumPage = () => {
                 </p>
                 {userInfo && (
                   <Link
-                    to="/forum/new"
+                    to="/new-discussion"
                     className="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-lab-purple hover:bg-lab-purple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lab-purple"
                   >
                     Créer la première discussion
@@ -193,7 +193,7 @@ const ForumPage = () => {
                       key={discussion._id} 
                       className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                     >
-                      <Link to={`/forum/discussion/${discussion._id}`} className="block p-4">
+                      <Link to={`/discussion/${discussion._id}`} className="block p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${category.color}`}>

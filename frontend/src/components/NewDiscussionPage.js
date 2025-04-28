@@ -47,7 +47,7 @@ const NewDiscussionPage = () => {
   // Redirection vers la page de connexion si l'utilisateur n'est pas connecté
   React.useEffect(() => {
     if (!userInfo) {
-      navigate('/login', { state: { from: '/forum/new' } });
+      navigate('/login', { state: { from: '/new-discussion' } });
     }
   }, [userInfo, navigate]);
   
@@ -75,7 +75,7 @@ const NewDiscussionPage = () => {
       .filter(tag => tag.length > 0);
     
     try {
-      const response = await fetch('/api/forum/discussions', {
+      const response = await fetch('/api/discussions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ const NewDiscussionPage = () => {
       }
       
       // Redirection vers la nouvelle discussion
-      navigate(`/forum/discussion/${data._id}`);
+      navigate(`/discussion/${data._id}`);
     } catch (err) {
       console.error(err);
       setError(err.message || 'Une erreur est survenue. Veuillez réessayer.');
@@ -113,7 +113,7 @@ const NewDiscussionPage = () => {
       <div className="container mx-auto py-8 px-4">
         <div className="mb-6">
           <Link 
-            to="/forum"
+            to="/"
             className="inline-flex items-center text-sm font-medium text-lab-purple hover:text-lab-purple/90"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -204,7 +204,7 @@ const NewDiscussionPage = () => {
             
             <div className="flex justify-end pt-4 border-t border-gray-200">
               <Link
-                to="/forum"
+                to="/"
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 mr-3"
               >
                 Annuler

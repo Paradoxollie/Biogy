@@ -47,7 +47,7 @@ const CreateDiscussionPage = () => {
   useEffect(() => {
     // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
     if (!userInfo) {
-      navigate('/login', { state: { from: '/forum/new' } });
+      navigate('/login', { state: { from: '/new-discussion' } });
     }
   }, [userInfo, navigate]);
   
@@ -68,7 +68,7 @@ const CreateDiscussionPage = () => {
         .map(tag => tag.trim())
         .filter(tag => tag !== '');
       
-      const response = await fetch('/api/forum/discussions', {
+      const response = await fetch('/api/discussions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ const CreateDiscussionPage = () => {
       }
       
       // Rediriger vers la nouvelle discussion
-      navigate(`/forum/discussion/${data.discussion._id}`);
+      navigate(`/discussion/${data.discussion._id}`);
     } catch (err) {
       setError(err.message || 'Une erreur est survenue. Veuillez réessayer.');
       console.error(err);

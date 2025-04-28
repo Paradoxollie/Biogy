@@ -57,11 +57,7 @@ const DiscussionPage = () => {
       if (userInfo) {
         try {
           console.log("Vérification du statut de like");
-          const likeStatusResponse = await api.get(`/discussions/${discussionId}/like-status`, {
-            headers: {
-              Authorization: `Bearer ${userInfo.token}`
-            }
-          });
+          const likeStatusResponse = await api.get(`/discussions/${discussionId}/like-status`);
           console.log("Réponse like status:", likeStatusResponse.data);
           setHasLiked(likeStatusResponse.data.hasLiked);
         } catch (err) {
@@ -106,10 +102,6 @@ const DiscussionPage = () => {
     try {
       const response = await api.post(`/discussions/${discussionId}/replies`, {
         content: replyContent
-      }, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`
-        }
       });
       
       setReplies([...replies, response.data.reply]);
@@ -131,11 +123,7 @@ const DiscussionPage = () => {
     }
     
     try {
-      const response = await api.post(`/discussions/${discussionId}/like`, {}, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`
-        }
-      });
+      const response = await api.post(`/discussions/${discussionId}/like`);
       
       setHasLiked(response.data.hasLiked);
       setLikesCount(response.data.likesCount);
@@ -372,7 +360,7 @@ const DiscussionPage = () => {
               {userInfo && discussion.author?._id === userInfo._id && (
                 <div className="flex space-x-2">
                   <Link
-                    to={`/forum/edit/${discussionId}`}
+                    to={`/edit-discussion/${discussionId}`}
                     className="inline-flex items-center text-xs font-medium text-gray-500 hover:text-lab-purple"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -464,7 +452,7 @@ const DiscussionPage = () => {
                 <p className="text-gray-700 mb-3">Vous devez être connecté pour répondre à cette discussion.</p>
                 <Link
                   to="/login"
-                  state={{ from: `/forum/discussion/${discussionId}` }}
+                  state={{ from: `/discussion/${discussionId}` }}
                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-lab-purple hover:bg-lab-purple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lab-purple"
                 >
                   Se connecter
