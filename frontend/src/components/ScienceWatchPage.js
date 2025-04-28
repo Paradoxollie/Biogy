@@ -79,31 +79,69 @@ function ScienceWatchPage() {
     }
   };
 
-  useEffect(() => {
-    // Fetch articles from the Netlify function
-    const fetchArticles = async () => {
-      setLoading(true);
-      setError(null);
+  // Fetch articles from the Netlify function
+  const fetchArticles = async () => {
+    setLoading(true);
+    setError(null);
+    
+    // Maximum number of retries
+    const MAX_RETRIES = 3;
+    let retries = 0;
+    
+    const attemptFetch = async () => {
       try {
-        const response = await fetch('/.netlify/functions/fetch-biotech-articles');
+        const response = await fetch('/.netlify/functions/fetch-biotech-articles', {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
+        
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
         }
+        
         const fetchedArticles = await response.json();
         
-        // Optional: Add further client-side processing/validation if needed
+        if (!Array.isArray(fetchedArticles) || fetchedArticles.length === 0) {
+          console.warn('Aucun article retourné par la fonction Netlify ou format invalide.');
+          // If we have no articles and have retries left, try again
+          if (retries < MAX_RETRIES) {
+            retries++;
+            console.log(`Nouvelle tentative (${retries}/${MAX_RETRIES})...`);
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+            return attemptFetch();
+          } else {
+            throw new Error('Impossible de charger les articles après plusieurs tentatives');
+          }
+        }
         
-        setArticles(fetchedArticles); 
         console.log(`Total articles chargés depuis la fonction Netlify: ${fetchedArticles.length}`);
-
+        setArticles(fetchedArticles);
+        
       } catch (err) {
         console.error("Erreur lors du chargement des articles depuis la fonction Netlify:", err);
+        
+        // Retry logic
+        if (retries < MAX_RETRIES) {
+          retries++;
+          console.log(`Nouvelle tentative (${retries}/${MAX_RETRIES}) après erreur...`);
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+          return attemptFetch();
+        }
+        
         setError(`Impossible de charger les articles (${err.message}). Vérifiez la console pour plus de détails.`);
-      } finally { 
-        setLoading(false);
+      } finally {
+        if (retries >= MAX_RETRIES || !error) {
+          setLoading(false);
+        }
       }
     };
+    
+    attemptFetch();
+  };
 
+  useEffect(() => {
     fetchArticles();
   }, []); // Empty dependency array ensures this runs only once on mount
 
@@ -222,8 +260,34 @@ function ScienceWatchPage() {
       
       {renderBiotechLegend()}
       
-      {/* Optional: Add a manual refresh button if desired */}
-      {/* <button onClick={fetchArticles} disabled={loading}>Refresh</button> */}
+      <div className="flex justify-center mb-6">
+        <button 
+          onClick={() => {
+            setLoading(true);
+            setError(null);
+            fetchArticles();
+          }} 
+          disabled={loading}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+        >
+          {loading ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Chargement...
+            </>
+          ) : (
+            <>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Actualiser les articles
+            </>
+          )}
+        </button>
+      </div>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
@@ -265,14 +329,29 @@ function ScienceWatchPage() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {colorArticles.map((article, index) => (
                     <div key={`${colorKey}-${index}-${article.link || index}`} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
-                      <div className="h-40 overflow-hidden flex-shrink-0">
+                      <div className="h-40 overflow-hidden flex-shrink-0 bg-gray-100">
                         <img
-                          src={article.imageUrl || 'https://via.placeholder.com/300x200?text=Image+Non+Disponible'} // Note: imageUrl isn't typically in RSS, might need logic to find one
+                          src={article.imageUrl || 'https://placehold.co/600x400?text=Biotechnologie+' + colorData.name}
                           alt={article.title || 'Titre non disponible'}
                           className="w-full h-full object-cover"
+                          loading="lazy"
                           onError={(e) => {
-                            e.target.onerror = null; 
-                            e.target.src = 'https://via.placeholder.com/300x200?text=Image+Erreur'; 
+                            e.target.onerror = null;
+                            // First try to fix common URL issues
+                            const url = e.target.src;
+                            if (url.startsWith('http:') && !url.includes('placehold.co')) {
+                              // Try to fix mixed content by using HTTPS
+                              e.target.src = url.replace('http:', 'https:');
+                            } else if (url.startsWith('//')) {
+                              // Fix protocol-relative URLs
+                              e.target.src = 'https:' + url;
+                            } else if (!url.startsWith('http') && !url.startsWith('https://placehold.co')) {
+                              // Try to add missing protocol
+                              e.target.src = 'https:' + url;
+                            } else {
+                              // If all attempts fail, use a placeholder with the biotech color
+                              e.target.src = `https://placehold.co/600x400?text=${encodeURIComponent('Biotechnologie ' + colorData.name)}`;
+                            }
                           }}
                         />
                       </div>
