@@ -176,11 +176,20 @@ const getImageUrl = (item) => {
 
 // --- Netlify Function Handler ---
 exports.handler = async (event, context) => {
-  console.log(`Fetching ${FEEDS.length} feeds...`);
+  // Extraire les paramètres de la requête
+  const params = event.queryStringParameters || {};
+  const colorFilter = params.color || null; // Paramètre de filtrage par couleur
+  
+  console.log(`Fetching articles with color filter: ${colorFilter || 'none (all colors)'}`);
+  
+  // Filtrer les feeds par couleur si un filtre est spécifié
+  const filteredFeeds = colorFilter ? FEEDS.filter(feed => feed.color === colorFilter) : FEEDS;
+  
+  console.log(`Fetching ${filteredFeeds.length} feeds...`);
   const allArticles = [];
   const fetchPromises = [];
 
-  for (const feedInfo of FEEDS) {
+  for (const feedInfo of filteredFeeds) {
     console.log(`- Fetching ${feedInfo.source} (${feedInfo.url})`);
     const fetchPromise = parser.parseURL(feedInfo.url, { timeout: FETCH_TIMEOUT })
       .then(feed => {

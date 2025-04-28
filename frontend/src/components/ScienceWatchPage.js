@@ -4,6 +4,7 @@ function ScienceWatchPage() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
 
   // Définition des catégories de biotechnologie par couleur
   const biotechColors = {
@@ -79,8 +80,8 @@ function ScienceWatchPage() {
     }
   };
 
-  // Fetch articles from the Netlify function
-  const fetchArticles = async () => {
+  // Fonction pour charger les articles
+  const fetchArticles = async (colorFilter = null) => {
     setLoading(true);
     setError(null);
     
@@ -90,7 +91,13 @@ function ScienceWatchPage() {
     
     const attemptFetch = async () => {
       try {
-        const response = await fetch('/.netlify/functions/fetch-biotech-articles', {
+        // Construire l'URL de l'API avec ou sans filtre de couleur
+        let apiUrl = '/.netlify/functions/fetch-biotech-articles';
+        if (colorFilter) {
+          apiUrl += `?color=${colorFilter}`;
+        }
+        
+        const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
             'Cache-Control': 'no-cache',
@@ -158,10 +165,52 @@ function ScienceWatchPage() {
     attemptFetch();
   };
 
+  // Charger les articles au montage du composant, sans filtre
   useEffect(() => {
-    fetchArticles();
-  }, []); // Empty dependency array ensures this runs only once on mount
+    // Ne charge pas automatiquement tous les articles au démarrage (trop lourd)
+    // Au lieu de cela, on affiche un écran de sélection de couleur
+    setLoading(false);
+  }, []);
 
+  // Gérer le changement de couleur sélectionnée
+  const handleColorSelect = (colorKey) => {
+    setSelectedColor(colorKey);
+    fetchArticles(colorKey);
+  };
+
+  // Sélecteur de couleur
+  const renderColorSelector = () => {
+    return (
+      <div className="mb-8 p-6 rounded-lg shadow-md bg-white">
+        <h2 className="text-2xl font-bold mb-4 text-center">Sélectionnez une catégorie de biotechnologie</h2>
+        <p className="mb-4 text-center text-gray-600">Pour éviter les temps de chargement trop longs, veuillez sélectionner une catégorie spécifique à consulter</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Object.entries(biotechColors).map(([key, data]) => (
+            <button
+              key={key}
+              onClick={() => handleColorSelect(key)}
+              className={`p-4 rounded-lg ${data.bgColorLight} border-l-4 ${data.borderColor} transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${data.color}-500`}
+            >
+              <h3 className={`font-bold ${data.textColor}`}>{data.name}</h3>
+              <p className="text-sm">{data.description}</p>
+            </button>
+          ))}
+        </div>
+        
+        {/* Option pour afficher tous les articles (avec avertissement) */}
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => handleColorSelect(null)}
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            Afficher toutes les catégories (peut être lent)
+          </button>
+        </div>
+      </div>
+    );
+  };
+  
   // Obtenir la légende des couleurs de biotech
   const renderBiotechLegend = () => {
     return (
@@ -275,37 +324,55 @@ function ScienceWatchPage() {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-6">Veille Scientifique</h1>
       
-      {renderBiotechLegend()}
+      {/* Afficher le sélecteur de couleur si aucun article n'a été chargé et pas de chargement en cours */}
+      {!loading && articles.length === 0 && !error && renderColorSelector()}
       
-      <div className="flex justify-center mb-6">
-        <button 
-          onClick={() => {
-            setLoading(true);
-            setError(null);
-            fetchArticles();
-          }} 
-          disabled={loading}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-        >
-          {loading ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Chargement...
-            </>
-          ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Actualiser les articles
-            </>
-          )}
-        </button>
-      </div>
-
+      {/* Afficher la légende des couleurs seulement après avoir chargé des articles */}
+      {articles.length > 0 && renderBiotechLegend()}
+      
+      {/* Bouton de retour à la sélection */}
+      {articles.length > 0 && (
+        <div className="flex justify-center mb-6">
+          <button 
+            onClick={() => {
+              setArticles([]);
+              setSelectedColor(null);
+              setError(null);
+            }}
+            className="mr-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300"
+          >
+            ← Retour à la sélection
+          </button>
+          
+          <button 
+            onClick={() => {
+              setLoading(true);
+              setError(null);
+              fetchArticles(selectedColor);
+            }}
+            disabled={loading}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Chargement...
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Actualiser les articles
+              </>
+            )}
+          </button>
+        </div>
+      )}
+      
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
           <strong className="font-bold">Erreur!</strong>
@@ -410,7 +477,7 @@ function ScienceWatchPage() {
             );
           })}
            {/* Display message if no articles loaded at all */} 
-          {articles.length === 0 && !loading && !error && (
+          {articles.length === 0 && !loading && error && (
              <p className="text-center text-gray-500 mt-10">Aucun article n'a pu être chargé depuis les flux RSS.</p>
           )}
         </div>
