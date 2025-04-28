@@ -81,43 +81,39 @@ function ScienceWatchPage() {
     }
   };
 
-  // Fonction pour charger les articles d'une couleur spécifique
-  const fetchArticlesByColor = async (colorKey) => {
+  // NOUVEAU: Utilisation d'un endpoint unique pour tous les articles
+  const fetchArticles = async (colorKey) => {
     setLoading(true);
     setError(null);
     
-    const colorEndpoints = {
-      red: "/.netlify/functions/redArticles",
-      blue: "/.netlify/functions/blueArticles",
-      yellow: "/.netlify/functions/yellowArticles",
-      green: "/.netlify/functions/greenArticles",
-      white: "/.netlify/functions/whiteArticles",
-      gray: "/.netlify/functions/grayArticles",
-      all: "/.netlify/functions/fetch-all" // Nouvel endpoint pour récupérer tous les articles
-    };
-    
     try {
-      let selectedEndpoint = colorKey ? colorEndpoints[colorKey] : colorEndpoints.all;
+      // Construire l'URL avec les paramètres appropriés
+      let url = '/.netlify/functions/biotech-veille';
       
-      // Vérifier si l'endpoint existe
-      if (!selectedEndpoint) {
-        throw new Error(`Pas d'endpoint configuré pour ${colorKey || 'tous les articles'}`);
+      // Ajouter les paramètres à l'URL
+      const params = new URLSearchParams();
+      if (colorKey) {
+        params.append('color', colorKey);
       }
-      
-      // Construire l'URL avec le paramètre de rafraîchissement si nécessaire
-      let url = selectedEndpoint;
       if (forceRefresh) {
-        url += `?refresh=true`;
+        params.append('refresh', 'true');
       }
       
-      console.log(`Chargement des articles depuis: ${url}`);
-      const response = await fetch(url);
+      const fullUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
+      console.log(`Chargement des articles depuis: ${fullUrl}`);
+      
+      const response = await fetch(fullUrl);
       
       if (!response.ok) {
         throw new Error(`Erreur réseau: ${response.status}`);
       }
       
       const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
       setArticles(data);
     } catch (err) {
       setError(err.message);
@@ -138,7 +134,7 @@ function ScienceWatchPage() {
   const handleColorSelect = (color) => {
     setSelectedColor(color);
     setArticles([]);
-    fetchArticlesByColor(color);
+    fetchArticles(color);
   };
 
   // Sélecteur de couleur
@@ -146,28 +142,30 @@ function ScienceWatchPage() {
     return (
       <div className="mb-8 p-6 rounded-lg shadow-md bg-white">
         <h2 className="text-2xl font-bold mb-4 text-center">Sélectionnez une catégorie de biotechnologie</h2>
-        <p className="mb-4 text-center text-gray-600">Pour éviter les temps de chargement trop longs, veuillez sélectionner une catégorie spécifique à consulter</p>
+        <p className="mb-4 text-center text-gray-600">Choisissez une catégorie spécifique ou affichez toutes les actualités</p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Object.entries(biotechColors).map(([key, data]) => (
-            <button
-              key={key}
-              onClick={() => handleColorSelect(key)}
-              className={`p-4 rounded-lg ${data.bgColorLight} border-l-4 ${data.borderColor} transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${data.color}-500`}
-            >
-              <h3 className={`font-bold ${data.textColor}`}>{data.name}</h3>
-              <p className="text-sm">{data.description}</p>
-            </button>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(biotechColors)
+            .filter(([key]) => key !== 'black') // Exclure la biotechnologie noire qui n'est pas pertinente
+            .map(([key, data]) => (
+              <button
+                key={key}
+                onClick={() => handleColorSelect(key)}
+                className={`p-4 rounded-lg ${data.bgColorLight} border-l-4 ${data.borderColor} transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${data.color}-500`}
+              >
+                <h3 className={`font-bold ${data.textColor}`}>{data.name}</h3>
+                <p className="text-sm">{data.description}</p>
+              </button>
+            ))}
         </div>
         
-        {/* Option pour afficher tous les articles (avec avertissement) */}
+        {/* Option pour afficher tous les articles */}
         <div className="mt-6 text-center">
           <button
             onClick={() => handleColorSelect(null)}
             className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            Afficher toutes les catégories (peut être lent)
+            Afficher toutes les catégories
           </button>
         </div>
       </div>
@@ -179,13 +177,15 @@ function ScienceWatchPage() {
     return (
       <div className="mb-8 p-6 rounded-lg shadow-md bg-white">
         <h2 className="text-2xl font-bold mb-4 text-center">Les couleurs des biotechnologies</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Object.entries(biotechColors).map(([key, data]) => (
-            <div key={key} className={`p-4 rounded-lg ${data.bgColorLight} border-l-4 ${data.borderColor}`}>
-              <h3 className={`font-bold ${data.textColor}`}>{data.name}</h3>
-              <p className="text-sm">{data.description}</p>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(biotechColors)
+            .filter(([key]) => key !== 'black') // Exclure la biotechnologie noire
+            .map(([key, data]) => (
+              <div key={key} className={`p-4 rounded-lg ${data.bgColorLight} border-l-4 ${data.borderColor}`}>
+                <h3 className={`font-bold ${data.textColor}`}>{data.name}</h3>
+                <p className="text-sm">{data.description}</p>
+              </div>
+            ))}
         </div>
       </div>
     );
@@ -200,80 +200,12 @@ function ScienceWatchPage() {
     }, { unclassified: [] });
     
     // Group articles by their pre-assigned biotechColor from the function
-    const articlesByColor = articleList.reduce((acc, article) => {
+    articleList.forEach(article => {
       const color = article.biotechColor && biotechColors[article.biotechColor] ? article.biotechColor : 'unclassified';
-      if (!acc[color]) acc[color] = []; // Should already exist, but safety check
-      acc[color].push(article);
-      return acc;
-    }, {});
-    
-    // Ensure diversity and limit (max 4 per color)
-    Object.entries(articlesByColor).forEach(([color, articles]) => {
-      if (!organizedByColor[color]) return; // Skip if color isn't in our main categories
-      
-      // Group by source within the color category
-      const articlesBySource = articles.reduce((acc, article) => {
-        const sourceKey = article.source || 'Unknown Source';
-        if (!acc[sourceKey]) acc[sourceKey] = [];
-        acc[sourceKey].push(article);
-        return acc;
-      }, {});
-      
-      // Sort articles within each source by date (most recent first)
-      // Note: Articles are already sorted by date globally by the Netlify function,
-      // but sorting within source ensures the *latest* from each source is picked first if needed.
-      Object.values(articlesBySource).forEach(sourceArticles => {
-          sourceArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-      });
-
-      // Collect articles alternating sources, up to the limit (e.g., 4)
-      const sources = Object.keys(articlesBySource);
-      let currentSourceIndex = 0;
-      let addedCount = 0;
-      const MAX_ARTICLES_PER_COLOR_DISPLAY = 4; // Define the display limit
-      const addedArticlesSet = new Set(); // Track added articles to prevent duplicates if logic loops
-
-      while (addedCount < MAX_ARTICLES_PER_COLOR_DISPLAY && sources.length > 0) {
-          const source = sources[currentSourceIndex % sources.length];
-          const articlesForSource = articlesBySource[source];
-
-          if (articlesForSource && articlesForSource.length > 0) {
-              const articleToAdd = articlesForSource.shift(); // Get the most recent available from this source
-              
-              // Check if article already added (safety for complex scenarios)
-              const articleKey = `${articleToAdd.link || articleToAdd.title}-${articleToAdd.pubDate}`;
-              if (!addedArticlesSet.has(articleKey)) {
-                  organizedByColor[color].push(articleToAdd);
-                  addedArticlesSet.add(articleKey);
-                  addedCount++;
-              }
-
-              // If this source is now empty, remove it from rotation
-              if (articlesForSource.length === 0) {
-                  sources.splice(sources.indexOf(source), 1);
-                  // Adjust index if removing the current or an earlier source
-                  if (currentSourceIndex >= sources.length) {
-                     currentSourceIndex = 0; // Reset index if it goes out of bounds
-                  }
-              } else {
-                 currentSourceIndex++; // Move to next source only if current wasn't removed
-              }
-          } else {
-              // Source might already be empty, remove it and adjust index
-              sources.splice(sources.indexOf(source), 1);
-               if (currentSourceIndex >= sources.length) {
-                 currentSourceIndex = 0; 
-               }
-          }
-
-          // Prevent infinite loops if all remaining sources are empty
-          if (sources.length > 0 && sources.every(s => !articlesBySource[s] || articlesBySource[s].length === 0)) {
-              break;
-          }
-           // Reset index if it went through all available sources
-          if (sources.length > 0 && currentSourceIndex >= sources.length) {
-              currentSourceIndex = 0;
-          }
+      if (organizedByColor[color]) {
+        organizedByColor[color].push(article);
+      } else {
+        organizedByColor.unclassified.push(article);
       }
     });
     
@@ -285,10 +217,8 @@ function ScienceWatchPage() {
 
   // Ajouter cette fonction pour gérer le rafraîchissement des articles:
   const handleRefresh = () => {
-    if (selectedColor) {
-      setArticles([]);
-      fetchArticlesByColor(selectedColor);
-    }
+    setArticles([]);
+    fetchArticles(selectedColor);
   };
 
   // Ajouter cette fonction pour gérer le changement de l'option de rafraîchissement forcé:
@@ -298,7 +228,7 @@ function ScienceWatchPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold text-center mb-6">Veille Scientifique</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">Veille Scientifique Biotechnologie</h1>
       
       {/* Afficher le sélecteur de couleur si aucun article n'a été chargé et pas de chargement en cours */}
       {!loading && articles.length === 0 && !error && renderColorSelector()}
@@ -353,7 +283,7 @@ function ScienceWatchPage() {
                 className="mr-2"
               />
               <label htmlFor="forceRefresh" className="text-sm text-gray-600">
-                Ignorer le cache (plus fraîche mais plus lent)
+                Ignorer le cache (plus frais mais plus lent)
               </label>
             </div>
           </div>
@@ -369,7 +299,14 @@ function ScienceWatchPage() {
 
       {loading ? (
         <div className="text-center py-10">
+          <div className="flex justify-center mb-4">
+            <svg className="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
           <p>Chargement des articles depuis les flux RSS...</p> 
+          <p className="text-sm text-gray-500 mt-2">Cette opération peut prendre quelques instants...</p>
         </div>
       ) : (
         <div>
@@ -397,12 +334,12 @@ function ScienceWatchPage() {
                   <p className="text-sm">{colorData.description}</p>
                 </div>
                 
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {colorArticles.map((article, index) => (
                     <div key={`${colorKey}-${index}-${article.link || index}`} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
                       <div className="h-40 overflow-hidden flex-shrink-0 bg-gray-100">
                         <img
-                          src={article.imageUrl || 'https://placehold.co/600x400?text=Biotechnologie+' + colorData.name}
+                          src={article.imageUrl || `https://placehold.co/600x400?text=Biotechnologie+${colorData.name}`}
                           alt={article.title || 'Titre non disponible'}
                           className="w-full h-full object-cover"
                           loading="lazy"
@@ -465,6 +402,10 @@ function ScienceWatchPage() {
           })}
           
           {/* Display message if no articles loaded at all */} 
+          {articles.length === 0 && !loading && !error && (
+             <p className="text-center text-gray-500 mt-10">Veuillez sélectionner une catégorie de biotechnologie ci-dessus.</p>
+          )}
+          
           {articles.length === 0 && !loading && error && (
              <p className="text-center text-gray-500 mt-10">Aucun article n'a pu être chargé depuis les flux RSS.</p>
           )}
