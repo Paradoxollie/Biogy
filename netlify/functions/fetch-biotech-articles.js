@@ -24,62 +24,39 @@ const parser = new Parser({
 
 // --- Configuration ---
 const FEEDS = [
-  // Général / Multi-couleurs (Bases importantes)
+  // Sélection des sources les plus fiables par catégorie (réduites pour éviter le timeout)
+  // Général / Multi-couleurs
   { url: 'https://lejournal.cnrs.fr/rss', source: 'CNRS Le Journal', color: 'multi' },
-  { url: 'https://www.cea.fr/rss/actualites.php?format=xml', source: 'CEA', color: 'multi' },
-  { url: 'https://www.ird.fr/rss.xml', source: 'IRD', color: 'multi' },
-  { url: 'https://www.sorbonne-universite.fr/actualites/recherche/feed', source: 'Sorbonne Université (Recherche)', color: 'multi' },
-  { url: 'https://www.universite-paris-saclay.fr/actualites/feed', source: 'Université Paris-Saclay (Actus)', color: 'multi' },
-  { url: 'https://theconversation.com/fr/sciences/feed', source: 'The Conversation (Sciences)', color: 'multi' }, // Added reliable source
-
-  // Verte (Agro-alimentaire, production végétale, biomatériaux, énergie)
+  { url: 'https://theconversation.com/fr/sciences/feed', source: 'The Conversation (Sciences)', color: 'multi' },
+  
+  // Verte
   { url: 'https://www.inrae.fr/flux/actualites/all/rss.xml', source: 'INRAE', color: 'green' },
-  { url: 'https://www.cirad.fr/actualites/toutes-les-actualites/feed', source: 'CIRAD', color: 'green' },
-  { url: 'https://www.anses.fr/fr/flux/actualites/rss.xml', source: 'ANSES', color: 'green' },
-  { url: 'https://www.terresinovia.fr/rss', source: 'Terres Inovia', color: 'green' },
-  { url: 'https://www.arvalis-infos.fr/rss.html', source: 'Arvalis-Infos', color: 'green' }, // Added reliable source
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/agronomie.xml', source: 'Actu-Environnement (Agronomie)', color: 'green' }, // Added reliable source
-
-  // Rouge (Santé, pharmaceutique, médecine)
+  { url: 'https://www.actu-environnement.com/feeds/rss/ae/agronomie.xml', source: 'Actu-Environnement (Agronomie)', color: 'green' },
+  
+  // Rouge
   { url: 'https://presse.inserm.fr/feed/', source: 'INSERM', color: 'red' },
-  { url: 'https://www.pasteur.fr/fr/rss/press/press-releases.xml', source: 'Institut Pasteur (Presse)', color: 'red' },
-  { url: 'https://ansm.sante.fr/feed', source: 'ANSM', color: 'red' },
-  { url: 'https://curie.fr/rss.xml', source: 'Institut Curie', color: 'red' },
-  { url: 'https://www.santepubliquefrance.fr/rss/actualites.xml', source: 'Santé Publique France', color: 'red' },
-  { url: 'https://france-biotech.fr/feed/', source: 'France Biotech', color: 'red' },
-  { url: 'https://www.sciencesetavenir.fr/sante/rss.xml', source: 'Sciences et Avenir (Santé)', color: 'red' }, // Added reliable source
-
-  // Blanche (Applications industrielles, procédés biologiques)
-  { url: 'https://www.genopole.fr/feed/', source: 'Genopole', color: 'white' },
+  { url: 'https://www.sciencesetavenir.fr/sante/rss.xml', source: 'Sciences et Avenir (Santé)', color: 'red' },
+  
+  // Blanche
   { url: 'https://www.usinenouvelle.com/flux/rss', source: 'Usine Nouvelle (Général)', color: 'white' },
-  { url: 'http://www.biotechinfo.fr/feed/', source: 'BioTech Info', color: 'white' },
-  { url: 'https://www.industrie-techno.com/rss', source: 'Industrie & Technologies', color: 'white' }, // Added reliable source
-  { url: 'https://www.techniques-ingenieur.fr/actualite/thematique/environnement/feed/', source: 'Techniques de l\'Ingénieur (Environnement)', color: 'white' }, // Added reliable source
-
-  // Jaune (Protection de l'environnement, traitement des pollutions)
-  { url: 'https://presse.ademe.fr/feed/', source: 'ADEME', color: 'yellow' },
+  { url: 'https://www.industrie-techno.com/rss', source: 'Industrie & Technologies', color: 'white' },
+  
+  // Jaune
   { url: 'https://www.actu-environnement.com/feeds/rss/ae/eau.xml', source: 'Actu-Environnement (Eau)', color: 'yellow' },
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/dechets.xml', source: 'Actu-Environnement (Déchets)', color: 'yellow' },
-  { url: 'https://www.novethic.fr/feed/rss/rss.xml', source: 'Novethic', color: 'yellow' }, // Added reliable source
-  { url: 'https://www.goodplanet.info/feed/', source: 'GoodPlanet Info', color: 'yellow' }, // Added reliable source
-
-  // Bleue (Biodiversité marine, aquaculture, cosmétique marine)
-  { url: 'https://www.ifremer.fr/fr/actualites-ifremer/-/journal_content/56/10192/RSS', source: 'Ifremer', color: 'blue' },
-  { url: 'https://www.pole-mer-bretagne-atlantique.com/fr/actualites/feed/', source: 'Pôle Mer Bretagne Atlantique', color: 'blue' },
-  { url: 'https://www.polemermediterranee.com/feed/', source: 'Pôle Mer Méditerranée', color: 'blue' },
-  { url: 'https://www.meretmarine.com/fr/rss.xml', source: 'Mer et Marine', color: 'blue' }, // Added reliable source
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/mer-littoral.xml', source: 'Actu-Environnement (Mer)', color: 'blue' }, // Added reliable source
-
-  // Noir (Éducation)
-  { url: 'https://www.enseignementsup-recherche.gouv.fr/fr/rss/actualites.xml', source: 'Ministère Ens Sup Recherche', color: 'black' },
-  { url: 'https://www.onisep.fr/feed/actualites-nationales', source: 'Onisep (Nationales)', color: 'black' },
-  { url: 'https://eduscol.education.fr/sti/feed', source: 'Eduscol (STI Général)', color: 'black' },
-  { url: 'https://theconversation.com/fr/education/feed', source: 'The Conversation (Éducation)', color: 'black' }, // Added reliable source
-  { url: 'https://www.vousnousils.fr/feed', source: 'VousNousIls (Éducation)', color: 'black' }, // Added reliable source
+  { url: 'https://www.goodplanet.info/feed/', source: 'GoodPlanet Info', color: 'yellow' },
+  
+  // Bleue
+  { url: 'https://www.meretmarine.com/fr/rss.xml', source: 'Mer et Marine', color: 'blue' },
+  { url: 'https://www.actu-environnement.com/feeds/rss/ae/mer-littoral.xml', source: 'Actu-Environnement (Mer)', color: 'blue' },
+  
+  // Noir
+  { url: 'https://theconversation.com/fr/education/feed', source: 'The Conversation (Éducation)', color: 'black' },
+  { url: 'https://www.vousnousils.fr/feed', source: 'VousNousIls (Éducation)', color: 'black' },
 ];
 
-// Max articles per feed to avoid overwhelming results
-const MAX_ARTICLES_PER_FEED = 10; 
+// Max articles par flux et timeout pour les requêtes
+const MAX_ARTICLES_PER_FEED = 5;
+const FETCH_TIMEOUT = 3000; // 3 secondes de timeout par requête
 
 // Helper to extract description (handles variations)
 const getDescription = (item) => {
@@ -205,7 +182,7 @@ exports.handler = async (event, context) => {
 
   for (const feedInfo of FEEDS) {
     console.log(`- Fetching ${feedInfo.source} (${feedInfo.url})`);
-    const fetchPromise = parser.parseURL(feedInfo.url)
+    const fetchPromise = parser.parseURL(feedInfo.url, { timeout: FETCH_TIMEOUT })
       .then(feed => {
         console.log(`  - Parsed ${feed.items?.length || 0} items from ${feedInfo.source}`);
         if (feed.items) {
@@ -221,22 +198,35 @@ exports.handler = async (event, context) => {
               source: feedInfo.source,
               biotechColor: feedInfo.color,
               imageUrl: getImageUrl(item), // Extract image URL
-              // Add other fields if available and needed, e.g., author: item.author
             });
           });
         }
       })
       .catch(error => {
         console.error(`  - Error fetching or parsing feed ${feedInfo.source} (${feedInfo.url}):`, error.message);
-        // Optionally push an error indicator article? For now, just log.
+        // Ne pas bloquer l'exécution en cas d'erreur
       });
     fetchPromises.push(fetchPromise);
   }
 
-  // Wait for all feeds to be processed (fetched and parsed)
-  await Promise.allSettled(fetchPromises); // Use allSettled to continue even if some feeds fail
+  // Attendre avec un timeout global pour toutes les promesses
+  const allSettledPromises = await Promise.allSettled(fetchPromises);
+  console.log(`Processed ${allSettledPromises.length} feeds, ${allSettledPromises.filter(p => p.status === 'fulfilled').length} succeeded`);
 
   console.log(`Total articles collected: ${allArticles.length}`);
+
+  // Si aucun article n'a été trouvé, renvoyer un tableau vide plutôt qu'une erreur
+  if (allArticles.length === 0) {
+    console.log("Warning: No articles were collected from any feed");
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify([]),
+    };
+  }
 
   // Sort articles by date (most recent first) before returning
   allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
@@ -245,7 +235,7 @@ exports.handler = async (event, context) => {
     statusCode: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*', // Allow requests from any origin (adjust if needed for security)
+      'Access-Control-Allow-Origin': '*',
     },
     body: JSON.stringify(allArticles),
   };

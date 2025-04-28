@@ -95,16 +95,26 @@ function ScienceWatchPage() {
           headers: {
             'Cache-Control': 'no-cache',
           },
+          // Augmenter le timeout côté client
+          signal: AbortSignal.timeout(30000), // 30 secondes de timeout
         });
         
         if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
+          if (response.status === 502) {
+            throw new Error(`La fonction Netlify a pris trop de temps à s'exécuter. Limitez le nombre de sources ou augmentez la capacité de la fonction.`);
+          } else {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+          }
         }
         
         const fetchedArticles = await response.json();
         
-        if (!Array.isArray(fetchedArticles) || fetchedArticles.length === 0) {
-          console.warn('Aucun article retourné par la fonction Netlify ou format invalide.');
+        if (!Array.isArray(fetchedArticles)) {
+          throw new Error('Format de réponse invalide (pas un tableau)');
+        }
+        
+        if (fetchedArticles.length === 0) {
+          console.warn('Aucun article retourné par la fonction Netlify.');
           // If we have no articles and have retries left, try again
           if (retries < MAX_RETRIES) {
             retries++;
@@ -112,25 +122,32 @@ function ScienceWatchPage() {
             await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
             return attemptFetch();
           } else {
-            throw new Error('Impossible de charger les articles après plusieurs tentatives');
+            // Set articles to empty array rather than throwing an error
+            setArticles([]);
+            setError('Aucun article n\'a pu être récupéré après plusieurs tentatives. Vérifiez la connexion aux flux RSS.');
           }
+        } else {
+          console.log(`Total articles chargés depuis la fonction Netlify: ${fetchedArticles.length}`);
+          setArticles(fetchedArticles);
         }
-        
-        console.log(`Total articles chargés depuis la fonction Netlify: ${fetchedArticles.length}`);
-        setArticles(fetchedArticles);
         
       } catch (err) {
         console.error("Erreur lors du chargement des articles depuis la fonction Netlify:", err);
         
-        // Retry logic
-        if (retries < MAX_RETRIES) {
+        // Retry logic for certain errors, but not for timeout errors
+        if (retries < MAX_RETRIES && !err.message.includes('pris trop de temps') && !err.message.includes('aborted')) {
           retries++;
           console.log(`Nouvelle tentative (${retries}/${MAX_RETRIES}) après erreur...`);
           await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
           return attemptFetch();
         }
         
-        setError(`Impossible de charger les articles (${err.message}). Vérifiez la console pour plus de détails.`);
+        // Message d'erreur plus explicite pour les timeouts Netlify
+        if (err.message.includes('pris trop de temps') || err.name === 'TimeoutError' || err.message.includes('aborted')) {
+          setError(`La fonction de récupération des articles a expiré. La version gratuite de Netlify limite l'exécution des fonctions à 10 secondes, ce qui peut être insuffisant pour interroger tous les flux RSS.`);
+        } else {
+          setError(`Impossible de charger les articles (${err.message}). Vérifiez la console pour plus de détails.`);
+        }
       } finally {
         if (retries >= MAX_RETRIES || !error) {
           setLoading(false);
