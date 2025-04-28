@@ -11,7 +11,17 @@ import ScienceWatchPage from './components/ScienceWatchPage';
 import AuthDebug from './context/AuthDebug';
 import ForumPage from './components/ForumPage';
 import ProfilePage from './components/ProfilePage';
+import DiscussionPage from './components/DiscussionPage';
+import NewDiscussionPage from './components/NewDiscussionPage';
 import { AuthProvider } from './context/AuthContext';
+
+// Placeholder component for EditProfilePage
+const EditProfilePage = () => (
+  <div className="container mx-auto p-10 text-center">
+    <h1 className="text-2xl font-bold text-lab-purple">Édition du profil</h1>
+    <p className="mt-4">Cette fonctionnalité est en cours de développement</p>
+  </div>
+);
 
 function App() {
   return (
@@ -33,7 +43,7 @@ function App() {
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/forum" element={<ForumPage />} />
             <Route path="/forum/discussion/:id" element={<DiscussionPage />} />
-            <Route path="/forum/nouvelle-discussion" element={<NewDiscussionPage />} />
+            <Route path="/forum/new" element={<NewDiscussionPage />} />
             <Route path="/profile/:userId" element={<ProfilePage />} />
             <Route path="/profile/edit" element={<EditProfilePage />} />
           </Routes>
