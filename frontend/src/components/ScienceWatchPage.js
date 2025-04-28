@@ -5,6 +5,7 @@ function ScienceWatchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
+  const [forceRefresh, setForceRefresh] = useState(false);
 
   // Définition des catégories de biotechnologie par couleur
   const biotechColors = {
@@ -81,7 +82,7 @@ function ScienceWatchPage() {
   };
 
   // Fonction pour charger les articles
-  const fetchArticles = async (colorFilter = null) => {
+  const fetchArticles = async (colorFilter = null, skipCache = false) => {
     setLoading(true);
     setError(null);
     
@@ -93,14 +94,24 @@ function ScienceWatchPage() {
       try {
         // Construire l'URL de l'API avec ou sans filtre de couleur
         let apiUrl = '/.netlify/functions/fetch-biotech-articles';
+        const params = [];
+        
         if (colorFilter) {
-          apiUrl += `?color=${colorFilter}`;
+          params.push(`color=${colorFilter}`);
+        }
+        
+        if (skipCache) {
+          params.push('skipCache=true');
+        }
+        
+        if (params.length > 0) {
+          apiUrl += `?${params.join('&')}`;
         }
         
         const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
-            'Cache-Control': 'no-cache',
+            'Cache-Control': skipCache ? 'no-cache' : 'default',
           },
           // Augmenter le timeout côté client
           signal: AbortSignal.timeout(30000), // 30 secondes de timeout
@@ -175,7 +186,7 @@ function ScienceWatchPage() {
   // Gérer le changement de couleur sélectionnée
   const handleColorSelect = (colorKey) => {
     setSelectedColor(colorKey);
-    fetchArticles(colorKey);
+    fetchArticles(colorKey, forceRefresh);
   };
 
   // Sélecteur de couleur
@@ -344,32 +355,47 @@ function ScienceWatchPage() {
             ← Retour à la sélection
           </button>
           
-          <button 
-            onClick={() => {
-              setLoading(true);
-              setError(null);
-              fetchArticles(selectedColor);
-            }}
-            disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-          >
-            {loading ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Chargement...
-              </>
-            ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Actualiser les articles
-              </>
-            )}
-          </button>
+          <div className="flex flex-col items-center">
+            <button 
+              onClick={() => {
+                setLoading(true);
+                setError(null);
+                fetchArticles(selectedColor, forceRefresh);
+              }}
+              disabled={loading}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Chargement...
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Actualiser les articles
+                </>
+              )}
+            </button>
+            
+            <div className="mt-2 flex items-center">
+              <input 
+                type="checkbox" 
+                id="forceRefresh" 
+                checked={forceRefresh} 
+                onChange={() => setForceRefresh(!forceRefresh)} 
+                className="mr-2"
+              />
+              <label htmlFor="forceRefresh" className="text-sm text-gray-600">
+                Ignorer le cache (plus fraîche mais plus lent)
+              </label>
+            </div>
+          </div>
         </div>
       )}
       

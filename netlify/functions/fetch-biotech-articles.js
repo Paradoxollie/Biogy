@@ -58,6 +58,12 @@ const FEEDS = [
 const MAX_ARTICLES_PER_FEED = 5;
 const FETCH_TIMEOUT = 3000; // 3 secondes de timeout par requête
 
+// Système de cache pour éviter de requêter les flux à chaque fois
+let CACHE = {
+  // Structure: { color: { data: [...articles], timestamp: Date.now() } }
+};
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes en millisecondes
+
 // Helper to extract description (handles variations)
 const getDescription = (item) => {
   let desc = item.description || item.contentEncoded || item.content || '';
@@ -173,79 +179,118 @@ const getImageUrl = (item) => {
   return null;
 };
 
-
-// --- Netlify Function Handler ---
-exports.handler = async (event, context) => {
-  // Extraire les paramètres de la requête
-  const params = event.queryStringParameters || {};
-  const colorFilter = params.color || null; // Paramètre de filtrage par couleur
+// Fonction pour récupérer les articles par couleur (avec cache)
+const fetchArticlesByColor = async (colorFilter) => {
+  // Vérifier si nous avons des données en cache pour cette couleur
+  const cacheKey = colorFilter || 'all';
+  if (CACHE[cacheKey] && CACHE[cacheKey].timestamp > Date.now() - CACHE_DURATION) {
+    console.log(`Using cached data for color: ${cacheKey}`);
+    return CACHE[cacheKey].data;
+  }
   
-  console.log(`Fetching articles with color filter: ${colorFilter || 'none (all colors)'}`);
+  console.log(`Cache miss or expired for color: ${cacheKey}, fetching fresh data...`);
   
   // Filtrer les feeds par couleur si un filtre est spécifié
   const filteredFeeds = colorFilter ? FEEDS.filter(feed => feed.color === colorFilter) : FEEDS;
   
-  console.log(`Fetching ${filteredFeeds.length} feeds...`);
+  console.log(`Fetching ${filteredFeeds.length} feeds for color: ${cacheKey}...`);
   const allArticles = [];
-  const fetchPromises = [];
-
+  
+  // Plutôt que d'envoyer toutes les requêtes en parallèle, nous les traitons en série
+  // Ce qui est plus lent mais garantit de ne pas dépasser les limites de Netlify
   for (const feedInfo of filteredFeeds) {
-    console.log(`- Fetching ${feedInfo.source} (${feedInfo.url})`);
-    const fetchPromise = parser.parseURL(feedInfo.url, { timeout: FETCH_TIMEOUT })
-      .then(feed => {
-        console.log(`  - Parsed ${feed.items?.length || 0} items from ${feedInfo.source}`);
-        if (feed.items) {
-          // Limit the number of articles per feed
-          const limitedItems = feed.items.slice(0, MAX_ARTICLES_PER_FEED); 
-          
-          limitedItems.forEach(item => {
-            allArticles.push({
-              title: item.title || 'Titre inconnu',
-              link: item.link || '',
-              pubDate: getPubDate(item),
-              description: getDescription(item),
-              source: feedInfo.source,
-              biotechColor: feedInfo.color,
-              imageUrl: getImageUrl(item), // Extract image URL
-            });
+    try {
+      console.log(`- Fetching ${feedInfo.source} (${feedInfo.url})`);
+      const feed = await parser.parseURL(feedInfo.url, { timeout: FETCH_TIMEOUT });
+      
+      console.log(`  - Parsed ${feed.items?.length || 0} items from ${feedInfo.source}`);
+      if (feed.items) {
+        // Limit the number of articles per feed
+        const limitedItems = feed.items.slice(0, MAX_ARTICLES_PER_FEED); 
+        
+        limitedItems.forEach(item => {
+          allArticles.push({
+            title: item.title || 'Titre inconnu',
+            link: item.link || '',
+            pubDate: getPubDate(item),
+            description: getDescription(item),
+            source: feedInfo.source,
+            biotechColor: feedInfo.color,
+            imageUrl: getImageUrl(item), // Extract image URL
           });
-        }
-      })
-      .catch(error => {
-        console.error(`  - Error fetching or parsing feed ${feedInfo.source} (${feedInfo.url}):`, error.message);
-        // Ne pas bloquer l'exécution en cas d'erreur
-      });
-    fetchPromises.push(fetchPromise);
+        });
+      }
+    } catch (error) {
+      console.error(`  - Error fetching or parsing feed ${feedInfo.source} (${feedInfo.url}):`, error.message);
+      // Continue with next feed
+    }
   }
+  
+  console.log(`Total articles collected for color ${cacheKey}: ${allArticles.length}`);
+  
+  // Sort articles by date (most recent first)
+  allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  
+  // Save to cache
+  CACHE[cacheKey] = {
+    data: allArticles,
+    timestamp: Date.now()
+  };
+  
+  return allArticles;
+};
 
-  // Attendre avec un timeout global pour toutes les promesses
-  const allSettledPromises = await Promise.allSettled(fetchPromises);
-  console.log(`Processed ${allSettledPromises.length} feeds, ${allSettledPromises.filter(p => p.status === 'fulfilled').length} succeeded`);
+// Fonction pour nettoyer le cache des anciennes entrées
+const cleanupCache = () => {
+  const now = Date.now();
+  Object.keys(CACHE).forEach(key => {
+    if (CACHE[key].timestamp < now - CACHE_DURATION) {
+      console.log(`Cleaning up expired cache for: ${key}`);
+      delete CACHE[key];
+    }
+  });
+};
 
-  console.log(`Total articles collected: ${allArticles.length}`);
-
-  // Si aucun article n'a été trouvé, renvoyer un tableau vide plutôt qu'une erreur
-  if (allArticles.length === 0) {
-    console.log("Warning: No articles were collected from any feed");
+// --- Netlify Function Handler ---
+exports.handler = async (event, context) => {
+  try {
+    // Extraire les paramètres de la requête
+    const params = event.queryStringParameters || {};
+    const colorFilter = params.color || null; // Paramètre de filtrage par couleur
+    const skipCache = params.skipCache === 'true'; // Paramètre pour forcer le rafraîchissement
+    
+    console.log(`Fetching articles with color filter: ${colorFilter || 'none (all colors)'}, skipCache: ${skipCache}`);
+    
+    // Nettoyer le cache des entrées expirées
+    cleanupCache();
+    
+    // Si skip_cache est true, nous ignorons le cache
+    if (skipCache && CACHE[colorFilter || 'all']) {
+      console.log(`Clearing cache for: ${colorFilter || 'all'}`);
+      delete CACHE[colorFilter || 'all'];
+    }
+    
+    // Récupérer les articles (du cache ou frais)
+    const articles = await fetchArticlesByColor(colorFilter);
+    
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=300' // Cache côté client de 5 minutes
       },
-      body: JSON.stringify([]),
+      body: JSON.stringify(articles),
+    };
+  } catch (error) {
+    console.error('Error in fetch-biotech-articles function:', error);
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({ error: error.message }),
     };
   }
-
-  // Sort articles by date (most recent first) before returning
-  allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-
-  return {
-    statusCode: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    },
-    body: JSON.stringify(allArticles),
-  };
 }; 
