@@ -1,6 +1,6 @@
 [build]
   base = "/"
-  command = "npm run build"
+  command = "npm run build --no-warnings --loglevel=error"
   publish = "frontend/build"
   functions = "netlify/functions"
   
