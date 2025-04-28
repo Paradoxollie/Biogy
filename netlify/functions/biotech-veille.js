@@ -1,6 +1,10 @@
 const Parser = require('rss-parser');
 const parser = new Parser({
-  timeout: 10000, // Augmenter considérablement le timeout global
+  timeout: 3000, // Réduire le timeout par flux pour éviter de bloquer trop longtemps
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
+    'Accept': 'application/rss+xml, application/xml, text/xml; q=0.1'
+  },
   customFields: {
     item: [
       ['description', 'description'],
@@ -257,82 +261,48 @@ const FALLBACK_ARTICLES = {
   ]
 };
 
-// Sources françaises de biotechnologie par catégorie - CONSIDÉRABLEMENT ENRICHIES
+// Sources françaises de biotechnologie par catégorie - OPTIMISÉES POUR DES CONTENUS RÉCENTS
 const SOURCES_BIOTECH = [
-  // Rouge - Santé/Médecine (sources inchangées car fonctionne bien)
+  // Rouge - Santé/Médecine - Sources à jour
   { url: 'https://presse.inserm.fr/feed/', source: 'INSERM', color: 'red', langue: 'fr', priorité: 1 },
   { url: 'https://www.sciencesetavenir.fr/sante/rss.xml', source: 'Sciences et Avenir (Santé)', color: 'red', langue: 'fr', priorité: 1 },
   { url: 'https://www.futura-sciences.com/rss/sante/actualites.xml', source: 'Futura Sciences (Santé)', color: 'red', langue: 'fr', priorité: 1 },
-  { url: 'https://www.biotech-finances.com/feed/', source: 'Biotech Finances', color: 'red', langue: 'fr', priorité: 1 },
-  { url: 'https://www.leem.org/rss.xml', source: 'LEEM', color: 'red', langue: 'fr', priorité: 2 },
-  { url: 'https://www.industrie-techno.com/api/feed/category/biotech-pharmaceutique.rss', source: 'Industrie Techno Pharma', color: 'red', langue: 'fr', priorité: 2 },
-  { url: 'https://www.biofutur.com/feed/', source: 'Biofutur', color: 'red', langue: 'fr', priorité: 2 },
+  { url: 'https://www.allodocteurs.fr/rss/rss.xml', source: 'Allo Docteurs', color: 'red', langue: 'fr', priorité: 1 },
+  { url: 'https://www.santepubliquefrance.fr/rss', source: 'Santé Publique France', color: 'red', langue: 'fr', priorité: 1 },
   
-  // Verte - Agronomie (+ 4 nouvelles sources pour atteindre 13 au total)
+  // Verte - Agronomie - Sources à jour
   { url: 'https://www.inrae.fr/flux/actualites/all/rss.xml', source: 'INRAE', color: 'green', langue: 'fr', priorité: 1 },
   { url: 'https://www.actu-environnement.com/feeds/rss/ae/agronomie.xml', source: 'Actu-Environnement (Agronomie)', color: 'green', langue: 'fr', priorité: 1 },
   { url: 'https://www.agro-media.fr/feed/', source: 'Agro Media', color: 'green', langue: 'fr', priorité: 1 },
-  { url: 'https://www.bayer-agri.fr/feed/', source: 'Bayer Agri', color: 'green', langue: 'fr', priorité: 1 },
-  { url: 'https://www.arvalisinstitutduvegetal.fr/feed', source: 'Arvalis', color: 'green', langue: 'fr', priorité: 2 },
-  { url: 'https://www.agroscope.admin.ch/agroscope/fr/home/actualite/infothek/flux-rss.xml', source: 'Agroscope', color: 'green', langue: 'fr', priorité: 2 },
-  { url: 'https://www.agriculture-environnement.fr/feed.xml', source: 'Agriculture & Environnement', color: 'green', langue: 'fr', priorité: 2 },
-  { url: 'https://www.terre-net.fr/rss/', source: 'Terre-Net', color: 'green', langue: 'fr', priorité: 2 },
-  { url: 'https://www.agro-bordeaux.fr/feed/', source: 'Bordeaux Sciences Agro', color: 'green', langue: 'fr', priorité: 3 },
-  { url: 'https://www.pleinchamp.com/rss', source: 'Plein Champ', color: 'green', langue: 'fr', priorité: 2 },
-  { url: 'https://revue-sesame-inrae.fr/feed/', source: 'Revue Sésame', color: 'green', langue: 'fr', priorité: 2 },
-  { url: 'https://www.cirad.fr/flux-rss', source: 'CIRAD', color: 'green', langue: 'fr', priorité: 1 },
-  { url: 'https://www.acta.asso.fr/flux-rss.html', source: 'ACTA', color: 'green', langue: 'fr', priorité: 2 },
+  { url: 'https://www.campagnesetenvironnement.fr/feed/', source: 'Campagnes et Environnement', color: 'green', langue: 'fr', priorité: 1 },
+  { url: 'https://www.lafranceagricole.fr/rss', source: 'La France Agricole', color: 'green', langue: 'fr', priorité: 1 },
   
-  // Bleue - Marine (+ 5 nouvelles sources pour atteindre 14 au total)
+  // Bleue - Marine - Sources à jour
   { url: 'https://www.meretmarine.com/fr/rss.xml', source: 'Mer et Marine', color: 'blue', langue: 'fr', priorité: 1 },
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/mer-littoral.xml', source: 'Actu-Environnement (Mer)', color: 'blue', langue: 'fr', priorité: 1 },
   { url: 'https://wwz.ifremer.fr/layout/set/rss/Actualites-et-Agenda/Toutes-les-actualites', source: 'IFREMER', color: 'blue', langue: 'fr', priorité: 1 },
-  { url: 'https://www.lemarin.fr/rss.xml', source: 'Le Marin', color: 'blue', langue: 'fr', priorité: 2 },
-  { url: 'https://www.ifemer.fr/feed/', source: 'Institut Français de la Mer', color: 'blue', langue: 'fr', priorité: 2 },
-  { url: 'https://www.institut-ocean.org/feed/', source: 'Institut de l\'Océan', color: 'blue', langue: 'fr', priorité: 2 },
-  { url: 'https://www.cluster-maritime.fr/feed/', source: 'Cluster Maritime Français', color: 'blue', langue: 'fr', priorité: 2 },
-  { url: 'https://www.pollution-marine.com/feed/', source: 'Pollution Marine', color: 'blue', langue: 'fr', priorité: 3 },
-  { url: 'https://www.econav.org/?page=rss', source: 'Econav', color: 'blue', langue: 'fr', priorité: 3 },
-  { url: 'https://www.futura-sciences.com/rss/planete/actualites.xml', source: 'Futura Sciences (Planète)', color: 'blue', langue: 'fr', priorité: 2 },
-  { url: 'https://www.mnhn.fr/fr/rss', source: 'Muséum National d\'Histoire Naturelle', color: 'blue', langue: 'fr', priorité: 2 },
-  { url: 'https://www.environnement-magazine.fr/rss/eau', source: 'Environnement Magazine (Eau)', color: 'blue', langue: 'fr', priorité: 2 },
-  { url: 'https://www.journaldelenvironnement.net/RSS/categorie/6/eau.xml', source: 'JDLE (Eau)', color: 'blue', langue: 'fr', priorité: 2 },
-  { url: 'https://www.planetoscope.com/rss/Ocean-mers-littoral', source: 'Planetoscope (Océan)', color: 'blue', langue: 'fr', priorité: 3 },
+  { url: 'https://lemarin.ouest-france.fr/rss/rss.xml', source: 'Le Marin', color: 'blue', langue: 'fr', priorité: 1 },
+  { url: 'https://www.futura-sciences.com/rss/planete/actualites.xml', source: 'Futura Sciences (Planète)', color: 'blue', langue: 'fr', priorité: 1 },
   
-  // Jaune - Environnement (+ 4 nouvelles sources pour atteindre 12 au total)
+  // Jaune - Environnement - Sources à jour
   { url: 'https://www.actu-environnement.com/feeds/rss/ae/eau.xml', source: 'Actu-Environnement (Eau)', color: 'yellow', langue: 'fr', priorité: 1 },
   { url: 'https://www.goodplanet.info/feed/', source: 'GoodPlanet Info', color: 'yellow', langue: 'fr', priorité: 1 },
-  { url: 'https://www.ademe.fr/actualites/feed', source: 'ADEME', color: 'yellow', langue: 'fr', priorité: 1 },
-  { url: 'https://www.notre-environnement.gouv.fr/flux-rss', source: 'Notre Environnement', color: 'yellow', langue: 'fr', priorité: 2 },
-  { url: 'https://www.environnement-magazine.fr/rss', source: 'Environnement Magazine', color: 'yellow', langue: 'fr', priorité: 2 },
-  { url: 'https://www.ecologique-solidaire.gouv.fr/rss.xml', source: 'Ministère de la Transition Écologique', color: 'yellow', langue: 'fr', priorité: 2 },
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/biodiversite.xml', source: 'Actu-Environnement (Biodiversité)', color: 'yellow', langue: 'fr', priorité: 2 },
-  { url: 'https://www.irdeco.fr/feed/', source: 'IRDéco', color: 'yellow', langue: 'fr', priorité: 3 },
   { url: 'https://www.novethic.fr/rss/theme/environnement.xml', source: 'Novethic (Environnement)', color: 'yellow', langue: 'fr', priorité: 1 },
-  { url: 'https://www.encyclopedie-environnement.org/feed/', source: 'Encyclopédie Environnement', color: 'yellow', langue: 'fr', priorité: 2 },
-  { url: 'https://www.reporterre.net/spip.php?page=backend', source: 'Reporterre', color: 'yellow', langue: 'fr', priorité: 2 },
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/dechets.xml', source: 'Actu-Environnement (Déchets)', color: 'yellow', langue: 'fr', priorité: 2 },
+  { url: 'https://www.notre-environnement.gouv.fr/flux-rss', source: 'Notre Environnement', color: 'yellow', langue: 'fr', priorité: 1 },
+  { url: 'https://reporterre.net/spip.php?page=backend', source: 'Reporterre', color: 'yellow', langue: 'fr', priorité: 1 },
   
-  // Blanche - Industrielle (+ 5 nouvelles sources pour atteindre 12 au total)
+  // Blanche - Industrielle - Sources à jour
   { url: 'https://www.industrie-techno.com/rss', source: 'Industrie & Technologies', color: 'white', langue: 'fr', priorité: 1 },
   { url: 'https://www.usinenouvelle.com/flux/rss', source: 'Usine Nouvelle', color: 'white', langue: 'fr', priorité: 1 },
   { url: 'https://www.techniques-ingenieur.fr/actualite/articles/feed/', source: 'Techniques de l\'Ingénieur', color: 'white', langue: 'fr', priorité: 1 },
-  { url: 'https://www.industrie-mag.com/article/feed/news', source: 'Industrie Mag', color: 'white', langue: 'fr', priorité: 1 },
-  { url: 'https://www.processalimentaire.com/rss/actualites/innovation', source: 'Process Alimentaire', color: 'white', langue: 'fr', priorité: 2 },
-  { url: 'https://www.industrie4.0-village.com/feed/', source: 'Industrie 4.0', color: 'white', langue: 'fr', priorité: 2 },
-  { url: 'https://www.chimie-tech.com/feed/', source: 'Chimie Tech', color: 'white', langue: 'fr', priorité: 2 },
-  { url: 'https://www.industrie-chimie.fr/feed/', source: 'Industrie Chimie', color: 'white', langue: 'fr', priorité: 1 },
-  { url: 'https://lachimie.net/feed/', source: 'La Chimie', color: 'white', langue: 'fr', priorité: 2 },
+  { url: 'https://www.processalimentaire.com/rss/actualites/innovation', source: 'Process Alimentaire', color: 'white', langue: 'fr', priorité: 1 },
   { url: 'https://www.formule-verte.com/feed/', source: 'Formule Verte', color: 'white', langue: 'fr', priorité: 1 },
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/energie.xml', source: 'Actu-Environnement (Énergie)', color: 'white', langue: 'fr', priorité: 2 },
-  { url: 'https://www.enerzine.com/feed', source: 'Enerzine', color: 'white', langue: 'fr', priorité: 2 },
   
-  // Multidisciplinaire (inchangé)
+  // Multidisciplinaire - Sources à jour
   { url: 'https://lejournal.cnrs.fr/rss', source: 'CNRS Le Journal', color: 'multi', langue: 'fr', priorité: 1 },
   { url: 'https://theconversation.com/fr/sciences/feed', source: 'The Conversation (Sciences)', color: 'multi', langue: 'fr', priorité: 1 },
   { url: 'https://www.futura-sciences.com/rss/actualites.xml', source: 'Futura Sciences', color: 'multi', langue: 'fr', priorité: 1 },
-  { url: 'https://www.lemonde.fr/sciences/rss_full.xml', source: 'Le Monde (Sciences)', color: 'multi', langue: 'fr', priorité: 2 },
-  { url: 'https://www.pourlascience.fr/feed/actualites.xml', source: 'Pour la Science', color: 'multi', langue: 'fr', priorité: 2 }
+  { url: 'https://www.lemonde.fr/sciences/rss_full.xml', source: 'Le Monde (Sciences)', color: 'multi', langue: 'fr', priorité: 1 },
+  { url: 'https://www.pourlascience.fr/feed/actualites.xml', source: 'Pour la Science', color: 'multi', langue: 'fr', priorité: 1 }
 ];
 
 const MAX_ARTICLES_PER_SOURCE = 4;
@@ -481,125 +451,254 @@ exports.handler = async (event, context) => {
   // Récupérer le paramètre 'color' de la requête
   const params = event.queryStringParameters || {};
   const requestedColor = params.color || 'all';
-  const maxParam = params.max ? parseInt(params.max, 10) : 20; // Réduire le nombre d'articles par défaut
-  const max = isNaN(maxParam) ? 20 : Math.min(maxParam, 30); // Limiter à 30 articles maximum
+  const maxParam = params.max ? parseInt(params.max, 10) : 20; 
+  const max = isNaN(maxParam) ? 20 : Math.min(maxParam, 30); 
+  const forceRefresh = params.refresh === 'true';
   
-  console.log(`Biotech-veille function invoked. Requested color: ${requestedColor}, max: ${max}`);
+  // Mesurer le temps d'exécution pour éviter de dépasser les limites de Netlify
+  const startTime = Date.now();
+  
+  console.log(`Biotech-veille function invoked. Requested color: ${requestedColor}, max: ${max}, forceRefresh: ${forceRefresh}`);
 
   try {
-    // Pour les demandes de couleur spécifique, court-circuiter et utiliser directement la fonction dédiée
+    // Récupération directe des articles via les flux RSS - approche directe plutôt que fetch-all
+    console.log("Récupération directe des flux RSS...");
+
+    // Filtrer les sources selon la couleur demandée
+    let sourcesToFetch = [];
     if (requestedColor !== 'all') {
-      console.log(`Requesting specific color: ${requestedColor}, using direct function`);
-      try {
-        const colorResponse = await fetch(`${process.env.URL}/.netlify/functions/fetch-${requestedColor}`, {
-          timeout: 8000  // Réduire le timeout pour éviter que la fonction Netlify ne timeout (limite à 10s)
-        });
-        
-        if (colorResponse.ok) {
-          const colorData = await colorResponse.json();
-          let articles = colorData.articles || [];
-          
-          // Ajouter des articles de secours si nécessaire
-          if (articles.length < 3 && FALLBACK_ARTICLES[requestedColor]) {
-            const fallbackToAdd = FALLBACK_ARTICLES[requestedColor];
-            articles = [...articles, ...fallbackToAdd];
-          }
-          
-          // Trier et limiter
-          articles.sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
-          const limitedArticles = articles.slice(0, max);
-          
-          return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({ articles: limitedArticles })
-          };
+      sourcesToFetch = SOURCES_BIOTECH.filter(source => source.color === requestedColor);
+    } else {
+      // Pour "all", prendre un sous-ensemble bien réparti de sources
+      const colorGroups = {};
+      
+      // Regrouper par couleur et priorité
+      SOURCES_BIOTECH.forEach(source => {
+        if (!colorGroups[source.color]) {
+          colorGroups[source.color] = [];
         }
-      } catch (error) {
-        console.log(`Error fetching ${requestedColor} articles directly: ${error.message}`);
-        // Continue to fallback strategy
-      }
-    }
-    
-    // Si la demande concerne tous les articles ou si la requête directe a échoué
-    // Utiliser les articles de secours immédiatement pour garantir une réponse rapide
-    console.log("Using fallback articles for quick response");
-    
-    let fallbackArticles = [];
-    
-    if (requestedColor === 'all') {
-      // Pour tous les articles, prendre quelques-uns de chaque couleur
-      ['red', 'blue', 'green', 'white', 'yellow'].forEach(color => {
-        if (FALLBACK_ARTICLES[color]) {
-          // Prendre seulement 2-3 articles de chaque couleur pour aller vite
-          fallbackArticles = [...fallbackArticles, ...FALLBACK_ARTICLES[color].slice(0, 3)];
-        }
+        colorGroups[source.color].push(source);
       });
       
-      // Ajouter quelques articles multi
-      if (FALLBACK_ARTICLES.multi) {
-        fallbackArticles = [...fallbackArticles, ...FALLBACK_ARTICLES.multi.slice(0, 3)];
-      }
-    } else if (FALLBACK_ARTICLES[requestedColor]) {
-      // Utiliser les articles de secours pour la couleur demandée
-      fallbackArticles = FALLBACK_ARTICLES[requestedColor];
+      // Prendre les 2-3 meilleures sources de chaque couleur
+      Object.values(colorGroups).forEach(sources => {
+        // Trier par priorité
+        sources.sort((a, b) => a.priorité - b.priorité);
+        // Prendre les 2-3 premières
+        sourcesToFetch = [...sourcesToFetch, ...sources.slice(0, 3)];
+      });
     }
     
-    // Trier par date et limiter
-    fallbackArticles.sort((a, b) => {
+    console.log(`Récupération de ${sourcesToFetch.length} sources...`);
+    
+    // Récupérer les articles de manière parallèle mais avec un timeout strict
+    const articlePromises = sourcesToFetch.map(source => {
+      return new Promise(async (resolve) => {
+        try {
+          const feedResponse = await parser.parseURL(source.url);
+          
+          // Extraire et transformer les données
+          const articles = feedResponse.items
+            .slice(0, 5) // Limiter à 5 articles par source
+            .map(item => ({
+              title: item.title,
+              link: item.link,
+              pubDate: getPubDate(item),
+              description: getDescription(item),
+              content: item.contentEncoded || item.content || '',
+              contentSnippet: item.contentSnippet || '',
+              imageUrl: getImageUrl(item),
+              source: source.source,
+              biotechColor: source.color,
+              langue: source.langue
+            }));
+            
+          console.log(`Récupéré ${articles.length} articles de ${source.source}`);
+          
+          // Filtrer les articles par mots-clés biotechnologie
+          const biotechArticles = articles.filter(article => isBiotechArticle(article, source.color));
+          console.log(`Dont ${biotechArticles.length} articles de biotechnologie de ${source.source}`);
+          
+          resolve(biotechArticles);
+        } catch (error) {
+          console.log(`Erreur lors de la récupération de ${source.source}: ${error.message}`);
+          resolve([]); // Continuer avec un tableau vide
+        }
+      });
+    });
+    
+    // Timeout global pour toutes les requêtes
+    const timeoutPromise = new Promise(resolve => {
+      setTimeout(() => {
+        console.log("Timeout global atteint pour la récupération des articles");
+        resolve([]);
+      }, 7000); // 7 secondes max pour rester dans les limites de Netlify
+    });
+    
+    // Attendre que toutes les requêtes soient terminées ou que le timeout soit atteint
+    const results = await Promise.race([
+      Promise.all(articlePromises),
+      timeoutPromise.then(() => articlePromises.map(() => []))
+    ]);
+    
+    // Fusionner tous les articles
+    let allArticles = results.flat();
+    console.log(`Total d'articles récupérés: ${allArticles.length}`);
+    
+    // Si nous n'avons pas assez d'articles, essayer de manière séquentielle pour les sources restantes
+    if (allArticles.length < 10 && requestedColor === 'all') {
+      console.log("Pas assez d'articles, tentative séquentielle pour les principales sources...");
+      
+      // Prendre une source par couleur pour compléter rapidement
+      const mainSources = ['red', 'blue', 'green', 'white', 'yellow'].map(color => {
+        const sources = SOURCES_BIOTECH.filter(s => s.color === color);
+        return sources.length > 0 ? sources[0] : null;
+      }).filter(s => s !== null);
+      
+      for (const source of mainSources) {
+        if (Date.now() - startTime > 7000) {
+          console.log("Temps imparti dépassé, arrêt des requêtes séquentielles");
+          break;
+        }
+        
+        try {
+          console.log(`Tentative séquentielle pour ${source.source}...`);
+          const feedResponse = await parser.parseURL(source.url);
+          
+          const articles = feedResponse.items
+            .slice(0, 3) // Seulement 3 articles par source en séquentiel
+            .map(item => ({
+              title: item.title,
+              link: item.link,
+              pubDate: getPubDate(item),
+              description: getDescription(item),
+              content: item.contentEncoded || item.content || '',
+              contentSnippet: item.contentSnippet || '',
+              imageUrl: getImageUrl(item),
+              source: source.source,
+              biotechColor: source.color,
+              langue: source.langue
+            }));
+            
+          // Filtrer les articles de biotechnologie
+          const biotechArticles = articles.filter(article => isBiotechArticle(article, source.color));
+          allArticles = [...allArticles, ...biotechArticles];
+          
+          console.log(`Ajout de ${biotechArticles.length} articles de ${source.source}`);
+        } catch (error) {
+          console.log(`Erreur séquentielle pour ${source.source}: ${error.message}`);
+          continue;
+        }
+      }
+    }
+    
+    // Vérification finale du nombre d'articles par couleur
+    const articlesByColor = {};
+    ['red', 'blue', 'green', 'white', 'yellow'].forEach(color => {
+      articlesByColor[color] = allArticles.filter(article => article.biotechColor === color);
+    });
+    
+    let usesFallback = false;
+    let filteredArticles = [];
+    
+    if (requestedColor !== 'all') {
+      // Filtrer par couleur demandée
+      filteredArticles = allArticles.filter(article => article.biotechColor === requestedColor);
+      
+      // Si pas assez d'articles après filtrage (moins de 3), ajouter quelques fallbacks
+      if (filteredArticles.length < 3 && FALLBACK_ARTICLES[requestedColor]) {
+        console.log(`Pas assez d'articles pour ${requestedColor}, ajout de quelques fallbacks`);
+        usesFallback = true;
+        
+        // Ne prendre que le complément nécessaire
+        const neededFallbacks = 3 - filteredArticles.length;
+        const fallbacksToAdd = FALLBACK_ARTICLES[requestedColor].slice(0, neededFallbacks);
+        
+        filteredArticles = [...filteredArticles, ...fallbacksToAdd];
+      }
+    } else {
+      // Pour "all", s'assurer d'avoir quelques articles de chaque couleur
+      let hasEnoughPerColor = true;
+      
+      // Vérifier s'il y a au moins 2 articles par couleur
+      for (const color of ['red', 'blue', 'green', 'white', 'yellow']) {
+        if (articlesByColor[color].length < 2) {
+          hasEnoughPerColor = false;
+          break;
+        }
+      }
+      
+      if (hasEnoughPerColor) {
+        // On a assez d'articles de chaque couleur, les combiner
+        filteredArticles = allArticles;
+      } else {
+        // On n'a pas assez d'articles, compléter chaque couleur avec des fallbacks
+        usesFallback = true;
+        console.log("Utilisation de fallbacks pour compléter certaines couleurs manquantes");
+        
+        for (const color of ['red', 'blue', 'green', 'white', 'yellow']) {
+          const colorArticles = articlesByColor[color];
+          
+          // Si moins de 2 articles pour cette couleur
+          if (colorArticles.length < 2 && FALLBACK_ARTICLES[color]) {
+            // Ajouter juste ce qu'il faut pour atteindre 2 articles
+            const needed = 2 - colorArticles.length;
+            const fallbacksToAdd = FALLBACK_ARTICLES[color].slice(0, needed);
+            filteredArticles = [...filteredArticles, ...colorArticles, ...fallbacksToAdd];
+          } else {
+            // Sinon ajouter tous les articles de cette couleur
+            filteredArticles = [...filteredArticles, ...colorArticles];
+          }
+        }
+        
+        // Ajouter quelques articles multi-disciplines
+        if (filteredArticles.length < 10) {
+          const multiArticles = allArticles.filter(article => article.biotechColor === 'multi');
+          filteredArticles = [...filteredArticles, ...multiArticles];
+        }
+      }
+    }
+    
+    // Trier les articles par date de publication (du plus récent au plus ancien)
+    filteredArticles.sort((a, b) => {
       const dateA = a.pubDate ? new Date(a.pubDate) : new Date(0);
       const dateB = b.pubDate ? new Date(b.pubDate) : new Date(0);
       return dateB - dateA;
     });
     
-    const limitedFallbackArticles = fallbackArticles.slice(0, max);
+    // Limiter le nombre d'articles retournés
+    const limitedArticles = filteredArticles.slice(0, max);
     
-    // Essayer de charger les articles dynamiquement en arrière-plan et mettre en cache pour la prochaine requête
-    // Mais retourner les articles de secours immédiatement
-    setTimeout(async () => {
-      try {
-        // Charger les articles en arrière-plan pour la prochaine requête
-        console.log("Background loading articles for next request");
-        const allArticlesResponse = await fetch(`${process.env.URL}/.netlify/functions/fetch-all`, {
-          timeout: 8000
-        });
-        
-        if (allArticlesResponse.ok) {
-          console.log("Successfully loaded articles in background");
-          // Netlify n'a pas de mécanisme intégré pour mettre en cache entre les requêtes
-          // Cette partie est donc uniquement pour éviter les timeouts
-        }
-      } catch (error) {
-        console.log(`Background loading error: ${error.message}`);
-      }
-    }, 0);
+    console.log(`Retournant ${limitedArticles.length} articles pour couleur: ${requestedColor} (fallback: ${usesFallback})`);
     
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({ 
-        articles: limitedFallbackArticles,
-        source: 'fallback', // Indiquer que ce sont des articles de secours
+        articles: limitedArticles,
+        usesFallback: usesFallback
       })
     };
   } catch (error) {
-    console.error('Error in biotech-veille function:', error);
+    console.error('Erreur dans biotech-veille:', error);
     
-    // En cas d'erreur ultime, retourner un ensemble minimal d'articles de secours
-    const emergencyArticles = [];
+    // En cas d'erreur complète, retourner un minimum d'articles de fallback
+    let emergencyArticles = [];
+    let errorMessage = `Erreur lors de la récupération des articles: ${error.message}`;
     
-    // Prendre juste quelques articles
-    if (requestedColor === 'all') {
-      Object.values(FALLBACK_ARTICLES).forEach(colorArticles => {
-        if (colorArticles && colorArticles.length > 0) {
-          emergencyArticles.push(colorArticles[0]);
-        }
-      });
-    } else if (FALLBACK_ARTICLES[requestedColor] && FALLBACK_ARTICLES[requestedColor].length > 0) {
-      emergencyArticles.push(...FALLBACK_ARTICLES[requestedColor].slice(0, 3));
+    if (requestedColor !== 'all' && FALLBACK_ARTICLES[requestedColor]) {
+      emergencyArticles = FALLBACK_ARTICLES[requestedColor].slice(0, Math.min(max, 5));
     } else {
-      // Articles multi en dernier recours
-      emergencyArticles.push(...(FALLBACK_ARTICLES.multi || []).slice(0, 3));
+      // Prendre quelques articles de chaque couleur
+      for (const color of ['red', 'blue', 'green', 'white', 'yellow']) {
+        if (FALLBACK_ARTICLES[color]) {
+          emergencyArticles.push(FALLBACK_ARTICLES[color][0]); // Juste 1 article par couleur
+        }
+      }
+      
+      if (emergencyArticles.length < 5 && FALLBACK_ARTICLES.multi) {
+        emergencyArticles = [...emergencyArticles, ...FALLBACK_ARTICLES.multi.slice(0, 2)];
+      }
     }
     
     return {
@@ -607,8 +706,8 @@ exports.handler = async (event, context) => {
       headers,
       body: JSON.stringify({ 
         articles: emergencyArticles,
-        error: `Error fetching articles: ${error.message}`,
-        source: 'emergency'
+        error: errorMessage,
+        usesFallback: true
       })
     };
   }
