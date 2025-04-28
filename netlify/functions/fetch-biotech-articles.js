@@ -26,41 +26,42 @@ const parser = new Parser({
 const FEEDS = [
   // Sélection des sources les plus fiables par catégorie (réduites pour éviter le timeout)
   // Général / Multi-couleurs
-  { url: 'https://lejournal.cnrs.fr/rss', source: 'CNRS Le Journal', color: 'multi' },
-  { url: 'https://theconversation.com/fr/sciences/feed', source: 'The Conversation (Sciences)', color: 'multi' },
+  { id: 'cnrs', url: 'https://lejournal.cnrs.fr/rss', source: 'CNRS Le Journal', color: 'multi' },
+  { id: 'conversation_sci', url: 'https://theconversation.com/fr/sciences/feed', source: 'The Conversation (Sciences)', color: 'multi' },
   
   // Verte
-  { url: 'https://www.inrae.fr/flux/actualites/all/rss.xml', source: 'INRAE', color: 'green' },
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/agronomie.xml', source: 'Actu-Environnement (Agronomie)', color: 'green' },
+  { id: 'inrae', url: 'https://www.inrae.fr/flux/actualites/all/rss.xml', source: 'INRAE', color: 'green' },
+  { id: 'actu_env_agro', url: 'https://www.actu-environnement.com/feeds/rss/ae/agronomie.xml', source: 'Actu-Environnement (Agronomie)', color: 'green' },
   
   // Rouge
-  { url: 'https://presse.inserm.fr/feed/', source: 'INSERM', color: 'red' },
-  { url: 'https://www.sciencesetavenir.fr/sante/rss.xml', source: 'Sciences et Avenir (Santé)', color: 'red' },
+  { id: 'inserm', url: 'https://presse.inserm.fr/feed/', source: 'INSERM', color: 'red' },
+  { id: 'sciences_avenir', url: 'https://www.sciencesetavenir.fr/sante/rss.xml', source: 'Sciences et Avenir (Santé)', color: 'red' },
   
   // Blanche
-  { url: 'https://www.usinenouvelle.com/flux/rss', source: 'Usine Nouvelle (Général)', color: 'white' },
-  { url: 'https://www.industrie-techno.com/rss', source: 'Industrie & Technologies', color: 'white' },
+  { id: 'usine_nouvelle', url: 'https://www.usinenouvelle.com/flux/rss', source: 'Usine Nouvelle (Général)', color: 'white' },
+  { id: 'industrie_techno', url: 'https://www.industrie-techno.com/rss', source: 'Industrie & Technologies', color: 'white' },
   
   // Jaune
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/eau.xml', source: 'Actu-Environnement (Eau)', color: 'yellow' },
-  { url: 'https://www.goodplanet.info/feed/', source: 'GoodPlanet Info', color: 'yellow' },
+  { id: 'actu_env_eau', url: 'https://www.actu-environnement.com/feeds/rss/ae/eau.xml', source: 'Actu-Environnement (Eau)', color: 'yellow' },
+  { id: 'goodplanet', url: 'https://www.goodplanet.info/feed/', source: 'GoodPlanet Info', color: 'yellow' },
   
   // Bleue
-  { url: 'https://www.meretmarine.com/fr/rss.xml', source: 'Mer et Marine', color: 'blue' },
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/mer-littoral.xml', source: 'Actu-Environnement (Mer)', color: 'blue' },
+  { id: 'mer_marine', url: 'https://www.meretmarine.com/fr/rss.xml', source: 'Mer et Marine', color: 'blue' },
+  { id: 'actu_env_mer', url: 'https://www.actu-environnement.com/feeds/rss/ae/mer-littoral.xml', source: 'Actu-Environnement (Mer)', color: 'blue' },
   
   // Noir
-  { url: 'https://theconversation.com/fr/education/feed', source: 'The Conversation (Éducation)', color: 'black' },
-  { url: 'https://www.vousnousils.fr/feed', source: 'VousNousIls (Éducation)', color: 'black' },
+  { id: 'conversation_edu', url: 'https://theconversation.com/fr/education/feed', source: 'The Conversation (Éducation)', color: 'black' },
+  { id: 'vousnousils', url: 'https://www.vousnousils.fr/feed', source: 'VousNousIls (Éducation)', color: 'black' },
 ];
 
 // Max articles par flux et timeout pour les requêtes
 const MAX_ARTICLES_PER_FEED = 5;
 const FETCH_TIMEOUT = 3000; // 3 secondes de timeout par requête
+const MAX_FEEDS_PER_REQUEST = 2; // Nombre maximum de flux à traiter par requête
 
 // Système de cache pour éviter de requêter les flux à chaque fois
 let CACHE = {
-  // Structure: { color: { data: [...articles], timestamp: Date.now() } }
+  // Structure: { feedId: { data: [...articles], timestamp: Date.now() } }
 };
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes en millisecondes
 
@@ -179,65 +180,50 @@ const getImageUrl = (item) => {
   return null;
 };
 
-// Fonction pour récupérer les articles par couleur (avec cache)
-const fetchArticlesByColor = async (colorFilter) => {
-  // Vérifier si nous avons des données en cache pour cette couleur
-  const cacheKey = colorFilter || 'all';
-  if (CACHE[cacheKey] && CACHE[cacheKey].timestamp > Date.now() - CACHE_DURATION) {
-    console.log(`Using cached data for color: ${cacheKey}`);
-    return CACHE[cacheKey].data;
-  }
-  
-  console.log(`Cache miss or expired for color: ${cacheKey}, fetching fresh data...`);
-  
-  // Filtrer les feeds par couleur si un filtre est spécifié
-  const filteredFeeds = colorFilter ? FEEDS.filter(feed => feed.color === colorFilter) : FEEDS;
-  
-  console.log(`Fetching ${filteredFeeds.length} feeds for color: ${cacheKey}...`);
-  const allArticles = [];
-  
-  // Plutôt que d'envoyer toutes les requêtes en parallèle, nous les traitons en série
-  // Ce qui est plus lent mais garantit de ne pas dépasser les limites de Netlify
-  for (const feedInfo of filteredFeeds) {
-    try {
-      console.log(`- Fetching ${feedInfo.source} (${feedInfo.url})`);
-      const feed = await parser.parseURL(feedInfo.url, { timeout: FETCH_TIMEOUT });
-      
-      console.log(`  - Parsed ${feed.items?.length || 0} items from ${feedInfo.source}`);
-      if (feed.items) {
-        // Limit the number of articles per feed
-        const limitedItems = feed.items.slice(0, MAX_ARTICLES_PER_FEED); 
-        
-        limitedItems.forEach(item => {
-          allArticles.push({
-            title: item.title || 'Titre inconnu',
-            link: item.link || '',
-            pubDate: getPubDate(item),
-            description: getDescription(item),
-            source: feedInfo.source,
-            biotechColor: feedInfo.color,
-            imageUrl: getImageUrl(item), // Extract image URL
-          });
-        });
-      }
-    } catch (error) {
-      console.error(`  - Error fetching or parsing feed ${feedInfo.source} (${feedInfo.url}):`, error.message);
-      // Continue with next feed
+// Fonction pour récupérer des articles à partir d'un flux spécifique
+const fetchFeedArticles = async (feedInfo) => {
+  try {
+    // Vérifier si nous avons ce flux en cache
+    if (CACHE[feedInfo.id] && CACHE[feedInfo.id].timestamp > Date.now() - CACHE_DURATION) {
+      console.log(`Using cached data for feed: ${feedInfo.source}`);
+      return CACHE[feedInfo.id].data;
     }
+    
+    console.log(`- Fetching ${feedInfo.source} (${feedInfo.url})`);
+    const feed = await parser.parseURL(feedInfo.url, { timeout: FETCH_TIMEOUT });
+    
+    console.log(`  - Parsed ${feed.items?.length || 0} items from ${feedInfo.source}`);
+    const articles = [];
+    
+    if (feed.items) {
+      // Limit the number of articles per feed
+      const limitedItems = feed.items.slice(0, MAX_ARTICLES_PER_FEED); 
+      
+      limitedItems.forEach(item => {
+        articles.push({
+          title: item.title || 'Titre inconnu',
+          link: item.link || '',
+          pubDate: getPubDate(item),
+          description: getDescription(item),
+          source: feedInfo.source,
+          biotechColor: feedInfo.color,
+          imageUrl: getImageUrl(item), // Extract image URL
+          feedId: feedInfo.id
+        });
+      });
+    }
+    
+    // Sauvegarder dans le cache
+    CACHE[feedInfo.id] = {
+      data: articles,
+      timestamp: Date.now()
+    };
+    
+    return articles;
+  } catch (error) {
+    console.error(`  - Error fetching feed ${feedInfo.source}: ${error.message}`);
+    return []; // Retourner un tableau vide en cas d'erreur
   }
-  
-  console.log(`Total articles collected for color ${cacheKey}: ${allArticles.length}`);
-  
-  // Sort articles by date (most recent first)
-  allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-  
-  // Save to cache
-  CACHE[cacheKey] = {
-    data: allArticles,
-    timestamp: Date.now()
-  };
-  
-  return allArticles;
 };
 
 // Fonction pour nettoyer le cache des anciennes entrées
@@ -258,20 +244,101 @@ exports.handler = async (event, context) => {
     const params = event.queryStringParameters || {};
     const colorFilter = params.color || null; // Paramètre de filtrage par couleur
     const skipCache = params.skipCache === 'true'; // Paramètre pour forcer le rafraîchissement
-    
-    console.log(`Fetching articles with color filter: ${colorFilter || 'none (all colors)'}, skipCache: ${skipCache}`);
+    const feedIds = params.feeds ? params.feeds.split(',') : null; // Liste spécifique de flux à récupérer
+    const batch = parseInt(params.batch || '0', 10); // Numéro du lot (pour le chargement progressif)
     
     // Nettoyer le cache des entrées expirées
     cleanupCache();
     
-    // Si skip_cache est true, nous ignorons le cache
-    if (skipCache && CACHE[colorFilter || 'all']) {
-      console.log(`Clearing cache for: ${colorFilter || 'all'}`);
-      delete CACHE[colorFilter || 'all'];
+    // Si skip_cache est true, nous nettoyons le cache pour les flux demandés
+    if (skipCache && feedIds) {
+      feedIds.forEach(id => {
+        if (CACHE[id]) {
+          console.log(`Clearing cache for feed: ${id}`);
+          delete CACHE[id];
+        }
+      });
     }
     
-    // Récupérer les articles (du cache ou frais)
-    const articles = await fetchArticlesByColor(colorFilter);
+    let articlesToReturn = [];
+    let feedsToProcess = [];
+    
+    // Déterminer quels flux traiter
+    if (feedIds) {
+      // Si une liste spécifique de flux est fournie, nous les récupérons
+      feedsToProcess = FEEDS.filter(feed => feedIds.includes(feed.id));
+      console.log(`Processing specific feeds: ${feedsToProcess.map(f => f.id).join(', ')}`);
+    } else if (colorFilter) {
+      // Si un filtre de couleur est spécifié
+      feedsToProcess = FEEDS.filter(feed => feed.color === colorFilter);
+      console.log(`Processing feeds for color: ${colorFilter}`);
+      
+      // Appliquer la pagination pour éviter les timeouts
+      const startIndex = batch * MAX_FEEDS_PER_REQUEST;
+      const endIndex = startIndex + MAX_FEEDS_PER_REQUEST;
+      
+      // Pour le premier lot, inclure également des infos sur tous les lots disponibles
+      if (batch === 0) {
+        const totalFeeds = feedsToProcess.length;
+        const totalBatches = Math.ceil(totalFeeds / MAX_FEEDS_PER_REQUEST);
+        
+        // Réduire à juste ce lot
+        feedsToProcess = feedsToProcess.slice(startIndex, endIndex);
+        
+        // Inclure les métadonnées sur les lots
+        const metadata = {
+          totalFeeds,
+          totalBatches,
+          currentBatch: batch,
+          feedsInCurrentBatch: feedsToProcess.length,
+          allFeedIds: FEEDS.filter(feed => feed.color === colorFilter).map(feed => feed.id),
+          batchSize: MAX_FEEDS_PER_REQUEST
+        };
+        
+        console.log(`Batch ${batch}/${totalBatches-1}: Processing ${feedsToProcess.length} feeds`);
+        
+        // Traiter les flux pour ce lot
+        const promises = feedsToProcess.map(feed => fetchFeedArticles(feed));
+        const results = await Promise.all(promises);
+        
+        // Combiner tous les articles
+        articlesToReturn = results.flat();
+        
+        // Trier par date (plus récent d'abord)
+        articlesToReturn.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+        
+        return {
+          statusCode: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'public, max-age=300' // Cache côté client de 5 minutes
+          },
+          body: JSON.stringify({
+            articles: articlesToReturn,
+            metadata
+          }),
+        };
+      } else {
+        // Pour les lots suivants, juste retourner les articles
+        feedsToProcess = feedsToProcess.slice(startIndex, endIndex);
+        console.log(`Batch ${batch}: Processing ${feedsToProcess.length} feeds`);
+      }
+    } else {
+      // Si aucun filtre ou feedIds, limiter à un nombre sûr de flux
+      feedsToProcess = FEEDS.slice(0, MAX_FEEDS_PER_REQUEST);
+      console.log(`No filter specified, processing first ${MAX_FEEDS_PER_REQUEST} feeds only`);
+    }
+    
+    // Traiter les flux sélectionnés
+    const promises = feedsToProcess.map(feed => fetchFeedArticles(feed));
+    const results = await Promise.all(promises);
+    
+    // Combiner tous les articles
+    articlesToReturn = results.flat();
+    
+    // Trier par date (plus récent d'abord)
+    articlesToReturn.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
     
     return {
       statusCode: 200,
@@ -280,7 +347,9 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'public, max-age=300' // Cache côté client de 5 minutes
       },
-      body: JSON.stringify(articles),
+      body: JSON.stringify({
+        articles: articlesToReturn
+      }),
     };
   } catch (error) {
     console.error('Error in fetch-biotech-articles function:', error);
