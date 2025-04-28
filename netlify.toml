@@ -1,6 +1,6 @@
 [build]
   base = "/"
-  command = "cd frontend && npm ci && CI=false npm run build"
+  command = "cd frontend && npm ci --legacy-peer-deps && CI=false npm run build"
   publish = "frontend/build"
   functions = "netlify/functions"
   
