@@ -472,14 +472,6 @@ function Homepage() {
               <p className="text-gray-600 text-center">
                 Échangez avec <span className="font-medium">étudiants et enseignants</span>, posez vos questions et partagez vos astuces.
               </p>
-              <div className="flex flex-col gap-2 items-center mt-4">
-                <Link to="/forum" className="text-white bg-lab-green hover:bg-lab-green/90 px-4 py-2 rounded-lg transition-colors duration-300 text-sm font-medium w-full text-center">
-                  Voir le forum
-                </Link>
-                <Link to="/forum/nouvelle-discussion" className="text-lab-green border border-lab-green hover:bg-lab-green/5 px-4 py-2 rounded-lg transition-colors duration-300 text-sm font-medium w-full text-center">
-                  Créer une discussion
-                </Link>
-              </div>
             </div>
           </div>
         </div>
