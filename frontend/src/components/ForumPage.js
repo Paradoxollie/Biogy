@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 const ForumPage = () => {
   const { userInfo } = useAuth();
@@ -34,31 +35,26 @@ const ForumPage = () => {
     setError('');
     
     try {
-      let url = `/api/forum/discussions?page=${currentPage}`;
+      let endpoint = `/forum/discussions?page=${currentPage}`;
       
       if (activeCategory !== 'all') {
-        url += `&category=${activeCategory}`;
+        endpoint += `&category=${activeCategory}`;
       }
       
       if (activeFilter === 'popular') {
-        url += '&sort=likes';
+        endpoint += '&sort=likes';
       } else if (activeFilter === 'active') {
-        url += '&sort=replies';
+        endpoint += '&sort=replies';
       } else {
-        url += '&sort=createdAt';
+        endpoint += '&sort=createdAt';
       }
       
-      const response = await fetch(url);
-      const data = await response.json();
+      const response = await api.get(endpoint);
       
-      if (!response.ok) {
-        throw new Error(data.message || 'Une erreur est survenue');
-      }
-      
-      setDiscussions(data.discussions);
-      setTotalPages(data.totalPages);
+      setDiscussions(response.data.discussions);
+      setTotalPages(response.data.totalPages);
     } catch (err) {
-      setError(err.message || 'Une erreur est survenue. Veuillez réessayer.');
+      setError(err.response?.data?.message || err.message || 'Une erreur est survenue. Veuillez réessayer.');
       console.error(err);
     } finally {
       setLoading(false);

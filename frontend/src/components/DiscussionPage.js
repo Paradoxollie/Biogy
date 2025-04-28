@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import DOMPurify from 'dompurify';
+import api from '../services/api';
 
 const DiscussionPage = () => {
   const { discussionId } = useParams();
@@ -21,6 +22,8 @@ const DiscussionPage = () => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [sortOrder, setSortOrder] = useState('newest');
+  const [hasLiked, setHasLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
   
   // Configuration de l'éditeur ReactQuill
   const modules = {
@@ -41,55 +44,39 @@ const DiscussionPage = () => {
   ];
   
   // Récupérer les détails de la discussion et les réponses
-  useEffect(() => {
-    const fetchDiscussionData = async () => {
-      setLoading(true);
-      setError('');
+  const fetchDiscussionDetails = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const discussionResponse = await api.get(`/forum/discussions/${discussionId}`);
+      setDiscussion(discussionResponse.data.discussion);
       
-      try {
-        // Récupérer les détails de la discussion
-        const discussionResponse = await fetch(`/api/forum/discussions/${discussionId}`);
-        
-        if (!discussionResponse.ok) {
-          throw new Error('Erreur lors de la récupération de la discussion');
-        }
-        
-        const discussionData = await discussionResponse.json();
-        setDiscussion(discussionData);
-        setLikeCount(discussionData.likes || 0);
-        
-        // Vérifier si l'utilisateur a déjà aimé cette discussion
-        if (userInfo && userInfo._id) {
-          const likeStatusResponse = await fetch(`/api/forum/discussions/${discussionId}/like-status`, {
+      if (userInfo) {
+        try {
+          const likeStatusResponse = await api.get(`/forum/discussions/${discussionId}/like-status`, {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
+              Authorization: `Bearer ${userInfo.token}`
             }
           });
-          
-          if (likeStatusResponse.ok) {
-            const likeData = await likeStatusResponse.json();
-            setLiked(likeData.liked);
-          }
+          setHasLiked(likeStatusResponse.data.hasLiked);
+        } catch (err) {
+          console.error('Error checking like status:', err);
         }
-        
-        // Récupérer les réponses
-        const repliesResponse = await fetch(`/api/forum/discussions/${discussionId}/replies?sort=${sortOrder}`);
-        
-        if (!repliesResponse.ok) {
-          throw new Error('Erreur lors de la récupération des réponses');
-        }
-        
-        const repliesData = await repliesResponse.json();
-        setReplies(repliesData);
-      } catch (err) {
-        console.error(err);
-        setError('Une erreur est survenue lors du chargement de la discussion.');
-      } finally {
-        setLoading(false);
       }
-    };
-    
-    fetchDiscussionData();
+      
+      const repliesResponse = await api.get(`/forum/discussions/${discussionId}/replies?sort=${sortOrder}`);
+      setReplies(repliesResponse.data.replies);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Une erreur est survenue lors de la récupération des données');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchDiscussionDetails();
   }, [discussionId, userInfo, sortOrder]);
   
   // Gérer le changement de l'ordre de tri des réponses
@@ -103,14 +90,7 @@ const DiscussionPage = () => {
   const handleSubmitReply = async (e) => {
     e.preventDefault();
     
-    if (!userInfo) {
-      navigate('/login', { state: { from: `/forum/discussion/${discussionId}` } });
-      return;
-    }
-    
-    // Validation
     if (!replyContent.trim()) {
-      setReplyError('Le contenu de la réponse est requis');
       return;
     }
     
@@ -118,64 +98,43 @@ const DiscussionPage = () => {
     setReplyError('');
     
     try {
-      const response = await fetch(`/api/forum/discussions/${discussionId}/replies`, {
-        method: 'POST',
+      const response = await api.post(`/forum/discussions/${discussionId}/replies`, {
+        content: replyContent
+      }, {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ content: replyContent })
+          Authorization: `Bearer ${userInfo.token}`
+        }
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erreur lors de l\'envoi de la réponse');
-      }
-      
-      const newReply = await response.json();
-      
-      // Ajouter la nouvelle réponse à la liste
-      if (sortOrder === 'newest') {
-        setReplies([newReply, ...replies]);
-      } else {
-        setReplies([...replies, newReply]);
-      }
-      
-      // Réinitialiser le formulaire
+      setReplies([...replies, response.data.reply]);
       setReplyContent('');
+      setLikesCount(likesCount + 1);
     } catch (err) {
+      setReplyError(err.response?.data?.message || 'Une erreur est survenue lors de l\'envoi de votre réponse');
       console.error(err);
-      setReplyError(err.message || 'Une erreur est survenue lors de l\'envoi de la réponse.');
     } finally {
       setReplyLoading(false);
     }
   };
   
   // Gérer le like d'une discussion
-  const handleLike = async () => {
+  const handleLikeDiscussion = async () => {
     if (!userInfo) {
-      navigate('/login', { state: { from: `/forum/discussion/${discussionId}` } });
+      navigate('/login');
       return;
     }
     
     try {
-      const response = await fetch(`/api/forum/discussions/${discussionId}/like`, {
-        method: 'POST',
+      const response = await api.post(`/forum/discussions/${discussionId}/like`, {}, {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${userInfo.token}`
         }
       });
       
-      if (!response.ok) {
-        throw new Error('Erreur lors du like de la discussion');
-      }
-      
-      const data = await response.json();
-      setLiked(data.liked);
-      setLikeCount(data.likeCount);
+      setHasLiked(response.data.hasLiked);
+      setLikesCount(response.data.likesCount);
     } catch (err) {
-      console.error(err);
+      console.error('Error toggling like:', err);
     }
   };
   
@@ -378,19 +337,19 @@ const DiscussionPage = () => {
             <div className="border-t border-gray-200 pt-4 flex justify-between items-center">
               <div className="flex space-x-4">
                 <button 
-                  onClick={handleLike}
-                  className={`flex items-center text-sm font-medium ${liked ? 'text-lab-purple' : 'text-gray-500 hover:text-lab-purple'}`}
+                  onClick={handleLikeDiscussion}
+                  className={`flex items-center text-sm font-medium ${hasLiked ? 'text-lab-purple' : 'text-gray-500 hover:text-lab-purple'}`}
                 >
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    className={`h-5 w-5 mr-1.5 ${liked ? 'text-lab-purple fill-current' : 'text-gray-400'}`} 
+                    className={`h-5 w-5 mr-1.5 ${hasLiked ? 'text-lab-purple fill-current' : 'text-gray-400'}`} 
                     viewBox="0 0 20 20" 
-                    fill={liked ? 'currentColor' : 'none'}
+                    fill={hasLiked ? 'currentColor' : 'none'}
                     stroke="currentColor"
                   >
                     <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                   </svg>
-                  {likeCount} j'aime{likeCount !== 1 ? 's' : ''}
+                  {likesCount} j'aime{likesCount !== 1 ? 's' : ''}
                 </button>
                 
                 <button 
