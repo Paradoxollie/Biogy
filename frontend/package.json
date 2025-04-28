@@ -54,6 +54,5 @@
       "react-app"
     ]
   },
-  "proxy": "http://localhost:9000",
-  "homepage": "."
+  "proxy": "http://localhost:9000"
 }
