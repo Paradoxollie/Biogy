@@ -88,7 +88,14 @@ const NewDiscussionPage = () => {
       console.log('Réponse du serveur:', response.data);
       
       // Redirection vers la nouvelle discussion
-      navigate(`/discussion/${response.data._id}`);
+      if (response.data && response.data.discussion && response.data.discussion._id) {
+        navigate(`/discussion/${response.data.discussion._id}`);
+      } else if (response.data && response.data._id) {
+        navigate(`/discussion/${response.data._id}`);
+      } else {
+        console.error('ID de discussion introuvable dans la réponse:', response.data);
+        navigate('/forum');
+      }
     } catch (err) {
       console.error('Erreur lors de la création de la discussion:', err);
       
@@ -119,7 +126,7 @@ const NewDiscussionPage = () => {
       <div className="container mx-auto py-8 px-4">
         <div className="mb-6">
           <Link 
-            to="/"
+            to="/forum"
             className="inline-flex items-center text-sm font-medium text-lab-purple hover:text-lab-purple/90"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -210,7 +217,7 @@ const NewDiscussionPage = () => {
             
             <div className="flex justify-end pt-4 border-t border-gray-200">
               <Link
-                to="/"
+                to="/forum"
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 mr-3"
               >
                 Annuler

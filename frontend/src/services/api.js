@@ -12,7 +12,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false
+  withCredentials: true
 });
 
 // Fonction helper pour corriger les chemins d'API
@@ -22,18 +22,19 @@ export const fixApiPath = (path) => {
     return path;
   }
   
-  // Enlever le préfixe "/forum" s'il existe
+  // Normaliser le chemin en supprimant les préfixes redondants
   let normalizedPath = path;
-  if (path.startsWith('/forum/')) {
-    normalizedPath = path.substring(6); // Remove '/forum' prefix
+  
+  // Supprimer les préfixes redondants en une seule opération
+  const prefixesToRemove = ['/forum/', '/api/'];
+  for (const prefix of prefixesToRemove) {
+    if (normalizedPath.startsWith(prefix)) {
+      normalizedPath = normalizedPath.substring(prefix.length);
+      break;
+    }
   }
   
-  // Si le chemin commence déjà par '/api/', enlever ce préfixe car baseURL le contient déjà
-  if (normalizedPath.startsWith('/api/')) {
-    normalizedPath = normalizedPath.substring(4); // Remove '/api' prefix
-  }
-  
-  // Si le chemin ne commence pas par '/', ajouter '/'
+  // Ajouter le '/' au début si nécessaire
   if (!normalizedPath.startsWith('/')) {
     normalizedPath = `/${normalizedPath}`;
   }
