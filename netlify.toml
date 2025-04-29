@@ -27,17 +27,31 @@
 # Redirect API requests to Netlify Function
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/proxy/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
   force = true
 
 # Handle OPTIONS preflight requests for Netlify Function
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/proxy/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
   force = true
   method = "OPTIONS"
+
+# Redirect for posts endpoint
+[[redirects]]
+  from = "/posts"
+  to = "/.netlify/functions/api/posts"
+  status = 200
+  force = true
+
+# Redirect for discussions endpoint
+[[redirects]]
+  from = "/discussions"
+  to = "/.netlify/functions/api/discussions"
+  status = 200
+  force = true
 
 # SPA fallback
 [[redirects]]
