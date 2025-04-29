@@ -7,6 +7,7 @@ import App from './App'
 import { AuthProvider } from './context/AuthContext';
 import './index.css'; // Import Tailwind CSS
 import ErrorBoundary from './ErrorBoundary';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Add global error handler
 window.addEventListener('error', (event) => {

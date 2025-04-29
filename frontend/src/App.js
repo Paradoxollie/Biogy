@@ -13,6 +13,7 @@ import ForumPage from './components/ForumPage';
 import ProfilePage from './components/ProfilePage';
 import DiscussionPage from './components/DiscussionPage';
 import NewDiscussionPage from './components/NewDiscussionPage';
+import CorsDebugger from './components/CorsDebugger';
 
 // Placeholder component for EditProfilePage
 const EditProfilePage = () => (
@@ -44,6 +45,7 @@ function App() {
           <Route path="/new-discussion" element={<NewDiscussionPage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<EditProfilePage />} />
+          <Route path="/cors-debugger" element={<CorsDebugger />} />
         </Routes>
       </Layout>
     </>

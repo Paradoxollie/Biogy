@@ -2,9 +2,11 @@ import axios from 'axios';
 
 // Déterminer l'URL de base de l'API en fonction de l'environnement
 const API_URL = 
-  process.env.NODE_ENV === 'production' 
-    ? 'https://biogy-api.onrender.com/api' 
-    : '/api';
+  process.env.REACT_APP_API_URL 
+    ? `${process.env.REACT_APP_API_URL}/api`
+    : process.env.NODE_ENV === 'production' 
+      ? 'https://biogy-api.onrender.com/api' 
+      : 'http://localhost:5000/api';
 
 // Créer une instance axios avec une configuration par défaut
 const api = axios.create({

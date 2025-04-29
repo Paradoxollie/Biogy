@@ -48,26 +48,14 @@ function ProjectsGallery() {
 
     try {
       setLikeLoading(projectId);
-      const response = await fetch(`${apiUrl}/api/posts/${projectId}/like`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userInfo.token}`
-        }
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message);
-      }
+      const response = await api.post(`/posts/${projectId}/like`);
 
       // Mettre à jour le projet dans l'état
       setProjects(projects.map(project => {
         if (project._id === projectId) {
           return {
             ...project,
-            likes: data.likes
+            likes: response.data.likes
           };
         }
         return project;
@@ -86,25 +74,14 @@ function ProjectsGallery() {
 
     try {
       setCommentLoading(true);
-      const response = await fetch(`${apiUrl}/api/posts/${projectId}/comment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userInfo.token}`
-        },
-        body: JSON.stringify({ text: comment.trim() })
+      const response = await api.post(`/posts/${projectId}/comment`, {
+        text: comment.trim()
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message);
-      }
 
       // Mettre à jour le projet avec le nouveau commentaire
       setProjects(projects.map(project => {
         if (project._id === projectId) {
-          const updatedComments = [...project.comments, data.comment];
+          const updatedComments = [...project.comments, response.data.comment];
           return {
             ...project,
             comments: updatedComments
@@ -130,18 +107,7 @@ function ProjectsGallery() {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) return;
     
     try {
-      const response = await fetch(`${apiUrl}/api/posts/${projectId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userInfo.token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Erreur lors de la suppression du post');
-      }
+      const response = await api.delete(`/posts/${projectId}`);
       
       // Mettre à jour l'état en retirant le post supprimé
       setProjects(projects.filter(project => project._id !== projectId));
@@ -160,23 +126,9 @@ function ProjectsGallery() {
     
     try {
       console.log('Tentative de suppression du commentaire:', { projectId, commentId });
-      console.log('URL:', `${apiUrl}/api/posts/${projectId}/comments/${commentId}`);
-      console.log('Token:', userInfo.token.substring(0, 10) + '...');
       
-      const response = await fetch(`${apiUrl}/api/posts/${projectId}/comments/${commentId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userInfo.token}`
-        }
-      });
-      
-      const data = await response.json();
-      console.log('Réponse du serveur:', data);
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Erreur lors de la suppression du commentaire');
-      }
+      const response = await api.delete(`/posts/${projectId}/comments/${commentId}`);
+      console.log('Réponse du serveur:', response.data);
       
       // Mettre à jour l'état en retirant le commentaire supprimé
       setProjects(projects.map(project => {
