@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 function ProjectsGallery() {
   const [projects, setProjects] = useState([]);
@@ -12,28 +13,24 @@ function ProjectsGallery() {
   const [likeLoading, setLikeLoading] = useState(null); // ID du projet en cours de like
   const { userInfo } = useAuth();
 
-  // Update the API URL to point to the production backend if not in development
-  const apiUrl = process.env.REACT_APP_API_URL || 'https://biogy.onrender.com';
-
   // Utiliser useCallback pour éviter les boucles infinies avec useEffect
   const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${apiUrl}/api/posts`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Erreur lors de la récupération des projets');
+      const response = await api.get('/posts');
+      
+      if (response && response.data) {
+        setProjects(response.data);
+      } else {
+        throw new Error('Données invalides reçues du serveur');
       }
-
-      setProjects(data);
     } catch (err) {
       console.error('Erreur:', err);
       setError(err.message || 'Une erreur est survenue lors de la récupération des projets');
     } finally {
       setLoading(false);
     }
-  }, [apiUrl]); // Dépendance apiUrl pour useCallback
+  }, []); // Pas de dépendance nécessaire car nous utilisons api de services
 
   useEffect(() => {
     fetchProjects();
