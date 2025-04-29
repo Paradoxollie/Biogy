@@ -2,7 +2,7 @@
   # This tells Netlify where your project is located
   base = "/"
   # This tells Netlify what command to run
-  command = "cd frontend && npm ci --legacy-peer-deps && npm run build && cd ../netlify/functions && npm install"
+  command = "npm install && node netlify.js && cd frontend && npm ci --legacy-peer-deps && npm run build"
   # This tells Netlify where the build output is located
   publish = "frontend/build"
   # This tells Netlify where to find functions
@@ -16,6 +16,13 @@
   CI = "false"
   GENERATE_SOURCEMAP = "false"
   REACT_APP_API_URL = "/.netlify/functions/proxy"
+
+# Direct access to Netlify Functions
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
 
 # Redirect API requests to Netlify Function
 [[redirects]]

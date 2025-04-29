@@ -49,10 +49,10 @@ function ProjectsGallery() {
         console.warn('API service failed, trying direct API call:', apiError);
       }
 
-      // Si l'API normale échoue, essayer via la fonction Netlify
+      // Si l'API normale échoue, essayer via la fonction direct-api
       try {
-        console.log('Making API call via Netlify Function');
-        const response = await fetch('/.netlify/functions/proxy/posts', {
+        console.log('Making API call via direct-api Netlify Function');
+        const response = await fetch('/.netlify/functions/direct-api/posts', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -65,27 +65,102 @@ function ProjectsGallery() {
         }
 
         const data = await response.json();
-        console.log('Projects API response from Netlify Function:', data);
+        console.log('Projects API response from direct-api Netlify Function:', data);
 
         if (data) {
           if (Array.isArray(data)) {
             setProjects(data);
-            console.log(`Loaded ${data.length} projects successfully via Netlify Function`);
+            console.log(`Loaded ${data.length} projects successfully via direct-api Netlify Function`);
+            return;
           } else if (data.posts && Array.isArray(data.posts)) {
             setProjects(data.posts);
-            console.log(`Loaded ${data.posts.length} projects from 'posts' property via Netlify Function`);
+            console.log(`Loaded ${data.posts.length} projects from 'posts' property via direct-api Netlify Function`);
+            return;
           } else {
-            console.error('Unexpected data format from Netlify Function:', data);
-            throw new Error('Format de données inattendu reçu du serveur');
+            console.error('Unexpected data format from direct-api Netlify Function:', data);
           }
         } else {
-          console.error('No data in response from Netlify Function');
-          throw new Error('Données invalides reçues du serveur');
+          console.error('No data in response from direct-api Netlify Function');
         }
-      } catch (netlifyError) {
-        console.error('Netlify Function call failed:', netlifyError);
-        setError('Impossible de charger les projets. Veuillez réessayer plus tard.');
-        setProjects([]);
+      } catch (directApiError) {
+        console.error('direct-api Netlify Function call failed:', directApiError);
+
+        // Si la fonction direct-api échoue, essayer via la fonction proxy
+        try {
+          console.log('Making API call via proxy Netlify Function');
+          const response = await fetch('/.netlify/functions/proxy/posts', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              ...headers
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status} ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          console.log('Projects API response from proxy Netlify Function:', data);
+
+          if (data) {
+            if (Array.isArray(data)) {
+              setProjects(data);
+              console.log(`Loaded ${data.length} projects successfully via proxy Netlify Function`);
+            } else if (data.posts && Array.isArray(data.posts)) {
+              setProjects(data.posts);
+              console.log(`Loaded ${data.posts.length} projects from 'posts' property via proxy Netlify Function`);
+            } else {
+              console.error('Unexpected data format from proxy Netlify Function:', data);
+              throw new Error('Format de données inattendu reçu du serveur');
+            }
+          } else {
+            console.error('No data in response from proxy Netlify Function');
+            throw new Error('Données invalides reçues du serveur');
+          }
+        } catch (proxyError) {
+          console.error('proxy Netlify Function call failed:', proxyError);
+
+          // Si la fonction proxy échoue, essayer directement l'API
+          try {
+            console.log('Making direct API call to Render');
+            const response = await fetch('https://biogy-api.onrender.com/api/posts', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                ...headers,
+                'Origin': 'https://biogy.netlify.app'
+              }
+            });
+
+            if (!response.ok) {
+              throw new Error(`API error: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log('Projects API response from direct API call:', data);
+
+            if (data) {
+              if (Array.isArray(data)) {
+                setProjects(data);
+                console.log(`Loaded ${data.length} projects successfully via direct API call`);
+              } else if (data.posts && Array.isArray(data.posts)) {
+                setProjects(data.posts);
+                console.log(`Loaded ${data.posts.length} projects from 'posts' property via direct API call`);
+              } else {
+                console.error('Unexpected data format from direct API call:', data);
+                throw new Error('Format de données inattendu reçu du serveur');
+              }
+            } else {
+              console.error('No data in response from direct API call');
+              throw new Error('Données invalides reçues du serveur');
+            }
+          } catch (directError) {
+            console.error('Direct API call failed:', directError);
+            setError('Impossible de charger les projets. Veuillez réessayer plus tard.');
+            setProjects([]);
+          }
+        }
       }
     } catch (err) {
       console.error('Error fetching projects:', err);

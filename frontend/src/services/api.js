@@ -3,7 +3,7 @@ import proxyService from './proxyService';
 
 // Déterminer l'URL de base de l'API en fonction de l'environnement
 const API_URL = process.env.NODE_ENV === 'production'
-  ? process.env.REACT_APP_API_URL || '/.netlify/functions/proxy' // Utiliser la fonction Netlify en production
+  ? '/.netlify/functions/direct-api' // Utiliser la fonction direct-api en production
   : process.env.REACT_APP_API_URL
     ? process.env.REACT_APP_API_URL // Variable d'env prioritaire
     : 'http://localhost:5000/api'; // Fallback pour le dev local
@@ -11,27 +11,44 @@ const API_URL = process.env.NODE_ENV === 'production'
 // URL directe de l'API (pour les cas où le proxy échoue)
 const DIRECT_API_URL = 'https://biogy-api.onrender.com/api';
 
+// URL de la fonction proxy (pour les cas où la fonction direct-api échoue)
+const PROXY_API_URL = '/.netlify/functions/proxy';
+
 console.log('API_URL configured as:', API_URL);
 
-// Vérifier si l'API est accessible via la fonction Netlify
-const checkApiHealth = async () => {
+// Vérifier si les fonctions Netlify sont accessibles
+const checkNetlifyFunctions = async () => {
   try {
-    // Vérifier d'abord la fonction de test
-    const testResponse = await axios.get('/.netlify/functions/test', { timeout: 5000 });
-    console.log('Netlify Functions test successful:', testResponse.data);
+    // Vérifier d'abord la fonction simple
+    const simpleResponse = await axios.get('/.netlify/functions/simple', { timeout: 5000 });
+    console.log('Netlify Functions simple test successful:', simpleResponse.data);
 
-    // Ensuite vérifier le proxy
-    const response = await axios.get(`${API_URL}/health`, { timeout: 5000 });
-    console.log('API health check via Netlify Function successful:', response.data);
-    return true;
+    // Ensuite vérifier la fonction direct-api
+    try {
+      const directApiResponse = await axios.get('/.netlify/functions/direct-api/health', { timeout: 5000 });
+      console.log('Netlify Function direct-api test successful:', directApiResponse.data);
+      return true;
+    } catch (directApiError) {
+      console.warn('Netlify Function direct-api test failed:', directApiError.message);
+
+      // Essayer la fonction proxy
+      try {
+        const proxyResponse = await axios.get('/.netlify/functions/proxy/health', { timeout: 5000 });
+        console.log('Netlify Function proxy test successful:', proxyResponse.data);
+        return true;
+      } catch (proxyError) {
+        console.warn('Netlify Function proxy test failed:', proxyError.message);
+        return false;
+      }
+    }
   } catch (error) {
-    console.warn('API health check failed:', error.message);
+    console.warn('Netlify Functions test failed:', error.message);
     return false;
   }
 };
 
 // Exécuter la vérification au chargement
-checkApiHealth();
+checkNetlifyFunctions();
 
 // Flag pour activer le fallback vers le proxy si les requêtes API échouent
 let useProxyFallback = false;
@@ -139,21 +156,37 @@ const withFallback = async (method, path, data = null) => {
       } catch (proxyError) {
         console.error('Proxy fallback error:', proxyError);
 
-        // Essayer avec l'URL directe en dernier recours
+        // Essayer avec la fonction direct-api
         try {
-          console.log(`Tentative d'appel API direct via ${DIRECT_API_URL}`);
-          const directResponse = await axios({
+          console.log(`Tentative d'appel API via la fonction direct-api`);
+          const directApiResponse = await axios({
             method,
             url: fixedPath,
             data,
             headers,
-            baseURL: DIRECT_API_URL,
-            timeout: 15000 // 15 secondes de timeout pour l'appel direct
+            baseURL: '/.netlify/functions/direct-api',
+            timeout: 15000 // 15 secondes de timeout pour l'appel via la fonction direct-api
           });
-          return directResponse;
-        } catch (directError) {
-          console.error('Direct API Error:', directError);
-          throw directError;
+          return directApiResponse;
+        } catch (directApiError) {
+          console.error('Direct API Function Error:', directApiError);
+
+          // Essayer avec l'URL directe en dernier recours
+          try {
+            console.log(`Tentative d'appel API direct via ${DIRECT_API_URL}`);
+            const directResponse = await axios({
+              method,
+              url: fixedPath,
+              data,
+              headers,
+              baseURL: DIRECT_API_URL,
+              timeout: 20000 // 20 secondes de timeout pour l'appel direct
+            });
+            return directResponse;
+          } catch (directError) {
+            console.error('Direct API Error:', directError);
+            throw directError;
+          }
         }
       }
     }
