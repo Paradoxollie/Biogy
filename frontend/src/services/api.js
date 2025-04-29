@@ -8,7 +8,25 @@ const API_URL = process.env.NODE_ENV === 'production'
     ? `${process.env.REACT_APP_API_URL}/api` // Variable d'env prioritaire (pourrait être utilisée pour d'autres environnements)
     : 'http://localhost:5000/api'; // Fallback pour le dev local
 
+// URL directe de l'API (pour les cas où le proxy échoue)
+const DIRECT_API_URL = 'https://biogy-api.onrender.com/api';
+
 console.log('API_URL configured as:', API_URL);
+
+// Vérifier si l'API est accessible via le proxy Netlify
+const checkApiHealth = async () => {
+  try {
+    const response = await axios.get('/api/health', { timeout: 5000 });
+    console.log('API health check via proxy successful:', response.data);
+    return true;
+  } catch (error) {
+    console.warn('API health check via proxy failed, will use direct API:', error.message);
+    return false;
+  }
+};
+
+// Exécuter la vérification au chargement
+checkApiHealth();
 
 // Flag pour activer le fallback vers le proxy si les requêtes API échouent
 let useProxyFallback = false;
@@ -115,7 +133,23 @@ const withFallback = async (method, path, data = null) => {
         return { data: response }; // Wrap in data property to match axios response format
       } catch (proxyError) {
         console.error('Proxy fallback error:', proxyError);
-        throw proxyError;
+
+        // Essayer avec l'URL directe en dernier recours
+        try {
+          console.log(`Tentative d'appel API direct via ${DIRECT_API_URL}`);
+          const directResponse = await axios({
+            method,
+            url: fixedPath,
+            data,
+            headers,
+            baseURL: DIRECT_API_URL,
+            timeout: 15000 // 15 secondes de timeout pour l'appel direct
+          });
+          return directResponse;
+        } catch (directError) {
+          console.error('Direct API Error:', directError);
+          throw directError;
+        }
       }
     }
 

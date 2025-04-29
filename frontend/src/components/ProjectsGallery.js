@@ -21,7 +21,7 @@ function ProjectsGallery() {
       setError('');
       console.log('Fetching projects from /posts endpoint');
 
-      // Utiliser notre service de proxy CORS
+      // Préparer les headers
       const headers = {};
       if (userInfo && userInfo.token) {
         headers['Authorization'] = `Bearer ${userInfo.token}`;
@@ -46,30 +46,50 @@ function ProjectsGallery() {
           }
         }
       } catch (apiError) {
-        console.warn('API service failed, trying CORS proxy:', apiError);
+        console.warn('API service failed, trying direct API call:', apiError);
       }
 
-      // Si l'API normale échoue, utiliser le proxy CORS
-      console.log('Using CORS proxy as fallback');
-      const data = await corsProxy.get('/posts', { headers });
-      console.log('Projects API response from CORS proxy:', data);
+      // Si l'API normale échoue, essayer un appel direct à l'API Render
+      try {
+        console.log('Making direct API call to Render');
+        const response = await fetch('https://biogy-api.onrender.com/api/posts', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+            'Origin': 'https://biogy.netlify.app',
+            'Access-Control-Request-Method': 'GET',
+            'Access-Control-Request-Headers': 'Content-Type, Authorization'
+          },
+          mode: 'cors'
+        });
 
-      if (data) {
-        // Check if data is an array
-        if (Array.isArray(data)) {
-          setProjects(data);
-          console.log(`Loaded ${data.length} projects successfully via proxy`);
-        } else if (data.posts && Array.isArray(data.posts)) {
-          // Some APIs wrap the data in a 'posts' property
-          setProjects(data.posts);
-          console.log(`Loaded ${data.posts.length} projects from 'posts' property via proxy`);
-        } else {
-          console.error('Unexpected data format from proxy:', data);
-          throw new Error('Format de données inattendu reçu du serveur');
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
         }
-      } else {
-        console.error('No data in response from proxy');
-        throw new Error('Données invalides reçues du serveur');
+
+        const data = await response.json();
+        console.log('Projects API response from direct API call:', data);
+
+        if (data) {
+          if (Array.isArray(data)) {
+            setProjects(data);
+            console.log(`Loaded ${data.length} projects successfully via direct API`);
+          } else if (data.posts && Array.isArray(data.posts)) {
+            setProjects(data.posts);
+            console.log(`Loaded ${data.posts.length} projects from 'posts' property via direct API`);
+          } else {
+            console.error('Unexpected data format from direct API:', data);
+            throw new Error('Format de données inattendu reçu du serveur');
+          }
+        } else {
+          console.error('No data in response from direct API');
+          throw new Error('Données invalides reçues du serveur');
+        }
+      } catch (directError) {
+        console.error('Direct API call failed:', directError);
+        setError('Impossible de charger les projets. Veuillez réessayer plus tard.');
+        setProjects([]);
       }
     } catch (err) {
       console.error('Error fetching projects:', err);

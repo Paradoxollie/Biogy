@@ -85,40 +85,64 @@ const ForumPage = () => {
           }
         }
       } catch (apiError) {
-        console.warn('API service failed, trying CORS proxy:', apiError);
+        console.warn('API service failed, trying direct API call:', apiError);
       }
 
-      // Si l'API normale échoue, utiliser le proxy CORS
-      console.log('Using CORS proxy as fallback');
-      const data = await corsProxy.get(apiPath, { headers });
-      console.log('Forum API response from CORS proxy:', data);
+      // Si l'API normale échoue, essayer un appel direct à l'API Render
+      try {
+        const directUrl = `https://biogy-api.onrender.com/api/discussions?page=${pageNumber}`;
+        console.log('Making direct API call to Render:', directUrl);
 
-      // Handle different response formats
-      if (data) {
-        if (data.discussions && Array.isArray(data.discussions)) {
-          // Standard format with discussions array and totalPages
-          console.log(`Loaded ${data.discussions.length} discussions via proxy`);
-          setDiscussions(data.discussions);
-          setTotalPages(data.totalPages || 1);
-        } else if (Array.isArray(data)) {
-          // Direct array format
-          console.log(`Loaded ${data.length} discussions (array format) via proxy`);
-          setDiscussions(data);
-          setTotalPages(Math.ceil(data.length / 10) || 1); // Estimate total pages
-        } else if (data.success && data.data && Array.isArray(data.data.discussions)) {
-          // Nested format with success flag
-          console.log(`Loaded ${data.data.discussions.length} discussions (nested format) via proxy`);
-          setDiscussions(data.data.discussions);
-          setTotalPages(data.data.totalPages || 1);
-        } else {
-          console.error('Unexpected data format from proxy:', data);
-          setDiscussions([]);
-          setError('Format de données inattendu. Veuillez réessayer plus tard.');
+        const response = await fetch(directUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+            'Origin': 'https://biogy.netlify.app',
+            'Access-Control-Request-Method': 'GET',
+            'Access-Control-Request-Headers': 'Content-Type, Authorization'
+          },
+          mode: 'cors'
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
         }
-      } else {
-        console.error('No data in response from proxy');
+
+        const data = await response.json();
+        console.log('Forum API response from direct API call:', data);
+
+        // Handle different response formats
+        if (data) {
+          if (data.discussions && Array.isArray(data.discussions)) {
+            // Standard format with discussions array and totalPages
+            console.log(`Loaded ${data.discussions.length} discussions via direct API`);
+            setDiscussions(data.discussions);
+            setTotalPages(data.totalPages || 1);
+          } else if (Array.isArray(data)) {
+            // Direct array format
+            console.log(`Loaded ${data.length} discussions (array format) via direct API`);
+            setDiscussions(data);
+            setTotalPages(Math.ceil(data.length / 10) || 1); // Estimate total pages
+          } else if (data.success && data.data && Array.isArray(data.data.discussions)) {
+            // Nested format with success flag
+            console.log(`Loaded ${data.data.discussions.length} discussions (nested format) via direct API`);
+            setDiscussions(data.data.discussions);
+            setTotalPages(data.data.totalPages || 1);
+          } else {
+            console.error('Unexpected data format from direct API:', data);
+            setDiscussions([]);
+            setError('Format de données inattendu. Veuillez réessayer plus tard.');
+          }
+        } else {
+          console.error('No data in response from direct API');
+          setDiscussions([]);
+          setError('Aucune donnée reçue du serveur. Veuillez réessayer plus tard.');
+        }
+      } catch (directError) {
+        console.error('Direct API call failed:', directError);
+        setError('Impossible de charger les discussions. Veuillez réessayer plus tard.');
         setDiscussions([]);
-        setError('Aucune donnée reçue du serveur. Veuillez réessayer plus tard.');
       }
     } catch (error) {
       console.error('Erreur lors du chargement des discussions:', error);

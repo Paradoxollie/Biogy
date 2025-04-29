@@ -12,42 +12,61 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
   'https://biogy.netlify.app',
+  'https://www.biogy.netlify.app',
+  'https://biogy.netlify.com',
+  'https://www.biogy.netlify.com',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
-// Configuration CORS simplifiée et plus stricte
+// Configuration CORS beaucoup plus permissive pour résoudre les problèmes
 const corsOptions = {
-  origin: function(origin, callback) {
-    // Autoriser les requêtes sans origine (ex: Postman, mobile apps) ET les requêtes en dev
-    if (!origin || process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
-    }
-    // Autoriser les origines de la liste en production
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    } else {
-      console.error(`Origin ${origin} not allowed by CORS policy.`);
-      return callback(new Error('Not allowed by CORS')); // Rejeter explicitement
-    }
-  },
+  origin: '*', // Autoriser toutes les origines
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  credentials: true, // Important pour les cookies/auth headers
-  optionsSuccessStatus: 200 // Pour les navigateurs anciens
+  credentials: false, // Désactiver credentials pour permettre '*'
+  optionsSuccessStatus: 200, // Pour les navigateurs anciens
+  preflightContinue: false
 };
 
 // Middleware CORS global
 app.use(cors(corsOptions));
 
-// Les requêtes OPTIONS (preflight) sont gérées automatiquement par le middleware `cors`
-// Il n'est plus nécessaire de définir app.options('*', ...)
+// Middleware spécifique pour les requêtes OPTIONS (preflight)
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.status(200).send();
+});
 
 app.use(express.json()); // Pour parser le JSON dans les requêtes
 app.use(express.urlencoded({ extended: true })); // Pour parser les données de formulaire
 
+// Middleware pour ajouter les en-têtes CORS à toutes les réponses
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  next();
+});
+
 // Routes de base
 app.get('/', (req, res) => {
   res.send('API Biogy Backend is running...');
+});
+
+// Route de test CORS
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'API is healthy and CORS is working!',
+    timestamp: new Date().toISOString(),
+    origin: req.headers.origin || 'unknown',
+    cors: {
+      enabled: true,
+      allowedOrigins: allowedOrigins
+    }
+  });
 });
 
 // Routes spécifiques (à compléter dans routes/)
@@ -65,16 +84,16 @@ app.use((err, req, res, next) => {
 
   // Le middleware `cors` devrait déjà avoir défini les headers si la requête initiale était autorisée
   // Il n'est plus nécessaire de les redéfinir ici
-  
+
   // Si l'erreur est une erreur CORS générée par notre logique plus haut
   if (err.message === 'Not allowed by CORS') {
     return res.status(403).json({ message: 'Forbidden by CORS policy' });
   }
-  
-  res.status(statusCode).json({ 
+
+  res.status(statusCode).json({
       message: err.message || 'Internal Server Error',
       // Ne pas exposer le stack en production
-      stack: process.env.NODE_ENV === 'production' ? null : err.stack 
+      stack: process.env.NODE_ENV === 'production' ? null : err.stack
   });
 });
 

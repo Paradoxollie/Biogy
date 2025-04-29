@@ -104,15 +104,34 @@ const NewDiscussionPage = () => {
           data = response.data;
         }
       } catch (apiError) {
-        console.warn('API service failed, trying CORS proxy:', apiError);
+        console.warn('API service failed, trying direct API call:', apiError);
 
-        // Si l'API normale échoue, utiliser le proxy CORS
-        console.log('Using CORS proxy as fallback');
-        data = await corsProxy.post('/discussions', discussionData, {
-          headers: {
-            'Authorization': `Bearer ${userInfo.token}`
+        // Si l'API normale échoue, essayer un appel direct à l'API Render
+        try {
+          console.log('Making direct API call to Render');
+          const response = await fetch('https://biogy-api.onrender.com/api/discussions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userInfo.token}`,
+              'Origin': 'https://biogy.netlify.app',
+              'Access-Control-Request-Method': 'POST',
+              'Access-Control-Request-Headers': 'Content-Type, Authorization'
+            },
+            body: JSON.stringify(discussionData),
+            mode: 'cors'
+          });
+
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status} ${response.statusText}`);
           }
-        });
+
+          data = await response.json();
+          console.log('Discussion API response from direct API call:', data);
+        } catch (directError) {
+          console.error('Direct API call failed:', directError);
+          throw new Error('Impossible de créer la discussion. Veuillez réessayer plus tard.');
+        }
       }
 
       console.log('Réponse du serveur:', data);

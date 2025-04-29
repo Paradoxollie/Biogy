@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: biogy-api
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        value: https://biogy.netlify.app
+    headers:
+      - path: /*
+        name: Access-Control-Allow-Origin
+        value: "*"
+      - path: /*
+        name: Access-Control-Allow-Methods
+        value: "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+      - path: /*
+        name: Access-Control-Allow-Headers
+        value: "Content-Type, Authorization, X-Requested-With, Accept, Origin"
