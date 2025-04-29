@@ -1,14 +1,1 @@
-# API redirects with CORS headers - Main API endpoint
-/api/*  https://biogy-api.onrender.com/api/:splat  200!  Access-Control-Allow-Origin=*,Access-Control-Allow-Methods=GET,POST,PUT,DELETE,OPTIONS,PATCH,Access-Control-Allow-Headers=Origin,X-Requested-With,Content-Type,Accept,Authorization
 
-# Specific API endpoints with higher priority
-/api/health  https://biogy-api.onrender.com/api/health  200!  Access-Control-Allow-Origin=*,Access-Control-Allow-Methods=GET,OPTIONS,Access-Control-Allow-Headers=*
-/api/discussions/*  https://biogy-api.onrender.com/api/discussions/:splat  200!  Access-Control-Allow-Origin=*,Access-Control-Allow-Methods=GET,POST,PUT,DELETE,OPTIONS,PATCH,Access-Control-Allow-Headers=*
-/api/posts/*  https://biogy-api.onrender.com/api/posts/:splat  200!  Access-Control-Allow-Origin=*,Access-Control-Allow-Methods=GET,POST,PUT,DELETE,OPTIONS,PATCH,Access-Control-Allow-Headers=*
-/api/auth/*  https://biogy-api.onrender.com/api/auth/:splat  200!  Access-Control-Allow-Origin=*,Access-Control-Allow-Methods=GET,POST,PUT,DELETE,OPTIONS,PATCH,Access-Control-Allow-Headers=*
-
-# OPTIONS preflight requests
-/api/*  https://biogy-api.onrender.com/api/:splat  200!  Access-Control-Allow-Origin=*,Access-Control-Allow-Methods=GET,POST,PUT,DELETE,OPTIONS,PATCH,Access-Control-Allow-Headers=*  OPTIONS
-
-# SPA fallback
-/* /index.html 200

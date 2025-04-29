@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Homepage from './components/Homepage';
 import Layout from './components/Layout';
 import ShareProjectPage from './components/ShareProjectPage';
@@ -9,19 +9,6 @@ import AdminPage from './components/AdminPage';
 import ProjectsGallery from './components/ProjectsGallery';
 import ScienceWatchPage from './components/ScienceWatchPage';
 import AuthDebug from './context/AuthDebug';
-import ForumPage from './components/ForumPage';
-import ProfilePage from './components/ProfilePage';
-import DiscussionPage from './components/DiscussionPage';
-import NewDiscussionPage from './components/NewDiscussionPage';
-import CorsDebugger from './components/CorsDebugger';
-
-// Placeholder component for EditProfilePage
-const EditProfilePage = () => (
-  <div className="container mx-auto p-10 text-center">
-    <h1 className="text-2xl font-bold text-lab-purple">Édition du profil</h1>
-    <p className="mt-4">Cette fonctionnalité est en cours de développement</p>
-  </div>
-);
 
 function App() {
   return (
@@ -40,12 +27,6 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/forum" element={<ForumPage />} />
-          <Route path="/discussion/:discussionId" element={<DiscussionPage />} />
-          <Route path="/new-discussion" element={<NewDiscussionPage />} />
-          <Route path="/profile/:userId" element={<ProfilePage />} />
-          <Route path="/profile/edit" element={<EditProfilePage />} />
-          <Route path="/cors-debugger" element={<CorsDebugger />} />
         </Routes>
       </Layout>
     </>

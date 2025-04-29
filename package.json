@@ -1,57 +1,6 @@
 {
-  "name": "frontend",
-  "version": "1.0.1",
-  "main": "index.js",
-  "engines": {
-    "node": "18.x"
-  },
-  "scripts": {
-    "build": "cd frontend && npm i --legacy-peer-deps && CI=false GENERATE_SOURCEMAP=false NODE_OPTIONS=--max-old-space-size=4096 npm run build -- --profile",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "react-scripts start",
-    "postinstall": "cd netlify/functions && npm install",
-    "functions:install": "cd netlify/functions && npm install",
-    "functions:serve": "netlify functions:serve",
-    "vercel-build": "cd frontend && npm install --legacy-peer-deps && npm run build"
-  },
   "dependencies": {
-    "autoprefixer": "^10.4.19",
-    "axios": "^1.6.5",
-    "dompurify": "^3.2.5",
-    "postcss": "^8.4.35",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-quill": "^2.0.0",
-    "react-router-dom": "^6.22.3",
-    "react-scripts": "^5.0.1",
     "rss-parser": "^3.13.0",
-    "tailwindcss": "^3.4.1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
-  },
-  "proxy": "http://localhost:9000",
-  "resolutions": {
-    "nth-check": "^2.0.1",
-    "postcss": "^8.4.31",
-    "quill": "^2.0.0"
+    "axios": "^1.6.5"
   }
 }

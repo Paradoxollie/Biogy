@@ -1,62 +1,14 @@
 [build]
-  # This tells Netlify where your project is located
   base = "/"
-  # This tells Netlify what command to run
-  command = "npm install && node netlify.js && cd frontend && npm ci --legacy-peer-deps && npm run build"
-  # This tells Netlify where the build output is located
+  command = "cd frontend && npm ci && CI=false npm run build"
   publish = "frontend/build"
-  # This tells Netlify where to find functions
   functions = "netlify/functions"
-
+  
 [build.environment]
-  NODE_VERSION = "16"
-  NPM_VERSION = "8"
-  PYTHON_VERSION = "3.9"
-  NODE_OPTIONS = "--max-old-space-size=4096"
-  CI = "false"
-  GENERATE_SOURCEMAP = "false"
-  REACT_APP_API_URL = "/.netlify/functions/api"
-  NETLIFY_CLEAR_CACHE = "true"
-  NETLIFY_FORCE_DEPLOY = "2025-04-29T19:55:00Z"
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
 
-# Direct access to Netlify Functions
-[[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-  force = true
-
-# Redirect API requests to Netlify Function
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-  force = true
-
-# Handle OPTIONS preflight requests for Netlify Function
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-  force = true
-  method = "OPTIONS"
-
-# Redirect for posts endpoint
-[[redirects]]
-  from = "/posts"
-  to = "/.netlify/functions/api/posts"
-  status = 200
-  force = true
-
-# Redirect for discussions endpoint
-[[redirects]]
-  from = "/discussions"
-  to = "/.netlify/functions/api/discussions"
-  status = 200
-  force = true
-
-# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200
+  status = 200 
