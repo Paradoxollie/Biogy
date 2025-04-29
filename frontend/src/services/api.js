@@ -1,4 +1,5 @@
 import axios from 'axios';
+import proxyService from './proxyService';
 
 // Déterminer l'URL de base de l'API en fonction de l'environnement
 const API_URL = 
@@ -7,6 +8,9 @@ const API_URL =
     : process.env.REACT_APP_API_URL 
       ? `${process.env.REACT_APP_API_URL}/api` // Variable d'env prioritaire (pourrait être utilisée pour d'autres environnements)
       : 'http://localhost:5000/api'; // Fallback pour le dev local
+
+// Flag pour activer le fallback vers le proxy si les requêtes API échouent
+let useProxyFallback = false;
 
 // Créer une instance axios avec une configuration par défaut
 const api = axios.create({
@@ -45,6 +49,40 @@ export const fixApiPath = (path) => {
   // Si la baseURL est absolue (dev), on retourne aussi le chemin normalisé
   console.log(`Appel API vers (${API_URL}): ${normalizedPath}`); 
   return normalizedPath; // Axios concatène baseURL + url
+};
+
+// Wrapper pour les méthodes d'API avec fallback
+const withFallback = async (method, path, data = null) => {
+  if (useProxyFallback && process.env.NODE_ENV === 'production') {
+    // Utiliser le proxy service directement
+    console.log(`Utilisation du service proxy pour ${method} ${path}`);
+    return proxyService[method](path, data);
+  }
+  
+  try {
+    // Essayer d'abord avec l'API normale
+    const fixedPath = fixApiPath(path);
+    const config = {
+      method,
+      url: fixedPath,
+      data
+    };
+    
+    const response = await api.request(config);
+    return response;
+  } catch (error) {
+    // Si l'erreur est 404 en production et que nous n'utilisons pas déjà le proxy
+    if (process.env.NODE_ENV === 'production' && error.response && error.response.status === 404 && !useProxyFallback) {
+      console.log(`Activation du fallback proxy pour les futures requêtes`);
+      useProxyFallback = true;
+      
+      // Réessayer avec le proxy
+      return proxyService[method](path, data);
+    }
+    
+    // Sinon, propager l'erreur
+    throw error;
+  }
 };
 
 // Intercepteur pour ajouter le token d'authentification à chaque requête
@@ -95,4 +133,20 @@ api.interceptors.response.use(
   }
 );
 
-export default api; 
+// Exporter les méthodes API améliorées avec fallback
+export default {
+  // Méthodes standard avec fallback
+  get: (url, config = {}) => withFallback('get', url, null),
+  post: (url, data, config = {}) => withFallback('post', url, data),
+  put: (url, data, config = {}) => withFallback('put', url, data),
+  delete: (url, config = {}) => withFallback('delete', url, null),
+  
+  // Instance axios d'origine pour les cas particuliers
+  instance: api,
+  
+  // Flag pour forcer l'utilisation du proxy
+  setUseProxyFallback: (value) => {
+    useProxyFallback = value;
+    console.log(`Mode proxy fallback ${value ? 'activé' : 'désactivé'}`);
+  }
+}; 
