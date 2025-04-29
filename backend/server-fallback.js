@@ -56,30 +56,53 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Charger les routes en toute sécurité
-try {
-  // Routes d'API
-  app.use('/api/auth', require('./routes/authRoutes'));
-  app.use('/api/posts', require('./routes/postRoutes'));
-  app.use('/api/admin', require('./routes/adminRoutes'));
-  app.use('/api/forum', require('./routes/forumRoutes'));
-  app.use('/api/discussions', require('./routes/forumRoutes'));
-  app.use('/api/social', require('./routes/socialRoutes'));
-} catch (error) {
-  console.error('Erreur lors du chargement des routes:', error);
-  app.use('/api/*', (req, res) => {
-    res.status(500).json({
-      message: 'Erreur de configuration des routes. Veuillez contacter l\'administrateur.',
-      error: error.message
+// Fonction pour charger une route en toute sécurité
+const safelyLoadRoute = (path, routeModule) => {
+  try {
+    console.log(`Chargement de la route ${path}...`);
+    app.use(path, routeModule);
+    console.log(`Route ${path} chargée avec succès`);
+    return true;
+  } catch (error) {
+    console.error(`Erreur lors du chargement de la route ${path}:`, error);
+    app.use(path, (req, res) => {
+      res.status(500).json({
+        message: `Erreur de configuration de la route ${path}. Veuillez contacter l'administrateur.`,
+        error: error.message
+      });
     });
-  });
-}
+    return false;
+  }
+};
+
+// Charger les routes une par une en toute sécurité
+console.log('Chargement des routes...');
+
+// Routes d'authentification
+safelyLoadRoute('/api/auth', require('./routes/authRoutes'));
+
+// Routes de posts
+safelyLoadRoute('/api/posts', require('./routes/postRoutes'));
+
+// Routes d'administration
+safelyLoadRoute('/api/admin', require('./routes/adminRoutes'));
+
+// Routes de forum
+safelyLoadRoute('/api/forum', require('./routes/forumRoutes'));
+
+// Routes de discussions (alias pour le forum)
+safelyLoadRoute('/api/discussions', require('./routes/forumRoutes'));
+
+// Routes sociales
+safelyLoadRoute('/api/social', require('./routes/socialRoutes'));
+
+console.log('Chargement des routes terminé');
 
 // Gestionnaire d'erreurs global
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
-  
+
   res.status(statusCode).json({
     message: err.message || 'Internal Server Error',
     stack: process.env.NODE_ENV === 'production' ? null : err.stack
