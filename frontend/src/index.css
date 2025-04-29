@@ -12,8 +12,8 @@ a {
 }
 
 /* Conserver le soulignement uniquement pour les liens qui en ont besoin */
-a.underline, .prose a {
-  @apply underline;
+a.with-underline, .prose a {
+  text-decoration: underline;
 }
 
 /* Effet de papier ligné pour le forum */
