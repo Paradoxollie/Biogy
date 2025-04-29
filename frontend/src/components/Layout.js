@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 function Layout({ children }) {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { userInfo, logout, loadingAuth } = useAuth();
   const navigate = useNavigate();
@@ -16,6 +17,11 @@ function Layout({ children }) {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Fermer le menu mobile lors d'un changement de page
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -170,12 +176,101 @@ function Layout({ children }) {
             )}
           </div>
 
-          <button className="md:hidden text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden text-gray-700 focus:outline-none"
+            aria-label="Menu principal"
+          >
+            {mobileMenuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
           </button>
         </div>
+
+        {/* Menu mobile */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white shadow-lg rounded-b-lg overflow-hidden">
+            <div className="px-4 py-3 space-y-3">
+              {[
+                { name: 'Apprendre', path: '/apprendre', color: 'lab-blue', hoverClass: 'hover:text-lab-blue' },
+                { name: 'Recherche', path: '/recherche', color: 'lab-purple', hoverClass: 'hover:text-lab-purple' },
+                { name: 'Projets', path: '/projets', color: 'lab-teal', hoverClass: 'hover:text-lab-teal' },
+                { name: 'Actualités', path: '/actualites', color: 'lab-teal', hoverClass: 'hover:text-lab-teal' },
+                { name: 'Méthodes', path: '/methodes', color: 'lab-green', hoverClass: 'hover:text-lab-green' },
+                { name: 'Forum', path: '/forum', color: 'lab-purple', hoverClass: 'hover:text-lab-purple' }
+              ].map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`block py-2 px-3 rounded-lg no-underline ${item.hoverClass} ${
+                    location.pathname === item.path
+                      ? `text-${item.color} bg-${item.color}/10`
+                      : 'text-gray-600'
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              ))}
+
+              <div className="border-t border-gray-100 my-3 pt-3">
+                {userInfo ? (
+                  <>
+                    <Link
+                      to="/profile"
+                      className="block py-2 px-3 rounded-lg text-gray-700 hover:text-lab-purple no-underline"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Mon profil
+                    </Link>
+                    {userInfo.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        className="block py-2 px-3 rounded-lg bg-indigo-600 text-white no-underline"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Admin
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        logout();
+                        navigate('/login');
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left py-2 px-3 rounded-lg text-red-600 hover:text-red-800 mt-2"
+                    >
+                      Déconnexion
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="block py-2 px-3 rounded-lg text-gray-600 hover:text-lab-blue no-underline"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Se Connecter
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="block py-2 px-3 rounded-lg bg-gradient-to-r from-lab-blue to-lab-purple text-white mt-2 no-underline"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      S'inscrire
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="flex-grow">
