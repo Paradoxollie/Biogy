@@ -48,9 +48,35 @@ const ForumPage = () => {
       console.log(`Fetching discussions with endpoint: ${endpoint}`);
 
       const response = await api.get(endpoint);
-      // Ensure discussions is always an array, even if the API returns null or undefined
-      setDiscussions(response.data.discussions || []);
-      setTotalPages(response.data.totalPages || 1);
+      console.log('Forum API response:', response);
+
+      // Handle different response formats
+      if (response && response.data) {
+        if (response.data.discussions && Array.isArray(response.data.discussions)) {
+          // Standard format with discussions array and totalPages
+          console.log(`Loaded ${response.data.discussions.length} discussions`);
+          setDiscussions(response.data.discussions);
+          setTotalPages(response.data.totalPages || 1);
+        } else if (Array.isArray(response.data)) {
+          // Direct array format
+          console.log(`Loaded ${response.data.length} discussions (array format)`);
+          setDiscussions(response.data);
+          setTotalPages(Math.ceil(response.data.length / 10) || 1); // Estimate total pages
+        } else if (response.data.success && response.data.data && Array.isArray(response.data.data.discussions)) {
+          // Nested format with success flag
+          console.log(`Loaded ${response.data.data.discussions.length} discussions (nested format)`);
+          setDiscussions(response.data.data.discussions);
+          setTotalPages(response.data.data.totalPages || 1);
+        } else {
+          console.error('Unexpected data format:', response.data);
+          setDiscussions([]);
+          setError('Format de données inattendu. Veuillez réessayer plus tard.');
+        }
+      } else {
+        console.error('No data in response:', response);
+        setDiscussions([]);
+        setError('Aucune donnée reçue du serveur. Veuillez réessayer plus tard.');
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des discussions:', error);
       setError('Impossible de charger les discussions. Veuillez réessayer plus tard.');

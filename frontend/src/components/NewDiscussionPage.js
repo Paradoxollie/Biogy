@@ -8,14 +8,14 @@ import api from '../services/api';
 const NewDiscussionPage = () => {
   const navigate = useNavigate();
   const { userInfo } = useAuth();
-  
+
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('general');
   const [tags, setTags] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   // Liste des catégories disponibles
   const categories = [
     { id: 'general', label: 'Discussion générale', color: 'bg-blue-100 text-blue-800' },
@@ -24,7 +24,7 @@ const NewDiscussionPage = () => {
     { id: 'evenement', label: 'Évènement', color: 'bg-yellow-100 text-yellow-800' },
     { id: 'annonce', label: 'Annonce', color: 'bg-red-100 text-red-800' }
   ];
-  
+
   // Configuration de ReactQuill
   const modules = {
     toolbar: [
@@ -36,7 +36,7 @@ const NewDiscussionPage = () => {
       ['clean']
     ],
   };
-  
+
   const formats = [
     'header',
     'bold', 'italic', 'underline', 'strike',
@@ -44,65 +44,96 @@ const NewDiscussionPage = () => {
     'link', 'image', 'blockquote', 'code-block',
     'color', 'background'
   ];
-  
+
   // Redirection vers la page de connexion si l'utilisateur n'est pas connecté
   React.useEffect(() => {
     if (!userInfo) {
       navigate('/login', { state: { from: '/new-discussion' } });
     }
   }, [userInfo, navigate]);
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation basique
     if (!title.trim()) {
       setError('Veuillez saisir un titre pour votre discussion.');
       return;
     }
-    
+
     if (!content.trim()) {
       setError('Veuillez saisir un contenu pour votre discussion.');
       return;
     }
-    
+
     setLoading(true);
     setError('');
-    
+
     // Préparation des tags (séparés par des virgules)
     const tagArray = tags
       .split(',')
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0);
-    
+
     try {
       console.log('Envoi de la nouvelle discussion au serveur');
-      
-      const response = await api.post('/discussions', {
+
+      // Ensure we have the auth token
+      if (!userInfo || !userInfo.token) {
+        throw new Error('Vous devez être connecté pour créer une discussion');
+      }
+
+      // Create the discussion data
+      const discussionData = {
         title,
         content,
         category,
         tags: tagArray,
-      });
-      
-      console.log('Réponse du serveur:', response.data);
-      
-      // Redirection vers la nouvelle discussion
-      if (response.data && response.data.discussion && response.data.discussion._id) {
-        navigate(`/discussion/${response.data.discussion._id}`);
-      } else if (response.data && response.data._id) {
-        navigate(`/discussion/${response.data._id}`);
+      };
+
+      console.log('Discussion data:', discussionData);
+
+      // Make the API request with explicit headers
+      const response = await api.post('/discussions', discussionData);
+
+      console.log('Réponse du serveur:', response);
+
+      // Handle different response formats
+      let discussionId = null;
+
+      if (response.data) {
+        if (response.data.discussion && response.data.discussion._id) {
+          // Standard format
+          discussionId = response.data.discussion._id;
+        } else if (response.data._id) {
+          // Direct object format
+          discussionId = response.data._id;
+        } else if (response.data.success && response.data.data && response.data.data._id) {
+          // Nested success format
+          discussionId = response.data.data._id;
+        } else if (response.data.id) {
+          // Simple id format
+          discussionId = response.data.id;
+        }
+      }
+
+      if (discussionId) {
+        console.log(`Redirection vers la discussion: ${discussionId}`);
+        navigate(`/discussion/${discussionId}`);
       } else {
         console.error('ID de discussion introuvable dans la réponse:', response.data);
-        navigate('/forum');
+        setError('La discussion a été créée mais impossible de la retrouver. Veuillez vérifier dans le forum.');
+        setTimeout(() => {
+          navigate('/forum');
+        }, 3000);
       }
     } catch (err) {
       console.error('Erreur lors de la création de la discussion:', err);
-      
+
       if (err.response) {
         // La requête a été faite et le serveur a répondu avec un code d'erreur
         console.error('Réponse d\'erreur du serveur:', err.response.data);
-        setError(err.response.data.message || 'Erreur du serveur. Veuillez réessayer.');
+        setError(err.response.data?.message || 'Erreur du serveur. Veuillez réessayer.');
       } else if (err.request) {
         // La requête a été faite mais aucune réponse n'a été reçue
         console.error('Pas de réponse du serveur:', err.request);
@@ -110,22 +141,22 @@ const NewDiscussionPage = () => {
       } else {
         // Une erreur s'est produite lors de la configuration de la requête
         console.error('Erreur de requête:', err.message);
-        setError('Une erreur est survenue. Veuillez réessayer.');
+        setError(`Une erreur est survenue: ${err.message}. Veuillez réessayer.`);
       }
     } finally {
       setLoading(false);
     }
   };
-  
+
   if (!userInfo) {
     return null; // L'effet useEffect se chargera de la redirection
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8 px-4">
         <div className="mb-6">
-          <Link 
+          <Link
             to="/forum"
             className="inline-flex items-center text-sm font-medium text-lab-purple hover:text-lab-purple/90"
           >
@@ -135,21 +166,21 @@ const NewDiscussionPage = () => {
             Retour au forum
           </Link>
         </div>
-        
+
         <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 mb-8">
           <div className="p-6 border-b border-gray-200">
             <h1 className="text-2xl font-bold text-gray-900">
               Nouvelle discussion
             </h1>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="p-6">
             {error && (
               <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
                 {error}
               </div>
             )}
-            
+
             <div className="mb-6">
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
                 Titre *
@@ -164,7 +195,7 @@ const NewDiscussionPage = () => {
                 required
               />
             </div>
-            
+
             <div className="mb-6">
               <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
                 Catégorie *
@@ -182,7 +213,7 @@ const NewDiscussionPage = () => {
                 ))}
               </select>
             </div>
-            
+
             <div className="mb-6">
               <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
                 Tags (séparés par des virgules)
@@ -199,7 +230,7 @@ const NewDiscussionPage = () => {
                 Ajoutez des tags pour aider les autres à trouver votre discussion
               </p>
             </div>
-            
+
             <div className="mb-6">
               <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
                 Contenu *
@@ -214,7 +245,7 @@ const NewDiscussionPage = () => {
                 className="bg-white rounded-md border border-gray-300 min-h-[250px]"
               />
             </div>
-            
+
             <div className="flex justify-end pt-4 border-t border-gray-200">
               <Link
                 to="/forum"
@@ -247,4 +278,4 @@ const NewDiscussionPage = () => {
   );
 };
 
-export default NewDiscussionPage; 
+export default NewDiscussionPage;

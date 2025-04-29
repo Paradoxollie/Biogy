@@ -13,7 +13,9 @@
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "false"
   GENERATE_SOURCEMAP = "false"
+  REACT_APP_API_URL = "https://biogy-api.onrender.com"
 
+# Handle all API requests - main redirect
 [[redirects]]
   from = "/api/*"
   to = "https://biogy-api.onrender.com/api/:splat"
@@ -26,7 +28,7 @@
     Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
     Access-Control-Allow-Credentials = "true"
 
-# Add a specific redirect for OPTIONS requests (CORS preflight)
+# Handle OPTIONS preflight requests specifically
 [[redirects]]
   from = "/api/*"
   to = "https://biogy-api.onrender.com/api/:splat"
@@ -40,6 +42,32 @@
     Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
     Access-Control-Allow-Credentials = "true"
     Access-Control-Max-Age = "86400"
+
+# Handle forum-specific routes
+[[redirects]]
+  from = "/api/discussions/*"
+  to = "https://biogy-api.onrender.com/api/discussions/:splat"
+  status = 200
+  force = true
+
+  [redirects.headers]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    Access-Control-Allow-Credentials = "true"
+
+# Handle posts-specific routes
+[[redirects]]
+  from = "/api/posts/*"
+  to = "https://biogy-api.onrender.com/api/posts/:splat"
+  status = 200
+  force = true
+
+  [redirects.headers]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    Access-Control-Allow-Credentials = "true"
 
 [[redirects]]
   from = "/*"

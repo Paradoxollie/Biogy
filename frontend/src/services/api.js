@@ -9,6 +9,8 @@ const API_URL =
       ? `${process.env.REACT_APP_API_URL}/api` // Variable d'env prioritaire (pourrait être utilisée pour d'autres environnements)
       : 'http://localhost:5000/api'; // Fallback pour le dev local
 
+console.log('API_URL configured as:', API_URL);
+
 // Flag pour activer le fallback vers le proxy si les requêtes API échouent
 let useProxyFallback = false;
 
@@ -67,10 +69,21 @@ const withFallback = async (method, path, data = null) => {
     }
   }
 
+  // Always add content-type header for POST and PUT requests
+  if (method === 'post' || method === 'put') {
+    headers['Content-Type'] = 'application/json';
+  }
+
   if (useProxyFallback && process.env.NODE_ENV === 'production') {
     // Utiliser le proxy service directement
     console.log(`Utilisation du service proxy pour ${method} ${path}`);
-    return proxyService[method](path, data, headers);
+    try {
+      const response = await proxyService[method](path, data, headers);
+      return { data: response }; // Wrap in data property to match axios response format
+    } catch (proxyError) {
+      console.error('Proxy service error:', proxyError);
+      throw proxyError;
+    }
   }
 
   try {
@@ -80,25 +93,43 @@ const withFallback = async (method, path, data = null) => {
       method,
       url: fixedPath,
       data,
-      headers
+      headers,
+      timeout: 10000 // 10 second timeout
     };
 
+    console.log(`Making API request to ${fixedPath} with method ${method}`);
     const response = await api.request(config);
     return response;
   } catch (error) {
-    // Si l'erreur est 404 en production et que nous n'utilisons pas déjà le proxy
-    if (process.env.NODE_ENV === 'production' && (error.response?.status === 404 || error.message.includes('Network Error')) && !useProxyFallback) {
+    // Si l'erreur est 404 ou Network Error en production et que nous n'utilisons pas déjà le proxy
+    if (process.env.NODE_ENV === 'production' &&
+        (error.response?.status === 404 ||
+         error.message.includes('Network Error') ||
+         error.code === 'ECONNABORTED') &&
+        !useProxyFallback) {
       console.log(`Activation du fallback proxy pour les futures requêtes`);
       useProxyFallback = true;
 
       // Réessayer avec le proxy
-      return proxyService[method](path, data, headers);
+      try {
+        const response = await proxyService[method](path, data, headers);
+        return { data: response }; // Wrap in data property to match axios response format
+      } catch (proxyError) {
+        console.error('Proxy fallback error:', proxyError);
+        throw proxyError;
+      }
     }
 
     // Log the error details for debugging
     console.error('API Error details:', {
+      method,
+      path,
       message: error.message,
-      response: error.response,
+      code: error.code,
+      response: error.response ? {
+        status: error.response.status,
+        data: error.response.data
+      } : 'No response',
       request: error.request ? 'Request object exists' : 'No request object'
     });
 

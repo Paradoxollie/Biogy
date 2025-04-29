@@ -20,25 +20,36 @@ export const proxyRequest = async (method, endpoint, data = null, headers = {}) 
 
     console.log(`Tentative d'appel API via proxy Netlify: ${normalizedEndpoint}`);
 
+    // Make sure we have the right content type for POST/PUT requests
+    const requestHeaders = {
+      ...headers
+    };
+
+    if ((method === 'post' || method === 'put') && !requestHeaders['Content-Type']) {
+      requestHeaders['Content-Type'] = 'application/json';
+    }
+
     const response = await axios({
       method,
       url: `/api${normalizedEndpoint}`,
       data,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': headers.Authorization || '',
-        ...headers
-      },
-      withCredentials: false // Changed to false to avoid CORS issues
+      headers: requestHeaders,
+      withCredentials: false, // Changed to false to avoid CORS issues
+      timeout: 15000 // 15 second timeout
     });
+
+    if (!response.data) {
+      throw new Error('Empty response received from server');
+    }
 
     return response.data;
   } catch (error) {
-    console.warn(`Échec de l'appel via proxy Netlify: ${error.message}`);
+    console.warn(`Échec de l'appel via proxy Netlify:`, error);
 
-    // Si l'erreur est 404, c'est probablement que les redirections ne fonctionnent pas
-    // Tenter un fallback vers l'API directement (avec risque CORS)
-    if (error.response && error.response.status === 404) {
+    // Si l'erreur est 404 ou une erreur réseau, tenter un fallback direct
+    if ((error.response && error.response.status === 404) ||
+        error.message.includes('Network Error') ||
+        error.code === 'ECONNABORTED') {
       try {
         console.log(`Tentative de fallback direct vers l'API: ${endpoint}`);
 
@@ -50,49 +61,66 @@ export const proxyRequest = async (method, endpoint, data = null, headers = {}) 
             : endpoint;
 
         const directUrl = `${API_FALLBACK_URL}/${normalizedEndpoint}`;
+        console.log(`Direct API URL: ${directUrl}`);
+
+        // Make sure we have the right content type for POST/PUT requests
+        const requestHeaders = {
+          ...headers
+        };
+
+        if ((method === 'post' || method === 'put') && !requestHeaders['Content-Type']) {
+          requestHeaders['Content-Type'] = 'application/json';
+        }
 
         // Tenter d'appeler directement l'API (risque d'erreur CORS)
         const directResponse = await axios({
           method,
           url: directUrl,
           data,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': headers.Authorization || '',
-            ...headers
-          },
-          withCredentials: false // Change to false to avoid CORS issues
+          headers: requestHeaders,
+          withCredentials: false, // Change to false to avoid CORS issues
+          timeout: 15000 // 15 second timeout
         });
+
+        if (!directResponse.data) {
+          throw new Error('Empty response received from direct API call');
+        }
 
         return directResponse.data;
       } catch (directError) {
-        console.warn(`Échec de l'appel direct: ${directError.message}`);
+        console.warn(`Échec de l'appel direct:`, directError);
 
-        // Si l'erreur est liée à CORS, tenter via proxy CORS public
+        // Si l'erreur est liée à CORS et c'est une requête GET, tenter via proxy CORS public
         if (method.toLowerCase() === 'get') {
           try {
             console.log(`Tentative via proxy CORS public: ${endpoint}`);
 
             // Pour GET uniquement, essayer via un proxy CORS public
             const encodedUrl = encodeURIComponent(`${API_FALLBACK_URL}/${normalizedEndpoint}`);
-            const proxyResponse = await axios.get(`${CORS_PROXY_URL}${encodedUrl}`);
+            const proxyResponse = await axios.get(`${CORS_PROXY_URL}${encodedUrl}`, {
+              timeout: 15000 // 15 second timeout
+            });
 
             // Les réponses via ce proxy sont encapsulées dans un objet contents
+            if (!proxyResponse.data || !proxyResponse.data.contents) {
+              throw new Error('Invalid response from CORS proxy');
+            }
+
             return JSON.parse(proxyResponse.data.contents);
           } catch (proxyError) {
-            console.error(`Toutes les tentatives ont échoué: ${proxyError.message}`);
-            throw proxyError;
+            console.error(`Toutes les tentatives ont échoué:`, proxyError);
+            throw new Error(`Impossible de communiquer avec le serveur: ${proxyError.message}`);
           }
         } else {
           // Pour les autres méthodes, on ne peut pas utiliser le proxy CORS public
           console.error(`Impossible d'utiliser le proxy CORS pour ${method}`);
-          throw directError;
+          throw new Error(`Impossible d'envoyer la requête ${method}: ${directError.message}`);
         }
       }
     }
 
-    // Si l'erreur n'est pas 404, propager l'erreur
-    throw error;
+    // Si l'erreur n'est pas 404, propager l'erreur avec un message plus clair
+    throw new Error(`Erreur de communication avec le serveur: ${error.message}`);
   }
 };
 
