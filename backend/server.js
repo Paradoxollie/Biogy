@@ -69,13 +69,66 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Routes spécifiques (à compléter dans routes/)
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/posts', require('./routes/postRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes')); // Routes admin
-app.use('/api/forum', require('./routes/forumRoutes')); // Nouvelles routes forum
-app.use('/api/discussions', require('./routes/forumRoutes')); // Alias pour la compatibilité
-app.use('/api/social', require('./routes/socialRoutes')); // Nouvelles routes sociales
+// Importer le correctif de routes
+const { fixRouterRoutes } = require('./routes/fixRoutes');
+
+// Fonction pour charger les routes en toute sécurité
+const safelyLoadRoutes = () => {
+  try {
+    console.log('Chargement des routes...');
+
+    // Routes spécifiques avec correction des routes problématiques
+    app.use('/api/auth', fixRouterRoutes(require('./routes/authRoutes')));
+    console.log('Routes d\'authentification chargées');
+
+    app.use('/api/posts', fixRouterRoutes(require('./routes/postRoutes')));
+    console.log('Routes de posts chargées');
+
+    app.use('/api/admin', fixRouterRoutes(require('./routes/adminRoutes'))); // Routes admin
+    console.log('Routes d\'administration chargées');
+
+    app.use('/api/forum', fixRouterRoutes(require('./routes/forumRoutes'))); // Nouvelles routes forum
+    console.log('Routes de forum chargées');
+
+    app.use('/api/discussions', fixRouterRoutes(require('./routes/forumRoutes'))); // Alias pour la compatibilité
+    console.log('Routes de discussions chargées');
+
+    app.use('/api/social', fixRouterRoutes(require('./routes/socialRoutes'))); // Nouvelles routes sociales
+    console.log('Routes sociales chargées');
+
+    console.log('Toutes les routes ont été chargées avec succès');
+  } catch (error) {
+    console.error('Erreur lors du chargement des routes:', error);
+    // Ajouter une route de secours pour indiquer l'erreur
+    app.use('/api/*', (req, res) => {
+      res.status(500).json({
+        message: 'Erreur de configuration des routes. Veuillez contacter l\'administrateur.',
+        error: error.message
+      });
+    });
+  }
+};
+
+// Charger les routes en toute sécurité
+safelyLoadRoutes();
+
+// Ajouter un gestionnaire pour les routes invalides
+app.use('/invalid-route', (req, res) => {
+  res.status(400).json({ message: 'Route invalide détectée et corrigée. Veuillez vérifier vos routes.' });
+});
+
+// Gestionnaire d'erreurs spécifique pour path-to-regexp
+app.use((err, req, res, next) => {
+  if (err.message && err.message.includes('pathToRegexpError')) {
+    console.error('Erreur path-to-regexp détectée:', err.message);
+    return res.status(500).json({
+      message: 'Erreur de configuration des routes. Une URL invalide a été utilisée comme route.',
+      error: 'PATH_TO_REGEXP_ERROR',
+      details: err.message
+    });
+  }
+  next(err);
+});
 
 // Gestionnaire d'erreurs global
 app.use((err, req, res, next) => {
@@ -88,6 +141,15 @@ app.use((err, req, res, next) => {
   // Si l'erreur est une erreur CORS générée par notre logique plus haut
   if (err.message === 'Not allowed by CORS') {
     return res.status(403).json({ message: 'Forbidden by CORS policy' });
+  }
+
+  // Si l'erreur est liée à path-to-regexp
+  if (err.message && err.message.includes('Missing parameter name')) {
+    return res.status(500).json({
+      message: 'Erreur de configuration des routes. Une URL invalide a été utilisée comme route.',
+      error: 'PATH_TO_REGEXP_ERROR',
+      details: err.message
+    });
   }
 
   res.status(statusCode).json({
