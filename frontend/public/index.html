@@ -3,12 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Biogy - Plateforme de partage pour biologistes et biotechnologistes">
+    <meta name="theme-color" content="#8B5CF6">
     <title>Biogy</title>
+
+    <!-- Préchargement des domaines externes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://biogy-api.onrender.com" crossorigin>
+    <link rel="preconnect" href="https://corsproxy.io" crossorigin>
+    <link rel="preconnect" href="https://api.allorigins.win" crossorigin>
+    <link rel="preconnect" href="https://cors-anywhere.herokuapp.com" crossorigin>
+
+    <!-- Polices -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Préchargement des API -->
+    <script type="text/javascript">
+        // Précharger l'API pour améliorer les performances
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const preconnectAPI = new XMLHttpRequest();
+                preconnectAPI.open('GET', 'https://biogy-api.onrender.com/api/health', true);
+                preconnectAPI.send();
+
+                // Précharger les proxies CORS
+                const proxies = [
+                    'https://corsproxy.io/?https://biogy-api.onrender.com/api/health',
+                    'https://api.allorigins.win/raw?url=https://biogy-api.onrender.com/api/health'
+                ];
+
+                proxies.forEach(function(proxy) {
+                    const preconnectProxy = new XMLHttpRequest();
+                    preconnectProxy.open('GET', proxy, true);
+                    preconnectProxy.send();
+                });
+            }, 2000); // Attendre 2 secondes après le chargement de la page
+        });
+    </script>
 </head>
 <body>
     <div id="root"></div>
+    <noscript>
+        <div style="padding: 20px; text-align: center; font-family: sans-serif;">
+            <h1>JavaScript est désactivé</h1>
+            <p>Biogy nécessite JavaScript pour fonctionner. Veuillez l'activer dans les paramètres de votre navigateur.</p>
+        </div>
+    </noscript>
 </body>
 </html>

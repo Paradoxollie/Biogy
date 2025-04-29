@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import api from '../services/api';
+import corsProxy from '../services/corsProxy';
 
 const NewDiscussionPage = () => {
   const navigate = useNavigate();
@@ -93,21 +94,27 @@ const NewDiscussionPage = () => {
 
       console.log('Discussion data:', discussionData);
 
-      // Use direct fetch instead of the API service
-      const response = await fetch('https://biogy-api.onrender.com/api/discussions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userInfo.token}`
-        },
-        body: JSON.stringify(discussionData)
-      });
+      // Première tentative avec le service API normal
+      let data;
+      try {
+        const response = await api.post('/discussions', discussionData);
+        console.log('Discussion API response from API service:', response);
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
+        if (response && response.data) {
+          data = response.data;
+        }
+      } catch (apiError) {
+        console.warn('API service failed, trying CORS proxy:', apiError);
+
+        // Si l'API normale échoue, utiliser le proxy CORS
+        console.log('Using CORS proxy as fallback');
+        data = await corsProxy.post('/discussions', discussionData, {
+          headers: {
+            'Authorization': `Bearer ${userInfo.token}`
+          }
+        });
       }
 
-      const data = await response.json();
       console.log('Réponse du serveur:', data);
 
       // Handle different response formats

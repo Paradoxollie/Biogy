@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import corsProxy from '../services/corsProxy';
 
 const ForumPage = () => {
   const { userInfo } = useAuth();
@@ -35,59 +36,87 @@ const ForumPage = () => {
     setError('');
 
     try {
-      let endpoint = `https://biogy-api.onrender.com/api/discussions?page=${pageNumber}`;
+      // Construire le chemin de l'API
+      let apiPath = `/discussions?page=${pageNumber}`;
 
       if (activeCategory !== 'all') {
-        endpoint += `&category=${activeCategory}`;
+        apiPath += `&category=${activeCategory}`;
       }
 
       if (activeFilter !== 'recent') {
-        endpoint += `&filter=${activeFilter}`;
+        apiPath += `&filter=${activeFilter}`;
       }
 
-      console.log(`Fetching discussions with endpoint: ${endpoint}`);
+      console.log(`Fetching discussions with path: ${apiPath}`);
 
-      // Use direct fetch instead of the API service
-      const response = await fetch(endpoint, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authorization header if user is logged in
-          ...(userInfo && userInfo.token ? { 'Authorization': `Bearer ${userInfo.token}` } : {})
+      // Préparer les headers
+      const headers = {};
+      if (userInfo && userInfo.token) {
+        headers['Authorization'] = `Bearer ${userInfo.token}`;
+      }
+
+      // Première tentative avec le service API normal
+      try {
+        const response = await api.get(apiPath);
+        console.log('Forum API response from API service:', response);
+
+        if (response && response.data) {
+          if (response.data.discussions && Array.isArray(response.data.discussions)) {
+            // Standard format with discussions array and totalPages
+            console.log(`Loaded ${response.data.discussions.length} discussions`);
+            setDiscussions(response.data.discussions);
+            setTotalPages(response.data.totalPages || 1);
+            setLoading(false);
+            return;
+          } else if (Array.isArray(response.data)) {
+            // Direct array format
+            console.log(`Loaded ${response.data.length} discussions (array format)`);
+            setDiscussions(response.data);
+            setTotalPages(Math.ceil(response.data.length / 10) || 1); // Estimate total pages
+            setLoading(false);
+            return;
+          } else if (response.data.success && response.data.data && Array.isArray(response.data.data.discussions)) {
+            // Nested format with success flag
+            console.log(`Loaded ${response.data.data.discussions.length} discussions (nested format)`);
+            setDiscussions(response.data.data.discussions);
+            setTotalPages(response.data.data.totalPages || 1);
+            setLoading(false);
+            return;
+          }
         }
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
+      } catch (apiError) {
+        console.warn('API service failed, trying CORS proxy:', apiError);
       }
 
-      const data = await response.json();
-      console.log('Forum API response:', data);
+      // Si l'API normale échoue, utiliser le proxy CORS
+      console.log('Using CORS proxy as fallback');
+      const data = await corsProxy.get(apiPath, { headers });
+      console.log('Forum API response from CORS proxy:', data);
 
       // Handle different response formats
       if (data) {
         if (data.discussions && Array.isArray(data.discussions)) {
           // Standard format with discussions array and totalPages
-          console.log(`Loaded ${data.discussions.length} discussions`);
+          console.log(`Loaded ${data.discussions.length} discussions via proxy`);
           setDiscussions(data.discussions);
           setTotalPages(data.totalPages || 1);
         } else if (Array.isArray(data)) {
           // Direct array format
-          console.log(`Loaded ${data.length} discussions (array format)`);
+          console.log(`Loaded ${data.length} discussions (array format) via proxy`);
           setDiscussions(data);
           setTotalPages(Math.ceil(data.length / 10) || 1); // Estimate total pages
         } else if (data.success && data.data && Array.isArray(data.data.discussions)) {
           // Nested format with success flag
-          console.log(`Loaded ${data.data.discussions.length} discussions (nested format)`);
+          console.log(`Loaded ${data.data.discussions.length} discussions (nested format) via proxy`);
           setDiscussions(data.data.discussions);
           setTotalPages(data.data.totalPages || 1);
         } else {
-          console.error('Unexpected data format:', data);
+          console.error('Unexpected data format from proxy:', data);
           setDiscussions([]);
           setError('Format de données inattendu. Veuillez réessayer plus tard.');
         }
       } else {
-        console.error('No data in response');
+        console.error('No data in response from proxy');
         setDiscussions([]);
         setError('Aucune donnée reçue du serveur. Veuillez réessayer plus tard.');
       }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import corsProxy from '../services/corsProxy';
 
 function ProjectsGallery() {
   const [projects, setProjects] = useState([]);
@@ -20,38 +21,54 @@ function ProjectsGallery() {
       setError('');
       console.log('Fetching projects from /posts endpoint');
 
-      // Use a direct fetch to the API instead of the api service
-      const response = await fetch('https://biogy-api.onrender.com/api/posts', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authorization header if user is logged in
-          ...(userInfo && userInfo.token ? { 'Authorization': `Bearer ${userInfo.token}` } : {})
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
+      // Utiliser notre service de proxy CORS
+      const headers = {};
+      if (userInfo && userInfo.token) {
+        headers['Authorization'] = `Bearer ${userInfo.token}`;
       }
 
-      const data = await response.json();
-      console.log('Projects API response:', data);
+      // Première tentative avec le service API normal
+      try {
+        const response = await api.get('/posts');
+        console.log('Projects API response from API service:', response);
+
+        if (response && response.data) {
+          if (Array.isArray(response.data)) {
+            setProjects(response.data);
+            console.log(`Loaded ${response.data.length} projects successfully`);
+            setLoading(false);
+            return;
+          } else if (response.data.posts && Array.isArray(response.data.posts)) {
+            setProjects(response.data.posts);
+            console.log(`Loaded ${response.data.posts.length} projects from 'posts' property`);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (apiError) {
+        console.warn('API service failed, trying CORS proxy:', apiError);
+      }
+
+      // Si l'API normale échoue, utiliser le proxy CORS
+      console.log('Using CORS proxy as fallback');
+      const data = await corsProxy.get('/posts', { headers });
+      console.log('Projects API response from CORS proxy:', data);
 
       if (data) {
         // Check if data is an array
         if (Array.isArray(data)) {
           setProjects(data);
-          console.log(`Loaded ${data.length} projects successfully`);
+          console.log(`Loaded ${data.length} projects successfully via proxy`);
         } else if (data.posts && Array.isArray(data.posts)) {
           // Some APIs wrap the data in a 'posts' property
           setProjects(data.posts);
-          console.log(`Loaded ${data.posts.length} projects from 'posts' property`);
+          console.log(`Loaded ${data.posts.length} projects from 'posts' property via proxy`);
         } else {
-          console.error('Unexpected data format:', data);
+          console.error('Unexpected data format from proxy:', data);
           throw new Error('Format de données inattendu reçu du serveur');
         }
       } else {
-        console.error('No data in response');
+        console.error('No data in response from proxy');
         throw new Error('Données invalides reçues du serveur');
       }
     } catch (err) {
