@@ -361,7 +361,7 @@ function TopicPage() {
       {/* Liste des discussions */}
       <div className="space-y-6 mb-6">
         {discussions.map((discussion, index) => (
-          <div key={discussion._id} className={`bg-white rounded-lg shadow-md overflow-hidden sketch-container transform transition-all duration-300 hover:shadow-lg ${index % 2 === 0 ? 'hover:-rotate-0.5' : 'hover:rotate-0.5'}`}>
+          <div key={discussion._id} className="bg-white rounded-lg shadow-md overflow-hidden sketch-container transform transition-all duration-300 hover:shadow-lg">
             {/* En-tête de la discussion */}
             <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 border-b border-gray-200 flex justify-between items-center">
               <div className="flex items-center">
@@ -417,11 +417,7 @@ function TopicPage() {
             <div className="p-6 relative">
               {/* Effet de papier ligné */}
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="h-full w-full" style={{
-                  backgroundImage: 'linear-gradient(0deg, rgba(230,230,250,0.1) 1px, transparent 1px)',
-                  backgroundSize: '100% 24px',
-                  backgroundPosition: '0 0'
-                }}></div>
+                <div className="h-full w-full paper-lined-bg"></div>
               </div>
 
               {editingDiscussion === discussion._id ? (
@@ -715,11 +711,7 @@ function TopicPage() {
             <div className="mb-4 relative">
               {/* Effet de papier ligné */}
               <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-lg">
-                <div className="h-full w-full" style={{
-                  backgroundImage: 'linear-gradient(0deg, rgba(230,230,250,0.1) 1px, transparent 1px)',
-                  backgroundSize: '100% 24px',
-                  backgroundPosition: '0 0'
-                }}></div>
+                <div className="h-full w-full paper-lined-bg"></div>
               </div>
 
               <textarea
