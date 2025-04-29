@@ -15,7 +15,9 @@
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "false"
   GENERATE_SOURCEMAP = "false"
-  REACT_APP_API_URL = "/.netlify/functions/proxy"
+  REACT_APP_API_URL = "/.netlify/functions/api"
+  NETLIFY_CLEAR_CACHE = "true"
+  NETLIFY_FORCE_DEPLOY = "2025-04-29T19:55:00Z"
 
 # Direct access to Netlify Functions
 [[redirects]]

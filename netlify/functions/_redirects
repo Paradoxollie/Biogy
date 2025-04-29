@@ -1,0 +1,10 @@
+# Redirect API requests to Netlify Function
+/api/*  /.netlify/functions/api/:splat  200
+/posts  /.netlify/functions/api/posts  200
+/discussions  /.netlify/functions/api/discussions  200
+
+# Direct access to Netlify Functions
+/.netlify/functions/*  /.netlify/functions/:splat  200
+
+# SPA fallback
+/*  /index.html  200

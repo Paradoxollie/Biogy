@@ -1,0 +1,4 @@
+#!/bin/bash
+# This script is used to force Netlify to rebuild the site
+# It always returns false, which means Netlify will always rebuild
+exit 1
