@@ -11,7 +11,8 @@
     "start": "react-scripts start",
     "postinstall": "cd netlify/functions && npm install",
     "functions:install": "cd netlify/functions && npm install",
-    "functions:serve": "netlify functions:serve"
+    "functions:serve": "netlify functions:serve",
+    "vercel-build": "cd frontend && npm install --legacy-peer-deps && npm run build"
   },
   "dependencies": {
     "autoprefixer": "^10.4.19",

@@ -1,0 +1,20 @@
+# Ignore backend files
+backend/
+
+# Ignore Netlify files
+netlify/
+netlify.toml
+.netlify-ignore-build
+netlify.clear-cache
+
+# Ignore node_modules
+node_modules/
+frontend/node_modules/
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore other unnecessary files
+README.md
+LICENSE
