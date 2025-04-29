@@ -8,6 +8,10 @@ import RegisterPage from './components/RegisterPage';
 import AdminPage from './components/AdminPage';
 import ProjectsGallery from './components/ProjectsGallery';
 import ScienceWatchPage from './components/ScienceWatchPage';
+import ForumPage from './components/ForumPage';
+import TopicPage from './components/TopicPage';
+import NewTopicPage from './components/NewTopicPage';
+import ProfilePage from './components/ProfilePage';
 import AuthDebug from './context/AuthDebug';
 
 function App() {
@@ -27,6 +31,11 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/forum" element={<ForumPage />} />
+          <Route path="/forum/:id" element={<TopicPage />} />
+          <Route path="/forum/nouveau" element={<NewTopicPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:userId" element={<ProfilePage />} />
         </Routes>
       </Layout>
     </>

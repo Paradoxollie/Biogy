@@ -10,7 +10,7 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000', 
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
@@ -25,15 +25,17 @@ app.get('/', (req, res) => {
 // Routes spécifiques (à compléter dans routes/)
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/posts', require('./routes/postRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes')); // Nouvelles routes admin
+app.use('/api/admin', require('./routes/adminRoutes')); // Routes admin
+app.use('/api/forum', require('./routes/forumRoutes')); // Routes forum
+app.use('/api/social', require('./routes/socialRoutes')); // Routes sociales
 
 // Gestionnaire d'erreurs global
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  res.status(statusCode).json({ 
+  res.status(statusCode).json({
       message: err.message,
-      stack: process.env.NODE_ENV === 'production' ? null : err.stack 
+      stack: process.env.NODE_ENV === 'production' ? null : err.stack
   });
 });
 
