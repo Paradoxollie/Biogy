@@ -493,27 +493,57 @@ function TopicPage() {
               {!discussion.isDeleted && discussion.attachments && discussion.attachments.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <h4 className="text-sm font-medium text-gray-700 mb-2">Pièces jointes:</h4>
+
+                  {/* Affichage des images */}
+                  {discussion.attachments.filter(att => att.type === 'image').length > 0 && (
+                    <div className="mb-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                      {discussion.attachments
+                        .filter(att => att.type === 'image')
+                        .map((attachment, index) => (
+                          <a
+                            key={index}
+                            href={attachment.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block relative group"
+                          >
+                            <img
+                              src={attachment.url}
+                              alt={attachment.name || `Image ${index + 1}`}
+                              className="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-sm transition-transform duration-200 group-hover:shadow-md"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black bg-opacity-50 text-white p-2 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            </div>
+                          </a>
+                        ))
+                      }
+                    </div>
+                  )}
+
+                  {/* Affichage des autres types de fichiers */}
                   <div className="flex flex-wrap gap-2">
-                    {discussion.attachments.map((attachment, index) => (
-                      <a
-                        key={index}
-                        href={attachment.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      >
-                        {attachment.type === 'image' ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
+                    {discussion.attachments
+                      .filter(att => att.type !== 'image')
+                      .map((attachment, index) => (
+                        <a
+                          key={index}
+                          href={attachment.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clipRule="evenodd" />
                           </svg>
-                        )}
-                        {attachment.name || 'Fichier'}
-                      </a>
-                    ))}
+                          {attachment.name || 'Fichier'}
+                        </a>
+                      ))
+                    }
                   </div>
                 </div>
               )}
@@ -665,27 +695,56 @@ function TopicPage() {
                     {/* Pièces jointes de la réponse si présentes */}
                     {!reply.isDeleted && reply.attachments && reply.attachments.length > 0 && (
                       <div className="mt-2 pt-2 border-t border-gray-100">
+                        {/* Affichage des images */}
+                        {reply.attachments.filter(att => att.type === 'image').length > 0 && (
+                          <div className="mb-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {reply.attachments
+                              .filter(att => att.type === 'image')
+                              .map((attachment, index) => (
+                                <a
+                                  key={index}
+                                  href={attachment.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block relative group"
+                                >
+                                  <img
+                                    src={attachment.url}
+                                    alt={attachment.name || `Image ${index + 1}`}
+                                    className="w-full h-24 object-cover rounded-lg border border-gray-200 shadow-sm transition-transform duration-200 group-hover:shadow-md"
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
+                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black bg-opacity-50 text-white p-1 rounded-full">
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                                      </svg>
+                                    </div>
+                                  </div>
+                                </a>
+                              ))
+                            }
+                          </div>
+                        )}
+
+                        {/* Affichage des autres types de fichiers */}
                         <div className="flex flex-wrap gap-2">
-                          {reply.attachments.map((attachment, index) => (
-                            <a
-                              key={index}
-                              href={attachment.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            >
-                              {attachment.type === 'image' ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                                </svg>
-                              ) : (
+                          {reply.attachments
+                            .filter(att => att.type !== 'image')
+                            .map((attachment, index) => (
+                              <a
+                                key={index}
+                                href={attachment.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                   <path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clipRule="evenodd" />
                                 </svg>
-                              )}
-                              {attachment.name || 'Fichier'}
-                            </a>
-                          ))}
+                                {attachment.name || 'Fichier'}
+                              </a>
+                            ))
+                          }
                         </div>
                       </div>
                     )}

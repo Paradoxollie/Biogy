@@ -119,17 +119,17 @@ function Layout({ children }) {
 
           <nav className="hidden md:flex items-center space-x-8">
             {[
-              { name: 'Apprendre', path: '/apprendre', color: 'lab-blue' },
-              { name: 'Recherche', path: '/recherche', color: 'lab-purple' },
-              { name: 'Projets', path: '/projets', color: 'lab-teal' },
-              { name: 'Actualités', path: '/actualites', color: 'lab-teal' },
-              { name: 'Méthodes', path: '/methodes', color: 'lab-green' },
-              { name: 'Forum', path: '/forum', color: 'lab-purple' }
+              { name: 'Apprendre', path: '/apprendre', color: 'lab-blue', hoverClass: 'hover:text-lab-blue' },
+              { name: 'Recherche', path: '/recherche', color: 'lab-purple', hoverClass: 'hover:text-lab-purple' },
+              { name: 'Projets', path: '/projets', color: 'lab-teal', hoverClass: 'hover:text-lab-teal' },
+              { name: 'Actualités', path: '/actualites', color: 'lab-teal', hoverClass: 'hover:text-lab-teal' },
+              { name: 'Méthodes', path: '/methodes', color: 'lab-green', hoverClass: 'hover:text-lab-green' },
+              { name: 'Forum', path: '/forum', color: 'lab-purple', hoverClass: 'hover:text-lab-purple' }
             ].map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`relative font-medium transition-colors duration-300 hover:text-${item.color} group ${
+                className={`relative font-medium transition-colors duration-300 ${item.hoverClass} no-underline group ${
                   location.pathname === item.path ? `text-${item.color}` : 'text-gray-600'
                 }`}
               >
@@ -144,11 +144,11 @@ function Layout({ children }) {
           <div className="hidden md:flex items-center space-x-4">
             {userInfo ? (
                 <>
-                <Link to="/profile" className="text-gray-700 hover:text-lab-purple">Bonjour, {userInfo.username}!</Link>
+                <Link to="/profile" className="text-gray-700 hover:text-lab-purple no-underline">Bonjour, {userInfo.username}!</Link>
                 {userInfo.role === 'admin' && (
                   <Link
                     to="/admin"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md text-sm font-medium transition duration-150 ease-in-out no-underline"
                   >
                     Admin
                   </Link>
@@ -162,8 +162,8 @@ function Layout({ children }) {
                 </>
             ) : (
                 <>
-                <Link to="/login" className="text-gray-600 hover:text-lab-blue transition duration-300 font-medium">Se Connecter</Link>
-                <Link to="/register" className="bg-gradient-to-r from-lab-blue to-lab-purple hover:from-lab-blue/90 hover:to-lab-purple/90 text-white px-4 py-1.5 rounded-md text-sm font-semibold shadow-sm transition duration-150 ease-in-out">
+                <Link to="/login" className="text-gray-600 hover:text-lab-blue transition duration-300 font-medium no-underline">Se Connecter</Link>
+                <Link to="/register" className="bg-gradient-to-r from-lab-blue to-lab-purple hover:from-lab-blue/90 hover:to-lab-purple/90 text-white px-4 py-1.5 rounded-md text-sm font-semibold shadow-sm transition duration-150 ease-in-out no-underline">
                     S'inscrire
                 </Link>
                 </>
@@ -212,19 +212,19 @@ function Layout({ children }) {
             <div>
               <h3 className="font-semibold mb-3 text-gray-700">Navigation</h3>
               <ul className="space-y-2">
-                <li><Link to="/apprendre" className="text-gray-600 hover:text-lab-blue transition duration-300">Apprendre</Link></li>
-                <li><Link to="/methodes" className="text-gray-600 hover:text-lab-green transition duration-300">Méthodes</Link></li>
-                <li><Link to="/actualites" className="text-gray-600 hover:text-lab-teal transition duration-300">Actualités</Link></li>
-                <li><Link to="/partager-projet" className="text-gray-600 hover:text-lab-purple transition duration-300">Partager un Projet</Link></li>
+                <li><Link to="/apprendre" className="text-gray-600 hover:text-lab-blue transition duration-300 no-underline">Apprendre</Link></li>
+                <li><Link to="/methodes" className="text-gray-600 hover:text-lab-green transition duration-300 no-underline">Méthodes</Link></li>
+                <li><Link to="/actualites" className="text-gray-600 hover:text-lab-teal transition duration-300 no-underline">Actualités</Link></li>
+                <li><Link to="/partager-projet" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Partager un Projet</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-3 text-gray-700">Communauté</h3>
               <ul className="space-y-2">
-                  <li><Link to="/projets" className="text-gray-600 hover:text-lab-purple transition duration-300">Voir les Projets</Link></li>
-                  <li><Link to="/forum" className="text-gray-600 hover:text-lab-purple transition duration-300">Forum</Link></li>
-                  <li><Link to="/contact" className="text-gray-600 hover:text-lab-blue transition duration-300">Contact</Link></li>
+                  <li><Link to="/projets" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Voir les Projets</Link></li>
+                  <li><Link to="/forum" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Forum</Link></li>
+                  <li><Link to="/contact" className="text-gray-600 hover:text-lab-blue transition duration-300 no-underline">Contact</Link></li>
               </ul>
             </div>
 
@@ -234,13 +234,13 @@ function Layout({ children }) {
               {userInfo ? (
                 <>
                   <li>
-                    <Link to="/profile" className="text-gray-600 hover:text-lab-purple transition duration-300">
+                    <Link to="/profile" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">
                       Mon Profil
                     </Link>
                   </li>
                   {userInfo.role === 'admin' && (
                     <li>
-                      <Link to="/admin" className="text-indigo-600 hover:text-indigo-800 transition duration-300">
+                      <Link to="/admin" className="text-indigo-600 hover:text-indigo-800 transition duration-300 no-underline">
                         Panneau Admin
                       </Link>
                     </li>
@@ -256,8 +256,8 @@ function Layout({ children }) {
                 </>
               ) : (
                 <>
-                  <li><Link to="/login" className="text-gray-600 hover:text-lab-blue transition duration-300">Se Connecter</Link></li>
-                  <li><Link to="/register" className="text-gray-600 hover:text-lab-purple transition duration-300">S'inscrire</Link></li>
+                  <li><Link to="/login" className="text-gray-600 hover:text-lab-blue transition duration-300 no-underline">Se Connecter</Link></li>
+                  <li><Link to="/register" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">S'inscrire</Link></li>
                 </>
               )}
               </ul>
