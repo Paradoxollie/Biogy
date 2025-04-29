@@ -12,7 +12,7 @@ const ForumPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [activeFilter, setActiveFilter] = useState('recent');
   const [activeCategory, setActiveCategory] = useState('all');
-  
+
   // Liste des catégories disponibles
   const categories = [
     { id: 'all', label: 'Toutes', color: 'bg-gray-100 text-gray-800' },
@@ -22,53 +22,56 @@ const ForumPage = () => {
     { id: 'evenement', label: 'Évènement', color: 'bg-yellow-100 text-yellow-800' },
     { id: 'annonce', label: 'Annonce', color: 'bg-red-100 text-red-800' }
   ];
-  
+
   // Options de tri
   const filters = [
     { id: 'recent', label: 'Plus récentes' },
     { id: 'popular', label: 'Plus populaires' },
     { id: 'active', label: 'Plus actives' }
   ];
-  
+
   const fetchDiscussions = async (pageNumber = currentPage) => {
     setLoading(true);
     setError('');
-    
+
     try {
       let endpoint = `/discussions?page=${pageNumber}`;
-      
+
       if (activeCategory !== 'all') {
         endpoint += `&category=${activeCategory}`;
       }
-      
+
       if (activeFilter !== 'recent') {
         endpoint += `&filter=${activeFilter}`;
       }
-      
+
       console.log(`Fetching discussions with endpoint: ${endpoint}`);
-      
+
       const response = await api.get(endpoint);
-      setDiscussions(response.data.discussions);
-      setTotalPages(response.data.totalPages);
+      // Ensure discussions is always an array, even if the API returns null or undefined
+      setDiscussions(response.data.discussions || []);
+      setTotalPages(response.data.totalPages || 1);
     } catch (error) {
       console.error('Erreur lors du chargement des discussions:', error);
       setError('Impossible de charger les discussions. Veuillez réessayer plus tard.');
+      // Set discussions to empty array in case of error
+      setDiscussions([]);
     } finally {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchDiscussions();
   }, [currentPage, activeFilter, activeCategory]);
-  
+
   // Formatage de la date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffTime = Math.abs(now - date);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) {
       return "Aujourd'hui";
     } else if (diffDays === 1) {
@@ -79,12 +82,12 @@ const ForumPage = () => {
       return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
     }
   };
-  
+
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
     fetchDiscussions(value);
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8 px-4">
@@ -92,7 +95,7 @@ const ForumPage = () => {
           <div className="p-6">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-4 md:mb-0">Forum de discussion</h1>
-              
+
               {userInfo && (
                 <Link
                   to="/new-discussion"
@@ -105,13 +108,13 @@ const ForumPage = () => {
                 </Link>
               )}
             </div>
-            
+
             {error && (
               <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
                 {error}
               </div>
             )}
-            
+
             <div className="flex flex-col md:flex-row gap-4 mb-6">
               <div className="w-full md:w-3/4">
                 <div className="flex flex-wrap gap-2">
@@ -123,8 +126,8 @@ const ForumPage = () => {
                         setCurrentPage(1);
                       }}
                       className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                        activeCategory === category.id 
-                          ? category.color + ' border border-current' 
+                        activeCategory === category.id
+                          ? category.color + ' border border-current'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -133,7 +136,7 @@ const ForumPage = () => {
                   ))}
                 </div>
               </div>
-              
+
               <div className="w-full md:w-1/4">
                 <div className="flex justify-end gap-2">
                   {filters.map((filter) => (
@@ -144,8 +147,8 @@ const ForumPage = () => {
                         setCurrentPage(1);
                       }}
                       className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                        activeFilter === filter.id 
-                          ? 'bg-lab-purple/10 text-lab-purple border border-lab-purple/30' 
+                        activeFilter === filter.id
+                          ? 'bg-lab-purple/10 text-lab-purple border border-lab-purple/30'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -155,7 +158,7 @@ const ForumPage = () => {
                 </div>
               </div>
             </div>
-            
+
             {loading ? (
               <div className="py-12 flex justify-center items-center">
                 <svg className="animate-spin h-8 w-8 text-lab-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -170,8 +173,8 @@ const ForumPage = () => {
                 </svg>
                 <h3 className="mt-4 text-lg font-medium text-gray-900">Aucune discussion trouvée</h3>
                 <p className="mt-1 text-gray-500">
-                  {activeCategory !== 'all' 
-                    ? "Il n'y a pas encore de discussions dans cette catégorie." 
+                  {activeCategory !== 'all'
+                    ? "Il n'y a pas encore de discussions dans cette catégorie."
                     : "Il n'y a pas encore de discussions dans le forum."}
                 </p>
                 {userInfo && (
@@ -186,11 +189,14 @@ const ForumPage = () => {
             ) : (
               <div className="space-y-4">
                 {discussions.map((discussion) => {
+                  // Skip rendering if discussion is undefined or null
+                  if (!discussion) return null;
+
                   const category = categories.find(c => c.id === discussion.category) || categories[0];
-                  
+
                   return (
-                    <div 
-                      key={discussion._id} 
+                    <div
+                      key={discussion._id}
                       className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                     >
                       <Link to={`/discussion/${discussion._id}`} className="block p-4">
@@ -199,19 +205,19 @@ const ForumPage = () => {
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${category.color}`}>
                               {category.label}
                             </span>
-                            
+
                             <h3 className="mt-2 text-lg font-semibold text-gray-900 line-clamp-1">
-                              {discussion.title}
+                              {discussion.title || 'Sans titre'}
                             </h3>
-                            
+
                             <div className="mt-2 flex items-center text-sm text-gray-500">
                               <span className="truncate">
-                                Par {discussion.author.name}
+                                Par {discussion.author?.name || discussion.author?.username || 'Utilisateur inconnu'}
                               </span>
                               <span className="mx-1 text-gray-300">•</span>
                               <span>{formatDate(discussion.createdAt)}</span>
-                              
-                              {discussion.tags && discussion.tags.length > 0 && (
+
+                              {discussion.tags && Array.isArray(discussion.tags) && discussion.tags.length > 0 && (
                                 <>
                                   <span className="mx-1 text-gray-300">•</span>
                                   <div className="flex flex-wrap gap-1">
@@ -230,35 +236,37 @@ const ForumPage = () => {
                               )}
                             </div>
                           </div>
-                          
+
                           <div className="ml-4 flex flex-col items-end">
                             <div className="flex items-center text-gray-500 text-sm">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
                                 <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
                               </svg>
-                              {discussion.replyCount} {discussion.replyCount > 1 ? 'réponses' : 'réponse'}
+                              {discussion.replyCount || 0} {(discussion.replyCount || 0) > 1 ? 'réponses' : 'réponse'}
                             </div>
-                            
+
                             <div className="mt-2 flex items-center text-gray-500 text-sm">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                               </svg>
-                              {discussion.likes} {discussion.likes > 1 ? 'j\'aime' : 'j\'aime'}
+                              {discussion.likes || 0} {(discussion.likes || 0) > 1 ? 'j\'aime' : 'j\'aime'}
                             </div>
                           </div>
                         </div>
-                        
+
                         {discussion.lastReply && (
                           <div className="mt-3 pt-3 border-t border-gray-100">
                             <div className="flex items-center text-sm">
-                              <img 
-                                src={discussion.lastReply.author.avatar || '/images/default-avatar.png'} 
-                                alt={discussion.lastReply.author.name} 
+                              <img
+                                src={(discussion.lastReply.author && discussion.lastReply.author.avatar) || '/images/default-avatar.png'}
+                                alt={(discussion.lastReply.author && discussion.lastReply.author.name) || 'Utilisateur'}
                                 className="h-6 w-6 rounded-full mr-2"
                               />
                               <p className="text-gray-500 truncate">
-                                Dernière réponse par <span className="font-medium text-gray-900">{discussion.lastReply.author.name}</span>
+                                Dernière réponse par <span className="font-medium text-gray-900">
+                                  {(discussion.lastReply.author && (discussion.lastReply.author.name || discussion.lastReply.author.username)) || 'Utilisateur inconnu'}
+                                </span>
                                 <span className="mx-1 text-gray-300">•</span>
                                 {formatDate(discussion.lastReply.createdAt)}
                               </p>
@@ -271,7 +279,7 @@ const ForumPage = () => {
                 })}
               </div>
             )}
-            
+
             {/* Pagination */}
             {!loading && totalPages > 1 && (
               <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-6">
@@ -287,7 +295,7 @@ const ForumPage = () => {
                     Précédent
                   </button>
                 </div>
-                
+
                 <div className="hidden md:flex">
                   {[...Array(totalPages).keys()].map((x) => (
                     <button
@@ -303,13 +311,13 @@ const ForumPage = () => {
                     </button>
                   ))}
                 </div>
-                
+
                 <div className="flex md:hidden">
                   <span className="text-sm text-gray-700">
                     Page <span className="font-medium">{currentPage}</span> sur <span className="font-medium">{totalPages}</span>
                   </span>
                 </div>
-                
+
                 <div className="flex w-0 flex-1 justify-end">
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
@@ -331,4 +339,4 @@ const ForumPage = () => {
   );
 };
 
-export default ForumPage; 
+export default ForumPage;
