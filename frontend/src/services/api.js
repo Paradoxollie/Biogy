@@ -3,9 +3,9 @@ import proxyService from './proxyService';
 
 // Déterminer l'URL de base de l'API en fonction de l'environnement
 const API_URL = process.env.NODE_ENV === 'production'
-  ? '/api' // Utiliser le proxy Netlify en production
+  ? process.env.REACT_APP_API_URL || '/.netlify/functions/proxy' // Utiliser la fonction Netlify en production
   : process.env.REACT_APP_API_URL
-    ? `${process.env.REACT_APP_API_URL}/api` // Variable d'env prioritaire (pourrait être utilisée pour d'autres environnements)
+    ? process.env.REACT_APP_API_URL // Variable d'env prioritaire
     : 'http://localhost:5000/api'; // Fallback pour le dev local
 
 // URL directe de l'API (pour les cas où le proxy échoue)
@@ -13,14 +13,19 @@ const DIRECT_API_URL = 'https://biogy-api.onrender.com/api';
 
 console.log('API_URL configured as:', API_URL);
 
-// Vérifier si l'API est accessible via le proxy Netlify
+// Vérifier si l'API est accessible via la fonction Netlify
 const checkApiHealth = async () => {
   try {
-    const response = await axios.get('/api/health', { timeout: 5000 });
-    console.log('API health check via proxy successful:', response.data);
+    // Vérifier d'abord la fonction de test
+    const testResponse = await axios.get('/.netlify/functions/test', { timeout: 5000 });
+    console.log('Netlify Functions test successful:', testResponse.data);
+
+    // Ensuite vérifier le proxy
+    const response = await axios.get(`${API_URL}/health`, { timeout: 5000 });
+    console.log('API health check via Netlify Function successful:', response.data);
     return true;
   } catch (error) {
-    console.warn('API health check via proxy failed, will use direct API:', error.message);
+    console.warn('API health check failed:', error.message);
     return false;
   }
 };

@@ -2,9 +2,11 @@
   # This tells Netlify where your project is located
   base = "/"
   # This tells Netlify what command to run
-  command = "cd frontend && npm ci --legacy-peer-deps && npm run build"
+  command = "cd frontend && npm ci --legacy-peer-deps && npm run build && cd ../netlify/functions && npm install"
   # This tells Netlify where the build output is located
   publish = "frontend/build"
+  # This tells Netlify where to find functions
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "16"
@@ -13,24 +15,22 @@
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "false"
   GENERATE_SOURCEMAP = "false"
-  REACT_APP_API_URL = "https://biogy-api.onrender.com"
+  REACT_APP_API_URL = "/.netlify/functions/proxy"
 
-# API redirects with CORS headers
+# Redirect API requests to Netlify Function
 [[redirects]]
   from = "/api/*"
-  to = "https://biogy-api.onrender.com/api/:splat"
+  to = "/.netlify/functions/proxy/:splat"
   status = 200
   force = true
-  headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH", Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With, Accept, Origin"}
 
-# Handle OPTIONS preflight requests
+# Handle OPTIONS preflight requests for Netlify Function
 [[redirects]]
   from = "/api/*"
-  to = "https://biogy-api.onrender.com/api/:splat"
+  to = "/.netlify/functions/proxy/:splat"
   status = 200
   force = true
   method = "OPTIONS"
-  headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH", Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With, Accept, Origin", Access-Control-Max-Age = "86400"}
 
 # SPA fallback
 [[redirects]]

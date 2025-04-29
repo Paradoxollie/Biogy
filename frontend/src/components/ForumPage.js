@@ -88,21 +88,24 @@ const ForumPage = () => {
         console.warn('API service failed, trying direct API call:', apiError);
       }
 
-      // Si l'API normale échoue, essayer un appel direct à l'API Render
+      // Si l'API normale échoue, essayer via la fonction Netlify
       try {
-        const directUrl = `https://biogy-api.onrender.com/api/discussions?page=${pageNumber}`;
-        console.log('Making direct API call to Render:', directUrl);
+        let netlifyUrl = `/.netlify/functions/proxy/discussions?page=${pageNumber}`;
+        if (activeCategory !== 'all') {
+          netlifyUrl += `&category=${activeCategory}`;
+        }
+        if (activeFilter !== 'recent') {
+          netlifyUrl += `&filter=${activeFilter}`;
+        }
 
-        const response = await fetch(directUrl, {
+        console.log('Making API call via Netlify Function:', netlifyUrl);
+
+        const response = await fetch(netlifyUrl, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...headers,
-            'Origin': 'https://biogy.netlify.app',
-            'Access-Control-Request-Method': 'GET',
-            'Access-Control-Request-Headers': 'Content-Type, Authorization'
-          },
-          mode: 'cors'
+            ...headers
+          }
         });
 
         if (!response.ok) {
@@ -110,37 +113,37 @@ const ForumPage = () => {
         }
 
         const data = await response.json();
-        console.log('Forum API response from direct API call:', data);
+        console.log('Forum API response from Netlify Function:', data);
 
         // Handle different response formats
         if (data) {
           if (data.discussions && Array.isArray(data.discussions)) {
             // Standard format with discussions array and totalPages
-            console.log(`Loaded ${data.discussions.length} discussions via direct API`);
+            console.log(`Loaded ${data.discussions.length} discussions via Netlify Function`);
             setDiscussions(data.discussions);
             setTotalPages(data.totalPages || 1);
           } else if (Array.isArray(data)) {
             // Direct array format
-            console.log(`Loaded ${data.length} discussions (array format) via direct API`);
+            console.log(`Loaded ${data.length} discussions (array format) via Netlify Function`);
             setDiscussions(data);
             setTotalPages(Math.ceil(data.length / 10) || 1); // Estimate total pages
           } else if (data.success && data.data && Array.isArray(data.data.discussions)) {
             // Nested format with success flag
-            console.log(`Loaded ${data.data.discussions.length} discussions (nested format) via direct API`);
+            console.log(`Loaded ${data.data.discussions.length} discussions (nested format) via Netlify Function`);
             setDiscussions(data.data.discussions);
             setTotalPages(data.data.totalPages || 1);
           } else {
-            console.error('Unexpected data format from direct API:', data);
+            console.error('Unexpected data format from Netlify Function:', data);
             setDiscussions([]);
             setError('Format de données inattendu. Veuillez réessayer plus tard.');
           }
         } else {
-          console.error('No data in response from direct API');
+          console.error('No data in response from Netlify Function');
           setDiscussions([]);
           setError('Aucune donnée reçue du serveur. Veuillez réessayer plus tard.');
         }
-      } catch (directError) {
-        console.error('Direct API call failed:', directError);
+      } catch (netlifyError) {
+        console.error('Netlify Function call failed:', netlifyError);
         setError('Impossible de charger les discussions. Veuillez réessayer plus tard.');
         setDiscussions([]);
       }

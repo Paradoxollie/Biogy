@@ -106,20 +106,16 @@ const NewDiscussionPage = () => {
       } catch (apiError) {
         console.warn('API service failed, trying direct API call:', apiError);
 
-        // Si l'API normale échoue, essayer un appel direct à l'API Render
+        // Si l'API normale échoue, essayer via la fonction Netlify
         try {
-          console.log('Making direct API call to Render');
-          const response = await fetch('https://biogy-api.onrender.com/api/discussions', {
+          console.log('Making API call via Netlify Function');
+          const response = await fetch('/.netlify/functions/proxy/discussions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${userInfo.token}`,
-              'Origin': 'https://biogy.netlify.app',
-              'Access-Control-Request-Method': 'POST',
-              'Access-Control-Request-Headers': 'Content-Type, Authorization'
+              'Authorization': `Bearer ${userInfo.token}`
             },
-            body: JSON.stringify(discussionData),
-            mode: 'cors'
+            body: JSON.stringify(discussionData)
           });
 
           if (!response.ok) {
@@ -127,9 +123,9 @@ const NewDiscussionPage = () => {
           }
 
           data = await response.json();
-          console.log('Discussion API response from direct API call:', data);
-        } catch (directError) {
-          console.error('Direct API call failed:', directError);
+          console.log('Discussion API response from Netlify Function:', data);
+        } catch (netlifyError) {
+          console.error('Netlify Function call failed:', netlifyError);
           throw new Error('Impossible de créer la discussion. Veuillez réessayer plus tard.');
         }
       }
