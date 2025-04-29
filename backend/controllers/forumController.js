@@ -216,8 +216,8 @@ const deleteTopic = async (req, res) => {
     // Supprimer toutes les discussions associées
     await Discussion.deleteMany({ topic: topic._id });
 
-    // Supprimer le sujet
-    await topic.remove();
+    // Supprimer le sujet (en utilisant deleteOne au lieu de remove qui est obsolète)
+    await Topic.deleteOne({ _id: topic._id });
 
     res.status(200).json({ message: 'Sujet supprimé avec succès' });
   } catch (error) {
@@ -459,8 +459,8 @@ const deleteDiscussion = async (req, res) => {
       discussion.isDeleted = true;
       await discussion.save();
     } else {
-      // Sinon, on peut la supprimer complètement
-      await discussion.remove();
+      // Sinon, on peut la supprimer complètement (en utilisant deleteOne au lieu de remove qui est obsolète)
+      await Discussion.deleteOne({ _id: discussion._id });
     }
 
     res.status(200).json({ message: 'Discussion supprimée avec succès' });
