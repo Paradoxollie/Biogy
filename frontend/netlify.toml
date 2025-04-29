@@ -1,13 +1,10 @@
 [build]
-  base = "frontend"
-  command = "npm ci --legacy-peer-deps && npm run build"
+  base = "/"
   publish = "build"
   
 [build.environment]
   NODE_VERSION = "16"
   NPM_VERSION = "8"
-  PYTHON_VERSION = "3.9"
-  NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "false"
   GENERATE_SOURCEMAP = "false"
 
