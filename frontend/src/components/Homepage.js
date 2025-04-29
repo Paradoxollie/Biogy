@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 // Fonction utilitaire pour l'animation des cercles de Petri
 const animatePetriDishes = (canvas, ctx) => {
   if (!canvas || !ctx) return;
-  
+
   // Configuration
   const circles = [];
   const colors = ['#3b82f6', '#8b5cf6', '#14b8a6', '#22c55e'];
   const numCircles = 20;
-  
+
   // Création des cercles initiaux
   for (let i = 0; i < numCircles; i++) {
     circles.push({
@@ -24,20 +24,20 @@ const animatePetriDishes = (canvas, ctx) => {
       }
     });
   }
-  
+
   // Boucle d'animation
   const animate = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     circles.forEach(circle => {
       // Déplacement
       circle.x += circle.speed.x;
       circle.y += circle.speed.y;
-      
+
       // Rebond sur les bords
       if (circle.x < 0 || circle.x > canvas.width) circle.speed.x *= -1;
       if (circle.y < 0 || circle.y > canvas.height) circle.speed.y *= -1;
-      
+
       // Dessin du cercle (boîte de Petri)
       ctx.beginPath();
       ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
@@ -45,7 +45,7 @@ const animatePetriDishes = (canvas, ctx) => {
       ctx.lineWidth = 1;
       ctx.globalAlpha = circle.alpha;
       ctx.stroke();
-      
+
       // Petites cellules à l'intérieur
       const cells = Math.floor(Math.random() * 3) + 2;
       for (let j = 0; j < cells; j++) {
@@ -54,7 +54,7 @@ const animatePetriDishes = (canvas, ctx) => {
         const cellX = circle.x + Math.cos(cellAngle) * cellDistance;
         const cellY = circle.y + Math.sin(cellAngle) * cellDistance;
         const cellRadius = Math.random() * 2 + 1;
-        
+
         ctx.beginPath();
         ctx.arc(cellX, cellY, cellRadius, 0, Math.PI * 2);
         ctx.fillStyle = circle.color;
@@ -62,34 +62,34 @@ const animatePetriDishes = (canvas, ctx) => {
         ctx.fill();
       }
     });
-    
+
     requestAnimationFrame(animate);
   };
-  
+
   animate();
 };
 
 function Homepage() {
   const canvasRef = useRef(null);
-  
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     // Configuration du canvas
     const ctx = canvas.getContext('2d');
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-    
+
     // Initialisation de l'animation
     animatePetriDishes(canvas, ctx);
-    
+
     // Redimensionnement
     const handleResize = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -97,11 +97,11 @@ function Homepage() {
   return (
     <div className="relative min-h-screen">
       {/* Canvas d'arrière-plan pour l'animation des boîtes de Petri */}
-      <canvas 
-        ref={canvasRef} 
+      <canvas
+        ref={canvasRef}
         className="absolute top-0 left-0 w-full h-full -z-10 opacity-30"
       ></canvas>
-      
+
       {/* Section héro avec illustrations de labo */}
       <section className="pt-20 pb-24 px-4 md:px-0">
         <div className="container mx-auto max-w-6xl">
@@ -111,9 +111,9 @@ function Homepage() {
               <div className="w-full max-w-md mx-auto relative">
                 {/* Fond et effets décoratifs */}
                 <div className="absolute -inset-6 bg-green-900 rounded-xl shadow-xl -z-10"></div>
-                <div className="absolute -inset-6 bg-green-800 rounded-xl opacity-80 -z-10 
+                <div className="absolute -inset-6 bg-green-800 rounded-xl opacity-80 -z-10
                   border-2 border-amber-100/20 shadow-inner"></div>
-                
+
                 {/* Effet de craie sur tableau */}
                 <div className="absolute -top-2 -left-2 w-full h-full">
                   <div className="absolute top-3 left-4 h-0.5 w-16 bg-white/20 rotate-2"></div>
@@ -121,67 +121,67 @@ function Homepage() {
                   <div className="absolute bottom-5 left-8 h-0.5 w-24 bg-white/15 rotate-1"></div>
                   <div className="absolute bottom-10 right-6 h-0.5 w-16 bg-white/10 -rotate-2"></div>
                 </div>
-                
+
                 {/* Traces de craie/poussière */}
                 <div className="absolute -top-4 -left-6 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
                 <div className="absolute -bottom-4 -right-6 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
-                
+
                 {/* Petites particules de craie */}
                 <div className="absolute top-1/4 left-0 w-1 h-1 rounded-full bg-white/40 animate-pulse"></div>
                 <div className="absolute bottom-1/3 right-4 w-0.5 h-0.5 rounded-full bg-white/40 animate-pulse"></div>
                 <div className="absolute top-1/2 right-0 w-1 h-1 rounded-full bg-white/40 animate-pulse"></div>
-                
+
                 {/* Logo avec conteneur */}
                 <div className="relative bg-green-900/60 backdrop-blur-sm rounded-full p-8 shadow-inner overflow-hidden border border-white/10 aspect-square flex items-center justify-center">
                   {/* Effet de texture de tableau */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-30 rounded-full"></div>
-                  
+
                   {/* Orbites moléculaires */}
                   <div className="absolute inset-0 rounded-full border border-white/20 animate-spin" style={{ animationDuration: '20s' }}></div>
                   <div className="absolute inset-2 rounded-full border border-white/15 animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
                   <div className="absolute inset-4 rounded-full border border-white/10 animate-spin" style={{ animationDuration: '10s' }}></div>
                   <div className="absolute inset-6 rounded-full border-dashed border border-white/5 animate-spin" style={{ animationDuration: '25s' }}></div>
-                  
+
                   {/* Atomes/molécules en orbite */}
-                  <div className="absolute w-4 h-4 bg-lab-blue rounded-full shadow-glow animate-orbit-1" 
+                  <div className="absolute w-4 h-4 bg-lab-blue rounded-full shadow-glow animate-orbit-1"
                        style={{ top: '15%', left: '15%' }}></div>
-                  <div className="absolute w-3 h-3 bg-lab-purple rounded-full shadow-glow animate-orbit-2" 
+                  <div className="absolute w-3 h-3 bg-lab-purple rounded-full shadow-glow animate-orbit-2"
                        style={{ bottom: '20%', right: '15%' }}></div>
-                  <div className="absolute w-2 h-2 bg-lab-teal rounded-full shadow-glow animate-orbit-3" 
+                  <div className="absolute w-2 h-2 bg-lab-teal rounded-full shadow-glow animate-orbit-3"
                        style={{ top: '25%', right: '20%' }}></div>
-                  <div className="absolute w-3 h-3 bg-amber-400 rounded-full shadow-glow animate-orbit-4" 
+                  <div className="absolute w-3 h-3 bg-amber-400 rounded-full shadow-glow animate-orbit-4"
                        style={{ bottom: '25%', left: '20%' }}></div>
-                  <div className="absolute w-2 h-2 bg-green-400 rounded-full shadow-glow animate-orbit-5" 
+                  <div className="absolute w-2 h-2 bg-green-400 rounded-full shadow-glow animate-orbit-5"
                        style={{ top: '50%', right: '5%' }}></div>
-                  <div className="absolute w-2.5 h-2.5 bg-red-400 rounded-full shadow-glow animate-orbit-1" 
+                  <div className="absolute w-2.5 h-2.5 bg-red-400 rounded-full shadow-glow animate-orbit-1"
                        style={{ top: '10%', right: '45%', animationDelay: '0.5s' }}></div>
-                  <div className="absolute w-1.5 h-1.5 bg-yellow-300 rounded-full shadow-glow animate-orbit-3" 
+                  <div className="absolute w-1.5 h-1.5 bg-yellow-300 rounded-full shadow-glow animate-orbit-3"
                        style={{ bottom: '10%', left: '45%', animationDelay: '0.7s' }}></div>
-                  <div className="absolute w-2 h-2 bg-indigo-300 rounded-full shadow-glow animate-orbit-2" 
+                  <div className="absolute w-2 h-2 bg-indigo-300 rounded-full shadow-glow animate-orbit-2"
                        style={{ top: '40%', left: '5%', animationDelay: '0.3s' }}></div>
-                  
+
                   {/* Logo avec animation subtile */}
                   <div className="relative animate-float-gentle transform w-3/4 h-3/4 rounded-full overflow-hidden">
                     <div className="w-full h-full flex items-center justify-center rounded-full overflow-hidden bg-green-900/80">
-                      <img 
-                        src="/images/biogy-logo.png" 
-                        alt="Biogy Logo" 
+                      <img
+                        src="/images/biogy-logo.png"
+                        alt="Biogy Logo"
                         className="w-[85%] h-[85%] object-contain z-10 relative drop-shadow-lg rounded-full"
                       />
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <h2 className="text-2xl md:text-3xl text-gray-700 font-light leading-snug">
                 Votre <span className="font-semibold">plateforme dédiée</span> à l'excellence en <span className="font-semibold text-lab-purple">Biotechnologie</span>
               </h2>
-              
+
               <p className="text-lg text-gray-600">
-                Ressources pédagogiques, protocoles de laboratoire, actualités de la recherche et outils collaboratifs 
+                Ressources pédagogiques, protocoles de laboratoire, actualités de la recherche et outils collaboratifs
                 pour les <span className="font-medium">lycéens, étudiants et enseignants</span> en biotechnologie.
               </p>
-              
+
               <div className="flex flex-wrap gap-4 pt-4">
                 <Link to="/apprendre" className="px-6 py-3 bg-gradient-to-r from-lab-blue to-lab-purple text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                   Commencer l'exploration
@@ -194,7 +194,7 @@ function Homepage() {
                 </Link>
               </div>
             </div>
-            
+
             {/* Illustration de labo */}
             <div className="md:w-1/2 relative">
               {/* Image principale de microscope/illustration labo */}
@@ -202,50 +202,50 @@ function Homepage() {
                 <div className="aspect-[4/3] overflow-hidden rounded-md bg-gray-100 relative">
                   {/* Cercle lumineux pour l'effet microscope */}
                   <div className="absolute w-40 h-40 bg-lab-purple/20 rounded-full blur-xl animate-microscope-scan"></div>
-                  
+
                   {/* Illustration style "main levée" d'un microscope */}
                   <svg className="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                     {/* Base du microscope */}
                     <path d="M180 250H280C285 250 290 240 290 235L300 150C300 145 295 140 290 140H170C165 140 160 145 160 150L170 235C170 240 175 250 180 250Z" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="1 3" />
-                    
+
                     {/* Corps */}
                     <path d="M220 140V70" stroke="#333" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M200 70H240" stroke="#333" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                    
+
                     {/* Objectifs */}
                     <circle cx="220" cy="50" r="20" stroke="#333" strokeWidth="3" strokeLinecap="round" />
                     <path d="M235 35L205 65" stroke="#333" strokeWidth="2" />
                     <path d="M205 35L235 65" stroke="#333" strokeWidth="2" />
-                    
+
                     {/* Lumière en bas */}
                     <path d="M220 140L220 170" stroke="#333" strokeWidth="2" strokeLinecap="round" />
                     <circle cx="220" cy="180" r="10" stroke="#333" strokeWidth="2" fill="#FFEE77" fillOpacity="0.6" className="animate-pulse-glow" />
-                    
+
                     {/* Plaque d'échantillon */}
                     <rect x="200" y="120" width="40" height="10" rx="2" stroke="#333" strokeWidth="2" />
-                    
+
                     {/* Molettes de réglage */}
                     <circle cx="260" cy="110" r="12" stroke="#333" strokeWidth="2" />
                     <circle cx="180" cy="110" r="12" stroke="#333" strokeWidth="2" />
-                    
+
                     {/* Éléments décoratifs */}
                     <path d="M150 200H170" stroke="#333" strokeWidth="1" strokeDasharray="2 2" />
                     <path d="M280 200H300" stroke="#333" strokeWidth="1" strokeDasharray="2 2" />
-                    
+
                     {/* Formules scientifiques écrites à la main */}
                     <text x="310" y="50" className="text-xs" fill="#666" fontFamily="cursive">H₂O</text>
                     <text x="330" y="70" className="text-xs" fill="#666" fontFamily="cursive">O₂</text>
                     <text x="320" y="90" className="text-xs" fill="#666" fontFamily="cursive">DNA</text>
                     <text x="340" y="110" className="text-xs" fill="#666" fontFamily="cursive">ATP</text>
-                    
+
                     {/* Petite boîte de Petri */}
                     <ellipse cx="130" cy="100" rx="25" ry="10" stroke="#8b5cf6" strokeWidth="1" strokeDasharray="3 1" />
                     <ellipse cx="130" cy="100" rx="20" ry="8" stroke="#8b5cf6" strokeWidth="1" />
-                    
+
                     {/* Tube à essai */}
                     <path d="M90,70 L90,120 Q95,130 100,120 L100,70 Z" stroke="#14b8a6" strokeWidth="1" fill="none" />
                     <path d="M90,80 L100,80" stroke="#14b8a6" strokeWidth="1" />
-                    
+
                     {/* ADN */}
                     <path d="M40,50 Q50,60 40,70 Q30,80 40,90 Q50,100 40,110" stroke="#3b82f6" strokeWidth="1.5" fill="none" />
                     <path d="M60,50 Q50,60 60,70 Q70,80 60,90 Q50,100 60,110" stroke="#3b82f6" strokeWidth="1.5" fill="none" />
@@ -254,7 +254,7 @@ function Homepage() {
                     <path d="M40,100 L60,100" stroke="#3b82f6" strokeWidth="1" />
                   </svg>
                 </div>
-                
+
                 {/* Notes de laboratoire écrites à la main */}
                 <div className="absolute -right-16 top-10 bg-yellow-50 p-3 w-32 rotate-6 shadow-sm">
                   <div className="text-xs text-gray-600 font-handwriting">
@@ -265,11 +265,11 @@ function Homepage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Éléments décoratifs autour de l'image */}
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-lab-blue/5 rounded-full blur-xl"></div>
               <div className="absolute -top-5 -right-5 w-20 h-20 bg-lab-purple/5 rounded-full blur-lg"></div>
-              
+
               {/* Points décoratifs */}
               <div className="absolute top-2 left-2 grid grid-cols-3 gap-4">
                 {[...Array(9)].map((_, i) => (
@@ -280,14 +280,14 @@ function Homepage() {
           </div>
         </div>
       </section>
-      
+
       {/* Section avec les cartes des catégories */}
       <section className="py-16 bg-gradient-to-b from-white to-lab-bg/40">
         <div className="container mx-auto max-w-6xl px-4">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
             Explorer l'univers de la <span className="text-lab-purple">Bio</span><span className="text-lab-teal">tech</span>
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Carte Apprendre */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
@@ -302,16 +302,16 @@ function Homepage() {
                   <line x1="0" y1="160" x2="300" y2="160" stroke="white" strokeWidth="0.5" strokeDasharray="5 5" />
                   <line x1="0" y1="190" x2="300" y2="190" stroke="white" strokeWidth="0.5" strokeDasharray="5 5" />
                   <line x1="40" y1="0" x2="40" y2="200" stroke="white" strokeWidth="0.5" />
-                
+
                   {/* Dessin de structure cellulaire au "crayon" */}
                   <circle cx="200" cy="80" r="30" stroke="white" strokeWidth="1" fill="none" strokeDasharray="2" />
                   <circle cx="200" cy="80" r="15" stroke="white" strokeWidth="1" fill="none" />
                   <path d="M180,65 C185,70 190,60 195,65" stroke="white" strokeWidth="1" fill="none" />
                 </svg>
-                
+
                 <div className="absolute inset-0 bg-lab-blue/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-              
+
               <div className="p-6">
                 <h3 className="text-xl font-bold text-lab-blue mb-3">Maîtriser les Concepts</h3>
                 <p className="text-gray-600 mb-5">
@@ -322,7 +322,7 @@ function Homepage() {
                 </Link>
               </div>
             </div>
-            
+
             {/* Carte Méthodes (remplace Recherche) */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
               <div className="h-40 bg-gradient-to-r from-lab-purple/90 to-lab-purple/70 relative overflow-hidden">
@@ -338,7 +338,7 @@ function Homepage() {
                 </svg>
                 <div className="absolute inset-0 bg-lab-purple/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-              
+
               <div className="p-6">
                 <h3 className="text-xl font-bold text-lab-purple mb-3">Techniques & Protocoles</h3>
                 <p className="text-gray-600 mb-5">
@@ -349,7 +349,7 @@ function Homepage() {
                 </Link>
               </div>
             </div>
-            
+
             {/* Carte Actualités */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
               <div className="h-40 bg-gradient-to-r from-lab-teal/90 to-lab-teal/70 relative overflow-hidden">
@@ -358,29 +358,29 @@ function Homepage() {
                   {/* Grille/graphique */}
                   <line x1="40" y1="40" x2="40" y2="160" stroke="white" strokeWidth="1" />
                   <line x1="40" y1="160" x2="260" y2="160" stroke="white" strokeWidth="1" />
-                  
+
                   <line x1="40" y1="120" x2="260" y2="120" stroke="white" strokeWidth="0.5" strokeDasharray="4 4" />
                   <line x1="40" y1="80" x2="260" y2="80" stroke="white" strokeWidth="0.5" strokeDasharray="4 4" />
                   <line x1="100" y1="40" x2="100" y2="160" stroke="white" strokeWidth="0.5" strokeDasharray="4 4" />
                   <line x1="160" y1="40" x2="160" y2="160" stroke="white" strokeWidth="0.5" strokeDasharray="4 4" />
                   <line x1="220" y1="40" x2="220" y2="160" stroke="white" strokeWidth="0.5" strokeDasharray="4 4" />
-                  
+
                   {/* Courbe de données */}
                   <path d="M40,140 C70,130 90,150 120,130 C150,110 180,100 220,70" stroke="white" strokeWidth="2" fill="none" />
                   <circle cx="40" cy="140" r="3" fill="white" />
                   <circle cx="120" cy="130" r="3" fill="white" />
                   <circle cx="180" cy="100" r="3" fill="white" />
                   <circle cx="220" cy="70" r="3" fill="white" />
-                  
+
                   {/* Étiquette de données */}
                   <rect x="200" y="40" width="30" height="20" rx="2" stroke="white" strokeWidth="0.5" fill="none" />
                   <line x1="205" y1="50" x2="215" y2="50" stroke="white" strokeWidth="1" />
                   <line x1="220" y1="45" x2="220" y2="55" stroke="white" strokeWidth="1" />
                 </svg>
-                
+
                 <div className="absolute inset-0 bg-lab-teal/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-              
+
               <div className="p-6">
                 <h3 className="text-xl font-bold text-lab-teal mb-3">Veille Scientifique</h3>
                 <p className="text-gray-600 mb-5">
@@ -394,7 +394,7 @@ function Homepage() {
           </div>
         </div>
       </section>
-      
+
       {/* Section caractéristiques avec icônes de laboratoire */}
       <section className="py-16 relative overflow-hidden">
         {/* Formes décoratives */}
@@ -403,7 +403,7 @@ function Homepage() {
           <div className="absolute top-1/3 -left-20 w-60 h-60 bg-lab-purple/5 rounded-full blur-xl"></div>
           <div className="absolute bottom-0 right-1/4 w-40 h-40 bg-lab-teal/5 rounded-full blur-xl"></div>
         </div>
-        
+
         <div className="container mx-auto max-w-6xl px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4 text-gray-800">Des outils pour réussir en Biotechnologie</h2>
@@ -411,7 +411,7 @@ function Homepage() {
               Biogy centralise les ressources indispensables aux parcours <span className="font-medium">lycéens et supérieurs</span> en biotechnologie.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* QCM */}
             <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-300">
@@ -426,7 +426,7 @@ function Homepage() {
                 Validez vos acquis avec des <span className="font-medium">QCM auto-corrigés</span> et des exercices ciblés par chapitre.
               </p>
             </div>
-            
+
             {/* Fiches méthodes */}
             <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-300">
               <div className="w-16 h-16 mb-4 rounded-full bg-lab-purple/10 flex items-center justify-center mx-auto">
@@ -469,20 +469,25 @@ function Homepage() {
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Espace Collaboratif</h3>
-              <p className="text-gray-600 text-center">
+              <p className="text-gray-600 text-center mb-4">
                 Échangez avec <span className="font-medium">étudiants et enseignants</span>, posez vos questions et partagez vos astuces.
               </p>
+              <div className="flex flex-col gap-2 items-center">
+                <Link to="/forum" className="text-white bg-gradient-to-r from-lab-purple to-lab-green hover:opacity-90 px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium w-full text-center shadow-sm transform hover:-translate-y-0.5">
+                  Accéder au forum
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
-      
+
       {/* Section Projets */}
       <section className="py-16 bg-gradient-to-br from-white to-lab-teal/5 relative overflow-hidden">
         {/* Éléments décoratifs */}
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-lab-teal/10 rounded-full blur-xl"></div>
         <div className="absolute bottom-10 right-10 w-60 h-60 bg-lab-purple/5 rounded-full blur-xl"></div>
-        
+
         <div className="container mx-auto max-w-6xl px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3 text-gray-800">Galerie de Projets <span className="text-lab-teal">Biogy</span></h2>
@@ -490,12 +495,12 @@ function Homepage() {
               Découvrez les expériences partagées par notre communauté et publiez vos propres projets pour inspirer les autres.
             </p>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-xl p-8 relative overflow-hidden">
             {/* Effet décoratif */}
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-lab-teal/5 rounded-full"></div>
             <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-lab-purple/5 rounded-full"></div>
-            
+
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="md:w-1/2">
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Partagez vos <span className="text-lab-teal">expériences</span></h3>
@@ -531,7 +536,7 @@ function Homepage() {
                   </Link>
                 </div>
               </div>
-              
+
               <div className="md:w-1/2 relative">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="aspect-square rounded-lg overflow-hidden shadow-lg transform rotate-2 hover:rotate-0 transition-all duration-500">
@@ -572,7 +577,7 @@ function Homepage() {
           </div>
         </div>
       </section>
-      
+
       {/* Section "Rejoignez-nous" */}
       <section className="py-16 bg-gradient-to-br from-lab-blue/5 to-lab-purple/5 relative">
         <div className="container mx-auto max-w-5xl px-4">
@@ -581,7 +586,7 @@ function Homepage() {
             <div className="absolute -top-20 -right-20 w-40 h-40 bg-lab-blue/10 rounded-full"></div>
             <div className="absolute -bottom-10 right-20 w-24 h-24 bg-lab-purple/10 rounded-full"></div>
             <div className="absolute top-1/2 -left-16 w-32 h-32 bg-lab-teal/10 rounded-full"></div>
-            
+
             {/* Contenu */}
             <div className="text-center max-w-3xl mx-auto relative z-10">
               <h2 className="text-3xl font-bold mb-6 text-gray-800">Propulsez votre parcours en Biotechnologie</h2>
@@ -599,4 +604,4 @@ function Homepage() {
   );
 }
 
-export default Homepage; 
+export default Homepage;

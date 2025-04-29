@@ -6,7 +6,17 @@ body {
   @apply font-sans bg-lab-bg text-gray-800;
 }
 
+/* Suppression des soulignements par défaut des liens */
+a {
+  @apply no-underline;
+}
+
+/* Conserver le soulignement uniquement pour les liens qui en ont besoin */
+a.underline, .prose a {
+  @apply underline;
+}
+
 .perspective {
   perspective: 800px;
   transform-style: preserve-3d;
-} 
+}

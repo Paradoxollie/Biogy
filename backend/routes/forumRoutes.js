@@ -13,6 +13,7 @@ const {
   likeDiscussion
 } = require('../controllers/forumController');
 const { protect } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
@@ -31,7 +32,7 @@ router.route('/topics/:id/like')
 
 // Routes pour les discussions
 router.route('/topics/:id/discussions')
-  .post(protect, createDiscussion) // Créer une discussion (authentifié)
+  .post(protect, upload.array('images', 5), createDiscussion) // Créer une discussion avec images (authentifié)
   .get(getDiscussions);            // Récupérer les discussions d'un sujet (public)
 
 router.route('/discussions/:id')

@@ -1,7 +1,9 @@
 const Topic = require('../models/Topic');
 const Discussion = require('../models/Discussion');
 const User = require('../models/User');
-const { uploadToCloudinary } = require('../utils/cloudinary');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
+const multer = require('multer');
+const upload = require('../middleware/uploadMiddleware');
 
 // @desc    Créer un nouveau sujet
 // @route   POST /api/forum/topics
@@ -9,12 +11,12 @@ const { uploadToCloudinary } = require('../utils/cloudinary');
 const createTopic = async (req, res) => {
   try {
     const { title, content, category, tags } = req.body;
-    
+
     // Validation de base
     if (!title || !content) {
       return res.status(400).json({ message: 'Le titre et le contenu sont requis' });
     }
-    
+
     // Créer le sujet
     const topic = new Topic({
       title,
@@ -23,9 +25,9 @@ const createTopic = async (req, res) => {
       category: category || 'general',
       tags: tags ? tags.split(',').map(tag => tag.trim()) : []
     });
-    
+
     const createdTopic = await topic.save();
-    
+
     // Créer la première discussion (le message initial du sujet)
     const discussion = new Discussion({
       topic: createdTopic._id,
@@ -33,9 +35,9 @@ const createTopic = async (req, res) => {
       content,
       parentDiscussion: null
     });
-    
+
     await discussion.save();
-    
+
     // Récupérer le sujet avec les informations de l'utilisateur
     const populatedTopic = await Topic.findById(createdTopic._id)
       .populate('user', 'username')
@@ -46,7 +48,7 @@ const createTopic = async (req, res) => {
           select: 'username'
         }
       });
-    
+
     res.status(201).json(populatedTopic);
   } catch (error) {
     console.error('Error in createTopic:', error);
@@ -64,20 +66,20 @@ const getTopics = async (req, res) => {
     const skip = (page - 1) * limit;
     const category = req.query.category;
     const search = req.query.search;
-    
+
     // Construire la requête
     let query = {};
-    
+
     // Filtrer par catégorie si spécifiée
     if (category && category !== 'all') {
       query.category = category;
     }
-    
+
     // Recherche par titre si spécifiée
     if (search) {
       query.title = { $regex: search, $options: 'i' };
     }
-    
+
     // Récupérer les sujets épinglés en premier, puis par dernière activité
     const topics = await Topic.find(query)
       .sort({ isSticky: -1, lastActivity: -1 })
@@ -91,10 +93,10 @@ const getTopics = async (req, res) => {
           select: 'username'
         }
       });
-    
+
     // Compter le nombre total de sujets pour la pagination
     const total = await Topic.countDocuments(query);
-    
+
     res.status(200).json({
       topics,
       pagination: {
@@ -124,16 +126,16 @@ const getTopicById = async (req, res) => {
           select: 'username'
         }
       });
-    
+
     if (!topic) {
       return res.status(404).json({ message: 'Sujet non trouvé' });
     }
-    
+
     // Incrémenter le compteur de vues
     if (req.user) {
       await topic.incrementViews();
     }
-    
+
     res.status(200).json(topic);
   } catch (error) {
     console.error('Error in getTopicById:', error);
@@ -147,39 +149,39 @@ const getTopicById = async (req, res) => {
 const updateTopic = async (req, res) => {
   try {
     const { title, content, category, tags, isSticky, isClosed } = req.body;
-    
+
     const topic = await Topic.findById(req.params.id);
-    
+
     if (!topic) {
       return res.status(404).json({ message: 'Sujet non trouvé' });
     }
-    
+
     // Vérifier si l'utilisateur est le propriétaire ou un admin
     if (topic.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Non autorisé à modifier ce sujet' });
     }
-    
+
     // Mettre à jour les champs
     if (title) topic.title = title;
     if (content) topic.content = content;
     if (category) topic.category = category;
     if (tags) topic.tags = tags.split(',').map(tag => tag.trim());
-    
+
     // Seuls les admins peuvent épingler ou fermer un sujet
     if (req.user.role === 'admin') {
       if (isSticky !== undefined) topic.isSticky = isSticky;
       if (isClosed !== undefined) topic.isClosed = isClosed;
     }
-    
+
     const updatedTopic = await topic.save();
-    
+
     // Mettre à jour également la première discussion
     if (content) {
-      const firstDiscussion = await Discussion.findOne({ 
+      const firstDiscussion = await Discussion.findOne({
         topic: topic._id,
         parentDiscussion: null
       });
-      
+
       if (firstDiscussion) {
         firstDiscussion.content = content;
         firstDiscussion.isEdited = true;
@@ -187,7 +189,7 @@ const updateTopic = async (req, res) => {
         await firstDiscussion.save();
       }
     }
-    
+
     res.status(200).json(updatedTopic);
   } catch (error) {
     console.error('Error in updateTopic:', error);
@@ -201,22 +203,22 @@ const updateTopic = async (req, res) => {
 const deleteTopic = async (req, res) => {
   try {
     const topic = await Topic.findById(req.params.id);
-    
+
     if (!topic) {
       return res.status(404).json({ message: 'Sujet non trouvé' });
     }
-    
+
     // Vérifier si l'utilisateur est le propriétaire ou un admin
     if (topic.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Non autorisé à supprimer ce sujet' });
     }
-    
+
     // Supprimer toutes les discussions associées
     await Discussion.deleteMany({ topic: topic._id });
-    
+
     // Supprimer le sujet
     await topic.remove();
-    
+
     res.status(200).json({ message: 'Sujet supprimé avec succès' });
   } catch (error) {
     console.error('Error in deleteTopic:', error);
@@ -230,14 +232,14 @@ const deleteTopic = async (req, res) => {
 const likeTopic = async (req, res) => {
   try {
     const topic = await Topic.findById(req.params.id);
-    
+
     if (!topic) {
       return res.status(404).json({ message: 'Sujet non trouvé' });
     }
-    
+
     // Vérifier si l'utilisateur a déjà liké
     const alreadyLiked = topic.likes.includes(req.user._id);
-    
+
     if (alreadyLiked) {
       // Retirer le like
       topic.likes = topic.likes.filter(
@@ -247,9 +249,9 @@ const likeTopic = async (req, res) => {
       // Ajouter le like
       topic.likes.push(req.user._id);
     }
-    
+
     await topic.save();
-    
+
     res.status(200).json({
       likes: topic.likes,
       likesCount: topic.likes.length
@@ -267,34 +269,65 @@ const createDiscussion = async (req, res) => {
   try {
     const { content, parentDiscussionId } = req.body;
     const topicId = req.params.id;
-    
+    const files = req.files || [];
+
     // Validation de base
     if (!content) {
       return res.status(400).json({ message: 'Le contenu est requis' });
     }
-    
+
     // Vérifier si le sujet existe
     const topic = await Topic.findById(topicId);
-    
+
     if (!topic) {
       return res.status(404).json({ message: 'Sujet non trouvé' });
     }
-    
+
     // Vérifier si le sujet est fermé
     if (topic.isClosed) {
       return res.status(403).json({ message: 'Ce sujet est fermé, vous ne pouvez plus y répondre' });
     }
-    
+
+    // Traiter les images si présentes
+    const attachments = [];
+
+    if (files && files.length > 0) {
+      // Limiter à 5 images maximum
+      const imagesToProcess = files.slice(0, 5);
+
+      // Uploader les images sur Cloudinary
+      for (const file of imagesToProcess) {
+        try {
+          const uploadResult = await uploadToCloudinary(file.buffer, {
+            folder: 'forum_attachments'
+          });
+
+          if (uploadResult && uploadResult.secure_url) {
+            attachments.push({
+              type: file.mimetype.startsWith('image/') ? 'image' : 'document',
+              url: uploadResult.secure_url,
+              name: file.originalname,
+              cloudinaryPublicId: uploadResult.public_id
+            });
+          }
+        } catch (uploadError) {
+          console.error('Error uploading file to Cloudinary:', uploadError);
+          // Continuer avec les autres fichiers même si un échoue
+        }
+      }
+    }
+
     // Créer la discussion
     const discussion = new Discussion({
       topic: topicId,
       user: req.user._id,
       content,
-      parentDiscussion: parentDiscussionId || null
+      parentDiscussion: parentDiscussionId || null,
+      attachments: attachments
     });
-    
+
     const createdDiscussion = await discussion.save();
-    
+
     // Récupérer la discussion avec les informations de l'utilisateur
     const populatedDiscussion = await Discussion.findById(createdDiscussion._id)
       .populate('user', 'username')
@@ -305,7 +338,7 @@ const createDiscussion = async (req, res) => {
           select: 'username'
         }
       });
-    
+
     res.status(201).json(populatedDiscussion);
   } catch (error) {
     console.error('Error in createDiscussion:', error);
@@ -322,16 +355,16 @@ const getDiscussions = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
-    
+
     // Vérifier si le sujet existe
     const topic = await Topic.findById(topicId);
-    
+
     if (!topic) {
       return res.status(404).json({ message: 'Sujet non trouvé' });
     }
-    
+
     // Récupérer les discussions principales (non-réponses) d'abord
-    const mainDiscussions = await Discussion.find({ 
+    const mainDiscussions = await Discussion.find({
       topic: topicId,
       parentDiscussion: null
     })
@@ -346,13 +379,13 @@ const getDiscussions = async (req, res) => {
           select: 'username'
         }
       });
-    
+
     // Compter le nombre total de discussions principales pour la pagination
-    const total = await Discussion.countDocuments({ 
+    const total = await Discussion.countDocuments({
       topic: topicId,
       parentDiscussion: null
     });
-    
+
     res.status(200).json({
       discussions: mainDiscussions,
       pagination: {
@@ -374,25 +407,25 @@ const getDiscussions = async (req, res) => {
 const updateDiscussion = async (req, res) => {
   try {
     const { content } = req.body;
-    
+
     const discussion = await Discussion.findById(req.params.id);
-    
+
     if (!discussion) {
       return res.status(404).json({ message: 'Discussion non trouvée' });
     }
-    
+
     // Vérifier si l'utilisateur est le propriétaire ou un admin
     if (discussion.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Non autorisé à modifier cette discussion' });
     }
-    
+
     // Mettre à jour le contenu
     discussion.content = content;
     discussion.isEdited = true;
     discussion.editedAt = Date.now();
-    
+
     const updatedDiscussion = await discussion.save();
-    
+
     res.status(200).json(updatedDiscussion);
   } catch (error) {
     console.error('Error in updateDiscussion:', error);
@@ -406,21 +439,21 @@ const updateDiscussion = async (req, res) => {
 const deleteDiscussion = async (req, res) => {
   try {
     const discussion = await Discussion.findById(req.params.id);
-    
+
     if (!discussion) {
       return res.status(404).json({ message: 'Discussion non trouvée' });
     }
-    
+
     // Vérifier si l'utilisateur est le propriétaire ou un admin
     if (discussion.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Non autorisé à supprimer cette discussion' });
     }
-    
+
     // Si c'est la discussion principale (première du sujet), on ne peut pas la supprimer
     // On la marque comme supprimée à la place
     const isMainDiscussion = discussion.parentDiscussion === null;
     const hasReplies = await Discussion.exists({ parentDiscussion: discussion._id });
-    
+
     if (isMainDiscussion || hasReplies) {
       discussion.content = '[Ce message a été supprimé]';
       discussion.isDeleted = true;
@@ -429,7 +462,7 @@ const deleteDiscussion = async (req, res) => {
       // Sinon, on peut la supprimer complètement
       await discussion.remove();
     }
-    
+
     res.status(200).json({ message: 'Discussion supprimée avec succès' });
   } catch (error) {
     console.error('Error in deleteDiscussion:', error);
@@ -443,14 +476,14 @@ const deleteDiscussion = async (req, res) => {
 const likeDiscussion = async (req, res) => {
   try {
     const discussion = await Discussion.findById(req.params.id);
-    
+
     if (!discussion) {
       return res.status(404).json({ message: 'Discussion non trouvée' });
     }
-    
+
     // Vérifier si l'utilisateur a déjà liké
     const alreadyLiked = discussion.likes.includes(req.user._id);
-    
+
     if (alreadyLiked) {
       // Retirer le like
       discussion.likes = discussion.likes.filter(
@@ -460,9 +493,9 @@ const likeDiscussion = async (req, res) => {
       // Ajouter le like
       discussion.likes.push(req.user._id);
     }
-    
+
     await discussion.save();
-    
+
     res.status(200).json({
       likes: discussion.likes,
       likesCount: discussion.likes.length
