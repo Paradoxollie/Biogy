@@ -35,7 +35,7 @@ const ForumPage = () => {
     setError('');
 
     try {
-      let endpoint = `/discussions?page=${pageNumber}`;
+      let endpoint = `https://biogy-api.onrender.com/api/discussions?page=${pageNumber}`;
 
       if (activeCategory !== 'all') {
         endpoint += `&category=${activeCategory}`;
@@ -47,33 +47,47 @@ const ForumPage = () => {
 
       console.log(`Fetching discussions with endpoint: ${endpoint}`);
 
-      const response = await api.get(endpoint);
-      console.log('Forum API response:', response);
+      // Use direct fetch instead of the API service
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization header if user is logged in
+          ...(userInfo && userInfo.token ? { 'Authorization': `Bearer ${userInfo.token}` } : {})
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Forum API response:', data);
 
       // Handle different response formats
-      if (response && response.data) {
-        if (response.data.discussions && Array.isArray(response.data.discussions)) {
+      if (data) {
+        if (data.discussions && Array.isArray(data.discussions)) {
           // Standard format with discussions array and totalPages
-          console.log(`Loaded ${response.data.discussions.length} discussions`);
-          setDiscussions(response.data.discussions);
-          setTotalPages(response.data.totalPages || 1);
-        } else if (Array.isArray(response.data)) {
+          console.log(`Loaded ${data.discussions.length} discussions`);
+          setDiscussions(data.discussions);
+          setTotalPages(data.totalPages || 1);
+        } else if (Array.isArray(data)) {
           // Direct array format
-          console.log(`Loaded ${response.data.length} discussions (array format)`);
-          setDiscussions(response.data);
-          setTotalPages(Math.ceil(response.data.length / 10) || 1); // Estimate total pages
-        } else if (response.data.success && response.data.data && Array.isArray(response.data.data.discussions)) {
+          console.log(`Loaded ${data.length} discussions (array format)`);
+          setDiscussions(data);
+          setTotalPages(Math.ceil(data.length / 10) || 1); // Estimate total pages
+        } else if (data.success && data.data && Array.isArray(data.data.discussions)) {
           // Nested format with success flag
-          console.log(`Loaded ${response.data.data.discussions.length} discussions (nested format)`);
-          setDiscussions(response.data.data.discussions);
-          setTotalPages(response.data.data.totalPages || 1);
+          console.log(`Loaded ${data.data.discussions.length} discussions (nested format)`);
+          setDiscussions(data.data.discussions);
+          setTotalPages(data.data.totalPages || 1);
         } else {
-          console.error('Unexpected data format:', response.data);
+          console.error('Unexpected data format:', data);
           setDiscussions([]);
           setError('Format de données inattendu. Veuillez réessayer plus tard.');
         }
       } else {
-        console.error('No data in response:', response);
+        console.error('No data in response');
         setDiscussions([]);
         setError('Aucune donnée reçue du serveur. Veuillez réessayer plus tard.');
       }

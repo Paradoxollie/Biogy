@@ -1,20 +1,14 @@
 import axios from 'axios';
 import proxyService from './proxyService';
 
-// Check if we should use Netlify Functions
-const USE_NETLIFY_FUNCTIONS = process.env.REACT_APP_USE_NETLIFY_FUNCTIONS === 'true';
-
 // Déterminer l'URL de base de l'API en fonction de l'environnement
-const API_URL = USE_NETLIFY_FUNCTIONS && process.env.NODE_ENV === 'production'
-  ? '/.netlify/functions/proxy' // Use Netlify Functions in production
-  : process.env.NODE_ENV === 'production'
-    ? '/api' // Utiliser le proxy Netlify en production
-    : process.env.REACT_APP_API_URL
-      ? `${process.env.REACT_APP_API_URL}/api` // Variable d'env prioritaire (pourrait être utilisée pour d'autres environnements)
-      : 'http://localhost:5000/api'; // Fallback pour le dev local
+const API_URL = process.env.NODE_ENV === 'production'
+  ? '/api' // Utiliser le proxy Netlify en production
+  : process.env.REACT_APP_API_URL
+    ? `${process.env.REACT_APP_API_URL}/api` // Variable d'env prioritaire (pourrait être utilisée pour d'autres environnements)
+    : 'http://localhost:5000/api'; // Fallback pour le dev local
 
 console.log('API_URL configured as:', API_URL);
-console.log('Using Netlify Functions:', USE_NETLIFY_FUNCTIONS);
 
 // Flag pour activer le fallback vers le proxy si les requêtes API échouent
 let useProxyFallback = false;
@@ -50,14 +44,6 @@ export const fixApiPath = (path) => {
   // S'assurer qu'il commence par un slash
   if (!normalizedPath.startsWith('/')) {
     normalizedPath = `/${normalizedPath}`;
-  }
-
-  // Special handling for Netlify Functions
-  if (USE_NETLIFY_FUNCTIONS && process.env.NODE_ENV === 'production') {
-    // For Netlify Functions, we don't need to modify the path
-    // The function will handle the routing
-    console.log(`Appel API via Netlify Function: ${normalizedPath}`);
-    return normalizedPath;
   }
 
   // Si la baseURL est déjà /api, on retourne juste le chemin normalisé (ex: /posts, /auth/login)

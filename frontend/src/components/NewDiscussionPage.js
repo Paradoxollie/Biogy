@@ -93,27 +93,39 @@ const NewDiscussionPage = () => {
 
       console.log('Discussion data:', discussionData);
 
-      // Make the API request with explicit headers
-      const response = await api.post('/discussions', discussionData);
+      // Use direct fetch instead of the API service
+      const response = await fetch('https://biogy-api.onrender.com/api/discussions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userInfo.token}`
+        },
+        body: JSON.stringify(discussionData)
+      });
 
-      console.log('Réponse du serveur:', response);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Réponse du serveur:', data);
 
       // Handle different response formats
       let discussionId = null;
 
-      if (response.data) {
-        if (response.data.discussion && response.data.discussion._id) {
+      if (data) {
+        if (data.discussion && data.discussion._id) {
           // Standard format
-          discussionId = response.data.discussion._id;
-        } else if (response.data._id) {
+          discussionId = data.discussion._id;
+        } else if (data._id) {
           // Direct object format
-          discussionId = response.data._id;
-        } else if (response.data.success && response.data.data && response.data.data._id) {
+          discussionId = data._id;
+        } else if (data.success && data.data && data.data._id) {
           // Nested success format
-          discussionId = response.data.data._id;
-        } else if (response.data.id) {
+          discussionId = data.data._id;
+        } else if (data.id) {
           // Simple id format
-          discussionId = response.data.id;
+          discussionId = data.id;
         }
       }
 
@@ -121,7 +133,7 @@ const NewDiscussionPage = () => {
         console.log(`Redirection vers la discussion: ${discussionId}`);
         navigate(`/discussion/${discussionId}`);
       } else {
-        console.error('ID de discussion introuvable dans la réponse:', response.data);
+        console.error('ID de discussion introuvable dans la réponse:', data);
         setError('La discussion a été créée mais impossible de la retrouver. Veuillez vérifier dans le forum.');
         setTimeout(() => {
           navigate('/forum');
@@ -129,20 +141,7 @@ const NewDiscussionPage = () => {
       }
     } catch (err) {
       console.error('Erreur lors de la création de la discussion:', err);
-
-      if (err.response) {
-        // La requête a été faite et le serveur a répondu avec un code d'erreur
-        console.error('Réponse d\'erreur du serveur:', err.response.data);
-        setError(err.response.data?.message || 'Erreur du serveur. Veuillez réessayer.');
-      } else if (err.request) {
-        // La requête a été faite mais aucune réponse n'a été reçue
-        console.error('Pas de réponse du serveur:', err.request);
-        setError('Impossible de joindre le serveur. Veuillez vérifier votre connexion et réessayer.');
-      } else {
-        // Une erreur s'est produite lors de la configuration de la requête
-        console.error('Erreur de requête:', err.message);
-        setError(`Une erreur est survenue: ${err.message}. Veuillez réessayer.`);
-      }
+      setError(`Erreur: ${err.message}. Veuillez réessayer.`);
     } finally {
       setLoading(false);
     }

@@ -20,25 +20,38 @@ function ProjectsGallery() {
       setError('');
       console.log('Fetching projects from /posts endpoint');
 
-      const response = await api.get('/posts');
+      // Use a direct fetch to the API instead of the api service
+      const response = await fetch('https://biogy-api.onrender.com/api/posts', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization header if user is logged in
+          ...(userInfo && userInfo.token ? { 'Authorization': `Bearer ${userInfo.token}` } : {})
+        }
+      });
 
-      console.log('Projects API response:', response);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`);
+      }
 
-      if (response && response.data) {
+      const data = await response.json();
+      console.log('Projects API response:', data);
+
+      if (data) {
         // Check if data is an array
-        if (Array.isArray(response.data)) {
-          setProjects(response.data);
-          console.log(`Loaded ${response.data.length} projects successfully`);
-        } else if (response.data.posts && Array.isArray(response.data.posts)) {
+        if (Array.isArray(data)) {
+          setProjects(data);
+          console.log(`Loaded ${data.length} projects successfully`);
+        } else if (data.posts && Array.isArray(data.posts)) {
           // Some APIs wrap the data in a 'posts' property
-          setProjects(response.data.posts);
-          console.log(`Loaded ${response.data.posts.length} projects from 'posts' property`);
+          setProjects(data.posts);
+          console.log(`Loaded ${data.posts.length} projects from 'posts' property`);
         } else {
-          console.error('Unexpected data format:', response.data);
+          console.error('Unexpected data format:', data);
           throw new Error('Format de données inattendu reçu du serveur');
         }
       } else {
-        console.error('No data in response:', response);
+        console.error('No data in response');
         throw new Error('Données invalides reçues du serveur');
       }
     } catch (err) {
@@ -49,7 +62,7 @@ function ProjectsGallery() {
     } finally {
       setLoading(false);
     }
-  }, []); // Pas de dépendance nécessaire car nous utilisons api de services
+  }, [userInfo]); // Add userInfo as a dependency since we use it for the authorization header
 
   useEffect(() => {
     fetchProjects();
