@@ -133,10 +133,8 @@ const getTopicById = async (req, res) => {
       return res.status(404).json({ message: 'Sujet non trouvé' });
     }
 
-    // Incrémenter le compteur de vues
-    if (req.user) {
-      await topic.incrementViews();
-    }
+    // Incrémenter le compteur de vues pour tous les visiteurs
+    await topic.incrementViews();
 
     res.status(200).json(topic);
   } catch (error) {
