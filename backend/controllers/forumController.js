@@ -86,6 +86,7 @@ const getTopics = async (req, res) => {
       .skip(skip)
       .limit(limit)
       .populate('user', 'username')
+      .populate('discussionCount') // Peupler le compteur de discussions
       .populate({
         path: 'lastDiscussion',
         populate: {
@@ -119,6 +120,7 @@ const getTopicById = async (req, res) => {
   try {
     const topic = await Topic.findById(req.params.id)
       .populate('user', 'username')
+      .populate('discussionCount') // Peupler le compteur de discussions
       .populate({
         path: 'lastDiscussion',
         populate: {
@@ -327,6 +329,11 @@ const createDiscussion = async (req, res) => {
     });
 
     const createdDiscussion = await discussion.save();
+
+    // Mettre à jour explicitement le lastActivity du topic
+    await Topic.findByIdAndUpdate(topicId, {
+      lastActivity: Date.now()
+    });
 
     // Récupérer la discussion avec les informations de l'utilisateur
     const populatedDiscussion = await Discussion.findById(createdDiscussion._id)

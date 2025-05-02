@@ -27,3 +27,35 @@ a.with-underline, .prose a {
   perspective: 800px;
   transform-style: preserve-3d;
 }
+
+/* Animations pour le forum */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    filter: drop-shadow(0 0 0 rgba(139, 92, 246, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.5));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 rgba(139, 92, 246, 0));
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}

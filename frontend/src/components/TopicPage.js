@@ -360,21 +360,28 @@ function TopicPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-lab-purple"></div>
-        <p className="mt-2 text-gray-600">Chargement du sujet...</p>
+      <div className="container mx-auto px-4 py-12 text-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lab-purple mb-4">
+          <div className="h-10 w-10 rounded-full bg-lab-purple/10"></div>
+        </div>
+        <p className="mt-2 text-gray-700 font-medium">Chargement du sujet...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <div className="bg-red-50 p-4 rounded-lg">
-          <p className="text-red-500">Erreur: {error}</p>
+      <div className="container mx-auto px-4 py-12 text-center">
+        <div className="bg-red-50 p-8 rounded-lg shadow-md sketch-container">
+          <div className="mb-4 text-red-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <p className="text-red-600 font-medium mb-4">Erreur: {error}</p>
           <button
             onClick={() => navigate('/forum')}
-            className="mt-4 px-4 py-2 bg-lab-purple text-white rounded-lg"
+            className="px-4 py-2 bg-gradient-to-r from-lab-purple to-lab-blue text-white rounded-lg shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
           >
             Retour au forum
           </button>
@@ -385,12 +392,17 @@ function TopicPage() {
 
   if (!topic) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <div className="bg-yellow-50 p-4 rounded-lg">
-          <p className="text-yellow-600">Sujet non trouvé</p>
+      <div className="container mx-auto px-4 py-12 text-center">
+        <div className="bg-amber-50 p-8 rounded-lg shadow-md sketch-container">
+          <div className="mb-4 text-amber-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-amber-600 font-medium mb-4">Sujet non trouvé</p>
           <button
             onClick={() => navigate('/forum')}
-            className="mt-4 px-4 py-2 bg-lab-purple text-white rounded-lg"
+            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-400 text-white rounded-lg shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
           >
             Retour au forum
           </button>
@@ -402,71 +414,106 @@ function TopicPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* En-tête du sujet */}
-      <div className="mb-6">
-        <div className="flex items-center mb-2">
-          <Link to="/forum" className="text-lab-purple hover:underline flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+      <div className="mb-8 animate-fade-in-up">
+        <div className="flex items-center mb-4">
+          <Link to="/forum" className="text-lab-purple hover:text-lab-blue transition-colors duration-300 flex items-center group">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
             </svg>
-            Retour au forum
+            <span className="font-medium">Retour au forum</span>
           </Link>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6 sketch-container">
-          <div className="flex justify-between items-start">
-            <h1 className="text-2xl font-bold text-gray-800">{topic.title}</h1>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h1 className="text-2xl font-bold text-gray-800 relative">
+              {topic.title}
+              <span className="absolute -bottom-1 left-0 w-1/3 h-1 bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal transform scale-x-100 origin-bottom-left"></span>
+            </h1>
             <div className="flex items-center space-x-3">
               {userInfo && userInfo.role === 'admin' && (
                 <button
                   onClick={deleteTopic}
-                  className="text-red-500 hover:text-red-700 transition-colors duration-200 flex items-center"
+                  className="text-red-500 hover:text-red-700 transition-all duration-300 flex items-center px-3 py-1.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100"
                   title="Supprimer ce sujet"
                   disabled={submitting}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
-                  Supprimer le sujet
+                  <span className="font-medium">Supprimer</span>
                 </button>
               )}
-              <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${
+              <span className={`px-3 py-1.5 rounded-full text-sm font-medium bg-${
                 categories[topic.category]?.color || 'gray-500'
               }/10 text-${
                 categories[topic.category]?.color || 'gray-500'
-              }`}>
+              } border border-${
+                categories[topic.category]?.color || 'gray-500'
+              }/20 shadow-sm`}>
                 {categories[topic.category]?.name || 'Autre'}
               </span>
             </div>
           </div>
 
-          <div className="mt-2 text-sm text-gray-500">
-            <span>Créé par {topic.user?.username || 'Utilisateur inconnu'}</span>
-            <span className="mx-2">•</span>
-            <span>{formatDate(topic.createdAt)}</span>
-            <span className="mx-2">•</span>
-            <span>{topic.views} vues</span>
+          <div className="mt-4 flex items-center text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div className="flex items-center mr-4">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lab-blue to-lab-purple text-white flex items-center justify-center font-bold mr-2 shadow-sm">
+                {topic.user?.username ? topic.user.username.charAt(0).toUpperCase() : '?'}
+              </div>
+              <span className="font-medium">{topic.user?.username || 'Utilisateur inconnu'}</span>
+            </div>
+            <span className="mx-2 text-gray-400">•</span>
+            <span className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-lab-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {formatDate(topic.createdAt)}
+            </span>
+            <span className="mx-2 text-gray-400">•</span>
+            <span className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-lab-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <span className="font-medium">{topic.views}</span> vues
+            </span>
           </div>
         </div>
       </div>
 
       {/* Liste des discussions */}
-      <div className="space-y-6 mb-6">
+      <div className="space-y-8 mb-8">
         {discussions.map((discussion, index) => (
-          <div key={discussion._id} className="bg-white rounded-lg shadow-md overflow-hidden sketch-container transform transition-all duration-300 hover:shadow-lg">
+          <div
+            key={discussion._id}
+            className="bg-white rounded-lg shadow-md overflow-hidden sketch-container transform transition-all duration-300 hover:shadow-lg animate-fade-in-up"
+            style={{animationDelay: `${0.3 + index * 0.05}s`}}
+          >
             {/* En-tête de la discussion */}
             <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 border-b border-gray-200 flex justify-between items-center">
               <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lab-blue to-lab-purple text-white flex items-center justify-center font-bold mr-2 shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-lab-blue to-lab-purple text-white flex items-center justify-center font-bold mr-3 shadow-md">
                   {discussion.user?.username ? discussion.user.username.charAt(0).toUpperCase() : '?'}
                 </div>
                 <div>
-                  <div className="font-medium text-gray-700">{discussion.user?.username || 'Utilisateur inconnu'}</div>
+                  <div className="font-medium text-gray-800">{discussion.user?.username || 'Utilisateur inconnu'}</div>
                   <div className="flex items-center text-xs text-gray-500">
-                    <span>{formatDate(discussion.createdAt)}</span>
+                    <span className="flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-lab-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {formatDate(discussion.createdAt)}
+                    </span>
                     {discussion.isEdited && (
                       <>
                         <span className="mx-1 text-gray-400">•</span>
-                        <span className="italic">Modifié le {formatDate(discussion.editedAt)}</span>
+                        <span className="italic flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-lab-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          Modifié le {formatDate(discussion.editedAt)}
+                        </span>
                       </>
                     )}
                   </div>
@@ -480,7 +527,7 @@ function TopicPage() {
                       <>
                         <button
                           onClick={() => startEditing(discussion)}
-                          className="text-gray-500 hover:text-lab-blue transition-colors duration-200"
+                          className="text-gray-500 hover:text-lab-blue transition-all duration-300 p-1.5 rounded-full hover:bg-lab-blue/10"
                           title="Modifier"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -490,7 +537,7 @@ function TopicPage() {
 
                         <button
                           onClick={() => confirmDelete(discussion._id)}
-                          className="text-gray-500 hover:text-red-500 transition-colors duration-200"
+                          className="text-gray-500 hover:text-red-500 transition-all duration-300 p-1.5 rounded-full hover:bg-red-50"
                           title="Supprimer"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -645,20 +692,20 @@ function TopicPage() {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => likeDiscussion(discussion._id)}
-                  className={`flex items-center px-3 py-1.5 rounded-full transition-all duration-200 ${
+                  className={`flex items-center px-3 py-1.5 rounded-full transition-all duration-300 ${
                     discussion.likes?.includes(userInfo?._id)
-                      ? 'bg-lab-purple/10 text-lab-purple'
-                      : 'text-gray-500 hover:bg-gray-100'
+                      ? 'bg-lab-purple/10 text-lab-purple font-medium shadow-sm'
+                      : 'text-gray-500 hover:bg-gray-100 hover:text-lab-purple'
                   }`}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-1.5 ${discussion.likes?.includes(userInfo?._id) ? 'animate-pulse-glow' : ''}`} viewBox="0 0 20 20" fill="currentColor">
                     <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                   </svg>
                   <span className="font-medium">{discussion.likes?.length || 0}</span>
                 </button>
 
                 <button
-                  className="flex items-center px-3 py-1.5 rounded-full text-gray-500 hover:bg-gray-100 transition-all duration-200"
+                  className="flex items-center px-3 py-1.5 rounded-full text-gray-500 hover:bg-gray-100 hover:text-lab-blue transition-all duration-300"
                   onClick={() => {
                     // Faire défiler jusqu'au formulaire de réponse
                     document.getElementById('reply-form')?.scrollIntoView({ behavior: 'smooth' });
@@ -668,7 +715,7 @@ function TopicPage() {
                     }, 500);
                   }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5 group-hover:animate-bounce" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
                   </svg>
                   <span>Répondre</span>
@@ -676,8 +723,13 @@ function TopicPage() {
               </div>
 
               <div className="flex items-center">
-                <div className="text-xs font-medium px-2 py-1 bg-gray-200 rounded-full text-gray-700">
-                  #{discussions.indexOf(discussion) + 1}
+                <div className="text-xs font-medium px-3 py-1.5 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full text-gray-700 shadow-sm border border-gray-200">
+                  <span className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1 text-lab-purple/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                    Message #{discussions.indexOf(discussion) + 1}
+                  </span>
                 </div>
               </div>
             </div>
@@ -995,7 +1047,12 @@ function TopicPage() {
       <style jsx="true">{`
         .sketch-container {
           position: relative;
-          box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+          transition: all 0.3s ease;
+        }
+
+        .sketch-container:hover {
+          box-shadow: 0 6px 16px rgba(0,0,0,0.12);
         }
 
         .sketch-container:before {
@@ -1007,9 +1064,31 @@ function TopicPage() {
           bottom: 0;
           border: 2px solid #333;
           border-radius: 0.5rem;
-          opacity: 0.08;
+          opacity: 0.06;
           pointer-events: none;
-          transform: translate(2px, 2px);
+          transform: translate(3px, 3px);
+          transition: all 0.3s ease;
+        }
+
+        .sketch-container:after {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-image:
+            linear-gradient(to right, rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+          background-size: 20px 20px;
+          border-radius: 0.5rem;
+          pointer-events: none;
+        }
+
+        .paper-lined-bg {
+          background-image: linear-gradient(0deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+          background-size: 100% 24px;
+          background-position: 0 0;
         }
       `}</style>
     </div>
