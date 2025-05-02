@@ -737,10 +737,13 @@ function TopicPage() {
             {/* Réponses à cette discussion si présentes */}
             {discussion.replies && discussion.replies.length > 0 && (
               <div className="border-t border-gray-200 pl-8">
-                {discussion.replies.map((reply) => (
-                  <div key={reply._id} className="p-4 border-b border-gray-100 last:border-b-0">
+                {discussion.replies.map((reply, replyIndex) => (
+                  <div key={reply._id} className="p-4 border-b border-gray-100 last:border-b-0 bg-gray-50 rounded-lg my-2 shadow-sm">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center mb-2">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-lab-teal to-lab-blue text-white flex items-center justify-center font-bold text-xs mr-2 shadow-sm">
+                          {reply.user?.username ? reply.user.username.charAt(0).toUpperCase() : '?'}
+                        </div>
                         <div className="font-medium text-gray-700">{reply.user?.username || 'Utilisateur inconnu'}</div>
                         <span className="mx-2 text-gray-400">•</span>
                         <div className="text-sm text-gray-500">{formatDate(reply.createdAt)}</div>

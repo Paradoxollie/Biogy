@@ -108,7 +108,6 @@ function ForumPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-2 relative inline-block">
             Espace Collaboratif
-            <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal transform scale-x-100 origin-bottom-left"></span>
           </h1>
           <p className="text-gray-700">
             Discutez, partagez et collaborez avec d'autres passionnés de biotechnologie
