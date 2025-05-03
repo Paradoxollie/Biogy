@@ -77,13 +77,34 @@ export const proxyRequest = async (method, endpoint, data = null, headers = {}) 
  * Récupère le profil utilisateur
  */
 export const fetchProfile = async (token, userId = null) => {
-  const endpoint = userId ? `social/profile/${userId}` : 'social/profile';
+  try {
+    console.log('Récupération du profil utilisateur via fonction Netlify dédiée');
 
-  const headers = token ? {
-    'Authorization': `Bearer ${token}`
-  } : {};
+    // Utiliser directement la fonction Netlify dédiée
+    const url = userId
+      ? `${NETLIFY_FUNCTIONS_URL}/profile-proxy/${userId}`
+      : `${NETLIFY_FUNCTIONS_URL}/profile-proxy`;
 
-  return proxyRequest('get', endpoint, null, headers);
+    const headers = token ? {
+      'Authorization': `Bearer ${token}`
+    } : {};
+
+    const response = await axios({
+      method: 'get',
+      url,
+      headers,
+      timeout: 30000
+    });
+
+    if (!response.data) {
+      throw new Error('Empty response received from server');
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error('Erreur lors de la récupération du profil:', error);
+    throw new Error(`Erreur lors de la récupération du profil: ${error.message}`);
+  }
 };
 
 /**
@@ -94,11 +115,31 @@ export const updateProfile = async (token, profileData) => {
     throw new Error('Token d\'authentification requis');
   }
 
-  const headers = {
-    'Authorization': `Bearer ${token}`
-  };
+  try {
+    console.log('Mise à jour du profil utilisateur via fonction Netlify dédiée');
 
-  return proxyRequest('put', 'social/profile', profileData, headers);
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+
+    const response = await axios({
+      method: 'put',
+      url: `${NETLIFY_FUNCTIONS_URL}/profile-proxy`,
+      headers,
+      data: profileData,
+      timeout: 30000
+    });
+
+    if (!response.data) {
+      throw new Error('Empty response received from server');
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du profil:', error);
+    throw new Error(`Erreur lors de la mise à jour du profil: ${error.message}`);
+  }
 };
 
 /**
@@ -109,11 +150,31 @@ export const updateAvatar = async (token, avatarId) => {
     throw new Error('Token d\'authentification requis');
   }
 
-  const headers = {
-    'Authorization': `Bearer ${token}`
-  };
+  try {
+    console.log('Mise à jour de l\'avatar via fonction Netlify dédiée');
 
-  return proxyRequest('post', 'social/profile/avatar/predefined', { avatarId }, headers);
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+
+    const response = await axios({
+      method: 'post',
+      url: `${NETLIFY_FUNCTIONS_URL}/profile-proxy/avatar/predefined`,
+      headers,
+      data: { avatarId },
+      timeout: 30000
+    });
+
+    if (!response.data) {
+      throw new Error('Empty response received from server');
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de l\'avatar:', error);
+    throw new Error(`Erreur lors de la mise à jour de l'avatar: ${error.message}`);
+  }
 };
 
 /**

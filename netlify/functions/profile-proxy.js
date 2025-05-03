@@ -4,6 +4,14 @@ const axios = require('axios');
 // URL de l'API backend
 const API_URL = 'https://biogy-api.onrender.com/api';
 
+// Fonction pour logger les informations de débogage
+const logDebug = (message, data = null) => {
+  console.log(`[PROFILE-PROXY] ${message}`);
+  if (data) {
+    console.log(JSON.stringify(data, null, 2).substring(0, 500));
+  }
+};
+
 exports.handler = async function(event, context) {
   // Headers CORS permissifs
   const headers = {
@@ -14,9 +22,17 @@ exports.handler = async function(event, context) {
     'Content-Type': 'application/json'
   };
 
+  // Log de la requête entrante
+  logDebug('Requête entrante', {
+    path: event.path,
+    method: event.httpMethod,
+    headers: event.headers,
+    queryParams: event.queryStringParameters
+  });
+
   // Gérer les requêtes OPTIONS (preflight)
   if (event.httpMethod === 'OPTIONS') {
-    console.log('Handling OPTIONS preflight request for profile');
+    logDebug('Handling OPTIONS preflight request for profile');
     return {
       statusCode: 200,
       headers,
@@ -27,70 +43,135 @@ exports.handler = async function(event, context) {
   try {
     // Extraire le chemin de la requête
     const path = event.path.replace('/.netlify/functions/profile-proxy', '');
-    
+    logDebug(`Chemin extrait: "${path}"`);
+
+    // Gérer les cas spéciaux
+    if (path === '/test') {
+      logDebug('Test de connexion demandé');
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          message: 'Profile proxy function is working!',
+          timestamp: new Date().toISOString()
+        })
+      };
+    }
+
     // Construire l'URL complète pour le profil
     const endpoint = path ? `social/profile${path}` : 'social/profile';
     const url = `${API_URL}/${endpoint}`;
-    
-    console.log(`Profile Proxy: Forwarding ${event.httpMethod} request to: ${url}`);
-    
+
+    logDebug(`Forwarding ${event.httpMethod} request to: ${url}`);
+
     // Extraire les headers
     const authHeader = event.headers.authorization || event.headers.Authorization;
-    
+
     // Préparer les headers pour la requête à l'API
     const apiHeaders = {
       'Content-Type': 'application/json',
-      'Origin': 'https://biogy.netlify.app'
+      'Origin': 'https://biogy.netlify.app',
+      'Accept': 'application/json'
     };
-    
+
     if (authHeader) {
       apiHeaders['Authorization'] = authHeader;
-      console.log('Auth header included in request');
+      logDebug('Auth header included in request');
     } else {
-      console.log('No auth header found in request');
+      logDebug('No auth header found in request');
     }
-    
+
     // Préparer les données à envoyer
     let data = null;
     if (event.body) {
       try {
         data = JSON.parse(event.body);
-        console.log('Request data:', JSON.stringify(data).substring(0, 200));
+        logDebug('Request data:', data);
       } catch (error) {
-        console.error('Error parsing request body:', error);
+        logDebug('Error parsing request body:', { error: error.message });
       }
     }
-    
+
     // Préparer les paramètres de requête
     const params = event.queryStringParameters || {};
-    
-    // Effectuer la requête à l'API
-    const response = await axios({
-      method: event.httpMethod,
-      url,
-      headers: apiHeaders,
-      data,
-      params,
-      validateStatus: () => true, // Accepter tous les codes de statut
-      timeout: 30000 // 30 secondes
-    });
-    
-    console.log(`Response status: ${response.status}`);
-    
-    // Retourner la réponse
-    return {
-      statusCode: response.status,
-      headers,
-      body: JSON.stringify(response.data)
-    };
+
+    try {
+      // Effectuer la requête à l'API
+      logDebug('Sending request to API', {
+        method: event.httpMethod,
+        url,
+        headers: apiHeaders,
+        dataPresent: !!data
+      });
+
+      const response = await axios({
+        method: event.httpMethod,
+        url,
+        headers: apiHeaders,
+        data,
+        params,
+        validateStatus: () => true, // Accepter tous les codes de statut
+        timeout: 30000 // 30 secondes
+      });
+
+      logDebug(`Response received with status: ${response.status}`);
+
+      // Vérifier si la réponse contient des données
+      if (response.data) {
+        logDebug('Response data:', response.data);
+      } else {
+        logDebug('No data in response');
+      }
+
+      // Retourner la réponse
+      return {
+        statusCode: response.status,
+        headers,
+        body: JSON.stringify(response.data || { message: 'No data returned from API' })
+      };
+    } catch (apiError) {
+      logDebug('API request error:', {
+        message: apiError.message,
+        code: apiError.code,
+        response: apiError.response ? {
+          status: apiError.response.status,
+          data: apiError.response.data
+        } : null
+      });
+
+      // Si nous avons une réponse de l'API, la retourner
+      if (apiError.response) {
+        return {
+          statusCode: apiError.response.status,
+          headers,
+          body: JSON.stringify(apiError.response.data || {
+            message: `API Error: ${apiError.message}`,
+            error: true
+          })
+        };
+      }
+
+      // Sinon, retourner une erreur 500
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          message: `API Connection Error: ${apiError.message}`,
+          error: true
+        })
+      };
+    }
   } catch (error) {
-    console.error('Profile Proxy error:', error);
-    
+    logDebug('Profile Proxy error:', {
+      message: error.message,
+      stack: error.stack
+    });
+
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
-        message: error.message || 'Internal Server Error',
+        message: `Internal Error: ${error.message}`,
         error: true
       })
     };
