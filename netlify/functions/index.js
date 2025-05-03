@@ -4,6 +4,7 @@ const directApi = require('./direct-api');
 const simple = require('./simple');
 const profileProxy = require('./profile-proxy');
 const testProfile = require('./test-profile');
+const apiTest = require('./api-test');
 
 exports.handler = async function(event, context) {
   // Définir les headers CORS
@@ -44,6 +45,9 @@ exports.handler = async function(event, context) {
     } else if (path.startsWith('/.netlify/functions/test-profile')) {
       console.log('Routing to test-profile function');
       return await testProfile.handler(event, context);
+    } else if (path.startsWith('/.netlify/functions/api-test')) {
+      console.log('Routing to api-test function');
+      return await apiTest.handler(event, context);
     } else if (path.startsWith('/.netlify/functions/index')) {
       // Si la requête est pour index.js, retourner une liste des fonctions disponibles
       return {
@@ -60,7 +64,8 @@ exports.handler = async function(event, context) {
             '/.netlify/functions/direct-api',
             '/.netlify/functions/simple',
             '/.netlify/functions/profile-proxy',
-            '/.netlify/functions/test-profile'
+            '/.netlify/functions/test-profile',
+            '/.netlify/functions/api-test'
           ],
           event: {
             path: event.path,
@@ -84,7 +89,8 @@ exports.handler = async function(event, context) {
             '/.netlify/functions/direct-api',
             '/.netlify/functions/simple',
             '/.netlify/functions/profile-proxy',
-            '/.netlify/functions/test-profile'
+            '/.netlify/functions/test-profile',
+            '/.netlify/functions/api-test'
           ]
         })
       };
