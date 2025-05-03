@@ -13,20 +13,20 @@ function ProfileDiagnostic() {
   const runTests = async () => {
     setLoading(true);
     setResults([]);
-    
+
     try {
       // Test 1: Vérifier l'authentification
-      addResult('Vérification de l\'authentification', 
+      addResult('Vérification de l\'authentification',
         userInfo ? 'Utilisateur connecté' : 'Utilisateur non connecté',
         userInfo ? 'success' : 'warning'
       );
-      
+
       if (!userInfo) {
         addResult('Tests arrêtés', 'Veuillez vous connecter pour continuer les tests', 'error');
         setLoading(false);
         return;
       }
-      
+
       // Test 2: Vérifier l'accès direct à l'API
       try {
         const directResponse = await axios({
@@ -34,18 +34,18 @@ function ProfileDiagnostic() {
           url: 'https://biogy-api.onrender.com/api/health',
           timeout: 5000
         });
-        
-        addResult('Accès direct à l\'API (health)', 
+
+        addResult('Accès direct à l\'API (health)',
           `Succès - Statut: ${directResponse.status}`,
           'success'
         );
       } catch (error) {
-        addResult('Accès direct à l\'API (health)', 
+        addResult('Accès direct à l\'API (health)',
           `Échec - ${error.message}`,
           'error'
         );
       }
-      
+
       // Test 3: Vérifier l'accès via la fonction Netlify de diagnostic CORS
       try {
         const corsResponse = await axios({
@@ -61,36 +61,36 @@ function ProfileDiagnostic() {
           },
           timeout: 10000
         });
-        
+
         setCorsResults(corsResponse.data);
-        
+
         const analysis = corsResponse.data.analysis;
-        
+
         if (analysis.corsIssues.includes('Aucun problème CORS détecté')) {
-          addResult('Diagnostic CORS', 
+          addResult('Diagnostic CORS',
             'Aucun problème CORS détecté',
             'success'
           );
         } else {
-          addResult('Diagnostic CORS', 
+          addResult('Diagnostic CORS',
             `Problèmes détectés: ${analysis.corsIssues.join(', ')}`,
             'warning'
           );
-          
+
           if (analysis.recommendations.length > 0) {
-            addResult('Recommandations CORS', 
+            addResult('Recommandations CORS',
               analysis.recommendations.join(', '),
               'info'
             );
           }
         }
       } catch (error) {
-        addResult('Diagnostic CORS', 
+        addResult('Diagnostic CORS',
           `Échec - ${error.message}`,
           'error'
         );
       }
-      
+
       // Test 4: Vérifier l'accès via la fonction Netlify pour le profil
       try {
         const profileResponse = await axios({
@@ -101,25 +101,25 @@ function ProfileDiagnostic() {
           },
           timeout: 10000
         });
-        
-        addResult('Accès au profil via fonction Netlify', 
+
+        addResult('Accès au profil via fonction Netlify',
           `Succès - Statut: ${profileResponse.status}`,
           'success'
         );
       } catch (error) {
-        addResult('Accès au profil via fonction Netlify', 
+        addResult('Accès au profil via fonction Netlify',
           `Échec - ${error.message}`,
           'error'
         );
       }
-      
+
     } catch (error) {
       addResult('Erreur générale', error.message, 'error');
     } finally {
       setLoading(false);
     }
   };
-  
+
   const addResult = (title, message, status) => {
     setResults(prev => [...prev, { title, message, status }]);
   };
@@ -130,17 +130,16 @@ function ProfileDiagnostic() {
         <div className="bg-gradient-to-r from-lab-blue to-lab-purple p-6">
           <h1 className="text-2xl font-bold text-white">Diagnostic de la page profil en ligne</h1>
         </div>
-        
+
         <div className="p-6">
           <div className="mb-6 p-4 bg-blue-50 rounded-lg text-blue-700">
-            <h3 className="font-semibold">Deux versions disponibles</h3>
-            <p>Votre site dispose maintenant de deux versions de la page profil:</p>
-            <ul className="list-disc ml-6 mt-2">
-              <li><strong>Version locale</strong> - Fonctionne toujours, stockage dans le navigateur: <Link to="/profile" className="text-lab-purple hover:underline">Accéder</Link></li>
-              <li><strong>Version en ligne</strong> - Synchronisée avec le serveur (si disponible): <Link to="/profile-online" className="text-lab-purple hover:underline">Accéder</Link></li>
-            </ul>
+            <h3 className="font-semibold">Page profil en ligne</h3>
+            <p>Votre site utilise maintenant une version en ligne de la page profil, synchronisée avec le serveur.</p>
+            <p className="mt-2">
+              <Link to="/profile" className="text-lab-purple hover:underline">Accéder à votre profil</Link>
+            </p>
           </div>
-          
+
           <div className="flex space-x-4 mb-6">
             <button
               onClick={runTests}
@@ -150,12 +149,12 @@ function ProfileDiagnostic() {
               {loading ? 'Tests en cours...' : 'Lancer les tests de connectivité'}
             </button>
           </div>
-          
+
           {results.length > 0 && (
             <div className="space-y-4 mb-6">
               {results.map((result, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={`p-4 rounded-lg ${
                     result.status === 'success' ? 'bg-green-50 text-green-700' :
                     result.status === 'warning' ? 'bg-yellow-50 text-yellow-700' :
@@ -169,11 +168,11 @@ function ProfileDiagnostic() {
               ))}
             </div>
           )}
-          
+
           {corsResults && (
             <div className="mt-6">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">Détails du diagnostic CORS</h2>
-              
+
               <div className="bg-gray-50 p-4 rounded-lg mb-4">
                 <h3 className="font-semibold text-gray-700">Requête preflight (OPTIONS)</h3>
                 <p><span className="text-gray-500">Statut:</span> {corsResults.preflight.status}</p>
@@ -186,7 +185,7 @@ function ProfileDiagnostic() {
                   </div>
                 )}
               </div>
-              
+
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-semibold text-gray-700">Requête réelle ({corsResults.analysis.method})</h3>
                 <p><span className="text-gray-500">Statut:</span> {corsResults.actual.status}</p>
@@ -203,7 +202,7 @@ function ProfileDiagnostic() {
           )}
         </div>
       </div>
-      
+
       {/* Styles spécifiques pour l'effet crayon/schéma */}
       <style jsx="true">{`
         .sketch-container {

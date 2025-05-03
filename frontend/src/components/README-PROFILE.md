@@ -1,76 +1,68 @@
 # Guide de la page profil
 
-Ce document explique le fonctionnement de la nouvelle page profil simplifiée.
+Ce document explique le fonctionnement de la page profil.
 
-## Fonctionnalités
+## Page profil en ligne
 
-La nouvelle page profil offre les fonctionnalités suivantes:
+La page profil est maintenant entièrement synchronisée avec le serveur:
 
-1. **Affichage du profil**: Visualisation des informations de base de l'utilisateur
-2. **Édition du profil**: Modification des informations personnelles
-3. **Sélection d'avatar**: Choix parmi une collection d'avatars prédéfinis
-4. **Stockage local**: Toutes les données sont stockées dans le navigateur (localStorage)
+- **Avantages**: Données synchronisées avec le serveur, accessibles depuis n'importe quel appareil
+- **Fonctionnalités**: Affichage et modification des informations de profil, sélection d'avatar
 
-## Structure des fichiers
+### Routes disponibles
 
-- `ProfilePage.js`: Composant principal pour l'affichage du profil
-- `ProfileEditPage.js`: Formulaire d'édition du profil
-- `ProfileDebug.js`: Outil de diagnostic et de gestion du profil
+- `/profile` - Affiche le profil de l'utilisateur connecté
+- `/profile/:userId` - Affiche le profil d'un autre utilisateur
+- `/profile/edit` - Permet de modifier son profil
+- `/profile-diagnostic` - Outil de diagnostic pour tester la connectivité
 
-## Routes
+## Mode fallback
 
-- `/profile`: Affiche le profil de l'utilisateur connecté
-- `/profile/:userId`: Affiche le profil d'un autre utilisateur (simulé)
-- `/profile/edit`: Permet de modifier son profil
-- `/profile/debug`: Outil de diagnostic et de gestion du profil
+La page profil dispose d'un mode fallback qui utilise le stockage local en cas de problème de connectivité:
 
-## Fonctionnement technique
+1. Elle tente d'abord de récupérer les données depuis l'API
+2. En cas d'échec, elle utilise les données stockées localement
+3. Si aucune donnée locale n'existe, elle crée un profil simulé
 
-La page profil utilise une approche 100% locale pour contourner les problèmes de CORS:
+## Outil de diagnostic
 
-1. Toutes les données du profil sont stockées dans le localStorage du navigateur
-2. Aucune requête n'est envoyée à l'API backend
-3. Les modifications sont sauvegardées localement
-4. Un profil par défaut est créé automatiquement lors de la première visite
+Un outil de diagnostic est disponible pour tester la connectivité avec l'API:
 
-### Clé de stockage
+- `/profile-diagnostic` - Permet de tester la connectivité et d'identifier les problèmes CORS
 
-Les données du profil sont stockées sous la clé `biogy_profile_data` dans le localStorage.
+Cet outil effectue plusieurs tests:
+1. Vérification de l'authentification
+2. Accès direct à l'API
+3. Diagnostic CORS détaillé
+4. Test de la fonction Netlify pour le profil
 
-## Utilisation
+## Fonctions Netlify
 
-1. **Consulter son profil**: Accédez à `/profile` pour voir votre profil
-2. **Modifier son profil**: Cliquez sur "Modifier le profil" ou accédez à `/profile/edit`
-3. **Réinitialiser son profil**: Utilisez l'outil de diagnostic à `/profile/debug` et cliquez sur "Réinitialiser le profil"
+Deux fonctions Netlify sont utilisées pour la communication avec l'API:
 
-## Dépannage
+1. `profile-online.js` - Proxy pour les requêtes de profil
+2. `cors-diagnostic.js` - Outil de diagnostic CORS
 
-Si la page profil ne fonctionne pas correctement:
+## Recommandations
 
-1. Vérifiez que vous êtes connecté (la page de profil nécessite une authentification)
-2. Utilisez l'outil de diagnostic à `/profile/debug` pour voir l'état actuel du profil
-3. Essayez de réinitialiser le profil via l'outil de diagnostic
-4. Vérifiez que le localStorage est activé dans votre navigateur
+- Utilisez la version locale (`/profile`) si vous rencontrez des problèmes de connectivité
+- Utilisez la version en ligne (`/profile-online`) lorsque l'API est accessible
+- Utilisez l'outil de diagnostic (`/profile-diagnostic`) pour identifier les problèmes
 
-## Avantages de cette approche
+## Résolution des problèmes CORS
 
-1. **Fonctionnement garanti**: Fonctionne même en cas de problèmes de CORS ou d'API
-2. **Performance**: Aucun temps de chargement lié aux requêtes API
-3. **Simplicité**: Aucune dépendance à des services externes
-4. **Expérience utilisateur**: Interface réactive et fluide
+Si vous rencontrez des problèmes CORS, assurez-vous que votre backend:
 
-## Limitations
-
-1. Les données ne sont pas synchronisées entre différents appareils
-2. Les données sont perdues si l'utilisateur efface ses données de navigation
-3. Les profils d'autres utilisateurs sont simulés
+1. Répond correctement aux requêtes OPTIONS (preflight)
+2. Inclut les headers CORS appropriés:
+   - `Access-Control-Allow-Origin: https://biogy.netlify.app`
+   - `Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS`
+   - `Access-Control-Allow-Headers: Content-Type, Authorization`
 
 ## Améliorations futures
 
-Lorsque les problèmes de CORS seront résolus, cette version pourra être améliorée pour:
+Lorsque les problèmes de CORS seront résolus:
 
-1. Synchroniser les données avec le backend
-2. Afficher les vrais profils des autres utilisateurs
-3. Ajouter la possibilité de télécharger un avatar personnalisé
-4. Intégrer des badges et des récompenses
-5. Afficher les contributions au forum
+1. La version en ligne pourra devenir la version par défaut
+2. La synchronisation entre le stockage local et le serveur sera améliorée
+3. Des fonctionnalités supplémentaires pourront être ajoutées

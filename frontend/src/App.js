@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Homepage from './components/Homepage';
 import Layout from './components/Layout';
 import ShareProjectPage from './components/ShareProjectPage';
@@ -11,9 +11,6 @@ import ScienceWatchPage from './components/ScienceWatchPage';
 import ForumPage from './components/ForumPage';
 import TopicPage from './components/TopicPage';
 import NewTopicPage from './components/NewTopicPage';
-import ProfilePage from './components/ProfilePage';
-import ProfileEditPage from './components/ProfileEditPage';
-import ProfileDebug from './components/ProfileDebug';
 import ProfileOnline from './components/ProfileOnline';
 import ProfileEditOnline from './components/ProfileEditOnline';
 import ProfileDiagnostic from './components/ProfileDiagnostic';
@@ -46,18 +43,17 @@ function App() {
           <Route path="/forum" element={<ForumPage />} />
           <Route path="/forum/:id" element={<TopicPage />} />
           <Route path="/forum/nouveau" element={<NewTopicPage />} />
-          {/* Routes pour la version locale du profil */}
-          <Route path="/profile/edit" element={<ProfileEditPage />} />
-          <Route path="/profile/debug" element={<ProfileDebug />} />
-          <Route path="/profile/:userId" element={<ProfilePage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          {/* Routes pour le profil */}
+          <Route path="/profile/edit" element={<ProfileEditOnline />} />
+          <Route path="/profile/:userId" element={<ProfileOnline />} />
+          <Route path="/profile" element={<ProfileOnline />} />
 
-          {/* Routes pour la version en ligne du profil */}
-          <Route path="/profile-online/edit" element={<ProfileEditOnline />} />
-          <Route path="/profile-online/:userId" element={<ProfileOnline />} />
-          <Route path="/profile-online" element={<ProfileOnline />} />
+          {/* Routes alternatives (pour compatibilité) */}
+          <Route path="/profile-online/edit" element={<Navigate to="/profile/edit" replace />} />
+          <Route path="/profile-online/:userId" element={<Navigate to="/profile/:userId" replace />} />
+          <Route path="/profile-online" element={<Navigate to="/profile" replace />} />
 
-          {/* Outil de diagnostic pour les deux versions */}
+          {/* Outil de diagnostic */}
           <Route path="/profile-diagnostic" element={<ProfileDiagnostic />} />
         </Routes>
       </Layout>
