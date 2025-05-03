@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: biogy-api
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: yarn install
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 18.19.0
+      - key: PORT
+        value: 10000
+    autoDeploy: true

@@ -118,6 +118,36 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// Afficher les routes disponibles pour le débogage
+console.log('Routes disponibles:');
+app._router.stack.forEach(middleware => {
+  if(middleware.route) { // routes registered directly on the app
+    console.log(`${middleware.route.path}`);
+  } else if(middleware.name === 'router') { // router middleware
+    middleware.handle.stack.forEach(handler => {
+      if(handler.route) {
+        const path = handler.route.path;
+        const methods = Object.keys(handler.route.methods).join(', ').toUpperCase();
+        console.log(`${methods} ${path}`);
+      }
+    });
+  }
+});
+
+// Ajouter une route de test explicite
+app.get('/api/test', (req, res) => {
+  res.json({
+    message: 'API test successful',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV,
+    port: PORT
+  });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📡 Environment: ${process.env.NODE_ENV}`);
+  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'Not set'}`);
+});
