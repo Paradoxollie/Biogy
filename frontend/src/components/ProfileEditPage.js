@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import apiService from '../services/apiService';
+import api from '../services/api';
 
 // Liste des avatars prédéfinis
 const PREDEFINED_AVATARS = [
@@ -62,16 +62,9 @@ function ProfileEditPage() {
       try {
         setLoading(true);
 
-        // Utiliser le service API pour récupérer le profil
-        console.log('Chargement des données du profil...');
-        const data = await apiService.get('social/profile', {
-          headers: {
-            'Authorization': `Bearer ${userInfo.token}`
-          }
-        });
-
-        console.log('Données du profil reçues:', data);
-        console.log('Type de interests dans les données reçues:', typeof data.interests, Array.isArray(data.interests));
+        const data = await api.get('social/profile',
+          api.withAuth({}, userInfo.token)
+        );
 
         // Mettre à jour le formulaire avec les données du profil
         setFormData({
@@ -80,20 +73,7 @@ function ProfileEditPage() {
           specialization: data.specialization || '',
           institution: data.institution || '',
           level: data.level || 'autre',
-          interests: (() => {
-            console.log('Traitement des intérêts lors du chargement:', data.interests);
-            if (Array.isArray(data.interests)) {
-              const interestsString = data.interests.join(', ');
-              console.log('Intérêts convertis de tableau en chaîne:', interestsString);
-              return interestsString;
-            } else if (typeof data.interests === 'string') {
-              console.log('Intérêts déjà sous forme de chaîne:', data.interests);
-              return data.interests;
-            } else {
-              console.log('Intérêts non définis ou de type inattendu, utilisation d\'une chaîne vide');
-              return '';
-            }
-          })(),
+          interests: data.interests ? data.interests.join(', ') : '',
           socialLinks: {
             website: data.socialLinks?.website || '',
             linkedin: data.socialLinks?.linkedin || '',
@@ -178,78 +158,25 @@ function ProfileEditPage() {
       setError(null);
 
       // Préparer les données à envoyer
-      let interestsArray = [];
-
-      console.log('Type de interests avant traitement:', typeof formData.interests, Array.isArray(formData.interests));
-      console.log('Valeur de interests avant traitement:', formData.interests);
-
-      try {
-        if (Array.isArray(formData.interests)) {
-          // Si c'est déjà un tableau, l'utiliser directement
-          interestsArray = formData.interests;
-          console.log('interests est déjà un tableau');
-        } else if (typeof formData.interests === 'string') {
-          // Si c'est une chaîne, la diviser en tableau
-          interestsArray = formData.interests
-            .split(',')
-            .map(item => item.trim())
-            .filter(item => item);
-          console.log('interests converti de chaîne en tableau:', interestsArray);
-        } else {
-          // Si ce n'est ni un tableau ni une chaîne, utiliser un tableau vide
-          console.log('interests n\'est ni un tableau ni une chaîne, utilisation d\'un tableau vide');
-        }
-      } catch (error) {
-        console.error('Erreur lors du traitement des intérêts:', error);
-        // En cas d'erreur, utiliser un tableau vide
-      }
-
       const dataToSend = {
         ...formData,
-        interests: interestsArray
+        interests: formData.interests
+          .split(',')
+          .map(item => item.trim())
+          .filter(item => item)
       };
 
-      console.log('Type de interests après traitement:', typeof interestsArray, Array.isArray(interestsArray));
-      console.log('Valeur de interests après traitement:', interestsArray);
+      // Mettre à jour le profil
+      await api.put('social/profile', dataToSend,
+        api.withAuth({}, userInfo.token)
+      );
 
-      console.log('Données à envoyer:', dataToSend);
-
-      try {
-        // Utiliser le service API pour mettre à jour le profil
-        console.log('Mise à jour du profil via le service API');
-
-        // Mettre à jour le profil
-        const updatedProfile = await apiService.put(
-          'social/profile',
-          dataToSend,
-          {
-            headers: {
-              'Authorization': `Bearer ${userInfo.token}`
-            }
-          }
+      // Si un avatar est sélectionné, mettre à jour l'avatar
+      if (selectedAvatar) {
+        await api.post('social/profile/avatar/predefined',
+          { avatarId: selectedAvatar },
+          api.withAuth({}, userInfo.token)
         );
-
-        console.log('Profil mis à jour avec succès:', updatedProfile);
-
-        // Si un avatar est sélectionné, mettre à jour l'avatar
-        if (selectedAvatar) {
-          console.log('Mise à jour de l\'avatar:', selectedAvatar);
-
-          const avatarData = await apiService.post(
-            'social/profile/avatar/predefined',
-            { avatarId: selectedAvatar },
-            {
-              headers: {
-                'Authorization': `Bearer ${userInfo.token}`
-              }
-            }
-          );
-
-          console.log('Avatar mis à jour avec succès:', avatarData);
-        }
-      } catch (apiError) {
-        console.error('Erreur détaillée:', apiError);
-        throw new Error(`Erreur lors de la mise à jour du profil: ${apiError.message}`);
       }
 
       setSuccess(true);

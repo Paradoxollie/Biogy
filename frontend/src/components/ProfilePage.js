@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import apiService from '../services/apiService';
-import MaintenancePage from './MaintenancePage';
+import api from '../services/api';
 
 function ProfilePage() {
   const { userId } = useParams();
@@ -24,24 +23,17 @@ function ProfilePage() {
       try {
         setLoading(true);
 
-        // Déterminer l'endpoint en fonction de si c'est le profil de l'utilisateur connecté ou non
+        // Endpoint en fonction de si c'est le profil de l'utilisateur connecté ou non
         const endpoint = isOwnProfile
           ? 'social/profile'
           : `social/profile/${userId}`;
 
-        console.log('Chargement du profil:', endpoint);
+        // Options avec token si nécessaire
+        const options = userInfo
+          ? api.withAuth({}, userInfo.token)
+          : {};
 
-        // Préparer les options avec le token d'authentification si nécessaire
-        const options = userInfo ? {
-          headers: {
-            'Authorization': `Bearer ${userInfo.token}`
-          }
-        } : {};
-
-        // Utiliser le service API pour récupérer le profil
-        const data = await apiService.get(endpoint, options);
-
-        console.log('Données du profil reçues:', data);
+        const data = await api.get(endpoint, options);
         setProfile(data);
 
       } catch (error) {
@@ -80,18 +72,6 @@ function ProfilePage() {
   }
 
   if (error) {
-    // Vérifier si l'erreur est liée à l'indisponibilité du backend
-    if (error.includes('serveur backend') || error.includes('Impossible de se connecter')) {
-      return (
-        <MaintenancePage
-          title="Profil temporairement indisponible"
-          message="Notre espace profil est actuellement en maintenance. Nous travaillons à le remettre en ligne le plus rapidement possible."
-          returnPath="/"
-        />
-      );
-    }
-
-    // Afficher l'erreur standard pour les autres types d'erreurs
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-50 p-6 rounded-lg text-center">
