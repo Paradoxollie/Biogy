@@ -34,6 +34,7 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   // Tableau des méthodes à essayer dans l'ordre
   const methods = [
+    { name: 'API Proxy Function', url: `/.netlify/functions/api-proxy${endpoint.startsWith('/') ? endpoint : '/' + endpoint}` },
     { name: 'Netlify Proxy', url: `/api${endpoint.startsWith('/') ? endpoint : '/' + endpoint}` },
     { name: 'Netlify Function', url: `/.netlify/functions/api${endpoint.startsWith('/') ? endpoint : '/' + endpoint}` },
     { name: 'CORS Proxy', url: `/.netlify/functions/cors-proxy${endpoint.startsWith('/') ? endpoint : '/' + endpoint}` },
