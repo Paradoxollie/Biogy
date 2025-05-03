@@ -53,7 +53,23 @@ exports.handler = async function(event, context) {
     // Ajouter le corps de la requête si nécessaire
     if (event.body) {
       try {
-        options.data = JSON.parse(event.body);
+        const parsedBody = JSON.parse(event.body);
+
+        // Vérifier et traiter les intérêts
+        if (parsedBody.interests !== undefined) {
+          console.log('Type de interests dans la requête:', typeof parsedBody.interests, Array.isArray(parsedBody.interests));
+
+          // S'assurer que interests est un tableau
+          if (!Array.isArray(parsedBody.interests) && typeof parsedBody.interests === 'string') {
+            parsedBody.interests = parsedBody.interests
+              .split(',')
+              .map(item => item.trim())
+              .filter(item => item);
+          }
+        }
+
+        options.data = parsedBody;
+        console.log('Données à envoyer à l\'API:', options.data);
       } catch (error) {
         console.error('Error parsing request body:', error);
         options.data = event.body;

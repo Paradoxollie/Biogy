@@ -75,6 +75,9 @@ function ProfileEditPage() {
 
         const data = await response.json();
 
+        console.log('Données du profil reçues:', data);
+        console.log('Type de interests dans les données reçues:', typeof data.interests, Array.isArray(data.interests));
+
         // Mettre à jour le formulaire avec les données du profil
         setFormData({
           displayName: data.displayName || '',
@@ -82,7 +85,9 @@ function ProfileEditPage() {
           specialization: data.specialization || '',
           institution: data.institution || '',
           level: data.level || 'autre',
-          interests: data.interests ? data.interests.join(', ') : '',
+          interests: Array.isArray(data.interests)
+            ? data.interests.join(', ')
+            : data.interests || '',
           socialLinks: {
             website: data.socialLinks?.website || '',
             linkedin: data.socialLinks?.linkedin || '',
@@ -169,11 +174,17 @@ function ProfileEditPage() {
       // Préparer les données à envoyer
       const dataToSend = {
         ...formData,
-        interests: formData.interests
-          .split(',')
-          .map(item => item.trim())
-          .filter(item => item)
+        interests: Array.isArray(formData.interests)
+          ? formData.interests
+          : typeof formData.interests === 'string'
+            ? formData.interests
+                .split(',')
+                .map(item => item.trim())
+                .filter(item => item)
+            : []
       };
+
+      console.log('Type de interests:', typeof formData.interests, Array.isArray(formData.interests));
 
       console.log('URL de l\'API dans config:', API_URL);
       console.log('Données à envoyer:', dataToSend);
