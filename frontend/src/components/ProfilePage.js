@@ -23,10 +23,13 @@ function ProfilePage() {
       try {
         setLoading(true);
 
-        // URL de l'API en fonction de si c'est le profil de l'utilisateur connecté ou non
-        const url = isOwnProfile
-          ? `${API_URL}/api/social/profile`
-          : `${API_URL}/api/social/profile/${userId}`;
+        // Utiliser la fonction Netlify CORS proxy pour éviter les problèmes CORS
+        const path = isOwnProfile
+          ? '/social/profile'
+          : `/social/profile/${userId}`;
+
+        const url = `/.netlify/functions/cors-proxy${path}`;
+        console.log('Fetching profile via CORS proxy:', url);
 
         // Headers avec token si nécessaire
         const headers = userInfo

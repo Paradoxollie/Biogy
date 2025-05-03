@@ -14,29 +14,40 @@ connectDB();
 const app = express();
 
 // Configuration CORS permissive
-app.use(cors({
-  origin: '*',
+const corsOptions = {
+  origin: ['https://biogy.netlify.app', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  credentials: false
-}));
+  credentials: true,
+  maxAge: 86400 // 24 heures en secondes
+};
+
+app.use(cors(corsOptions));
 
 // Middleware pour les requêtes OPTIONS
-app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.status(200).send();
-});
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Middleware pour ajouter les en-têtes CORS à toutes les réponses
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  // Déterminer l'origine
+  const origin = req.headers.origin;
+  if (corsOptions.origin.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', corsOptions.origin[0]);
+  }
+
+  res.header('Access-Control-Allow-Methods', corsOptions.methods.join(', '));
+  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', corsOptions.maxAge.toString());
+
+  // Log pour le débogage
+  console.log(`CORS Headers set for request to ${req.path} from origin: ${origin || 'unknown'} (Fallback Server)`);
+
   next();
 });
 

@@ -63,7 +63,8 @@ function ProfileEditPage() {
       try {
         setLoading(true);
 
-        const response = await fetch(`${API_URL}/api/social/profile`, {
+        // Utiliser la fonction Netlify CORS proxy pour éviter les problèmes CORS
+        const response = await fetch(`/.netlify/functions/cors-proxy/social/profile`, {
           headers: {
             Authorization: `Bearer ${userInfo.token}`
           }
@@ -221,11 +222,11 @@ function ProfileEditPage() {
       console.log('Données à envoyer:', dataToSend);
 
       try {
-        // Utiliser la nouvelle fonction Netlify directe pour éviter les problèmes CORS
-        console.log('Utilisation de la fonction Netlify directe pour les requêtes API');
+        // Utiliser la nouvelle fonction Netlify CORS proxy pour éviter les problèmes CORS
+        console.log('Utilisation de la fonction Netlify CORS proxy pour les requêtes API');
 
         // Mettre à jour le profil
-        const profileResponse = await fetch('/.netlify/functions/profile-update-direct', {
+        const profileResponse = await fetch('/.netlify/functions/cors-proxy/social/profile', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -250,7 +251,7 @@ function ProfileEditPage() {
 
         // Si un avatar est sélectionné, mettre à jour l'avatar
         if (selectedAvatar) {
-          const avatarResponse = await fetch('/.netlify/functions/profile-avatar', {
+          const avatarResponse = await fetch('/.netlify/functions/cors-proxy/social/profile/avatar/predefined', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
