@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import apiService from '../services/apiService';
 
 function ForumPage() {
   const [topics, setTopics] = useState([]);
@@ -36,24 +36,21 @@ function ForumPage() {
       try {
         setLoading(true);
 
-        // Préparer les paramètres de requête
-        const params = {
-          page: pagination.page,
-          limit: pagination.limit
-        };
+        // Construire l'URL avec les paramètres
+        let endpoint = `forum/topics?page=${pagination.page}&limit=${pagination.limit}`;
 
         if (category !== 'all') {
-          params.category = category;
+          endpoint += `&category=${category}`;
         }
 
         if (search) {
-          params.search = search;
+          endpoint += `&search=${encodeURIComponent(search)}`;
         }
 
-        console.log('Fetching forum topics with params:', params);
+        console.log('Chargement des sujets du forum:', endpoint);
 
         // Utiliser le service API pour récupérer les sujets
-        const data = await api.get('forum/topics', { params });
+        const data = await apiService.get(endpoint);
 
         setTopics(data.topics);
         setPagination(data.pagination);

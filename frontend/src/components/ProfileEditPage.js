@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import apiService from '../services/apiService';
 
 // Liste des avatars prédéfinis
 const PREDEFINED_AVATARS = [
@@ -63,8 +63,12 @@ function ProfileEditPage() {
         setLoading(true);
 
         // Utiliser le service API pour récupérer le profil
-        console.log('Fetching profile data...');
-        const data = await api.get('social/profile', api.withAuth({}, userInfo.token));
+        console.log('Chargement des données du profil...');
+        const data = await apiService.get('social/profile', {
+          headers: {
+            'Authorization': `Bearer ${userInfo.token}`
+          }
+        });
 
         console.log('Données du profil reçues:', data);
         console.log('Type de interests dans les données reçues:', typeof data.interests, Array.isArray(data.interests));
@@ -215,10 +219,14 @@ function ProfileEditPage() {
         console.log('Mise à jour du profil via le service API');
 
         // Mettre à jour le profil
-        const updatedProfile = await api.put(
+        const updatedProfile = await apiService.put(
           'social/profile',
           dataToSend,
-          api.withAuth({}, userInfo.token)
+          {
+            headers: {
+              'Authorization': `Bearer ${userInfo.token}`
+            }
+          }
         );
 
         console.log('Profil mis à jour avec succès:', updatedProfile);
@@ -227,10 +235,14 @@ function ProfileEditPage() {
         if (selectedAvatar) {
           console.log('Mise à jour de l\'avatar:', selectedAvatar);
 
-          const avatarData = await api.post(
+          const avatarData = await apiService.post(
             'social/profile/avatar/predefined',
             { avatarId: selectedAvatar },
-            api.withAuth({}, userInfo.token)
+            {
+              headers: {
+                'Authorization': `Bearer ${userInfo.token}`
+              }
+            }
           );
 
           console.log('Avatar mis à jour avec succès:', avatarData);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import apiService from '../services/apiService';
 
 function ProfilePage() {
   const { userId } = useParams();
@@ -28,13 +28,19 @@ function ProfilePage() {
           ? 'social/profile'
           : `social/profile/${userId}`;
 
-        console.log('Fetching profile:', endpoint);
+        console.log('Chargement du profil:', endpoint);
 
-        // Utiliser le service API avec authentification si nécessaire
-        const options = userInfo ? api.withAuth({}, userInfo.token) : {};
-        const data = await api.get(endpoint, options);
+        // Préparer les options avec le token d'authentification si nécessaire
+        const options = userInfo ? {
+          headers: {
+            'Authorization': `Bearer ${userInfo.token}`
+          }
+        } : {};
 
-        console.log('Profile data received:', data);
+        // Utiliser le service API pour récupérer le profil
+        const data = await apiService.get(endpoint, options);
+
+        console.log('Données du profil reçues:', data);
         setProfile(data);
 
       } catch (error) {
