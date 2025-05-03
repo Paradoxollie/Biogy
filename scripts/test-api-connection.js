@@ -9,28 +9,31 @@ const http = require('http');
 // Configuration
 const API_URLS = [
   'https://biogy-api.onrender.com/api/health',
+  'https://biogy-api.onrender.com/api/forum/topics?page=1&limit=1',
   'https://biogy-api.onrender.com/api/social/profile',
-  'https://corsproxy.io/?https://biogy-api.onrender.com/api/health'
+  'https://corsproxy.io/?https://biogy-api.onrender.com/api/health',
+  'https://api.allorigins.win/raw?url=https://biogy-api.onrender.com/api/health',
+  'https://thingproxy.freeboard.io/fetch/https://biogy-api.onrender.com/api/health'
 ];
 
 // Fonction pour tester une URL
 function testUrl(url) {
   return new Promise((resolve, reject) => {
     console.log(`\nTest de connexion à: ${url}`);
-    
+
     const protocol = url.startsWith('https') ? https : http;
     const startTime = Date.now();
-    
+
     const req = protocol.get(url, (res) => {
       const endTime = Date.now();
       const duration = endTime - startTime;
-      
+
       let data = '';
-      
+
       res.on('data', (chunk) => {
         data += chunk;
       });
-      
+
       res.on('end', () => {
         console.log(`✅ Statut: ${res.statusCode} ${res.statusMessage}`);
         console.log(`⏱️ Temps de réponse: ${duration}ms`);
@@ -38,7 +41,7 @@ function testUrl(url) {
         console.log(`   Access-Control-Allow-Origin: ${res.headers['access-control-allow-origin'] || 'Non défini'}`);
         console.log(`   Access-Control-Allow-Methods: ${res.headers['access-control-allow-methods'] || 'Non défini'}`);
         console.log(`   Access-Control-Allow-Headers: ${res.headers['access-control-allow-headers'] || 'Non défini'}`);
-        
+
         try {
           // Essayer de parser la réponse comme JSON
           const jsonData = JSON.parse(data);
@@ -49,7 +52,7 @@ function testUrl(url) {
           console.log(`📄 Réponse (premiers 200 caractères):`);
           console.log(data.substring(0, 200) + (data.length > 200 ? '...' : ''));
         }
-        
+
         resolve({
           url,
           status: res.statusCode,
@@ -58,7 +61,7 @@ function testUrl(url) {
         });
       });
     });
-    
+
     req.on('error', (error) => {
       console.error(`❌ Erreur: ${error.message}`);
       reject({
@@ -67,7 +70,7 @@ function testUrl(url) {
         success: false
       });
     });
-    
+
     // Timeout après 10 secondes
     req.setTimeout(10000, () => {
       req.abort();
@@ -85,9 +88,9 @@ function testUrl(url) {
 async function main() {
   console.log('🔍 Test de connectivité avec l\'API Biogy');
   console.log('=======================================');
-  
+
   const results = [];
-  
+
   for (const url of API_URLS) {
     try {
       const result = await testUrl(url);
@@ -96,13 +99,13 @@ async function main() {
       results.push(error);
     }
   }
-  
+
   // Résumé
   console.log('\n📊 Résumé des tests:');
   console.log('-------------------');
-  
+
   let successCount = 0;
-  
+
   results.forEach((result) => {
     if (result.success) {
       successCount++;
@@ -111,9 +114,9 @@ async function main() {
       console.log(`❌ ${result.url} - Échec (${result.error || 'Erreur inconnue'})`);
     }
   });
-  
+
   console.log(`\n🏁 ${successCount}/${results.length} tests réussis`);
-  
+
   if (successCount === 0) {
     console.log('\n⚠️ Tous les tests ont échoué. Vérifiez votre connexion Internet et l\'état de l\'API.');
     console.log('Suggestions:');

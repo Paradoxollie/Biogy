@@ -8,8 +8,10 @@ export const API_URL = 'https://biogy-api.onrender.com';
 // Configuration des proxies CORS
 export const CORS_PROXIES = [
   'https://corsproxy.io/?',
-  'https://cors-anywhere.herokuapp.com/',
-  'https://api.allorigins.win/raw?url='
+  'https://api.allorigins.win/raw?url=',
+  'https://cors-proxy.htmldriven.com/?url=',
+  'https://thingproxy.freeboard.io/fetch/',
+  'https://api.codetabs.com/v1/proxy/?quest='
 ];
 
 // Configuration de l'authentification

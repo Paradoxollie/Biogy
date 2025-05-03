@@ -1,26 +1,19 @@
 /**
  * Service pour gérer les requêtes API avec gestion des erreurs et CORS
+ * Version améliorée avec plusieurs méthodes de connexion
  */
 
 import { API_URL, CORS_PROXIES } from '../config';
 
-// Proxy CORS principal à utiliser
-const PRIMARY_PROXY = CORS_PROXIES[0]; // 'https://corsproxy.io/?'
-
 /**
- * Fonction pour effectuer une requête API via un proxy CORS
- * Approche simplifiée et directe pour contourner les problèmes CORS
+ * Fonction pour effectuer une requête API avec plusieurs méthodes
+ * Essaie différentes approches pour contourner les problèmes CORS
  */
 export const apiRequest = async (endpoint, options = {}) => {
   // Construire l'URL complète de l'API
   const apiUrl = endpoint.startsWith('http')
     ? endpoint
     : `${API_URL}/api${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
-
-  // Construire l'URL avec le proxy CORS
-  const proxyUrl = `${PRIMARY_PROXY}${encodeURIComponent(apiUrl)}`;
-
-  console.log(`🔄 Requête API via proxy CORS: ${proxyUrl}`);
 
   // Options par défaut
   const defaultOptions = {
@@ -39,34 +32,57 @@ export const apiRequest = async (endpoint, options = {}) => {
     }
   };
 
-  try {
-    // Effectuer la requête via le proxy CORS
-    const response = await fetch(proxyUrl, requestOptions);
+  // Tableau des méthodes à essayer dans l'ordre
+  const methods = [
+    { name: 'Netlify Proxy', url: `/api${endpoint.startsWith('/') ? endpoint : '/' + endpoint}` },
+    { name: 'Netlify Function', url: `/.netlify/functions/api${endpoint.startsWith('/') ? endpoint : '/' + endpoint}` },
+    { name: 'CORS Proxy', url: `/.netlify/functions/cors-proxy${endpoint.startsWith('/') ? endpoint : '/' + endpoint}` },
+    ...CORS_PROXIES.map((proxy, index) => ({
+      name: `External Proxy ${index + 1}`,
+      url: `${proxy}${encodeURIComponent(apiUrl)}`
+    })),
+    { name: 'Direct API', url: apiUrl }
+  ];
 
-    // Vérifier si la réponse est OK
-    if (!response.ok) {
-      let errorMessage;
+  let lastError = null;
 
-      try {
-        // Essayer de parser le message d'erreur JSON
-        const errorData = await response.json();
-        errorMessage = errorData.message || `Erreur ${response.status}: ${response.statusText}`;
-      } catch (e) {
-        // Si ce n'est pas du JSON, utiliser le statut HTTP
-        errorMessage = `Erreur ${response.status}: ${response.statusText}`;
+  // Essayer chaque méthode jusqu'à ce qu'une réussisse
+  for (const method of methods) {
+    try {
+      console.log(`🔄 Tentative via ${method.name}: ${method.url}`);
+
+      const response = await fetch(method.url, requestOptions);
+
+      // Vérifier si la réponse est OK
+      if (!response.ok) {
+        let errorMessage;
+
+        try {
+          // Essayer de parser le message d'erreur JSON
+          const errorData = await response.json();
+          errorMessage = errorData.message || `Erreur ${response.status}: ${response.statusText}`;
+        } catch (e) {
+          // Si ce n'est pas du JSON, utiliser le statut HTTP
+          errorMessage = `Erreur ${response.status}: ${response.statusText}`;
+        }
+
+        throw new Error(errorMessage);
       }
 
-      throw new Error(errorMessage);
+      // Parser la réponse JSON
+      const data = await response.json();
+      console.log(`✅ Réponse API reçue via ${method.name}:`, data);
+      return data;
+    } catch (error) {
+      console.warn(`❌ Échec via ${method.name}:`, error);
+      lastError = error;
+      // Continuer avec la méthode suivante
     }
-
-    // Parser la réponse JSON
-    const data = await response.json();
-    console.log(`✅ Réponse API reçue:`, data);
-    return data;
-  } catch (error) {
-    console.error(`❌ Erreur API:`, error);
-    throw error;
   }
+
+  // Si toutes les méthodes ont échoué, lancer la dernière erreur
+  console.error(`❌ Toutes les méthodes ont échoué:`, lastError);
+  throw lastError || new Error('Impossible de se connecter à l\'API');
 };
 
 // Méthodes HTTP courantes

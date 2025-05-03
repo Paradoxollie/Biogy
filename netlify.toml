@@ -14,7 +14,7 @@
   to = "https://biogy-api.onrender.com/api/:splat"
   status = 200
   force = true
-  headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS", Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"}
+  headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH", Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization", Access-Control-Allow-Credentials = "true", Access-Control-Max-Age = "86400"}
 
 # Gestion des requêtes OPTIONS (CORS preflight)
 [[redirects]]
@@ -23,7 +23,7 @@
   status = 200
   force = true
   conditions = {method = "OPTIONS"}
-  headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS", Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"}
+  headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH", Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization", Access-Control-Allow-Credentials = "true", Access-Control-Max-Age = "86400"}
 
 # Redirections pour les fonctions Netlify
 [[redirects]]
