@@ -2,6 +2,8 @@ import axios from 'axios';
 
 // URL de l'API backend (pour les cas où la redirection Netlify ne fonctionne pas)
 const API_FALLBACK_URL = 'https://biogy-api.onrender.com/api';
+// URL des fonctions Netlify
+const NETLIFY_FUNCTIONS_URL = '/.netlify/functions';
 
 /**
  * Service de proxy pour envoyer des requêtes via un proxy CORS si les
@@ -27,13 +29,31 @@ export const proxyRequest = async (method, endpoint, data = null, headers = {}) 
       ? endpoint.substring(1)
       : endpoint;
 
-  try {
-    console.log(`Appel API via proxy Netlify: ${normalizedEndpoint}`);
+  // Vérifier si c'est une requête de profil pour utiliser la fonction Netlify dédiée
+  const isProfileRequest = normalizedEndpoint.startsWith('social/profile');
 
-    // Utiliser la redirection Netlify configurée dans _redirects
+  try {
+    let url;
+
+    if (isProfileRequest) {
+      // Utiliser la fonction Netlify dédiée pour les profils
+      console.log(`Appel API via fonction Netlify dédiée pour profil: ${normalizedEndpoint}`);
+      url = `${NETLIFY_FUNCTIONS_URL}/profile-proxy`;
+
+      // Si c'est un profil spécifique, ajouter l'ID à l'URL
+      if (normalizedEndpoint !== 'social/profile') {
+        const profileId = normalizedEndpoint.replace('social/profile/', '');
+        url = `${url}/${profileId}`;
+      }
+    } else {
+      // Utiliser la redirection Netlify standard
+      console.log(`Appel API via proxy Netlify: ${normalizedEndpoint}`);
+      url = `/api/${normalizedEndpoint}`;
+    }
+
     const response = await axios({
       method,
-      url: `/api/${normalizedEndpoint}`,
+      url,
       data,
       headers: requestHeaders,
       withCredentials: false,
@@ -103,6 +123,42 @@ export const fetchForumTopics = async (page = 1, limit = 10) => {
   return proxyRequest('get', `forum/topics`, { page, limit });
 };
 
+/**
+ * Vérifie l'accessibilité de l'API
+ */
+export const checkApiAccessibility = async () => {
+  try {
+    console.log('Vérification de l\'accessibilité de l\'API...');
+
+    // Essayer d'abord via la fonction Netlify dédiée
+    const response = await axios({
+      method: 'get',
+      url: `${NETLIFY_FUNCTIONS_URL}/profile-proxy/test`,
+      timeout: 5000
+    });
+
+    console.log('Résultat du test d\'accessibilité via fonction Netlify:', response.status);
+    return true;
+  } catch (error) {
+    console.error('Erreur lors de la vérification de l\'accessibilité de l\'API:', error);
+
+    try {
+      // Essayer directement via l'API
+      const directResponse = await axios({
+        method: 'get',
+        url: `${API_FALLBACK_URL}/health`,
+        timeout: 5000
+      });
+
+      console.log('Résultat du test d\'accessibilité direct:', directResponse.status);
+      return true;
+    } catch (directError) {
+      console.error('Erreur lors de la vérification directe de l\'API:', directError);
+      return false;
+    }
+  }
+};
+
 export default {
   get: (endpoint, data = null, headers = {}) => proxyRequest('get', endpoint, data, headers),
   post: (endpoint, data, headers = {}) => proxyRequest('post', endpoint, data, headers),
@@ -111,5 +167,6 @@ export default {
   fetchProfile,
   updateProfile,
   updateAvatar,
-  fetchForumTopics
+  fetchForumTopics,
+  checkApiAccessibility
 };

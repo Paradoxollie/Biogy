@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Homepage from './components/Homepage';
 import Layout from './components/Layout';
@@ -13,9 +13,17 @@ import TopicPage from './components/TopicPage';
 import NewTopicPage from './components/NewTopicPage';
 import ProfilePage from './components/ProfilePage';
 import ProfileEditPage from './components/ProfileEditPage';
+import ProfileTest from './components/ProfileTest';
+import SimulationModeIndicator from './components/SimulationModeIndicator';
 import AuthDebug from './context/AuthDebug';
+import proxyService from './services/proxyService';
 
 function App() {
+  // Vérifier l'accessibilité de l'API au chargement de l'application
+  useEffect(() => {
+    proxyService.checkApiAccessibility();
+  }, []);
+
   return (
     <>
       <AuthDebug />
@@ -36,10 +44,14 @@ function App() {
           <Route path="/forum/:id" element={<TopicPage />} />
           <Route path="/forum/nouveau" element={<NewTopicPage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />
+          <Route path="/profile/test" element={<ProfileTest />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </Layout>
+
+      {/* Indicateur de mode simulation */}
+      <SimulationModeIndicator />
     </>
   );
 }
