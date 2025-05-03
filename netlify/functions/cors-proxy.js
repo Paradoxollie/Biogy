@@ -4,6 +4,9 @@ const axios = require('axios');
 // URL de l'API backend
 const API_URL = 'https://biogy-api.onrender.com/api';
 
+// Ajouter un délai pour éviter les problèmes de rate limiting
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 exports.handler = async function(event, context) {
   // Définir les headers CORS permissifs
   const headers = {
