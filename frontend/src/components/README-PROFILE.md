@@ -2,9 +2,9 @@
 
 Ce document explique le fonctionnement de la page profil.
 
-## Page profil en ligne
+## Page profil
 
-La page profil est maintenant entièrement synchronisée avec le serveur:
+La page profil est entièrement synchronisée avec le serveur:
 
 - **Avantages**: Données synchronisées avec le serveur, accessibles depuis n'importe quel appareil
 - **Fonctionnalités**: Affichage et modification des informations de profil, sélection d'avatar
@@ -16,13 +16,24 @@ La page profil est maintenant entièrement synchronisée avec le serveur:
 - `/profile/edit` - Permet de modifier son profil
 - `/profile-diagnostic` - Outil de diagnostic pour tester la connectivité
 
-## Mode fallback
+## Fonctionnement technique
 
-La page profil dispose d'un mode fallback qui utilise le stockage local en cas de problème de connectivité:
+La page profil communique directement avec l'API backend:
 
-1. Elle tente d'abord de récupérer les données depuis l'API
-2. En cas d'échec, elle utilise les données stockées localement
-3. Si aucune donnée locale n'existe, elle crée un profil simulé
+1. Les requêtes sont envoyées à l'API via les redirections Netlify
+2. Les données sont récupérées et affichées en temps réel
+3. Les modifications sont enregistrées immédiatement sur le serveur
+
+## Configuration CORS
+
+Pour que la page profil fonctionne correctement, le backend doit être configuré avec les en-têtes CORS appropriés:
+
+```
+Access-Control-Allow-Origin: https://biogy.netlify.app
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization
+Access-Control-Allow-Credentials: true
+```
 
 ## Outil de diagnostic
 

@@ -11,8 +11,8 @@ import ScienceWatchPage from './components/ScienceWatchPage';
 import ForumPage from './components/ForumPage';
 import TopicPage from './components/TopicPage';
 import NewTopicPage from './components/NewTopicPage';
-import ProfileOnline from './components/ProfileOnline';
-import ProfileEditOnline from './components/ProfileEditOnline';
+import Profile from './components/Profile';
+import ProfileEdit from './components/ProfileEdit';
 import ProfileDiagnostic from './components/ProfileDiagnostic';
 import SimulationModeIndicator from './components/SimulationModeIndicator';
 import AuthDebug from './context/AuthDebug';
@@ -44,14 +44,9 @@ function App() {
           <Route path="/forum/:id" element={<TopicPage />} />
           <Route path="/forum/nouveau" element={<NewTopicPage />} />
           {/* Routes pour le profil */}
-          <Route path="/profile/edit" element={<ProfileEditOnline />} />
-          <Route path="/profile/:userId" element={<ProfileOnline />} />
-          <Route path="/profile" element={<ProfileOnline />} />
-
-          {/* Routes alternatives (pour compatibilité) */}
-          <Route path="/profile-online/edit" element={<Navigate to="/profile/edit" replace />} />
-          <Route path="/profile-online/:userId" element={<Navigate to="/profile/:userId" replace />} />
-          <Route path="/profile-online" element={<Navigate to="/profile" replace />} />
+          <Route path="/profile/edit" element={<ProfileEdit />} />
+          <Route path="/profile/:userId" element={<Profile />} />
+          <Route path="/profile" element={<Profile />} />
 
           {/* Outil de diagnostic */}
           <Route path="/profile-diagnostic" element={<ProfileDiagnostic />} />

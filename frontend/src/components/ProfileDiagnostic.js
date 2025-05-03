@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -46,68 +46,42 @@ function ProfileDiagnostic() {
         );
       }
 
-      // Test 3: Vérifier l'accès via la fonction Netlify de diagnostic CORS
+      // Test 3: Vérifier l'accès via la redirection Netlify
       try {
-        const corsResponse = await axios({
+        const apiResponse = await axios({
           method: 'GET',
-          url: '/.netlify/functions/cors-diagnostic',
-          params: {
-            endpoint: 'social/profile',
-            method: 'GET',
-            useToken: 'true'
-          },
-          headers: {
-            'Authorization': `Bearer ${userInfo.token}`
-          },
-          timeout: 10000
+          url: '/api/health',
+          timeout: 5000
         });
 
-        setCorsResults(corsResponse.data);
-
-        const analysis = corsResponse.data.analysis;
-
-        if (analysis.corsIssues.includes('Aucun problème CORS détecté')) {
-          addResult('Diagnostic CORS',
-            'Aucun problème CORS détecté',
-            'success'
-          );
-        } else {
-          addResult('Diagnostic CORS',
-            `Problèmes détectés: ${analysis.corsIssues.join(', ')}`,
-            'warning'
-          );
-
-          if (analysis.recommendations.length > 0) {
-            addResult('Recommandations CORS',
-              analysis.recommendations.join(', '),
-              'info'
-            );
-          }
-        }
+        addResult('Accès à l\'API via redirection Netlify',
+          `Succès - Statut: ${apiResponse.status}`,
+          'success'
+        );
       } catch (error) {
-        addResult('Diagnostic CORS',
+        addResult('Accès à l\'API via redirection Netlify',
           `Échec - ${error.message}`,
           'error'
         );
       }
 
-      // Test 4: Vérifier l'accès via la fonction Netlify pour le profil
+      // Test 4: Vérifier l'accès au profil
       try {
         const profileResponse = await axios({
           method: 'GET',
-          url: '/.netlify/functions/profile-online',
+          url: '/api/social/profile',
           headers: {
             'Authorization': `Bearer ${userInfo.token}`
           },
           timeout: 10000
         });
 
-        addResult('Accès au profil via fonction Netlify',
+        addResult('Accès au profil',
           `Succès - Statut: ${profileResponse.status}`,
           'success'
         );
       } catch (error) {
-        addResult('Accès au profil via fonction Netlify',
+        addResult('Accès au profil',
           `Échec - ${error.message}`,
           'error'
         );
@@ -128,13 +102,13 @@ function ProfileDiagnostic() {
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow-md overflow-hidden sketch-container">
         <div className="bg-gradient-to-r from-lab-blue to-lab-purple p-6">
-          <h1 className="text-2xl font-bold text-white">Diagnostic de la page profil en ligne</h1>
+          <h1 className="text-2xl font-bold text-white">Diagnostic de la page profil</h1>
         </div>
 
         <div className="p-6">
           <div className="mb-6 p-4 bg-blue-50 rounded-lg text-blue-700">
-            <h3 className="font-semibold">Page profil en ligne</h3>
-            <p>Votre site utilise maintenant une version en ligne de la page profil, synchronisée avec le serveur.</p>
+            <h3 className="font-semibold">Page profil</h3>
+            <p>Votre page profil est synchronisée avec le serveur. Toutes les modifications sont enregistrées en ligne.</p>
             <p className="mt-2">
               <Link to="/profile" className="text-lab-purple hover:underline">Accéder à votre profil</Link>
             </p>
@@ -166,38 +140,6 @@ function ProfileDiagnostic() {
                   <p>{result.message}</p>
                 </div>
               ))}
-            </div>
-          )}
-
-          {corsResults && (
-            <div className="mt-6">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Détails du diagnostic CORS</h2>
-
-              <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                <h3 className="font-semibold text-gray-700">Requête preflight (OPTIONS)</h3>
-                <p><span className="text-gray-500">Statut:</span> {corsResults.preflight.status}</p>
-                <p><span className="text-gray-500">Succès:</span> {corsResults.preflight.success ? 'Oui' : 'Non'}</p>
-                {corsResults.preflight.corsHeaders && (
-                  <div className="mt-2">
-                    <p><span className="text-gray-500">Access-Control-Allow-Origin:</span> {corsResults.preflight.corsHeaders.allowOrigin || 'Non défini'}</p>
-                    <p><span className="text-gray-500">Access-Control-Allow-Methods:</span> {corsResults.preflight.corsHeaders.allowMethods || 'Non défini'}</p>
-                    <p><span className="text-gray-500">Access-Control-Allow-Headers:</span> {corsResults.preflight.corsHeaders.allowHeaders || 'Non défini'}</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-gray-700">Requête réelle ({corsResults.analysis.method})</h3>
-                <p><span className="text-gray-500">Statut:</span> {corsResults.actual.status}</p>
-                <p><span className="text-gray-500">Succès:</span> {corsResults.actual.success ? 'Oui' : 'Non'}</p>
-                {corsResults.actual.corsHeaders && (
-                  <div className="mt-2">
-                    <p><span className="text-gray-500">Access-Control-Allow-Origin:</span> {corsResults.actual.corsHeaders.allowOrigin || 'Non défini'}</p>
-                    <p><span className="text-gray-500">Access-Control-Allow-Methods:</span> {corsResults.actual.corsHeaders.allowMethods || 'Non défini'}</p>
-                    <p><span className="text-gray-500">Access-Control-Allow-Headers:</span> {corsResults.actual.corsHeaders.allowHeaders || 'Non défini'}</p>
-                  </div>
-                )}
-              </div>
             </div>
           )}
         </div>
