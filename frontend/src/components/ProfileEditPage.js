@@ -247,10 +247,12 @@ function ProfileEditPage() {
       // Préparer les données à envoyer
       const dataToSend = {
         ...formData,
-        interests: formData.interests
-          .split(',')
-          .map(item => item.trim())
-          .filter(item => item)
+        interests: typeof formData.interests === 'string'
+          ? formData.interests
+              .split(',')
+              .map(item => item.trim())
+              .filter(item => item)
+          : formData.interests || []
       };
 
       // Mettre à jour le profil avec gestion CORS
@@ -271,6 +273,8 @@ function ProfileEditPage() {
         console.error('Erreur avec l\'API directe:', directError);
 
         // Essayer avec la fonction Netlify proxy
+        let proxySuccess = false;
+
         try {
           console.log('Tentative avec la fonction Netlify proxy');
 
@@ -318,8 +322,6 @@ function ProfileEditPage() {
           console.error('Erreur avec Netlify proxy:', netlifyProxyError);
 
           // Si la fonction Netlify échoue, essayer avec les proxies CORS externes
-          let proxySuccess = false;
-
           for (const proxy of CORS_PROXIES) {
             try {
               const proxyUrl = `${proxy}${encodeURIComponent(`${API_URL}/api/social/profile`)}`;
@@ -368,6 +370,8 @@ function ProfileEditPage() {
           console.error('Erreur avec l\'API directe (avatar):', directAvatarError);
 
           // Essayer avec la fonction Netlify proxy
+          let proxySuccess = false;
+
           try {
             console.log('Tentative avec la fonction Netlify proxy (avatar)');
 
@@ -415,8 +419,6 @@ function ProfileEditPage() {
             console.error('Erreur avec Netlify proxy (avatar):', netlifyProxyError);
 
             // Si la fonction Netlify échoue, essayer avec les proxies CORS externes
-            let proxySuccess = false;
-
             for (const proxy of CORS_PROXIES) {
               try {
                 const proxyUrl = `${proxy}${encodeURIComponent(`${API_URL}/api/social/profile/avatar/predefined`)}`;
