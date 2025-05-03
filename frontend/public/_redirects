@@ -1,13 +1,5 @@
-# Redirections Netlify pour Biogy
+# Proxy API requests to Render backend
+/api/*  https://biogy-api.onrender.com/api/:splat  200
 
-# Proxy API pour éviter les problèmes CORS
-/api/*  https://biogy-api.onrender.com/api/:splat  200!  Access-Control-Allow-Origin=*,Access-Control-Allow-Methods=GET,POST,PUT,DELETE,OPTIONS,PATCH,Access-Control-Allow-Headers=Origin,X-Requested-With,Content-Type,Accept,Authorization,Access-Control-Allow-Credentials=true,Access-Control-Max-Age=86400
-
-# Gestion des requêtes OPTIONS (CORS preflight)
-/api/*  https://biogy-api.onrender.com/api/:splat  200!  Access-Control-Allow-Origin=*,Access-Control-Allow-Methods=GET,POST,PUT,DELETE,OPTIONS,PATCH,Access-Control-Allow-Headers=Origin,X-Requested-With,Content-Type,Accept,Authorization,Access-Control-Allow-Credentials=true,Access-Control-Max-Age=86400
-
-# Accès direct aux fonctions Netlify
-/.netlify/functions/*  /.netlify/functions/:splat  200
-
-# SPA fallback
-/*  /index.html  200
+# Handle React Router
+/*    /index.html   200
