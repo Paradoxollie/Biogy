@@ -14,6 +14,9 @@ import NewTopicPage from './components/NewTopicPage';
 import ProfilePage from './components/ProfilePage';
 import ProfileEditPage from './components/ProfileEditPage';
 import ProfileDebug from './components/ProfileDebug';
+import ProfileOnline from './components/ProfileOnline';
+import ProfileEditOnline from './components/ProfileEditOnline';
+import ProfileDiagnostic from './components/ProfileDiagnostic';
 import SimulationModeIndicator from './components/SimulationModeIndicator';
 import AuthDebug from './context/AuthDebug';
 import proxyService from './services/proxyService';
@@ -43,10 +46,19 @@ function App() {
           <Route path="/forum" element={<ForumPage />} />
           <Route path="/forum/:id" element={<TopicPage />} />
           <Route path="/forum/nouveau" element={<NewTopicPage />} />
+          {/* Routes pour la version locale du profil */}
           <Route path="/profile/edit" element={<ProfileEditPage />} />
           <Route path="/profile/debug" element={<ProfileDebug />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/profile" element={<ProfilePage />} />
+
+          {/* Routes pour la version en ligne du profil */}
+          <Route path="/profile-online/edit" element={<ProfileEditOnline />} />
+          <Route path="/profile-online/:userId" element={<ProfileOnline />} />
+          <Route path="/profile-online" element={<ProfileOnline />} />
+
+          {/* Outil de diagnostic pour les deux versions */}
+          <Route path="/profile-diagnostic" element={<ProfileDiagnostic />} />
         </Routes>
       </Layout>
 

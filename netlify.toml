@@ -14,7 +14,7 @@
 # Redirections spécifiques pour les profils (priorité plus élevée)
 [[redirects]]
   from = "/api/social/profile*"
-  to = "/.netlify/functions/profile-api:splat"
+  to = "/.netlify/functions/profile-online:splat"
   status = 200
   force = true
 
