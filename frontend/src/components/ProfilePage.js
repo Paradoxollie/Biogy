@@ -23,16 +23,14 @@ function ProfilePage() {
       try {
         setLoading(true);
 
-        // Préparer les headers avec token si nécessaire
-        const headers = userInfo ? { 'Authorization': `Bearer ${userInfo.token}` } : {};
+        console.log('Chargement du profil utilisateur...');
 
-        // Endpoint en fonction de si c'est le profil de l'utilisateur connecté ou non
-        const endpoint = isOwnProfile ? 'social/profile' : `social/profile/${userId}`;
+        // Utiliser la fonction dédiée du service de proxy
+        const data = await proxyService.fetchProfile(
+          userInfo?.token,
+          isOwnProfile ? null : userId
+        );
 
-        console.log('Chargement du profil avec proxyService:', endpoint);
-
-        // Utiliser le service de proxy pour récupérer le profil
-        const data = await proxyService.get(endpoint, null, headers);
         console.log('Données du profil reçues:', data);
         setProfile(data);
       } catch (error) {
