@@ -10,15 +10,22 @@ function SimulationModeIndicator() {
 
   // Vérifier si le mode simulation est actif
   useEffect(() => {
-    const checkSimulationMode = () => {
-      setIsSimulationMode(proxyService.isSimulationModeActive());
+    const checkSimulationMode = async () => {
+      try {
+        // Vérifier si l'API est accessible
+        const apiAccessible = await proxyService.checkApiAccessibility();
+        setIsSimulationMode(!apiAccessible);
+      } catch (error) {
+        console.error('Erreur lors de la vérification du mode simulation:', error);
+        setIsSimulationMode(true); // En cas d'erreur, considérer que nous sommes en mode simulation
+      }
     };
 
     // Vérifier immédiatement
     checkSimulationMode();
 
-    // Vérifier toutes les 5 secondes
-    const interval = setInterval(checkSimulationMode, 5000);
+    // Vérifier toutes les 30 secondes
+    const interval = setInterval(checkSimulationMode, 30000);
 
     return () => clearInterval(interval);
   }, []);
@@ -30,7 +37,7 @@ function SimulationModeIndicator() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <div 
+      <div
         className={`bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded shadow-lg transition-all duration-300 ${
           isExpanded ? 'w-80' : 'w-auto cursor-pointer'
         }`}
@@ -40,7 +47,7 @@ function SimulationModeIndicator() {
           <>
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-bold">Mode Simulation Actif</h3>
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsExpanded(false);
@@ -57,7 +64,7 @@ function SimulationModeIndicator() {
               Les données affichées sont simulées et ne reflètent pas les données réelles.
             </p>
             <div className="mt-2 text-right">
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   proxyService.checkApiAccessibility();
