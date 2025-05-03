@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
+import { API_URL, CORS_PROXIES } from '../config';
+import { fetchWithAuth } from '../utils/apiUtils';
+
+// URL de la fonction Netlify proxy
+const NETLIFY_PROXY_URL = '/.netlify/functions/proxy';
 
 // Liste des avatars prédéfinis
 const PREDEFINED_AVATARS = [
@@ -62,17 +66,92 @@ function ProfileEditPage() {
       try {
         setLoading(true);
 
-        const response = await fetch(`${API_URL}/api/social/profile`, {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`
-          }
-        });
+        // Utiliser notre utilitaire avec gestion CORS
+        let profileData;
 
-        if (!response.ok) {
-          throw new Error('Erreur lors de la récupération du profil');
+        try {
+          // Essayer d'abord avec l'API directe
+          profileData = await fetchWithAuth('social/profile', {
+            method: 'GET'
+          }, userInfo.token);
+        } catch (directError) {
+          console.error('Erreur avec l\'API directe (chargement):', directError);
+
+          // Essayer avec la fonction Netlify proxy
+          try {
+            console.log('Tentative avec la fonction Netlify proxy');
+
+            const proxyResponse = await fetch(`${NETLIFY_PROXY_URL}/social/profile`, {
+              headers: {
+                'Authorization': `Bearer ${userInfo.token}`
+              }
+            });
+
+            if (proxyResponse.ok) {
+              profileData = await proxyResponse.json();
+              console.log('Profil chargé avec succès via Netlify proxy');
+              proxySuccess = true;
+            } else {
+              console.error('Erreur avec Netlify proxy:', proxyResponse.status);
+
+              // Si la fonction Netlify échoue, essayer avec les proxies CORS externes
+              for (const proxy of CORS_PROXIES) {
+                try {
+                  const proxyUrl = `${proxy}${encodeURIComponent(`${API_URL}/api/social/profile`)}`;
+                  console.log(`Tentative avec proxy externe (chargement): ${proxyUrl}`);
+
+                  const corsProxyResponse = await fetch(proxyUrl, {
+                    headers: {
+                      'Authorization': `Bearer ${userInfo.token}`
+                    }
+                  });
+
+                  if (corsProxyResponse.ok) {
+                    profileData = await corsProxyResponse.json();
+                    console.log('Profil chargé avec succès via proxy externe');
+                    proxySuccess = true;
+                    break;
+                  }
+                } catch (proxyError) {
+                  console.error(`Erreur avec proxy ${proxy} (chargement):`, proxyError);
+                }
+              }
+            }
+          } catch (netlifyProxyError) {
+            console.error('Erreur avec Netlify proxy:', netlifyProxyError);
+
+            // Si la fonction Netlify échoue, essayer avec les proxies CORS externes
+            let proxySuccess = false;
+
+            for (const proxy of CORS_PROXIES) {
+              try {
+                const proxyUrl = `${proxy}${encodeURIComponent(`${API_URL}/api/social/profile`)}`;
+                console.log(`Tentative avec proxy externe (chargement): ${proxyUrl}`);
+
+                const corsProxyResponse = await fetch(proxyUrl, {
+                  headers: {
+                    'Authorization': `Bearer ${userInfo.token}`
+                  }
+                });
+
+                if (corsProxyResponse.ok) {
+                  profileData = await corsProxyResponse.json();
+                  console.log('Profil chargé avec succès via proxy externe');
+                  proxySuccess = true;
+                  break;
+                }
+              } catch (proxyError) {
+                console.error(`Erreur avec proxy ${proxy} (chargement):`, proxyError);
+              }
+            }
+          }
+
+          if (!proxySuccess) {
+            throw new Error('Impossible de charger le profil. Veuillez réessayer plus tard.');
+          }
         }
 
-        const data = await response.json();
+        const data = profileData;
 
         // Mettre à jour le formulaire avec les données du profil
         setFormData({
@@ -174,49 +253,199 @@ function ProfileEditPage() {
           .filter(item => item)
       };
 
-      // Mettre à jour le profil
+      // Mettre à jour le profil avec gestion CORS
       console.log('Envoi des données de profil:', dataToSend);
-      const profileResponse = await fetch(`${API_URL}/api/social/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userInfo.token}`
-        },
-        body: JSON.stringify(dataToSend)
-      });
 
-      if (!profileResponse.ok) {
-        const errorData = await profileResponse.json().catch(() => ({}));
-        console.error('Erreur de réponse du serveur:', profileResponse.status, errorData);
-        throw new Error(`Erreur lors de la mise à jour du profil: ${errorData.message || profileResponse.status}`);
+      try {
+        // Essayer d'abord avec l'API directe
+        await fetchWithAuth('social/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataToSend)
+        }, userInfo.token);
+
+        console.log('Profil mis à jour avec succès');
+      } catch (directError) {
+        console.error('Erreur avec l\'API directe:', directError);
+
+        // Essayer avec la fonction Netlify proxy
+        try {
+          console.log('Tentative avec la fonction Netlify proxy');
+
+          const proxyResponse = await fetch(`${NETLIFY_PROXY_URL}/social/profile`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userInfo.token}`
+            },
+            body: JSON.stringify(dataToSend)
+          });
+
+          if (proxyResponse.ok) {
+            console.log('Profil mis à jour avec succès via Netlify proxy');
+            proxySuccess = true;
+          } else {
+            console.error('Erreur avec Netlify proxy:', proxyResponse.status);
+
+            // Si la fonction Netlify échoue, essayer avec les proxies CORS externes
+            for (const proxy of CORS_PROXIES) {
+              try {
+                const proxyUrl = `${proxy}${encodeURIComponent(`${API_URL}/api/social/profile`)}`;
+                console.log(`Tentative avec proxy externe: ${proxyUrl}`);
+
+                const corsProxyResponse = await fetch(proxyUrl, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userInfo.token}`
+                  },
+                  body: JSON.stringify(dataToSend)
+                });
+
+                if (corsProxyResponse.ok) {
+                  console.log('Profil mis à jour avec succès via proxy externe');
+                  proxySuccess = true;
+                  break;
+                }
+              } catch (proxyError) {
+                console.error(`Erreur avec proxy ${proxy}:`, proxyError);
+              }
+            }
+          }
+        } catch (netlifyProxyError) {
+          console.error('Erreur avec Netlify proxy:', netlifyProxyError);
+
+          // Si la fonction Netlify échoue, essayer avec les proxies CORS externes
+          let proxySuccess = false;
+
+          for (const proxy of CORS_PROXIES) {
+            try {
+              const proxyUrl = `${proxy}${encodeURIComponent(`${API_URL}/api/social/profile`)}`;
+              console.log(`Tentative avec proxy externe: ${proxyUrl}`);
+
+              const corsProxyResponse = await fetch(proxyUrl, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${userInfo.token}`
+                },
+                body: JSON.stringify(dataToSend)
+              });
+
+              if (corsProxyResponse.ok) {
+                console.log('Profil mis à jour avec succès via proxy externe');
+                proxySuccess = true;
+                break;
+              }
+            } catch (proxyError) {
+              console.error(`Erreur avec proxy ${proxy}:`, proxyError);
+            }
+          }
+        }
+
+        if (!proxySuccess) {
+          throw new Error('Impossible de mettre à jour le profil. Veuillez réessayer plus tard.');
+        }
       }
-
-      console.log('Profil mis à jour avec succès');
 
       // Si un avatar est sélectionné, mettre à jour l'avatar
       if (selectedAvatar) {
         console.log('Envoi de l\'avatar sélectionné:', selectedAvatar);
         try {
-          const avatarResponse = await fetch(`${API_URL}/api/social/profile/avatar/predefined`, {
+          // Essayer d'abord avec l'API directe
+          await fetchWithAuth('social/profile/avatar/predefined', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${userInfo.token}`
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({ avatarId: selectedAvatar })
-          });
-
-          if (!avatarResponse.ok) {
-            const errorData = await avatarResponse.json().catch(() => ({}));
-            console.error('Erreur de réponse du serveur (avatar):', avatarResponse.status, errorData);
-            throw new Error(`Erreur lors de la mise à jour de l'avatar: ${errorData.message || avatarResponse.status}`);
-          }
+          }, userInfo.token);
 
           console.log('Avatar mis à jour avec succès');
-        } catch (avatarError) {
-          console.error('Erreur lors de la mise à jour de l\'avatar:', avatarError);
-          // Ne pas bloquer la mise à jour du profil si l'avatar échoue
-          setError(`Profil mis à jour, mais erreur avec l'avatar: ${avatarError.message}`);
+        } catch (directAvatarError) {
+          console.error('Erreur avec l\'API directe (avatar):', directAvatarError);
+
+          // Essayer avec la fonction Netlify proxy
+          try {
+            console.log('Tentative avec la fonction Netlify proxy (avatar)');
+
+            const proxyResponse = await fetch(`${NETLIFY_PROXY_URL}/social/profile/avatar/predefined`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userInfo.token}`
+              },
+              body: JSON.stringify({ avatarId: selectedAvatar })
+            });
+
+            if (proxyResponse.ok) {
+              console.log('Avatar mis à jour avec succès via Netlify proxy');
+              proxySuccess = true;
+            } else {
+              console.error('Erreur avec Netlify proxy (avatar):', proxyResponse.status);
+
+              // Si la fonction Netlify échoue, essayer avec les proxies CORS externes
+              for (const proxy of CORS_PROXIES) {
+                try {
+                  const proxyUrl = `${proxy}${encodeURIComponent(`${API_URL}/api/social/profile/avatar/predefined`)}`;
+                  console.log(`Tentative avec proxy externe (avatar): ${proxyUrl}`);
+
+                  const corsProxyResponse = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${userInfo.token}`
+                    },
+                    body: JSON.stringify({ avatarId: selectedAvatar })
+                  });
+
+                  if (corsProxyResponse.ok) {
+                    console.log('Avatar mis à jour avec succès via proxy externe');
+                    proxySuccess = true;
+                    break;
+                  }
+                } catch (proxyError) {
+                  console.error(`Erreur avec proxy ${proxy} (avatar):`, proxyError);
+                }
+              }
+            }
+          } catch (netlifyProxyError) {
+            console.error('Erreur avec Netlify proxy (avatar):', netlifyProxyError);
+
+            // Si la fonction Netlify échoue, essayer avec les proxies CORS externes
+            let proxySuccess = false;
+
+            for (const proxy of CORS_PROXIES) {
+              try {
+                const proxyUrl = `${proxy}${encodeURIComponent(`${API_URL}/api/social/profile/avatar/predefined`)}`;
+                console.log(`Tentative avec proxy externe (avatar): ${proxyUrl}`);
+
+                const corsProxyResponse = await fetch(proxyUrl, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userInfo.token}`
+                  },
+                  body: JSON.stringify({ avatarId: selectedAvatar })
+                });
+
+                if (corsProxyResponse.ok) {
+                  console.log('Avatar mis à jour avec succès via proxy externe');
+                  proxySuccess = true;
+                  break;
+                }
+              } catch (proxyError) {
+                console.error(`Erreur avec proxy ${proxy} (avatar):`, proxyError);
+              }
+            }
+          }
+
+          if (!proxySuccess) {
+            // Ne pas bloquer la mise à jour du profil si l'avatar échoue
+            setError(`Profil mis à jour, mais erreur avec l'avatar: ${directAvatarError.message}`);
+          }
         }
       }
 
