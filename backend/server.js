@@ -11,44 +11,40 @@ const app = express();
 // Middlewares
 // Configuration CORS permissive
 const corsOptions = {
-  origin: ['https://biogy.netlify.app', 'http://localhost:3000'],
+  origin: '*', // Temporairement permettre toutes les origines pour le débogage
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   credentials: true,
   maxAge: 86400 // 24 heures en secondes
 };
 
+// Appliquer CORS à toutes les routes
 app.use(cors(corsOptions));
 
-// Middleware pour les requêtes OPTIONS
+// Middleware pour les requêtes OPTIONS préliminaires
 app.options('*', cors(corsOptions));
 
 app.use(express.json()); // Pour parser le JSON dans les requêtes
 app.use(express.urlencoded({ extended: true })); // Pour parser les données de formulaire
 
-// Middleware pour ajouter les en-têtes CORS à toutes les réponses
+// Middleware pour ajouter explicitement les en-têtes CORS à chaque réponse
 app.use((req, res, next) => {
-  // Déterminer l'origine
-  const origin = req.headers.origin;
-  if (corsOptions.origin.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', corsOptions.origin[0]);
-  }
-
-  res.header('Access-Control-Allow-Methods', corsOptions.methods.join(', '));
-  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
+  res.header('Access-Control-Allow-Origin', '*'); // Temporairement permettre toutes les origines
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', corsOptions.maxAge.toString());
-
+  res.header('Access-Control-Max-Age', '86400');
+  
   // Log pour le débogage
-  console.log(`CORS Headers set for request to ${req.path} from origin: ${origin || 'unknown'}`);
+  console.log(`CORS Headers set for request to ${req.path} from origin: ${req.headers.origin || 'unknown'}`);
 
   next();
 });
 
 // Routes de base
 app.get('/', (req, res) => {
+  // Ajouter les en-têtes CORS explicitement à cette réponse aussi
+  res.header('Access-Control-Allow-Origin', '*');
   res.send('API Biogy Backend is running...');
 });
 
@@ -66,6 +62,10 @@ app.use('/api/social', require('./routes/socialRoutes')); // Routes sociales
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  
+  // Ajouter les en-têtes CORS à la réponse d'erreur
+  res.header('Access-Control-Allow-Origin', '*');
+  
   res.status(statusCode).json({
       message: err.message,
       stack: process.env.NODE_ENV === 'production' ? null : err.stack
