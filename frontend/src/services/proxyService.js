@@ -1,13 +1,9 @@
 import axios from 'axios';
-import mockProfileService from './mockProfileService';
 
 // URL de l'API backend (pour les cas où la redirection Netlify ne fonctionne pas)
 const API_FALLBACK_URL = 'https://biogy-api.onrender.com/api';
 // URL des fonctions Netlify
 const NETLIFY_FUNCTIONS_URL = '/.netlify/functions';
-
-// Variable pour indiquer si nous sommes en mode simulation
-let simulationMode = false;
 
 /**
  * Service de proxy pour envoyer des requêtes via un proxy CORS si les
