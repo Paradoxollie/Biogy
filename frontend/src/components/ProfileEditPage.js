@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL, CORS_PROXIES } from '../config';
-import { fetchWithAuth } from '../utils/apiUtils';
-
-// URL de la fonction Netlify proxy
-const NETLIFY_PROXY_URL = '/.netlify/functions/proxy';
+import proxyService from '../services/proxyService';
 
 // Liste des avatars prédéfinis
 const PREDEFINED_AVATARS = [
@@ -65,70 +61,10 @@ function ProfileEditPage() {
 
       try {
         setLoading(true);
+        console.log('Chargement du profil avec proxyService');
 
-        // Utiliser notre utilitaire avec gestion CORS
-        let profileData;
-        let loadSuccess = false;
-
-        try {
-          // Utiliser la fonction Netlify api-proxy qui est la plus fiable
-          console.log('Tentative avec la fonction Netlify api-proxy');
-
-          const proxyResponse = await fetch(`/.netlify/functions/api-proxy/social/profile`, {
-            headers: {
-              'Authorization': `Bearer ${userInfo.token}`
-            }
-          });
-
-          if (proxyResponse.ok) {
-            profileData = await proxyResponse.json();
-            console.log('Profil chargé avec succès via Netlify api-proxy');
-            loadSuccess = true;
-          } else {
-            console.error('Erreur avec Netlify api-proxy:', proxyResponse.status);
-            throw new Error(`Erreur avec Netlify api-proxy: ${proxyResponse.status}`);
-          }
-        } catch (apiProxyError) {
-          console.error('Erreur avec api-proxy:', apiProxyError);
-
-          // Essayer avec l'API directe
-          try {
-            profileData = await fetchWithAuth('social/profile', {
-              method: 'GET'
-            }, userInfo.token);
-            loadSuccess = true;
-          } catch (directError) {
-            console.error('Erreur avec l\'API directe (chargement):', directError);
-
-            // Essayer avec la fonction Netlify proxy originale
-            try {
-              console.log('Tentative avec la fonction Netlify proxy originale');
-
-              const proxyResponse = await fetch(`${NETLIFY_PROXY_URL}/social/profile`, {
-                headers: {
-                  'Authorization': `Bearer ${userInfo.token}`
-                }
-              });
-
-              if (proxyResponse.ok) {
-                profileData = await proxyResponse.json();
-                console.log('Profil chargé avec succès via Netlify proxy originale');
-                loadSuccess = true;
-              } else {
-                throw new Error(`Erreur avec Netlify proxy originale: ${proxyResponse.status}`);
-              }
-            } catch (proxyError) {
-              console.error('Erreur avec toutes les méthodes de chargement:', proxyError);
-              throw new Error('Impossible de charger le profil. Veuillez réessayer plus tard.');
-            }
-          }
-        }
-
-        if (!loadSuccess || !profileData) {
-          throw new Error('Impossible de charger le profil. Veuillez réessayer plus tard.');
-        }
-
-        const data = profileData;
+        // Utiliser le service de proxy pour récupérer le profil
+        const data = await proxyService.fetchProfile(userInfo.token);
 
         // Mettre à jour le formulaire avec les données du profil
         setFormData({
@@ -232,38 +168,16 @@ function ProfileEditPage() {
           : formData.interests || []
       };
 
-      // Mettre à jour le profil avec la fonction Netlify proxy
+      // Mettre à jour le profil avec le service de proxy
       console.log('Envoi des données de profil:', dataToSend);
 
-      const response = await fetch('/.netlify/functions/api-proxy/social/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userInfo.token}`
-        },
-        body: JSON.stringify(dataToSend)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erreur API (${response.status}): Impossible de mettre à jour le profil`);
-      }
+      await proxyService.updateProfile(userInfo.token, dataToSend);
 
       // Si un avatar est sélectionné, mettre à jour l'avatar
       if (selectedAvatar) {
         console.log('Envoi de l\'avatar sélectionné:', selectedAvatar);
 
-        const avatarResponse = await fetch('/.netlify/functions/api-proxy/social/profile/avatar/predefined', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userInfo.token}`
-          },
-          body: JSON.stringify({ avatarId: selectedAvatar })
-        });
-
-        if (!avatarResponse.ok) {
-          console.error('Erreur lors de la mise à jour de l\'avatar');
-        }
+        await proxyService.updateAvatar(userInfo.token, selectedAvatar);
       }
 
       setSuccess(true);

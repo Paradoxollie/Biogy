@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import proxyService from '../services/proxyService';
 
 function ProfilePage() {
   const { userId } = useParams();
@@ -22,41 +23,21 @@ function ProfilePage() {
       try {
         setLoading(true);
 
-        // URL de l'API en fonction de si c'est le profil de l'utilisateur connecté ou non
-        const url = isOwnProfile
-          ? `/.netlify/functions/api-proxy/social/profile`
-          : `/.netlify/functions/api-proxy/social/profile/${userId}`;
+        // Préparer les headers avec token si nécessaire
+        const headers = userInfo ? { 'Authorization': `Bearer ${userInfo.token}` } : {};
 
-        // Headers avec token si nécessaire
-        const headers = userInfo
-          ? { Authorization: `Bearer ${userInfo.token}` }
-          : {};
+        // Endpoint en fonction de si c'est le profil de l'utilisateur connecté ou non
+        const endpoint = isOwnProfile ? 'social/profile' : `social/profile/${userId}`;
 
-        console.log('Chargement du profil depuis:', url);
+        console.log('Chargement du profil avec proxyService:', endpoint);
 
-        try {
-          const response = await fetch(url, { headers });
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('Profil non trouvé');
-          } else if (response.status === 403) {
-            throw new Error('Ce profil est privé');
-          } else {
-            throw new Error('Erreur lors de la récupération du profil');
-          }
-        }
-
-          const data = await response.json();
-          console.log('Données du profil reçues:', data);
-          setProfile(data);
-        } catch (fetchError) {
-          console.error('Erreur lors de la récupération des données:', fetchError);
-          throw new Error('Erreur lors de la récupération des données du profil');
-        }
+        // Utiliser le service de proxy pour récupérer le profil
+        const data = await proxyService.get(endpoint, null, headers);
+        console.log('Données du profil reçues:', data);
+        setProfile(data);
       } catch (error) {
         console.error('Error fetching profile:', error);
-        setError(error.message);
+        setError('Impossible de charger le profil. Veuillez réessayer plus tard.');
       } finally {
         setLoading(false);
       }
