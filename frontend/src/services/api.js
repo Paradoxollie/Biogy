@@ -8,12 +8,12 @@ import { API_URL } from '../config';
 // Constantes
 const DIRECT_API = `${API_URL}/api`;
 const NETLIFY_PROXY = '/api';
-const CORS_PROXY = '/.netlify/functions/cors-proxy';
+const SIMPLE_PROXY = '/.netlify/functions/simple-proxy';
 
 /**
  * Effectue une requête API avec gestion des erreurs et CORS
  * Essaie plusieurs méthodes en cas d'échec
- * 
+ *
  * @param {string} endpoint - Endpoint API (sans le préfixe /api)
  * @param {Object} options - Options fetch
  * @returns {Promise<any>} - Données de la réponse
@@ -21,7 +21,7 @@ const CORS_PROXY = '/.netlify/functions/cors-proxy';
 export const apiRequest = async (endpoint, options = {}) => {
   // S'assurer que l'endpoint commence par /
   const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  
+
   // Préparer les options par défaut
   const defaultOptions = {
     headers: {
@@ -29,7 +29,7 @@ export const apiRequest = async (endpoint, options = {}) => {
     },
     credentials: 'include',
   };
-  
+
   // Fusionner les options
   const requestOptions = {
     ...defaultOptions,
@@ -39,32 +39,32 @@ export const apiRequest = async (endpoint, options = {}) => {
       ...options.headers,
     },
   };
-  
+
   // Log pour le débogage
   console.log(`API Request: ${path}`, requestOptions);
-  
+
   // Tableau des stratégies à essayer dans l'ordre
   const strategies = [
+    { name: 'Simple Proxy', url: `${SIMPLE_PROXY}${path}` },
     { name: 'Netlify Proxy', url: `${NETLIFY_PROXY}${path}` },
-    { name: 'CORS Proxy Function', url: `${CORS_PROXY}${path}` },
     { name: 'Direct API', url: `${DIRECT_API}${path}` },
   ];
-  
+
   let lastError = null;
-  
+
   // Essayer chaque stratégie jusqu'à ce qu'une réussisse
   for (const strategy of strategies) {
     try {
       console.log(`Trying ${strategy.name}: ${strategy.url}`);
-      
+
       const response = await fetch(strategy.url, requestOptions);
-      
+
       // Si la réponse n'est pas OK, lancer une erreur
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
-      
+
       // Convertir la réponse en JSON
       const data = await response.json();
       console.log(`${strategy.name} succeeded:`, data);
@@ -75,7 +75,7 @@ export const apiRequest = async (endpoint, options = {}) => {
       // Continuer avec la stratégie suivante
     }
   }
-  
+
   // Si toutes les stratégies ont échoué, lancer la dernière erreur
   throw lastError || new Error('Failed to fetch data from API');
 };
@@ -152,11 +152,11 @@ export const withAuth = (options = {}, token) => {
       console.error('Error getting token from localStorage:', error);
     }
   }
-  
+
   if (!token) {
     return options;
   }
-  
+
   return {
     ...options,
     headers: {
