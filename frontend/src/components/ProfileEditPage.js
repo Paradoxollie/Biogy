@@ -232,10 +232,10 @@ function ProfileEditPage() {
           : formData.interests || []
       };
 
-      // Mettre à jour le profil avec l'API directe
+      // Mettre à jour le profil avec la fonction Netlify proxy
       console.log('Envoi des données de profil:', dataToSend);
 
-      const response = await fetch('https://biogy-api.onrender.com/api/social/profile', {
+      const response = await fetch('/.netlify/functions/api-proxy/social/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -252,7 +252,7 @@ function ProfileEditPage() {
       if (selectedAvatar) {
         console.log('Envoi de l\'avatar sélectionné:', selectedAvatar);
 
-        const avatarResponse = await fetch('https://biogy-api.onrender.com/api/social/profile/avatar/predefined', {
+        const avatarResponse = await fetch('/.netlify/functions/api-proxy/social/profile/avatar/predefined', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
