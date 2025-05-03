@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
 
 function ProfilePage() {
   const { userId } = useParams();
@@ -34,7 +33,9 @@ function ProfilePage() {
           : {};
 
         console.log('Chargement du profil depuis:', url);
-        const response = await fetch(url, { headers });
+
+        try {
+          const response = await fetch(url, { headers });
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -46,10 +47,13 @@ function ProfilePage() {
           }
         }
 
-        const data = await response.json();
-        console.log('Données du profil reçues:', data);
-        setProfile(data);
-
+          const data = await response.json();
+          console.log('Données du profil reçues:', data);
+          setProfile(data);
+        } catch (fetchError) {
+          console.error('Erreur lors de la récupération des données:', fetchError);
+          throw new Error('Erreur lors de la récupération des données du profil');
+        }
       } catch (error) {
         console.error('Error fetching profile:', error);
         setError(error.message);
