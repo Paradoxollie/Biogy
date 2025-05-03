@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
+import apiService from '../services/apiService';
 import MaintenancePage from './MaintenancePage';
 
 function ForumPage() {
@@ -50,16 +50,8 @@ function ForumPage() {
 
         console.log('Chargement des sujets du forum:', endpoint);
 
-        // Récupérer les sujets avec fetch
-        const response = await fetch(`${API_URL}/api/${endpoint}`, {
-          headers: userInfo ? { Authorization: `Bearer ${userInfo.token}` } : {}
-        });
-
-        if (!response.ok) {
-          throw new Error(`Erreur lors de la récupération des sujets: ${response.status}`);
-        }
-
-        const data = await response.json();
+        // Utiliser le service API pour récupérer les sujets
+        const data = await apiService.get(endpoint);
 
         setTopics(data.topics);
         setPagination(data.pagination);

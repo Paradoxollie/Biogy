@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Homepage from './components/Homepage';
 import Layout from './components/Layout';
 import ShareProjectPage from './components/ShareProjectPage';
@@ -11,19 +11,10 @@ import ScienceWatchPage from './components/ScienceWatchPage';
 import ForumPage from './components/ForumPage';
 import TopicPage from './components/TopicPage';
 import NewTopicPage from './components/NewTopicPage';
-import Profile from './components/Profile';
-import ProfileEdit from './components/ProfileEdit';
-import ProfileDiagnostic from './components/ProfileDiagnostic';
-import SimulationModeIndicator from './components/SimulationModeIndicator';
+import ProfilePage from './components/ProfilePage';
 import AuthDebug from './context/AuthDebug';
-import proxyService from './services/proxyService';
 
 function App() {
-  // Vérifier l'accessibilité de l'API au chargement de l'application
-  useEffect(() => {
-    proxyService.checkApiAccessibility();
-  }, []);
-
   return (
     <>
       <AuthDebug />
@@ -43,18 +34,10 @@ function App() {
           <Route path="/forum" element={<ForumPage />} />
           <Route path="/forum/:id" element={<TopicPage />} />
           <Route path="/forum/nouveau" element={<NewTopicPage />} />
-          {/* Routes pour le profil */}
-          <Route path="/profile/edit" element={<ProfileEdit />} />
-          <Route path="/profile/:userId" element={<Profile />} />
-          <Route path="/profile" element={<Profile />} />
-
-          {/* Outil de diagnostic */}
-          <Route path="/profile-diagnostic" element={<ProfileDiagnostic />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:userId" element={<ProfilePage />} />
         </Routes>
       </Layout>
-
-      {/* Indicateur de mode simulation */}
-      <SimulationModeIndicator />
     </>
   );
 }

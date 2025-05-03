@@ -1,6 +1,6 @@
 [build]
   base = "/"
-  command = "cd frontend && npm ci && CI=false npm run build && cd ../netlify && npm install"
+  command = "cd frontend && npm ci && CI=false npm run build"
   publish = "frontend/build"
   functions = "netlify/functions"
 
@@ -8,25 +8,29 @@
   NODE_VERSION = "18"
   NPM_VERSION = "9"
 
-[[plugins]]
-  package = "@netlify/plugin-functions-install-core"
-
-# Configuration des fonctions Netlify
-[functions]
-  node_bundler = "esbuild"
-
 # Redirections pour l'API (proxy CORS)
 [[redirects]]
   from = "/api/*"
   to = "https://biogy-api.onrender.com/api/:splat"
   status = 200
+  force = true
+  headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH", Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization", Access-Control-Allow-Credentials = "true", Access-Control-Max-Age = "86400"}
 
 # Gestion des requêtes OPTIONS (CORS preflight)
 [[redirects]]
   from = "/api/*"
   to = "https://biogy-api.onrender.com/api/:splat"
   status = 200
+  force = true
   conditions = {method = "OPTIONS"}
+  headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH", Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization", Access-Control-Allow-Credentials = "true", Access-Control-Max-Age = "86400"}
+
+# Redirections pour les fonctions Netlify
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
 
 # Redirections pour le SPA (Single Page Application)
 [[redirects]]

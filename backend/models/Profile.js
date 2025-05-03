@@ -18,9 +18,7 @@ const profileSchema = new mongoose.Schema({
   },
   avatar: {
     url: String,
-    cloudinaryPublicId: String,
-    predefinedId: String,
-    name: String
+    cloudinaryPublicId: String
   },
   specialization: {
     type: String,
@@ -38,6 +36,14 @@ const profileSchema = new mongoose.Schema({
   interests: [{
     type: String,
     trim: true
+  }],
+  following: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  followers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   }],
   badges: [{
     name: {
@@ -91,6 +97,8 @@ profileSchema.statics.createDefaultProfile = async function(userId) {
       institution: '',
       level: 'autre',
       interests: [],
+      following: [],
+      followers: [],
       badges: [],
       socialLinks: {
         website: '',
@@ -105,7 +113,7 @@ profileSchema.statics.createDefaultProfile = async function(userId) {
         showEmail: false
       }
     });
-
+    
     return await profile.save();
   } catch (error) {
     console.error('Erreur lors de la création du profil par défaut:', error);

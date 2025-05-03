@@ -1,16 +1,18 @@
 import axios from 'axios';
 
-// URL de l'API backend (pour les cas où la redirection Netlify ne fonctionne pas)
+// URLs des proxies CORS fiables
+const CORS_PROXIES = [
+  'https://corsproxy.io/?',
+  'https://cors-anywhere.herokuapp.com/',
+  'https://api.allorigins.win/get?url=',
+  'https://cors-proxy.htmldriven.com/?url='
+];
+
 const API_FALLBACK_URL = 'https://biogy-api.onrender.com/api';
-// URL des fonctions Netlify
-const NETLIFY_FUNCTIONS_URL = '/.netlify/functions';
 
 /**
  * Service de proxy pour envoyer des requêtes via un proxy CORS si les
  * redirections Netlify échouent
- */
-/**
- * Service de proxy pour envoyer des requêtes via les redirections Netlify
  */
 export const proxyRequest = async (method, endpoint, data = null, headers = {}) => {
   // Préparation des headers standard
@@ -29,18 +31,17 @@ export const proxyRequest = async (method, endpoint, data = null, headers = {}) 
       ? endpoint.substring(1)
       : endpoint;
 
+  // D'abord essayer l'API via le proxy Netlify (configuré dans _redirects)
   try {
-    // Utiliser la redirection Netlify standard pour toutes les requêtes
-    console.log(`Appel API via proxy Netlify: ${normalizedEndpoint}`);
-    const url = `/api/${normalizedEndpoint}`;
+    console.log(`Tentative d'appel API via proxy Netlify: ${normalizedEndpoint}`);
 
     const response = await axios({
       method,
-      url,
+      url: `/api/${normalizedEndpoint}`,
       data,
       headers: requestHeaders,
       withCredentials: false,
-      timeout: 30000 // 30 second timeout
+      timeout: 15000 // 15 second timeout
     });
 
     if (!response.data) {
@@ -49,188 +50,80 @@ export const proxyRequest = async (method, endpoint, data = null, headers = {}) 
 
     return response.data;
   } catch (error) {
-    console.error(`Erreur lors de l'appel API:`, error);
+    console.warn(`Échec de l'appel via proxy Netlify:`, error);
 
-    // Renvoyer une erreur claire
-    throw new Error(`Erreur lors de la communication avec le serveur: ${error.message}`);
-  }
-};
-
-/**
- * Récupère le profil utilisateur
- */
-export const fetchProfile = async (token, userId = null) => {
-  try {
-    console.log('Récupération du profil utilisateur via redirection Netlify');
-
-    // Utiliser la redirection Netlify configurée dans netlify.toml
-    const endpoint = userId ? `social/profile/${userId}` : 'social/profile';
-
-    const headers = token ? {
-      'Authorization': `Bearer ${token}`
-    } : {};
-
-    console.log(`Envoi de la requête à /api/${endpoint}`);
-
-    const response = await axios({
-      method: 'get',
-      url: `/api/${endpoint}`,
-      headers,
-      timeout: 30000
-    });
-
-    if (!response.data) {
-      throw new Error('Empty response received from server');
-    }
-
-    return response.data;
-  } catch (error) {
-    console.error('Erreur lors de la récupération du profil:', error);
-    throw new Error(`Erreur lors de la récupération du profil: ${error.message}`);
-  }
-};
-
-/**
- * Met à jour le profil utilisateur
- */
-export const updateProfile = async (token, profileData) => {
-  if (!token) {
-    throw new Error('Token d\'authentification requis');
-  }
-
-  try {
-    console.log('Mise à jour du profil utilisateur via redirection Netlify');
-
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    };
-
-    console.log('Envoi de la requête à /api/social/profile');
-
-    const response = await axios({
-      method: 'put',
-      url: '/api/social/profile',
-      headers,
-      data: profileData,
-      timeout: 30000
-    });
-
-    if (!response.data) {
-      throw new Error('Empty response received from server');
-    }
-
-    return response.data;
-  } catch (error) {
-    console.error('Erreur lors de la mise à jour du profil:', error);
-    throw new Error(`Erreur lors de la mise à jour du profil: ${error.message}`);
-  }
-};
-
-/**
- * Met à jour l'avatar de l'utilisateur
- */
-export const updateAvatar = async (token, avatarId) => {
-  if (!token) {
-    throw new Error('Token d\'authentification requis');
-  }
-
-  try {
-    console.log('Mise à jour de l\'avatar via redirection Netlify');
-
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    };
-
-    console.log('Envoi de la requête à /api/social/profile/avatar/predefined');
-
-    const response = await axios({
-      method: 'post',
-      url: '/api/social/profile/avatar/predefined',
-      headers,
-      data: { avatarId },
-      timeout: 30000
-    });
-
-    if (!response.data) {
-      throw new Error('Empty response received from server');
-    }
-
-    return response.data;
-  } catch (error) {
-    console.error('Erreur lors de la mise à jour de l\'avatar:', error);
-    throw new Error(`Erreur lors de la mise à jour de l'avatar: ${error.message}`);
-  }
-};
-
-/**
- * Récupère les sujets du forum
- */
-export const fetchForumTopics = async (page = 1, limit = 10) => {
-  return proxyRequest('get', `forum/topics`, { page, limit });
-};
-
-/**
- * Vérifie l'accessibilité de l'API
- */
-export const checkApiAccessibility = async () => {
-  try {
-    console.log('Vérification de l\'accessibilité de l\'API...');
-
-    // Essayer d'abord via la fonction Netlify de test
+    // Tentative d'appel direct à l'API
     try {
-      const response = await axios({
-        method: 'get',
-        url: `${NETLIFY_FUNCTIONS_URL}/api-test`,
-        timeout: 5000
-      });
+      console.log(`Tentative de fallback direct vers l'API: ${normalizedEndpoint}`);
+      const directUrl = `${API_FALLBACK_URL}/${normalizedEndpoint}`;
+      console.log(`Direct API URL: ${directUrl}`);
 
-      console.log('Résultat du test d\'accessibilité via fonction Netlify:', response.status);
-
-      // Si la fonction de test est accessible, vérifier les fonctions disponibles
-      if (response.data && response.data.availableFunctions) {
-        console.log('Fonctions Netlify disponibles:', response.data.availableFunctions);
-      }
-
-      return true;
-    } catch (netlifyError) {
-      console.error('Erreur lors de la vérification via fonction Netlify:', netlifyError);
-
-      // Essayer avec une autre fonction Netlify
-      try {
-        const simpleResponse = await axios({
-          method: 'get',
-          url: `${NETLIFY_FUNCTIONS_URL}/simple`,
-          timeout: 5000
-        });
-
-        console.log('Résultat du test d\'accessibilité via fonction simple:', simpleResponse.status);
-        return true;
-      } catch (simpleError) {
-        console.error('Erreur lors de la vérification via fonction simple:', simpleError);
-      }
-    }
-
-    // Essayer directement via l'API
-    try {
       const directResponse = await axios({
-        method: 'get',
-        url: `${API_FALLBACK_URL}/health`,
-        timeout: 5000
+        method,
+        url: directUrl,
+        data,
+        headers: {
+          ...requestHeaders,
+          'Origin': window.location.origin
+        },
+        withCredentials: false,
+        timeout: 15000
       });
 
-      console.log('Résultat du test d\'accessibilité direct:', directResponse.status);
-      return true;
-    } catch (directError) {
-      console.error('Erreur lors de la vérification directe de l\'API:', directError);
-    }
+      if (!directResponse.data) {
+        throw new Error('Empty response received from direct API call');
+      }
 
-    // Si toutes les tentatives échouent, retourner false
-    return false;
-  } catch (error) {
-    console.error('Erreur générale lors de la vérification de l\'accessibilité:', error);
-    return false;
+      return directResponse.data;
+    } catch (directError) {
+      console.warn(`Échec de l'appel direct:`, directError);
+
+      // Si méthode GET, essayer successivement tous les proxies CORS disponibles
+      if (method.toLowerCase() === 'get') {
+        let lastError = directError;
+
+        // Essayer chaque proxy CORS dans l'ordre
+        for (const proxy of CORS_PROXIES) {
+          try {
+            console.log(`Tentative via proxy CORS: ${proxy}`);
+            let proxyUrl;
+            let responseHandler;
+
+            // Gérer différemment selon le type de proxy
+            if (proxy === 'https://api.allorigins.win/get?url=') {
+              proxyUrl = `${proxy}${encodeURIComponent(`${API_FALLBACK_URL}/${normalizedEndpoint}`)}`;
+              responseHandler = (res) => {
+                if (!res.data || !res.data.contents) {
+                  throw new Error('Invalid response from CORS proxy');
+                }
+                return JSON.parse(res.data.contents);
+              };
+            } else {
+              proxyUrl = `${proxy}${encodeURIComponent(`${API_FALLBACK_URL}/${normalizedEndpoint}`)}`;
+              responseHandler = (res) => res.data;
+            }
+
+            const proxyResponse = await axios.get(proxyUrl, {
+              timeout: 15000
+            });
+
+            return responseHandler(proxyResponse);
+          } catch (proxyError) {
+            console.warn(`Échec avec proxy ${proxy}:`, proxyError);
+            lastError = proxyError;
+            // Continuer à la prochaine itération pour essayer un autre proxy
+          }
+        }
+
+        // Si on arrive ici, tous les proxies ont échoué
+        console.error(`Tous les proxies CORS ont échoué:`, lastError);
+        throw new Error(`Impossible de communiquer avec le serveur après plusieurs tentatives: ${lastError.message}`);
+      } else {
+        // Pour les autres méthodes, on ne peut pas utiliser les proxies CORS
+        console.error(`Impossible d'utiliser le proxy CORS pour ${method}`);
+        throw new Error(`Impossible d'envoyer la requête ${method}: ${directError.message}`);
+      }
+    }
   }
 };
 
@@ -238,10 +131,5 @@ export default {
   get: (endpoint, data = null, headers = {}) => proxyRequest('get', endpoint, data, headers),
   post: (endpoint, data, headers = {}) => proxyRequest('post', endpoint, data, headers),
   put: (endpoint, data, headers = {}) => proxyRequest('put', endpoint, data, headers),
-  delete: (endpoint, data = null, headers = {}) => proxyRequest('delete', endpoint, data, headers),
-  fetchProfile,
-  updateProfile,
-  updateAvatar,
-  fetchForumTopics,
-  checkApiAccessibility
+  delete: (endpoint, data = null, headers = {}) => proxyRequest('delete', endpoint, data, headers)
 };

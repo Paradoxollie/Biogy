@@ -1,21 +1,6 @@
 const Profile = require('../models/Profile');
 const User = require('../models/User');
-const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
-
-// Liste des avatars prédéfinis avec leurs noms
-// Utiliser des URLs absolues pour éviter les problèmes de chemin
-const PREDEFINED_AVATARS = {
-  avatar1: { url: 'https://biogy.netlify.app/images/avatars/avatar1.png', name: 'Scientifique' },
-  avatar2: { url: 'https://biogy.netlify.app/images/avatars/avatar2.png', name: 'Scientifique femme' },
-  avatar3: { url: 'https://biogy.netlify.app/images/avatars/avatar3.png', name: 'Microscope' },
-  avatar4: { url: 'https://biogy.netlify.app/images/avatars/avatar4.png', name: 'ADN' },
-  avatar5: { url: 'https://biogy.netlify.app/images/avatars/avatar5.png', name: 'Atome' },
-  avatar6: { url: 'https://biogy.netlify.app/images/avatars/avatar6.png', name: 'Éprouvette' },
-  avatar7: { url: 'https://biogy.netlify.app/images/avatars/avatar7.png', name: 'Molécule' },
-  avatar8: { url: 'https://biogy.netlify.app/images/avatars/avatar8.png', name: 'Cellule' },
-  avatar9: { url: 'https://biogy.netlify.app/images/avatars/avatar9.png', name: 'Plante' },
-  avatar10: { url: 'https://biogy.netlify.app/images/avatars/avatar10.png', name: 'Cerveau' },
-};
+const { uploadToCloudinary } = require('../utils/cloudinary');
 
 // @desc    Créer ou mettre à jour le profil de l'utilisateur
 // @route   PUT /api/social/profile
@@ -32,10 +17,10 @@ const updateProfile = async (req, res) => {
       socialLinks,
       settings
     } = req.body;
-
+    
     // Rechercher le profil existant
     let profile = await Profile.findOne({ user: req.user._id });
-
+    
     // Si le profil n'existe pas, en créer un nouveau
     if (!profile) {
       profile = new Profile({
@@ -45,11 +30,7 @@ const updateProfile = async (req, res) => {
         specialization: specialization || '',
         institution: institution || '',
         level: level || 'autre',
-        interests: Array.isArray(interests)
-          ? interests
-          : (typeof interests === 'string'
-              ? interests.split(',').map(item => item.trim())
-              : []),
+        interests: interests ? interests.split(',').map(item => item.trim()) : [],
         socialLinks: socialLinks || {},
         settings: settings || {}
       });
@@ -61,16 +42,9 @@ const updateProfile = async (req, res) => {
       if (institution !== undefined) profile.institution = institution;
       if (level !== undefined) profile.level = level;
       if (interests !== undefined) {
-        // Vérifier si interests est un tableau ou une chaîne
-        if (Array.isArray(interests)) {
-          profile.interests = interests;
-        } else if (typeof interests === 'string') {
-          profile.interests = interests.split(',').map(item => item.trim());
-        } else {
-          profile.interests = [];
-        }
+        profile.interests = interests.split(',').map(item => item.trim());
       }
-
+      
       // Mettre à jour les liens sociaux
       if (socialLinks) {
         profile.socialLinks = {
@@ -78,7 +52,7 @@ const updateProfile = async (req, res) => {
           ...socialLinks
         };
       }
-
+      
       // Mettre à jour les paramètres
       if (settings) {
         profile.settings = {
@@ -87,10 +61,10 @@ const updateProfile = async (req, res) => {
         };
       }
     }
-
+    
     // Sauvegarder le profil
     const updatedProfile = await profile.save();
-
+    
     res.status(200).json(updatedProfile);
   } catch (error) {
     console.error('Error in updateProfile:', error);
@@ -106,7 +80,7 @@ const uploadAvatar = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'Aucun fichier fourni' });
     }
-
+    
     // Uploader l'image sur Cloudinary
     const uploadResult = await uploadToCloudinary(req.file.buffer, {
       folder: 'avatars',
@@ -114,14 +88,14 @@ const uploadAvatar = async (req, res) => {
         { width: 250, height: 250, crop: 'fill' }
       ]
     });
-
+    
     if (!uploadResult || !uploadResult.secure_url) {
       throw new Error('Erreur lors de l\'upload sur Cloudinary');
     }
-
+    
     // Mettre à jour le profil avec le nouvel avatar
     let profile = await Profile.findOne({ user: req.user._id });
-
+    
     if (!profile) {
       // Créer un profil si nécessaire
       profile = new Profile({
@@ -140,74 +114,22 @@ const uploadAvatar = async (req, res) => {
           console.error('Erreur lors de la suppression de l\'ancien avatar:', error);
         }
       }
-
+      
       // Mettre à jour l'avatar
       profile.avatar = {
         url: uploadResult.secure_url,
         cloudinaryPublicId: uploadResult.public_id
       };
     }
-
+    
     const updatedProfile = await profile.save();
-
+    
     res.status(200).json({
       avatar: updatedProfile.avatar
     });
   } catch (error) {
     console.error('Error in uploadAvatar:', error);
     res.status(500).json({ message: error.message || 'Erreur lors de l\'upload de l\'avatar' });
-  }
-};
-
-// @desc    Définir un avatar prédéfini
-// @route   POST /api/social/profile/avatar/predefined
-// @access  Private
-const setPredefinedAvatar = async (req, res) => {
-  try {
-    console.log('Requête setPredefinedAvatar reçue:', req.body);
-    const { avatarId } = req.body;
-
-    if (!avatarId || !PREDEFINED_AVATARS[avatarId]) {
-      console.log('Avatar invalide:', avatarId);
-      return res.status(400).json({ message: 'Avatar invalide' });
-    }
-
-    console.log('Avatar valide:', avatarId, PREDEFINED_AVATARS[avatarId]);
-
-    // Récupérer le profil de l'utilisateur
-    let profile = await Profile.findOne({ user: req.user._id });
-
-    if (!profile) {
-      // Créer un profil si nécessaire
-      profile = new Profile({
-        user: req.user._id
-      });
-    }
-
-    // Supprimer l'ancien avatar de Cloudinary si nécessaire
-    if (profile.avatar && profile.avatar.cloudinaryPublicId) {
-      try {
-        await deleteFromCloudinary(profile.avatar.cloudinaryPublicId);
-      } catch (error) {
-        console.error('Erreur lors de la suppression de l\'ancien avatar:', error);
-      }
-    }
-
-    // Mettre à jour l'avatar avec l'avatar prédéfini
-    profile.avatar = {
-      url: PREDEFINED_AVATARS[avatarId].url,
-      predefinedId: avatarId,
-      name: PREDEFINED_AVATARS[avatarId].name
-    };
-
-    const updatedProfile = await profile.save();
-
-    res.status(200).json({
-      avatar: updatedProfile.avatar
-    });
-  } catch (error) {
-    console.error('Error in setPredefinedAvatar:', error);
-    res.status(500).json({ message: error.message || 'Erreur lors de la définition de l\'avatar' });
   }
 };
 
@@ -218,13 +140,13 @@ const getMyProfile = async (req, res) => {
   try {
     const profile = await Profile.findOne({ user: req.user._id })
       .populate('user', 'username role');
-
+    
     if (!profile) {
       // Créer un profil par défaut si nécessaire
       const newProfile = await Profile.createDefaultProfile(req.user._id);
       return res.status(200).json(await newProfile.populate('user', 'username role'));
     }
-
+    
     res.status(200).json(profile);
   } catch (error) {
     console.error('Error in getMyProfile:', error);
@@ -239,11 +161,11 @@ const getProfileByUserId = async (req, res) => {
   try {
     const profile = await Profile.findOne({ user: req.params.userId })
       .populate('user', 'username role');
-
+    
     if (!profile) {
       return res.status(404).json({ message: 'Profil non trouvé' });
     }
-
+    
     // Si le profil est privé et que l'utilisateur n'est pas le propriétaire ou un admin
     if (
       profile.settings.privateProfile &&
@@ -251,7 +173,7 @@ const getProfileByUserId = async (req, res) => {
     ) {
       return res.status(403).json({ message: 'Ce profil est privé' });
     }
-
+    
     res.status(200).json(profile);
   } catch (error) {
     console.error('Error in getProfileByUserId:', error);
@@ -259,12 +181,116 @@ const getProfileByUserId = async (req, res) => {
   }
 };
 
+// @desc    Suivre/Ne plus suivre un utilisateur
+// @route   POST /api/social/profile/:userId/follow
+// @access  Private
+const followUser = async (req, res) => {
+  try {
+    // Vérifier que l'utilisateur ne tente pas de se suivre lui-même
+    if (req.params.userId === req.user._id.toString()) {
+      return res.status(400).json({ message: 'Vous ne pouvez pas vous suivre vous-même' });
+    }
+    
+    // Vérifier que l'utilisateur à suivre existe
+    const userToFollow = await User.findById(req.params.userId);
+    
+    if (!userToFollow) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    
+    // Récupérer le profil de l'utilisateur connecté
+    let myProfile = await Profile.findOne({ user: req.user._id });
+    
+    if (!myProfile) {
+      // Créer un profil par défaut si nécessaire
+      myProfile = await Profile.createDefaultProfile(req.user._id);
+    }
+    
+    // Récupérer le profil de l'utilisateur à suivre
+    let targetProfile = await Profile.findOne({ user: req.params.userId });
+    
+    if (!targetProfile) {
+      // Créer un profil par défaut si nécessaire
+      targetProfile = await Profile.createDefaultProfile(req.params.userId);
+    }
+    
+    // Vérifier si l'utilisateur suit déjà la cible
+    const isFollowing = myProfile.following.includes(req.params.userId);
+    
+    if (isFollowing) {
+      // Ne plus suivre
+      myProfile.following = myProfile.following.filter(
+        id => id.toString() !== req.params.userId
+      );
+      
+      targetProfile.followers = targetProfile.followers.filter(
+        id => id.toString() !== req.user._id.toString()
+      );
+    } else {
+      // Suivre
+      myProfile.following.push(req.params.userId);
+      targetProfile.followers.push(req.user._id);
+    }
+    
+    // Sauvegarder les deux profils
+    await myProfile.save();
+    await targetProfile.save();
+    
+    res.status(200).json({
+      following: !isFollowing,
+      followingCount: myProfile.following.length,
+      followersCount: targetProfile.followers.length
+    });
+  } catch (error) {
+    console.error('Error in followUser:', error);
+    res.status(500).json({ message: error.message || 'Erreur lors du suivi/désabonnement' });
+  }
+};
 
+// @desc    Récupérer les utilisateurs suivis
+// @route   GET /api/social/profile/following
+// @access  Private
+const getFollowing = async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ user: req.user._id })
+      .populate('following', 'username');
+    
+    if (!profile) {
+      return res.status(404).json({ message: 'Profil non trouvé' });
+    }
+    
+    res.status(200).json(profile.following);
+  } catch (error) {
+    console.error('Error in getFollowing:', error);
+    res.status(500).json({ message: error.message || 'Erreur lors de la récupération des abonnements' });
+  }
+};
+
+// @desc    Récupérer les abonnés
+// @route   GET /api/social/profile/followers
+// @access  Private
+const getFollowers = async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ user: req.user._id })
+      .populate('followers', 'username');
+    
+    if (!profile) {
+      return res.status(404).json({ message: 'Profil non trouvé' });
+    }
+    
+    res.status(200).json(profile.followers);
+  } catch (error) {
+    console.error('Error in getFollowers:', error);
+    res.status(500).json({ message: error.message || 'Erreur lors de la récupération des abonnés' });
+  }
+};
 
 module.exports = {
   updateProfile,
   uploadAvatar,
-  setPredefinedAvatar,
   getMyProfile,
-  getProfileByUserId
+  getProfileByUserId,
+  followUser,
+  getFollowing,
+  getFollowers
 };
