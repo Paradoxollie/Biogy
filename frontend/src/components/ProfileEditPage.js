@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../config';
+import apiService from '../services/apiService';
 
 // Liste des avatars prédéfinis
 const PREDEFINED_AVATARS = [
@@ -174,34 +175,31 @@ function ProfileEditPage() {
           .filter(item => item)
       };
 
-      // Mettre à jour le profil
-      const profileResponse = await fetch(`${API_URL}/api/social/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userInfo.token}`
-        },
-        body: JSON.stringify(dataToSend)
-      });
+      console.log('URL de l\'API:', API_URL);
+      console.log('Données à envoyer:', dataToSend);
 
-      if (!profileResponse.ok) {
-        throw new Error('Erreur lors de la mise à jour du profil');
-      }
-
-      // Si un avatar est sélectionné, mettre à jour l'avatar
-      if (selectedAvatar) {
-        const avatarResponse = await fetch(`${API_URL}/api/social/profile/avatar/predefined`, {
-          method: 'POST',
+      try {
+        // Mettre à jour le profil avec notre service API
+        await apiService.put('api/social/profile', dataToSend, {
           headers: {
-            'Content-Type': 'application/json',
             Authorization: `Bearer ${userInfo.token}`
-          },
-          body: JSON.stringify({ avatarId: selectedAvatar })
+          }
         });
 
-        if (!avatarResponse.ok) {
-          throw new Error('Erreur lors de la mise à jour de l\'avatar');
+        // Si un avatar est sélectionné, mettre à jour l'avatar
+        if (selectedAvatar) {
+          await apiService.post('api/social/profile/avatar/predefined',
+            { avatarId: selectedAvatar },
+            {
+              headers: {
+                Authorization: `Bearer ${userInfo.token}`
+              }
+            }
+          );
         }
+      } catch (apiError) {
+        console.error('Erreur détaillée:', apiError);
+        throw new Error(`Erreur lors de la mise à jour du profil: ${apiError.message}`);
       }
 
       setSuccess(true);
