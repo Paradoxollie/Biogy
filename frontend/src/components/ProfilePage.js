@@ -7,34 +7,34 @@ function ProfilePage() {
   const { userId } = useParams();
   const { userInfo } = useAuth();
   const navigate = useNavigate();
-  
+
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [followLoading, setFollowLoading] = useState(false);
-  
+  // État supplémentaire pour les fonctionnalités améliorées
+  const [showBadges, setShowBadges] = useState(false);
+
   // Déterminer si c'est le profil de l'utilisateur connecté
   const isOwnProfile = !userId || (userInfo && userId === userInfo._id);
-  
+
   // Charger le profil
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        
+
         // URL de l'API en fonction de si c'est le profil de l'utilisateur connecté ou non
         const url = isOwnProfile
           ? `${API_URL}/api/social/profile`
           : `${API_URL}/api/social/profile/${userId}`;
-        
+
         // Headers avec token si nécessaire
         const headers = userInfo
           ? { Authorization: `Bearer ${userInfo.token}` }
           : {};
-        
+
         const response = await fetch(url, { headers });
-        
+
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Profil non trouvé');
@@ -44,14 +44,10 @@ function ProfilePage() {
             throw new Error('Erreur lors de la récupération du profil');
           }
         }
-        
+
         const data = await response.json();
         setProfile(data);
-        
-        // Vérifier si l'utilisateur suit déjà ce profil
-        if (userInfo && data.followers && data.followers.includes(userInfo._id)) {
-          setIsFollowing(true);
-        }
+
       } catch (error) {
         console.error('Error fetching profile:', error);
         setError(error.message);
@@ -59,49 +55,15 @@ function ProfilePage() {
         setLoading(false);
       }
     };
-    
+
     fetchProfile();
   }, [userId, userInfo, isOwnProfile]);
-  
-  // Gérer le suivi/désabonnement
-  const handleFollow = async () => {
-    if (!userInfo) {
-      navigate('/login', { state: { from: `/profile/${userId}` } });
-      return;
-    }
-    
-    try {
-      setFollowLoading(true);
-      
-      const response = await fetch(`${API_URL}/api/social/profile/${userId}/follow`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userInfo.token}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Erreur lors du suivi/désabonnement');
-      }
-      
-      const data = await response.json();
-      setIsFollowing(data.following);
-      
-      // Mettre à jour le nombre d'abonnés dans le profil
-      setProfile(prev => ({
-        ...prev,
-        followers: data.following
-          ? [...(prev.followers || []), userInfo._id]
-          : (prev.followers || []).filter(id => id !== userInfo._id)
-      }));
-    } catch (error) {
-      console.error('Error following/unfollowing:', error);
-    } finally {
-      setFollowLoading(false);
-    }
+
+  // Gérer l'affichage des badges
+  const toggleBadges = () => {
+    setShowBadges(!showBadges);
   };
-  
+
   // Formater la date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -111,7 +73,7 @@ function ProfilePage() {
       day: 'numeric'
     });
   };
-  
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
@@ -120,7 +82,7 @@ function ProfilePage() {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -136,7 +98,7 @@ function ProfilePage() {
       </div>
     );
   }
-  
+
   if (!profile) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -152,7 +114,7 @@ function ProfilePage() {
       </div>
     );
   }
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* En-tête du profil */}
@@ -176,8 +138,8 @@ function ProfilePage() {
               )}
             </div>
           </div>
-          
-          {/* Bouton de suivi ou d'édition */}
+
+          {/* Bouton d'édition */}
           <div className="absolute bottom-4 right-4">
             {isOwnProfile ? (
               <Link
@@ -186,46 +148,22 @@ function ProfilePage() {
               >
                 Modifier le profil
               </Link>
-            ) : userInfo ? (
-              <button
-                onClick={handleFollow}
-                disabled={followLoading}
-                className={`px-4 py-2 rounded-lg transition-all duration-300 ${
-                  isFollowing
-                    ? 'bg-white text-lab-purple border border-lab-purple hover:bg-lab-purple/5'
-                    : 'bg-lab-purple text-white hover:bg-lab-purple/90'
-                }`}
-              >
-                {followLoading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Chargement...
-                  </span>
-                ) : isFollowing ? (
-                  'Ne plus suivre'
-                ) : (
-                  'Suivre'
-                )}
-              </button>
             ) : (
               <Link
-                to="/login"
+                to="/forum"
                 className="px-4 py-2 bg-lab-purple text-white rounded-lg hover:bg-lab-purple/90 transition-all duration-300"
               >
-                Se connecter pour suivre
+                Voir dans le forum
               </Link>
             )}
           </div>
         </div>
-        
+
         <div className="pt-20 pb-6 px-8">
           <h1 className="text-2xl font-bold text-gray-800">
             {profile.displayName || profile.user?.username || 'Utilisateur'}
           </h1>
-          
+
           <div className="flex items-center text-gray-500 mt-1">
             <span>@{profile.user?.username}</span>
             {profile.user?.role === 'admin' && (
@@ -236,23 +174,23 @@ function ProfilePage() {
             <span className="mx-2">•</span>
             <span>Membre depuis {formatDate(profile.createdAt)}</span>
           </div>
-          
+
           <div className="flex items-center mt-4 space-x-4 text-sm">
-            <div>
-              <span className="font-semibold">{profile.followers?.length || 0}</span> abonnés
-            </div>
-            <div>
-              <span className="font-semibold">{profile.following?.length || 0}</span> abonnements
-            </div>
+            <button
+              onClick={toggleBadges}
+              className="px-3 py-1 bg-lab-purple/10 text-lab-purple rounded-full hover:bg-lab-purple/20 transition-all duration-200"
+            >
+              {showBadges ? 'Masquer les badges' : 'Voir les badges'}
+            </button>
           </div>
-          
+
           {profile.bio && (
             <div className="mt-6">
               <h3 className="text-gray-700 font-medium mb-2">Bio</h3>
               <p className="text-gray-600">{profile.bio}</p>
             </div>
           )}
-          
+
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             {profile.specialization && (
               <div>
@@ -260,14 +198,14 @@ function ProfilePage() {
                 <p className="text-gray-600">{profile.specialization}</p>
               </div>
             )}
-            
+
             {profile.institution && (
               <div>
                 <h3 className="text-gray-700 font-medium mb-1">Institution</h3>
                 <p className="text-gray-600">{profile.institution}</p>
               </div>
             )}
-            
+
             {profile.level && (
               <div>
                 <h3 className="text-gray-700 font-medium mb-1">Niveau</h3>
@@ -284,7 +222,7 @@ function ProfilePage() {
               </div>
             )}
           </div>
-          
+
           {profile.interests && profile.interests.length > 0 && (
             <div className="mt-6">
               <h3 className="text-gray-700 font-medium mb-2">Centres d'intérêt</h3>
@@ -300,7 +238,7 @@ function ProfilePage() {
               </div>
             </div>
           )}
-          
+
           {profile.socialLinks && Object.values(profile.socialLinks).some(link => link) && (
             <div className="mt-6">
               <h3 className="text-gray-700 font-medium mb-2">Liens</h3>
@@ -360,22 +298,72 @@ function ProfilePage() {
           )}
         </div>
       </div>
-      
-      {/* Activité récente - à implémenter dans une future version */}
+
+      {/* Section des badges */}
+      {showBadges && (
+        <div className="bg-white rounded-lg shadow-md p-6 sketch-container mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Badges et réalisations</h2>
+
+          {profile.badges && profile.badges.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {profile.badges.map((badge, index) => (
+                <div key={index} className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+                  <div className="w-16 h-16 flex items-center justify-center bg-lab-purple/10 rounded-full mb-2">
+                    <span className="text-2xl">{badge.icon || '🏆'}</span>
+                  </div>
+                  <h3 className="font-medium text-gray-800">{badge.name}</h3>
+                  <p className="text-xs text-gray-500 text-center mt-1">{badge.description}</p>
+                  <span className="text-xs text-gray-400 mt-2">
+                    {new Date(badge.awardedAt).toLocaleDateString('fr-FR')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">Aucun badge pour le moment</p>
+              <p className="text-sm text-gray-400">
+                Participez activement à la communauté pour gagner des badges!
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Section des statistiques */}
       <div className="bg-white rounded-lg shadow-md p-6 sketch-container">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Activité récente</h2>
-        <p className="text-gray-600 text-center py-8">
-          Cette fonctionnalité sera disponible prochainement.
-        </p>
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Statistiques</h2>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-lab-blue/5 p-4 rounded-lg text-center">
+            <div className="text-3xl font-bold text-lab-blue mb-1">0</div>
+            <div className="text-sm text-gray-600">Publications</div>
+          </div>
+
+          <div className="bg-lab-purple/5 p-4 rounded-lg text-center">
+            <div className="text-3xl font-bold text-lab-purple mb-1">0</div>
+            <div className="text-sm text-gray-600">Discussions</div>
+          </div>
+
+          <div className="bg-lab-green/5 p-4 rounded-lg text-center">
+            <div className="text-3xl font-bold text-lab-green mb-1">0</div>
+            <div className="text-sm text-gray-600">Commentaires</div>
+          </div>
+
+          <div className="bg-amber-50 p-4 rounded-lg text-center">
+            <div className="text-3xl font-bold text-amber-600 mb-1">0</div>
+            <div className="text-sm text-gray-600">Likes reçus</div>
+          </div>
+        </div>
       </div>
-      
+
       {/* Styles spécifiques pour l'effet crayon/schéma */}
       <style jsx="true">{`
         .sketch-container {
           position: relative;
           box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
         }
-        
+
         .sketch-container:before {
           content: "";
           position: absolute;

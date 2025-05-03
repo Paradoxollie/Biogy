@@ -12,6 +12,7 @@ import ForumPage from './components/ForumPage';
 import TopicPage from './components/TopicPage';
 import NewTopicPage from './components/NewTopicPage';
 import ProfilePage from './components/ProfilePage';
+import ProfileEditPage from './components/ProfileEditPage';
 import AuthDebug from './context/AuthDebug';
 
 function App() {
@@ -34,8 +35,9 @@ function App() {
           <Route path="/forum" element={<ForumPage />} />
           <Route path="/forum/:id" element={<TopicPage />} />
           <Route path="/forum/nouveau" element={<NewTopicPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/edit" element={<ProfileEditPage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </Layout>
     </>
