@@ -11,6 +11,11 @@
 [[plugins]]
   package = "@netlify/plugin-functions-install-core"
 
+# Configuration des fonctions Netlify
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["axios"]
+
 # Redirections spécifiques pour les profils (priorité plus élevée)
 [[redirects]]
   from = "/api/social/profile*"

@@ -23,7 +23,7 @@ function ProfileOnline() {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!userInfo) {
-        navigate('/login', { state: { from: '/profile' } });
+        navigate('/login', { state: { from: '/profile-online' } });
         return;
       }
 
@@ -33,26 +33,63 @@ function ProfileOnline() {
 
         // Utiliser la fonction Netlify pour récupérer le profil
         const endpoint = isOwnProfile ? '' : `/${userId}`;
-        
-        const response = await axios({
-          method: 'GET',
-          url: `/.netlify/functions/profile-online${endpoint}`,
-          headers: {
-            'Authorization': `Bearer ${userInfo.token}`
-          },
-          timeout: 10000
-        });
 
-        console.log('Données du profil reçues:', response.data);
-        setProfile(response.data);
-        setUsingFallback(false);
+        // Essayer d'abord avec la fonction Netlify améliorée
+        try {
+          console.log('Tentative avec la fonction profile-online...');
+          const response = await axios({
+            method: 'GET',
+            url: `/.netlify/functions/profile-online${endpoint}`,
+            headers: {
+              'Authorization': `Bearer ${userInfo.token}`
+            },
+            timeout: 15000
+          });
+
+          console.log('Données du profil reçues via profile-online:', response.data);
+          setProfile(response.data);
+          setUsingFallback(false);
+          return;
+        } catch (netlifyError) {
+          console.error('Erreur avec la fonction profile-online:', netlifyError);
+
+          // Essayer avec la fonction de diagnostic CORS
+          try {
+            console.log('Tentative avec la fonction cors-diagnostic...');
+            const corsResponse = await axios({
+              method: 'GET',
+              url: '/.netlify/functions/cors-diagnostic',
+              params: {
+                endpoint: `social/profile${endpoint}`,
+                method: 'GET',
+                useToken: 'true'
+              },
+              headers: {
+                'Authorization': `Bearer ${userInfo.token}`
+              },
+              timeout: 15000
+            });
+
+            if (corsResponse.data && corsResponse.data.actual && corsResponse.data.actual.data) {
+              console.log('Données du profil reçues via cors-diagnostic:', corsResponse.data.actual.data);
+              setProfile(corsResponse.data.actual.data);
+              setUsingFallback(false);
+              return;
+            } else {
+              throw new Error('Données de profil non trouvées dans la réponse du diagnostic');
+            }
+          } catch (corsError) {
+            console.error('Erreur avec la fonction cors-diagnostic:', corsError);
+            throw corsError; // Passer à la gestion de fallback
+          }
+        }
       } catch (error) {
-        console.error('Error fetching online profile:', error);
-        
+        console.error('Toutes les tentatives de récupération en ligne ont échoué:', error);
+
         // Essayer de récupérer le profil local comme fallback
         try {
           const storedProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
-          
+
           if (storedProfile) {
             const profileData = JSON.parse(storedProfile);
             console.log('Utilisation du profil local comme fallback:', profileData);
@@ -67,7 +104,7 @@ function ProfileOnline() {
             setError('Impossible de charger le profil. Affichage d\'un profil simulé.');
           }
         } catch (fallbackError) {
-          console.error('Error with fallback profile:', fallbackError);
+          console.error('Erreur avec le profil de secours:', fallbackError);
           const simulatedProfile = createSimulatedProfile(userInfo);
           setProfile(simulatedProfile);
           setUsingFallback(true);
@@ -92,10 +129,10 @@ function ProfileOnline() {
       { id: 'avatar5', url: '/images/avatars/avatar5.png', name: 'Neurone' },
       { id: 'avatar6', url: '/images/avatars/avatar6.png', name: 'Bactérie' },
     ];
-    
+
     // Sélectionner un avatar aléatoire
     const randomAvatar = avatars[Math.floor(Math.random() * avatars.length)];
-    
+
     // Créer un nouveau profil
     return {
       _id: userInfo._id,
@@ -154,16 +191,16 @@ function ProfileOnline() {
           <p className="text-yellow-600">{error}</p>
         </div>
       )}
-      
+
       {usingFallback && (
         <div className="bg-blue-50 p-4 rounded-lg mb-4">
           <p className="text-blue-600">
-            <strong>Mode hors ligne:</strong> Vous consultez une version locale du profil. 
+            <strong>Mode hors ligne:</strong> Vous consultez une version locale du profil.
             Les modifications ne seront pas synchronisées avec le serveur.
           </p>
         </div>
       )}
-      
+
       {/* En-tête du profil */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden sketch-container mb-6">
         <div className="bg-gradient-to-r from-lab-blue to-lab-purple h-32 relative">
@@ -211,7 +248,7 @@ function ProfileOnline() {
           <h1 className="text-2xl font-bold text-gray-800">
             {profile.displayName || profile.user?.username || 'Utilisateur'}
           </h1>
-          
+
           <div className="text-sm text-gray-500 mb-4">
             @{profile.user?.username}
             {profile.simulated && (
@@ -253,14 +290,14 @@ function ProfileOnline() {
                 </li>
               </ul>
             </div>
-            
+
             <div>
               <h2 className="text-lg font-semibold text-gray-700 mb-2">Centres d'intérêt</h2>
               <div className="flex flex-wrap gap-2">
                 {Array.isArray(profile.interests) && profile.interests.length > 0 ? (
                   profile.interests.map((interest, index) => (
-                    <span 
-                      key={index} 
+                    <span
+                      key={index}
                       className="bg-lab-blue/10 text-lab-blue px-3 py-1 rounded-full text-sm"
                     >
                       {interest}
