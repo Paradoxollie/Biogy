@@ -1,5 +1,8 @@
-# Redirection de l'API vers le backend
+# Redirection de l'API vers le backend avec CORS headers
 /api/*  https://biogy-api.onrender.com/api/:splat  200
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+  Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept, Origin
 
 # Redirection SPA pour React Router
 /*    /index.html   200

@@ -175,6 +175,7 @@ function ProfileEditPage() {
       };
 
       // Mettre à jour le profil
+      console.log('Envoi des données de profil:', dataToSend);
       const profileResponse = await fetch(`${API_URL}/api/social/profile`, {
         method: 'PUT',
         headers: {
@@ -185,22 +186,37 @@ function ProfileEditPage() {
       });
 
       if (!profileResponse.ok) {
-        throw new Error('Erreur lors de la mise à jour du profil');
+        const errorData = await profileResponse.json().catch(() => ({}));
+        console.error('Erreur de réponse du serveur:', profileResponse.status, errorData);
+        throw new Error(`Erreur lors de la mise à jour du profil: ${errorData.message || profileResponse.status}`);
       }
+
+      console.log('Profil mis à jour avec succès');
 
       // Si un avatar est sélectionné, mettre à jour l'avatar
       if (selectedAvatar) {
-        const avatarResponse = await fetch(`${API_URL}/api/social/profile/avatar/predefined`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userInfo.token}`
-          },
-          body: JSON.stringify({ avatarId: selectedAvatar })
-        });
+        console.log('Envoi de l\'avatar sélectionné:', selectedAvatar);
+        try {
+          const avatarResponse = await fetch(`${API_URL}/api/social/profile/avatar/predefined`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${userInfo.token}`
+            },
+            body: JSON.stringify({ avatarId: selectedAvatar })
+          });
 
-        if (!avatarResponse.ok) {
-          throw new Error('Erreur lors de la mise à jour de l\'avatar');
+          if (!avatarResponse.ok) {
+            const errorData = await avatarResponse.json().catch(() => ({}));
+            console.error('Erreur de réponse du serveur (avatar):', avatarResponse.status, errorData);
+            throw new Error(`Erreur lors de la mise à jour de l'avatar: ${errorData.message || avatarResponse.status}`);
+          }
+
+          console.log('Avatar mis à jour avec succès');
+        } catch (avatarError) {
+          console.error('Erreur lors de la mise à jour de l\'avatar:', avatarError);
+          // Ne pas bloquer la mise à jour du profil si l'avatar échoue
+          setError(`Profil mis à jour, mais erreur avec l'avatar: ${avatarError.message}`);
         }
       }
 

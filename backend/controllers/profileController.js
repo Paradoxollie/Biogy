@@ -3,17 +3,18 @@ const User = require('../models/User');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
 
 // Liste des avatars prédéfinis avec leurs noms
+// Utiliser des URLs absolues pour éviter les problèmes de chemin
 const PREDEFINED_AVATARS = {
-  avatar1: { url: '/images/avatars/avatar1.png', name: 'Scientifique' },
-  avatar2: { url: '/images/avatars/avatar2.png', name: 'Scientifique femme' },
-  avatar3: { url: '/images/avatars/avatar3.png', name: 'Microscope' },
-  avatar4: { url: '/images/avatars/avatar4.png', name: 'ADN' },
-  avatar5: { url: '/images/avatars/avatar5.png', name: 'Atome' },
-  avatar6: { url: '/images/avatars/avatar6.png', name: 'Éprouvette' },
-  avatar7: { url: '/images/avatars/avatar7.png', name: 'Molécule' },
-  avatar8: { url: '/images/avatars/avatar8.png', name: 'Cellule' },
-  avatar9: { url: '/images/avatars/avatar9.png', name: 'Plante' },
-  avatar10: { url: '/images/avatars/avatar10.png', name: 'Cerveau' },
+  avatar1: { url: 'https://biogy.netlify.app/images/avatars/avatar1.png', name: 'Scientifique' },
+  avatar2: { url: 'https://biogy.netlify.app/images/avatars/avatar2.png', name: 'Scientifique femme' },
+  avatar3: { url: 'https://biogy.netlify.app/images/avatars/avatar3.png', name: 'Microscope' },
+  avatar4: { url: 'https://biogy.netlify.app/images/avatars/avatar4.png', name: 'ADN' },
+  avatar5: { url: 'https://biogy.netlify.app/images/avatars/avatar5.png', name: 'Atome' },
+  avatar6: { url: 'https://biogy.netlify.app/images/avatars/avatar6.png', name: 'Éprouvette' },
+  avatar7: { url: 'https://biogy.netlify.app/images/avatars/avatar7.png', name: 'Molécule' },
+  avatar8: { url: 'https://biogy.netlify.app/images/avatars/avatar8.png', name: 'Cellule' },
+  avatar9: { url: 'https://biogy.netlify.app/images/avatars/avatar9.png', name: 'Plante' },
+  avatar10: { url: 'https://biogy.netlify.app/images/avatars/avatar10.png', name: 'Cerveau' },
 };
 
 // @desc    Créer ou mettre à jour le profil de l'utilisateur
@@ -152,11 +153,15 @@ const uploadAvatar = async (req, res) => {
 // @access  Private
 const setPredefinedAvatar = async (req, res) => {
   try {
+    console.log('Requête setPredefinedAvatar reçue:', req.body);
     const { avatarId } = req.body;
 
     if (!avatarId || !PREDEFINED_AVATARS[avatarId]) {
+      console.log('Avatar invalide:', avatarId);
       return res.status(400).json({ message: 'Avatar invalide' });
     }
+
+    console.log('Avatar valide:', avatarId, PREDEFINED_AVATARS[avatarId]);
 
     // Récupérer le profil de l'utilisateur
     let profile = await Profile.findOne({ user: req.user._id });
