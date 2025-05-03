@@ -7,12 +7,12 @@ import { API_URL, CORS_PROXIES, TIMEOUTS, FEATURES } from '../config';
 // Fonction pour utiliser un proxy CORS si nécessaire
 const withCorsProxy = (url) => {
   if (!FEATURES.useProxies) return url;
-  
+
   // Si l'URL est déjà un proxy, la retourner telle quelle
   if (CORS_PROXIES.some(proxy => url.startsWith(proxy))) {
     return url;
   }
-  
+
   // Utiliser le premier proxy disponible
   return `${CORS_PROXIES[0]}${encodeURIComponent(url)}`;
 };
@@ -22,13 +22,13 @@ const isUrlAccessible = async (url) => {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2000);
-    
+
     const response = await fetch(url, {
       method: 'HEAD',
       mode: 'cors',
       signal: controller.signal
     });
-    
+
     clearTimeout(timeoutId);
     return response.ok;
   } catch (error) {
@@ -39,17 +39,24 @@ const isUrlAccessible = async (url) => {
 
 // Fonction pour effectuer une requête API avec gestion des erreurs et CORS
 export const apiRequest = async (endpoint, options = {}) => {
-  const url = endpoint.startsWith('http') 
-    ? endpoint 
-    : `${API_URL}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
-  
+  // Forcer l'utilisation de l'URL correcte
+  const API_BASE_URL = 'https://biogy-api.onrender.com';
+
+  // Construire l'URL complète
+  const url = endpoint.startsWith('http')
+    ? endpoint
+    : `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+
+  console.log('🔍 API_URL dans config:', API_URL);
+  console.log('🔍 URL utilisée:', url);
+
   const defaultOptions = {
     headers: {
       'Content-Type': 'application/json'
     },
     timeout: TIMEOUTS.apiRequest
   };
-  
+
   const requestOptions = {
     ...defaultOptions,
     ...options,
@@ -58,17 +65,17 @@ export const apiRequest = async (endpoint, options = {}) => {
       ...options.headers
     }
   };
-  
+
   // Ajouter un timeout à la requête
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), requestOptions.timeout);
   requestOptions.signal = controller.signal;
-  
+
   try {
     // Essayer d'abord sans proxy
     let response;
     let error;
-    
+
     try {
       console.log(`🔄 Requête API directe vers: ${url}`);
       response = await fetch(url, requestOptions);
@@ -76,13 +83,13 @@ export const apiRequest = async (endpoint, options = {}) => {
       console.log(`❌ Échec de la requête directe:`, err.message);
       error = err;
     }
-    
+
     // Si la requête directe échoue, essayer avec un proxy
     if (!response || !response.ok) {
       if (FEATURES.useProxies) {
         const proxyUrl = withCorsProxy(url);
         console.log(`🔄 Tentative avec proxy: ${proxyUrl}`);
-        
+
         try {
           response = await fetch(proxyUrl, requestOptions);
         } catch (proxyError) {
@@ -95,11 +102,11 @@ export const apiRequest = async (endpoint, options = {}) => {
         throw error || new Error(`Erreur lors de la requête vers ${url}`);
       }
     }
-    
+
     // Vérifier si la réponse est OK
     if (!response.ok) {
       let errorMessage;
-      
+
       try {
         // Essayer de parser le message d'erreur JSON
         const errorData = await response.json();
@@ -108,10 +115,10 @@ export const apiRequest = async (endpoint, options = {}) => {
         // Si ce n'est pas du JSON, utiliser le statut HTTP
         errorMessage = `Erreur ${response.status}: ${response.statusText}`;
       }
-      
+
       throw new Error(errorMessage);
     }
-    
+
     // Parser la réponse JSON
     const data = await response.json();
     return data;

@@ -175,27 +175,46 @@ function ProfileEditPage() {
           .filter(item => item)
       };
 
-      console.log('URL de l\'API:', API_URL);
+      // Forcer l'utilisation de l'URL correcte
+      const API_CORRECT_URL = 'https://biogy-api.onrender.com';
+      console.log('URL de l\'API dans config:', API_URL);
+      console.log('URL de l\'API corrigée:', API_CORRECT_URL);
       console.log('Données à envoyer:', dataToSend);
 
       try {
-        // Mettre à jour le profil avec notre service API
-        await apiService.put('api/social/profile', dataToSend, {
+        // Utiliser les fonctions Netlify pour éviter les problèmes CORS
+        console.log('Utilisation des fonctions Netlify pour les requêtes API');
+
+        // Mettre à jour le profil
+        const profileResponse = await fetch('/.netlify/functions/profile-api', {
+          method: 'PUT',
           headers: {
-            Authorization: `Bearer ${userInfo.token}`
-          }
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userInfo.token}`
+          },
+          body: JSON.stringify(dataToSend)
         });
+
+        if (!profileResponse.ok) {
+          const errorData = await profileResponse.json();
+          throw new Error(errorData.message || 'Erreur lors de la mise à jour du profil');
+        }
 
         // Si un avatar est sélectionné, mettre à jour l'avatar
         if (selectedAvatar) {
-          await apiService.post('api/social/profile/avatar/predefined',
-            { avatarId: selectedAvatar },
-            {
-              headers: {
-                Authorization: `Bearer ${userInfo.token}`
-              }
-            }
-          );
+          const avatarResponse = await fetch('/.netlify/functions/profile-avatar', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userInfo.token}`
+            },
+            body: JSON.stringify({ avatarId: selectedAvatar })
+          });
+
+          if (!avatarResponse.ok) {
+            const errorData = await avatarResponse.json();
+            throw new Error(errorData.message || 'Erreur lors de la mise à jour de l\'avatar');
+          }
         }
       } catch (apiError) {
         console.error('Erreur détaillée:', apiError);
