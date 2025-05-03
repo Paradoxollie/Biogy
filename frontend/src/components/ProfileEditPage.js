@@ -221,11 +221,11 @@ function ProfileEditPage() {
       console.log('Données à envoyer:', dataToSend);
 
       try {
-        // Utiliser les fonctions Netlify pour éviter les problèmes CORS
-        console.log('Utilisation des fonctions Netlify pour les requêtes API');
+        // Utiliser la nouvelle fonction Netlify directe pour éviter les problèmes CORS
+        console.log('Utilisation de la fonction Netlify directe pour les requêtes API');
 
         // Mettre à jour le profil
-        const profileResponse = await fetch('/.netlify/functions/profile-api', {
+        const profileResponse = await fetch('/.netlify/functions/profile-update-direct', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -234,9 +234,18 @@ function ProfileEditPage() {
           body: JSON.stringify(dataToSend)
         });
 
+        console.log('Réponse de la fonction Netlify:', profileResponse.status);
+
         if (!profileResponse.ok) {
-          const errorData = await profileResponse.json();
-          throw new Error(errorData.message || 'Erreur lors de la mise à jour du profil');
+          let errorMessage = 'Erreur lors de la mise à jour du profil';
+          try {
+            const errorData = await profileResponse.json();
+            console.error('Données d\'erreur:', errorData);
+            errorMessage = errorData.message || errorMessage;
+          } catch (jsonError) {
+            console.error('Erreur lors du parsing de la réponse d\'erreur:', jsonError);
+          }
+          throw new Error(errorMessage);
         }
 
         // Si un avatar est sélectionné, mettre à jour l'avatar
