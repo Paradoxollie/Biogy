@@ -118,7 +118,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
 // Afficher les routes disponibles pour le débogage
 console.log('Routes disponibles:');

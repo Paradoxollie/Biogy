@@ -11,5 +11,9 @@ services:
       - key: NODE_VERSION
         value: 18.19.0
       - key: PORT
-        value: 10000
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        value: https://biogy.netlify.app
     autoDeploy: true
