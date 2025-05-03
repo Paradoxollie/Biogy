@@ -14,7 +14,7 @@
 # Redirections spécifiques pour les profils (priorité plus élevée)
 [[redirects]]
   from = "/api/social/profile*"
-  to = "https://biogy-api.onrender.com/api/social/profile:splat"
+  to = "/.netlify/functions/profile-api:splat"
   status = 200
   force = true
 

@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import proxyService from '../services/proxyService';
 
-// Liste des avatars prédéfinis
+// Avatars prédéfinis
 const PREDEFINED_AVATARS = [
-  { id: 'avatar1', url: '/images/avatars/avatar1.png', name: 'Scientifique' },
-  { id: 'avatar2', url: '/images/avatars/avatar2.png', name: 'Scientifique femme' },
-  { id: 'avatar3', url: '/images/avatars/avatar3.png', name: 'Microscope' },
-  { id: 'avatar4', url: '/images/avatars/avatar4.png', name: 'ADN' },
-  { id: 'avatar5', url: '/images/avatars/avatar5.png', name: 'Atome' },
-  { id: 'avatar6', url: '/images/avatars/avatar6.png', name: 'Éprouvette' },
+  { id: 'avatar1', url: '/images/avatars/avatar1.png', name: 'ADN' },
+  { id: 'avatar2', url: '/images/avatars/avatar2.png', name: 'Microscope' },
+  { id: 'avatar3', url: '/images/avatars/avatar3.png', name: 'Atome' },
+  { id: 'avatar4', url: '/images/avatars/avatar4.png', name: 'Éprouvette' },
+  { id: 'avatar5', url: '/images/avatars/avatar5.png', name: 'Neurone' },
+  { id: 'avatar6', url: '/images/avatars/avatar6.png', name: 'Bactérie' },
   { id: 'avatar7', url: '/images/avatars/avatar7.png', name: 'Molécule' },
   { id: 'avatar8', url: '/images/avatars/avatar8.png', name: 'Cellule' },
   { id: 'avatar9', url: '/images/avatars/avatar9.png', name: 'Plante' },
   { id: 'avatar10', url: '/images/avatars/avatar10.png', name: 'Cerveau' },
 ];
+
+// Clé pour le stockage local du profil
+const PROFILE_STORAGE_KEY = 'biogy_profile_data';
 
 function ProfileEditPage() {
   const { userInfo } = useAuth();
@@ -34,109 +36,96 @@ function ProfileEditPage() {
     institution: '',
     level: 'autre',
     interests: '',
-    socialLinks: {
-      website: '',
-      linkedin: '',
-      twitter: '',
-      github: '',
-      researchGate: ''
-    },
-    settings: {
-      emailNotifications: true,
-      privateProfile: false,
-      showEmail: false
-    }
   });
 
   // État pour l'avatar sélectionné
   const [selectedAvatar, setSelectedAvatar] = useState(null);
 
-  // Charger les données du profil
+  // Charger les données du profil depuis le localStorage
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!userInfo || !userInfo.token) {
+    const loadProfile = () => {
+      if (!userInfo) {
         navigate('/login', { state: { from: '/profile/edit' } });
         return;
       }
 
       try {
         setLoading(true);
-        console.log('Chargement du profil avec proxyService');
+        console.log('Chargement du profil depuis le localStorage...');
 
-        // Utiliser le service de proxy pour récupérer le profil
-        const data = await proxyService.fetchProfile(userInfo.token);
+        // Récupérer les données du profil du localStorage
+        const storedProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
+        let profileData;
+
+        if (storedProfile) {
+          // Utiliser les données stockées
+          profileData = JSON.parse(storedProfile);
+          console.log('Données du profil récupérées du localStorage:', profileData);
+        } else {
+          // Créer un profil par défaut
+          profileData = {
+            displayName: userInfo.username || '',
+            bio: 'Bienvenue sur mon profil!',
+            specialization: '',
+            institution: '',
+            level: 'autre',
+            interests: ['biologie', 'sciences'],
+            avatar: {
+              id: 'avatar1',
+              url: '/images/avatars/avatar1.png'
+            }
+          };
+          console.log('Profil par défaut créé:', profileData);
+        }
 
         // Mettre à jour le formulaire avec les données du profil
         setFormData({
-          displayName: data.displayName || '',
-          bio: data.bio || '',
-          specialization: data.specialization || '',
-          institution: data.institution || '',
-          level: data.level || 'autre',
-          interests: data.interests ? data.interests.join(', ') : '',
-          socialLinks: {
-            website: data.socialLinks?.website || '',
-            linkedin: data.socialLinks?.linkedin || '',
-            twitter: data.socialLinks?.twitter || '',
-            github: data.socialLinks?.github || '',
-            researchGate: data.socialLinks?.researchGate || ''
-          },
-          settings: {
-            emailNotifications: data.settings?.emailNotifications ?? true,
-            privateProfile: data.settings?.privateProfile ?? false,
-            showEmail: data.settings?.showEmail ?? false
-          }
+          displayName: profileData.displayName || userInfo.username || '',
+          bio: profileData.bio || '',
+          specialization: profileData.specialization || '',
+          institution: profileData.institution || '',
+          level: profileData.level || 'autre',
+          interests: Array.isArray(profileData.interests)
+            ? profileData.interests.join(', ')
+            : profileData.interests || '',
         });
 
-        // Vérifier si l'avatar actuel correspond à un avatar prédéfini
-        if (data.avatar && data.avatar.url) {
-          const matchedAvatar = PREDEFINED_AVATARS.find(avatar =>
-            data.avatar.url.includes(avatar.id)
-          );
-
-          if (matchedAvatar) {
-            setSelectedAvatar(matchedAvatar.id);
-          }
+        // Définir l'avatar sélectionné
+        if (profileData.avatar && profileData.avatar.id) {
+          setSelectedAvatar(profileData.avatar.id);
+        } else {
+          // Avatar par défaut
+          setSelectedAvatar('avatar1');
         }
       } catch (error) {
-        console.error('Error fetching profile:', error);
-        setError(error.message);
+        console.error('Erreur lors du chargement du profil:', error);
+        setError('Impossible de charger le profil. Utilisation des valeurs par défaut.');
+
+        // Initialiser avec des valeurs par défaut
+        setFormData({
+          displayName: userInfo.username || '',
+          bio: '',
+          specialization: '',
+          institution: '',
+          level: 'autre',
+          interests: '',
+        });
+        setSelectedAvatar('avatar1');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
+    loadProfile();
   }, [userInfo, navigate]);
 
   // Gérer les changements dans le formulaire
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    if (name.startsWith('socialLinks.')) {
-      const socialLinkKey = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        socialLinks: {
-          ...prev.socialLinks,
-          [socialLinkKey]: value
-        }
-      }));
-    } else if (name.startsWith('settings.')) {
-      const settingKey = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        settings: {
-          ...prev.settings,
-          [settingKey]: type === 'checkbox' ? checked : value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   // Gérer la sélection d'un avatar
@@ -144,51 +133,67 @@ function ProfileEditPage() {
     setSelectedAvatar(avatarId);
   };
 
-  // Soumettre le formulaire
-  const handleSubmit = async (e) => {
+  // Soumettre le formulaire (version locale)
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!userInfo || !userInfo.token) {
-      navigate('/login', { state: { from: '/profile/edit' } });
+    if (!userInfo) {
+      navigate('/login');
       return;
     }
 
     try {
       setSaving(true);
       setError(null);
+      setSuccess(false);
 
       // Préparer les données à envoyer
-      const dataToSend = {
-        ...formData,
-        interests: typeof formData.interests === 'string'
-          ? formData.interests
-              .split(',')
-              .map(item => item.trim())
-              .filter(item => item)
-          : formData.interests || []
+      const interests = formData.interests
+        .split(',')
+        .map(item => item.trim())
+        .filter(item => item !== '');
+
+      // Trouver l'URL de l'avatar sélectionné
+      const selectedAvatarObj = PREDEFINED_AVATARS.find(a => a.id === selectedAvatar);
+
+      // Créer l'objet profil complet
+      const profileData = {
+        _id: userInfo._id,
+        user: {
+          _id: userInfo._id,
+          username: userInfo.username,
+          role: userInfo.role
+        },
+        displayName: formData.displayName,
+        bio: formData.bio,
+        specialization: formData.specialization,
+        institution: formData.institution,
+        level: formData.level,
+        interests: interests,
+        avatar: {
+          id: selectedAvatar,
+          url: selectedAvatarObj ? selectedAvatarObj.url : '/images/avatars/avatar1.png',
+          name: selectedAvatarObj ? selectedAvatarObj.name : 'ADN'
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        simulated: true
       };
 
-      // Mettre à jour le profil avec le service de proxy
-      console.log('Envoi des données de profil:', dataToSend);
+      console.log('Sauvegarde des données du profil dans localStorage:', profileData);
 
-      await proxyService.updateProfile(userInfo.token, dataToSend);
-
-      // Si un avatar est sélectionné, mettre à jour l'avatar
-      if (selectedAvatar) {
-        console.log('Envoi de l\'avatar sélectionné:', selectedAvatar);
-
-        await proxyService.updateAvatar(userInfo.token, selectedAvatar);
-      }
+      // Sauvegarder dans le localStorage
+      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileData));
 
       setSuccess(true);
 
       // Rediriger vers la page de profil après un court délai
       setTimeout(() => {
         navigate('/profile');
-      }, 2000);
+      }, 1500);
     } catch (error) {
-      console.error('Error updating profile:', error);
-      setError(error.message);
+      console.error('Erreur lors de la mise à jour du profil:', error);
+      setError('Impossible de mettre à jour le profil. Veuillez réessayer plus tard.');
     } finally {
       setSaving(false);
     }
@@ -196,322 +201,175 @@ function ProfileEditPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-lab-purple"></div>
-        <p className="mt-2 text-gray-600">Chargement du profil...</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <p className="text-gray-600">Chargement du profil...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6 sketch-container mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Modifier votre profil</h1>
+      <div className="bg-white rounded-lg shadow-md overflow-hidden sketch-container">
+        <div className="bg-gradient-to-r from-lab-blue to-lab-purple p-6">
+          <h1 className="text-2xl font-bold text-white">Modifier mon profil</h1>
+        </div>
 
+        <form onSubmit={handleSubmit} className="p-6">
           {error && (
-            <div className="bg-red-50 p-4 rounded-lg mb-6">
-              <p className="text-red-500">{error}</p>
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
+              {error}
             </div>
           )}
 
           {success && (
-            <div className="bg-green-50 p-4 rounded-lg mb-6">
-              <p className="text-green-500">Profil mis à jour avec succès!</p>
+            <div className="bg-green-50 text-green-600 p-4 rounded-lg mb-6">
+              Profil mis à jour avec succès!
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            {/* Section Avatar */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Choisissez votre avatar</h2>
+          {/* Informations de base */}
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">Informations de base</h2>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                {PREDEFINED_AVATARS.map((avatar) => (
-                  <div
-                    key={avatar.id}
-                    onClick={() => handleAvatarSelect(avatar.id)}
-                    className={`cursor-pointer rounded-lg p-2 transition-all duration-200 ${
-                      selectedAvatar === avatar.id
-                        ? 'bg-lab-purple/10 ring-2 ring-lab-purple'
-                        : 'hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className="aspect-square rounded-full overflow-hidden mb-2">
-                      <img
-                        src={avatar.url}
-                        alt={avatar.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <p className="text-center text-sm text-gray-600">{avatar.name}</p>
+            <div className="mb-4">
+              <label htmlFor="displayName" className="block text-gray-700 mb-2">Nom d'affichage</label>
+              <input
+                type="text"
+                id="displayName"
+                name="displayName"
+                value={formData.displayName}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-lab-purple focus:border-lab-purple"
+                placeholder="Votre nom d'affichage"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="bio" className="block text-gray-700 mb-2">Biographie</label>
+              <textarea
+                id="bio"
+                name="bio"
+                value={formData.bio}
+                onChange={handleChange}
+                rows="4"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-lab-purple focus:border-lab-purple"
+                placeholder="Parlez-nous de vous..."
+              ></textarea>
+              <p className="text-sm text-gray-500 mt-1">Maximum 500 caractères</p>
+            </div>
+          </div>
+
+          {/* Informations académiques */}
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">Informations académiques</h2>
+
+            <div className="mb-4">
+              <label htmlFor="specialization" className="block text-gray-700 mb-2">Spécialisation</label>
+              <input
+                type="text"
+                id="specialization"
+                name="specialization"
+                value={formData.specialization}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-lab-purple focus:border-lab-purple"
+                placeholder="Ex: Biologie moléculaire, Écologie..."
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="institution" className="block text-gray-700 mb-2">Institution</label>
+              <input
+                type="text"
+                id="institution"
+                name="institution"
+                value={formData.institution}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-lab-purple focus:border-lab-purple"
+                placeholder="Ex: Université de Paris, Lycée..."
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="level" className="block text-gray-700 mb-2">Niveau</label>
+              <select
+                id="level"
+                name="level"
+                value={formData.level}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-lab-purple focus:border-lab-purple"
+              >
+                <option value="lycee">Lycée</option>
+                <option value="bts">BTS</option>
+                <option value="dut">DUT/BUT</option>
+                <option value="licence">Licence</option>
+                <option value="master">Master</option>
+                <option value="doctorat">Doctorat</option>
+                <option value="professionnel">Professionnel</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="interests" className="block text-gray-700 mb-2">Centres d'intérêt</label>
+              <input
+                type="text"
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-lab-purple focus:border-lab-purple"
+                placeholder="Ex: biologie, génétique, écologie (séparés par des virgules)"
+              />
+            </div>
+          </div>
+
+          {/* Sélection d'avatar */}
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">Avatar</h2>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+              {PREDEFINED_AVATARS.map((avatar) => (
+                <div
+                  key={avatar.id}
+                  onClick={() => handleAvatarSelect(avatar.id)}
+                  className={`cursor-pointer rounded-lg p-2 border-2 transition-all ${
+                    selectedAvatar === avatar.id
+                      ? 'border-lab-purple bg-lab-purple/10'
+                      : 'border-transparent hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="aspect-square rounded-full overflow-hidden mb-2">
+                    <img
+                      src={avatar.url}
+                      alt={avatar.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                ))}
-              </div>
+                  <p className="text-center text-sm text-gray-700">{avatar.name}</p>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* Informations de base */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Informations de base</h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="displayName" className="block text-gray-700 font-medium mb-1">
-                    Nom d'affichage
-                  </label>
-                  <input
-                    type="text"
-                    id="displayName"
-                    name="displayName"
-                    value={formData.displayName}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                    placeholder="Comment souhaitez-vous être appelé?"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="bio" className="block text-gray-700 font-medium mb-1">
-                    Bio <span className="text-gray-400 text-sm">(500 caractères max)</span>
-                  </label>
-                  <textarea
-                    id="bio"
-                    name="bio"
-                    value={formData.bio}
-                    onChange={handleChange}
-                    rows="4"
-                    maxLength="500"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                    placeholder="Parlez-nous un peu de vous..."
-                  ></textarea>
-                </div>
-              </div>
-            </div>
-
-            {/* Informations académiques */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Informations académiques</h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="specialization" className="block text-gray-700 font-medium mb-1">
-                    Spécialisation
-                  </label>
-                  <input
-                    type="text"
-                    id="specialization"
-                    name="specialization"
-                    value={formData.specialization}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                    placeholder="Ex: Biologie moléculaire, Écologie, etc."
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="institution" className="block text-gray-700 font-medium mb-1">
-                    Institution
-                  </label>
-                  <input
-                    type="text"
-                    id="institution"
-                    name="institution"
-                    value={formData.institution}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                    placeholder="Ex: Université, Lycée, Entreprise, etc."
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="level" className="block text-gray-700 font-medium mb-1">
-                    Niveau
-                  </label>
-                  <select
-                    id="level"
-                    name="level"
-                    value={formData.level}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                  >
-                    <option value="lycee">Lycée</option>
-                    <option value="bts">BTS</option>
-                    <option value="dut">DUT / BUT</option>
-                    <option value="licence">Licence</option>
-                    <option value="master">Master</option>
-                    <option value="doctorat">Doctorat</option>
-                    <option value="professionnel">Professionnel</option>
-                    <option value="autre">Autre</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="interests" className="block text-gray-700 font-medium mb-1">
-                    Centres d'intérêt <span className="text-gray-400 text-sm">(séparés par des virgules)</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="interests"
-                    name="interests"
-                    value={formData.interests}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                    placeholder="Ex: Génétique, Botanique, Microbiologie, etc."
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Liens sociaux */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Liens sociaux</h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="socialLinks.website" className="block text-gray-700 font-medium mb-1">
-                    Site web
-                  </label>
-                  <input
-                    type="url"
-                    id="socialLinks.website"
-                    name="socialLinks.website"
-                    value={formData.socialLinks.website}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                    placeholder="https://monsite.com"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="socialLinks.linkedin" className="block text-gray-700 font-medium mb-1">
-                    LinkedIn
-                  </label>
-                  <input
-                    type="url"
-                    id="socialLinks.linkedin"
-                    name="socialLinks.linkedin"
-                    value={formData.socialLinks.linkedin}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                    placeholder="https://linkedin.com/in/username"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="socialLinks.twitter" className="block text-gray-700 font-medium mb-1">
-                    Twitter
-                  </label>
-                  <input
-                    type="url"
-                    id="socialLinks.twitter"
-                    name="socialLinks.twitter"
-                    value={formData.socialLinks.twitter}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                    placeholder="https://twitter.com/username"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="socialLinks.github" className="block text-gray-700 font-medium mb-1">
-                    GitHub
-                  </label>
-                  <input
-                    type="url"
-                    id="socialLinks.github"
-                    name="socialLinks.github"
-                    value={formData.socialLinks.github}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                    placeholder="https://github.com/username"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="socialLinks.researchGate" className="block text-gray-700 font-medium mb-1">
-                    ResearchGate
-                  </label>
-                  <input
-                    type="url"
-                    id="socialLinks.researchGate"
-                    name="socialLinks.researchGate"
-                    value={formData.socialLinks.researchGate}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple focus:border-transparent"
-                    placeholder="https://researchgate.net/profile/username"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Paramètres */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Paramètres</h2>
-
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="settings.emailNotifications"
-                    name="settings.emailNotifications"
-                    checked={formData.settings.emailNotifications}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-lab-purple focus:ring-lab-purple border-gray-300 rounded"
-                  />
-                  <label htmlFor="settings.emailNotifications" className="ml-2 block text-gray-700">
-                    Recevoir des notifications par email
-                  </label>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="settings.privateProfile"
-                    name="settings.privateProfile"
-                    checked={formData.settings.privateProfile}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-lab-purple focus:ring-lab-purple border-gray-300 rounded"
-                  />
-                  <label htmlFor="settings.privateProfile" className="ml-2 block text-gray-700">
-                    Profil privé (visible uniquement par vous)
-                  </label>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="settings.showEmail"
-                    name="settings.showEmail"
-                    checked={formData.settings.showEmail}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-lab-purple focus:ring-lab-purple border-gray-300 rounded"
-                  />
-                  <label htmlFor="settings.showEmail" className="ml-2 block text-gray-700">
-                    Afficher mon email sur mon profil
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* Boutons d'action */}
-            <div className="flex justify-end space-x-4">
-              <Link
-                to="/profile"
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors duration-200"
-              >
-                Annuler
-              </Link>
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-4 py-2 bg-lab-purple text-white rounded-md hover:bg-lab-purple/90 transition-colors duration-200 disabled:opacity-50"
-              >
-                {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* Boutons d'action */}
+          <div className="flex justify-end space-x-4">
+            <Link
+              to="/profile"
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+            >
+              Annuler
+            </Link>
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-6 py-2 bg-lab-purple text-white rounded-lg hover:bg-lab-purple/90 disabled:opacity-50"
+            >
+              {saving ? 'Enregistrement...' : 'Enregistrer'}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Styles spécifiques pour l'effet crayon/schéma */}

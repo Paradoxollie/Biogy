@@ -13,7 +13,7 @@ import TopicPage from './components/TopicPage';
 import NewTopicPage from './components/NewTopicPage';
 import ProfilePage from './components/ProfilePage';
 import ProfileEditPage from './components/ProfileEditPage';
-import ProfileTest from './components/ProfileTest';
+import ProfileDebug from './components/ProfileDebug';
 import SimulationModeIndicator from './components/SimulationModeIndicator';
 import AuthDebug from './context/AuthDebug';
 import proxyService from './services/proxyService';
@@ -44,7 +44,7 @@ function App() {
           <Route path="/forum/:id" element={<TopicPage />} />
           <Route path="/forum/nouveau" element={<NewTopicPage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />
-          <Route path="/profile/test" element={<ProfileTest />} />
+          <Route path="/profile/debug" element={<ProfileDebug />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Routes>
