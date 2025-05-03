@@ -261,7 +261,7 @@ function ProfileEditPage() {
       } catch (apiProxyError) {
         console.error('Erreur avec api-proxy:', apiProxyError);
 
-      try {
+        try {
         // Essayer directement avec l'API Render
         const response = await fetch('https://biogy-api.onrender.com/api/social/profile', {
           method: 'PUT',
