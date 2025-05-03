@@ -14,7 +14,7 @@
 # Redirections pour l'API (proxy CORS)
 [[redirects]]
   from = "/api/*"
-  to = "https://biogy.onrender.com/api/:splat"
+  to = "https://biogy-api.onrender.com/api/:splat"
   status = 200
   force = true
   headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS", Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"}
@@ -22,7 +22,7 @@
 # Gestion des requêtes OPTIONS (CORS preflight)
 [[redirects]]
   from = "/api/*"
-  to = "https://biogy.onrender.com/api/:splat"
+  to = "https://biogy-api.onrender.com/api/:splat"
   status = 200
   force = true
   conditions = {method = "OPTIONS"}
@@ -36,4 +36,4 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self' https://biogy.onrender.com https://corsproxy.io https://api.allorigins.win https://cors-anywhere.herokuapp.com https://res.cloudinary.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com; script-src 'self' 'unsafe-inline' 'unsafe-eval';"
+    Content-Security-Policy = "default-src 'self' https://biogy-api.onrender.com https://corsproxy.io https://api.allorigins.win https://cors-anywhere.herokuapp.com https://res.cloudinary.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com; script-src 'self' 'unsafe-inline' 'unsafe-eval';"

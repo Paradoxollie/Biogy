@@ -1,7 +1,7 @@
 # Redirections Netlify pour Biogy
 
 # Proxy API pour éviter les problèmes CORS
-/api/*  https://biogy.onrender.com/api/:splat  200
+/api/*  https://biogy-api.onrender.com/api/:splat  200
 
 # SPA fallback
 /*  /index.html  200

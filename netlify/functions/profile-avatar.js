@@ -2,7 +2,7 @@
 const axios = require('axios');
 
 // URL de l'API backend
-const API_URL = 'https://biogy.onrender.com/api';
+const API_URL = 'https://biogy-api.onrender.com/api';
 
 exports.handler = async function(event, context) {
   // Définir les headers CORS

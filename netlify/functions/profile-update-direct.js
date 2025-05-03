@@ -2,7 +2,7 @@
 const axios = require('axios');
 
 // URL de l'API backend
-const API_URL = 'https://biogy.onrender.com/api';
+const API_URL = 'https://biogy-api.onrender.com/api';
 
 exports.handler = async function(event, context) {
   // Définir les headers CORS
@@ -24,7 +24,7 @@ exports.handler = async function(event, context) {
   try {
     // Extraire le token d'authentification
     const authHeader = event.headers.authorization || event.headers.Authorization;
-    
+
     if (!authHeader) {
       return {
         statusCode: 401,
@@ -35,22 +35,22 @@ exports.handler = async function(event, context) {
         })
       };
     }
-    
+
     // Construire l'URL de l'API
     const url = `${API_URL}/social/profile`;
-    
+
     console.log(`Proxying request to: ${url}`);
     console.log(`Method: ${event.httpMethod}`);
-    
+
     // Préparer les données à envoyer
     let requestData = {};
-    
+
     if (event.body) {
       try {
         // Parser le corps de la requête
         const parsedBody = JSON.parse(event.body);
         console.log('Données reçues du frontend:', parsedBody);
-        
+
         // Créer un nouvel objet avec seulement les champs nécessaires
         requestData = {
           displayName: parsedBody.displayName || '',
@@ -58,7 +58,7 @@ exports.handler = async function(event, context) {
           specialization: parsedBody.specialization || '',
           institution: parsedBody.institution || '',
           level: parsedBody.level || 'autre',
-          interests: [], // Forcer un tableau vide pour éviter les problèmes
+          interests: Array.isArray(parsedBody.interests) ? parsedBody.interests : [],
           socialLinks: {
             website: parsedBody.socialLinks?.website || '',
             linkedin: parsedBody.socialLinks?.linkedin || '',
@@ -72,19 +72,35 @@ exports.handler = async function(event, context) {
             showEmail: parsedBody.settings?.showEmail ?? false
           }
         };
-        
-        // Si des intérêts sont fournis et que c'est une chaîne, la convertir en tableau
-        if (typeof parsedBody.interests === 'string' && parsedBody.interests.trim()) {
-          requestData.interests = parsedBody.interests
-            .split(',')
-            .map(item => item.trim())
-            .filter(item => item);
-        } 
-        // Si des intérêts sont fournis et que c'est déjà un tableau, l'utiliser
-        else if (Array.isArray(parsedBody.interests)) {
-          requestData.interests = parsedBody.interests;
+
+        // Traiter les intérêts en fonction de leur type
+        if (parsedBody.interests !== undefined) {
+          try {
+            if (Array.isArray(parsedBody.interests)) {
+              // Si c'est déjà un tableau, l'utiliser directement
+              requestData.interests = parsedBody.interests;
+              console.log('interests est déjà un tableau:', requestData.interests);
+            } else if (typeof parsedBody.interests === 'string') {
+              // Si c'est une chaîne, la diviser en tableau
+              requestData.interests = parsedBody.interests.trim()
+                ? parsedBody.interests
+                    .split(',')
+                    .map(item => item.trim())
+                    .filter(item => item)
+                : [];
+              console.log('interests converti de chaîne en tableau:', requestData.interests);
+            } else {
+              // Si ce n'est ni un tableau ni une chaîne, utiliser un tableau vide
+              requestData.interests = [];
+              console.log('interests n\'est ni un tableau ni une chaîne, utilisation d\'un tableau vide');
+            }
+          } catch (error) {
+            console.error('Erreur lors du traitement des intérêts:', error);
+            // En cas d'erreur, utiliser un tableau vide
+            requestData.interests = [];
+          }
         }
-        
+
         console.log('Données préparées pour l\'API:', requestData);
       } catch (error) {
         console.error('Error parsing request body:', error);
@@ -98,7 +114,7 @@ exports.handler = async function(event, context) {
         };
       }
     }
-    
+
     // Effectuer la requête à l'API
     const response = await axios({
       method: 'PUT',
@@ -110,7 +126,7 @@ exports.handler = async function(event, context) {
       },
       timeout: 30000 // 30 secondes
     });
-    
+
     // Retourner la réponse
     return {
       statusCode: response.status,
@@ -122,11 +138,11 @@ exports.handler = async function(event, context) {
     };
   } catch (error) {
     console.error('Error proxying request:', error);
-    
+
     // Extraire le message d'erreur et le code de statut
     const statusCode = error.response?.status || 500;
     const errorMessage = error.response?.data?.message || error.message || 'Internal Server Error';
-    
+
     // Retourner l'erreur
     return {
       statusCode,

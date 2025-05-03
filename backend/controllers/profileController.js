@@ -44,7 +44,10 @@ const updateProfile = async (req, res) => {
         specialization: specialization || '',
         institution: institution || '',
         level: level || 'autre',
-        interests: interests ? interests.split(',').map(item => item.trim()) : [],
+        interests: interests ? (
+          Array.isArray(interests) ? interests :
+          typeof interests === 'string' ? interests.split(',').map(item => item.trim()) : []
+        ) : [],
         socialLinks: socialLinks || {},
         settings: settings || {}
       });
@@ -56,7 +59,14 @@ const updateProfile = async (req, res) => {
       if (institution !== undefined) profile.institution = institution;
       if (level !== undefined) profile.level = level;
       if (interests !== undefined) {
-        profile.interests = interests.split(',').map(item => item.trim());
+        // Handle both string and array formats for interests
+        if (Array.isArray(interests)) {
+          profile.interests = interests;
+        } else if (typeof interests === 'string') {
+          profile.interests = interests.split(',').map(item => item.trim());
+        } else {
+          profile.interests = [];
+        }
       }
 
       // Mettre à jour les liens sociaux

@@ -3,7 +3,7 @@
  */
 
 // URL de l'API backend
-export const API_URL = 'https://biogy.onrender.com';
+export const API_URL = 'https://biogy-api.onrender.com';
 
 // Configuration des proxies CORS
 export const CORS_PROXIES = [
