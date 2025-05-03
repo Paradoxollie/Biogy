@@ -41,16 +41,8 @@ app.get('/', (req, res) => {
   res.send('API Biogy Backend is running...');
 });
 
-// Route de test CORS
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'API is healthy and CORS is working!',
-    timestamp: new Date().toISOString(),
-    origin: req.headers.origin || 'unknown',
-    server: 'main'
-  });
-});
+// Routes de santé
+app.use('/api/health', require('./routes/healthRoutes'));
 
 // Routes spécifiques (à compléter dans routes/)
 app.use('/api/auth', require('./routes/authRoutes'));

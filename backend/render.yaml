@@ -11,6 +11,9 @@ services:
         value: production
       - key: FRONTEND_URL
         value: https://biogy.netlify.app
+      - key: CORS_ENABLED
+        value: "true"
+    healthCheckPath: /api/health
     headers:
       - path: /*
         name: Access-Control-Allow-Origin

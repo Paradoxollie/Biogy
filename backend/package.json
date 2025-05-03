@@ -7,13 +7,13 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server-fallback.js",
-    "start:main": "node server.js",
+    "start": "node server.js",
     "start:fallback": "node server-fallback.js",
-    "dev": "nodemon server-fallback.js",
-    "dev:main": "nodemon server.js",
+    "dev": "nodemon server.js",
+    "dev:fallback": "nodemon server-fallback.js",
     "clean": "node clean.js",
-    "reinstall": "node clean.js && npm install"
+    "reinstall": "node clean.js && npm install",
+    "test-health": "curl -v https://biogy-api.onrender.com/api/health"
   },
   "keywords": [],
   "author": "",
