@@ -12,7 +12,8 @@
     "deploy": "npm run build && netlify deploy --prod",
     "test-api": "node ../scripts/test-api-connection.js",
     "test-api-detailed": "node ../scripts/test-api-connection-detailed.js",
-    "check-functions": "node ../scripts/check-netlify-functions.js"
+    "check-functions": "node ../scripts/check-netlify-functions.js",
+    "verify-api": "node ../scripts/verify-api-config.js"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.7.0",

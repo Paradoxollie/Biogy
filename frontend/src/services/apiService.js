@@ -39,13 +39,10 @@ const isUrlAccessible = async (url) => {
 
 // Fonction pour effectuer une requête API avec gestion des erreurs et CORS
 export const apiRequest = async (endpoint, options = {}) => {
-  // Forcer l'utilisation de l'URL correcte
-  const API_BASE_URL = 'https://biogy-api.onrender.com';
-
   // Construire l'URL complète
   const url = endpoint.startsWith('http')
     ? endpoint
-    : `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+    : `${API_URL}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
 
   console.log('🔍 API_URL dans config:', API_URL);
   console.log('🔍 URL utilisée:', url);

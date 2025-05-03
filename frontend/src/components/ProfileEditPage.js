@@ -175,10 +175,7 @@ function ProfileEditPage() {
           .filter(item => item)
       };
 
-      // Forcer l'utilisation de l'URL correcte
-      const API_CORRECT_URL = 'https://biogy-api.onrender.com';
       console.log('URL de l\'API dans config:', API_URL);
-      console.log('URL de l\'API corrigée:', API_CORRECT_URL);
       console.log('Données à envoyer:', dataToSend);
 
       try {

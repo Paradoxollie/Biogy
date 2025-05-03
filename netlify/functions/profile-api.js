@@ -2,7 +2,7 @@
 const axios = require('axios');
 
 // URL de l'API backend
-const API_URL = 'https://biogy-api.onrender.com/api';
+const API_URL = 'https://biogy.onrender.com/api';
 
 exports.handler = async function(event, context) {
   // Définir les headers CORS
@@ -24,24 +24,24 @@ exports.handler = async function(event, context) {
   try {
     // Extraire le token d'authentification
     const authHeader = event.headers.authorization || event.headers.Authorization;
-    
+
     // Construire l'URL de l'API
     const endpoint = '/social/profile';
     const url = `${API_URL}${endpoint}`;
-    
+
     console.log(`Proxying request to: ${url}`);
     console.log(`Method: ${event.httpMethod}`);
     console.log(`Auth header present: ${!!authHeader}`);
-    
+
     // Préparer les headers pour la requête à l'API
     const apiHeaders = {
       'Content-Type': 'application/json'
     };
-    
+
     if (authHeader) {
       apiHeaders['Authorization'] = authHeader;
     }
-    
+
     // Préparer les options pour la requête à l'API
     const options = {
       method: event.httpMethod,
@@ -49,7 +49,7 @@ exports.handler = async function(event, context) {
       headers: apiHeaders,
       timeout: 30000 // 30 secondes
     };
-    
+
     // Ajouter le corps de la requête si nécessaire
     if (event.body) {
       try {
@@ -59,10 +59,10 @@ exports.handler = async function(event, context) {
         options.data = event.body;
       }
     }
-    
+
     // Effectuer la requête à l'API
     const response = await axios(options);
-    
+
     // Retourner la réponse
     return {
       statusCode: response.status,
@@ -74,11 +74,11 @@ exports.handler = async function(event, context) {
     };
   } catch (error) {
     console.error('Error proxying request:', error);
-    
+
     // Extraire le message d'erreur et le code de statut
     const statusCode = error.response?.status || 500;
     const errorMessage = error.response?.data?.message || error.message || 'Internal Server Error';
-    
+
     // Retourner l'erreur
     return {
       statusCode,
