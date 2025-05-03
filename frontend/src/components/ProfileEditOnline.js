@@ -55,10 +55,10 @@ function ProfileEditOnline() {
         setLoading(true);
         console.log('Chargement du profil en ligne...');
 
-        // Requête via la fonction Netlify
+        // Requête directe à l'API via la redirection Netlify
         const response = await axios({
           method: 'GET',
-          url: '/.netlify/functions/profile-online',
+          url: '/api/social/profile',
           headers: {
             'Authorization': `Bearer ${userInfo.token}`
           },
@@ -75,46 +75,46 @@ function ProfileEditOnline() {
           specialization: profileData.specialization || '',
           institution: profileData.institution || '',
           level: profileData.level || 'autre',
-          interests: Array.isArray(profileData.interests) 
-            ? profileData.interests.join(', ') 
+          interests: Array.isArray(profileData.interests)
+            ? profileData.interests.join(', ')
             : profileData.interests || '',
         });
 
         // Définir l'avatar sélectionné
         if (profileData.avatar && profileData.avatar.url) {
-          const avatarId = profileData.avatar.predefinedId || 
+          const avatarId = profileData.avatar.predefinedId ||
             PREDEFINED_AVATARS.find(a => a.url === profileData.avatar.url)?.id;
-          
+
           setSelectedAvatar(avatarId || null);
         }
-        
+
         setUsingFallback(false);
       } catch (error) {
         console.error('Erreur lors du chargement du profil en ligne:', error);
-        
+
         // Essayer de récupérer le profil local comme fallback
         try {
           const storedProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
-          
+
           if (storedProfile) {
             const profileData = JSON.parse(storedProfile);
             console.log('Utilisation du profil local comme fallback:', profileData);
-            
+
             setFormData({
               displayName: profileData.displayName || userInfo.username || '',
               bio: profileData.bio || '',
               specialization: profileData.specialization || '',
               institution: profileData.institution || '',
               level: profileData.level || 'autre',
-              interests: Array.isArray(profileData.interests) 
-                ? profileData.interests.join(', ') 
+              interests: Array.isArray(profileData.interests)
+                ? profileData.interests.join(', ')
                 : profileData.interests || '',
             });
-            
+
             if (profileData.avatar && profileData.avatar.id) {
               setSelectedAvatar(profileData.avatar.id);
             }
-            
+
             setUsingFallback(true);
             setError('Impossible de charger le profil en ligne. Utilisation du profil local.');
           } else {
@@ -171,7 +171,7 @@ function ProfileEditOnline() {
   // Soumettre le formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!userInfo || !userInfo.token) {
       navigate('/login');
       return;
@@ -187,7 +187,7 @@ function ProfileEditOnline() {
         .split(',')
         .map(item => item.trim())
         .filter(item => item !== '');
-      
+
       const profileData = {
         ...formData,
         interests
@@ -199,7 +199,7 @@ function ProfileEditOnline() {
         // Mettre à jour le profil en ligne
         await axios({
           method: 'PUT',
-          url: '/.netlify/functions/profile-online',
+          url: '/api/social/profile',
           headers: {
             'Authorization': `Bearer ${userInfo.token}`,
             'Content-Type': 'application/json'
@@ -212,7 +212,7 @@ function ProfileEditOnline() {
         if (selectedAvatar) {
           await axios({
             method: 'POST',
-            url: '/.netlify/functions/profile-online/avatar/predefined',
+            url: '/api/social/profile/avatar/predefined',
             headers: {
               'Authorization': `Bearer ${userInfo.token}`,
               'Content-Type': 'application/json'
@@ -222,12 +222,12 @@ function ProfileEditOnline() {
           });
         }
       }
-      
+
       // Sauvegarder également dans le localStorage comme fallback
       try {
         // Trouver l'URL de l'avatar sélectionné
         const selectedAvatarObj = PREDEFINED_AVATARS.find(a => a.id === selectedAvatar);
-        
+
         // Créer l'objet profil complet
         const localProfileData = {
           _id: userInfo._id,
@@ -258,14 +258,14 @@ function ProfileEditOnline() {
       }
 
       setSuccess(true);
-      
+
       // Rediriger vers la page de profil après un court délai
       setTimeout(() => {
         navigate('/profile-online');
       }, 1500);
     } catch (error) {
       console.error('Erreur lors de la mise à jour du profil:', error);
-      
+
       if (usingFallback) {
         setError('Mode hors ligne: Les modifications ont été sauvegardées localement mais ne seront pas synchronisées avec le serveur.');
         setSuccess(true);
@@ -316,7 +316,7 @@ function ProfileEditOnline() {
           {/* Informations de base */}
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-700 mb-4">Informations de base</h2>
-            
+
             <div className="mb-4">
               <label htmlFor="displayName" className="block text-gray-700 mb-2">Nom d'affichage</label>
               <input
@@ -348,7 +348,7 @@ function ProfileEditOnline() {
           {/* Informations académiques */}
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-700 mb-4">Informations académiques</h2>
-            
+
             <div className="mb-4">
               <label htmlFor="specialization" className="block text-gray-700 mb-2">Spécialisation</label>
               <input
@@ -412,21 +412,21 @@ function ProfileEditOnline() {
           {/* Sélection d'avatar */}
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-700 mb-4">Avatar</h2>
-            
+
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
               {PREDEFINED_AVATARS.map((avatar) => (
-                <div 
+                <div
                   key={avatar.id}
                   onClick={() => handleAvatarSelect(avatar.id)}
                   className={`cursor-pointer rounded-lg p-2 border-2 transition-all ${
-                    selectedAvatar === avatar.id 
-                      ? 'border-lab-purple bg-lab-purple/10' 
+                    selectedAvatar === avatar.id
+                      ? 'border-lab-purple bg-lab-purple/10'
                       : 'border-transparent hover:bg-gray-50'
                   }`}
                 >
                   <div className="aspect-square rounded-full overflow-hidden mb-2">
-                    <img 
-                      src={avatar.url} 
+                    <img
+                      src={avatar.url}
                       alt={avatar.name}
                       className="w-full h-full object-cover"
                     />

@@ -1,16 +1,14 @@
 // Fonction Netlify pour gérer les requêtes de profil en ligne
 const axios = require('axios');
+const { Config } = require("@netlify/functions");
 
 // URL de l'API backend
 const API_URL = 'https://biogy-api.onrender.com/api';
 
-// Proxies CORS alternatifs en cas d'échec
-const CORS_PROXIES = [
-  '', // Direct (pas de proxy)
-  'https://corsproxy.io/?',
-  'https://cors-anywhere.herokuapp.com/',
-  'https://api.allorigins.win/raw?url='
-];
+// Configuration du chemin de la fonction
+exports.config = {
+  path: "/api/social/*"
+};
 
 exports.handler = async function(event, context) {
   // Définir les headers CORS permissifs
@@ -38,12 +36,12 @@ exports.handler = async function(event, context) {
   const token = authHeader ? authHeader.replace('Bearer ', '') : null;
 
   // Extraire le chemin de la requête
-  const path = event.path.replace('/.netlify/functions/profile-online', '');
+  const path = event.path.replace('/api/social', '');
 
   // Construire l'URL complète
-  const baseUrl = `${API_URL}/social/profile${path}`;
+  const url = `${API_URL}/social${path}`;
 
-  console.log(`Requête profile-online: ${event.httpMethod} ${baseUrl}`);
+  console.log(`Requête proxy: ${event.httpMethod} ${url}`);
 
   // Préparer les headers pour la requête au backend
   const requestHeaders = {
@@ -61,78 +59,37 @@ exports.handler = async function(event, context) {
   // Données à envoyer
   const data = event.body ? JSON.parse(event.body) : undefined;
 
-  // Essayer chaque proxy jusqu'à ce qu'un fonctionne
-  let lastError = null;
-  let response = null;
+  try {
+    // Faire une requête directe au backend
+    const response = await axios({
+      method: event.httpMethod.toLowerCase(),
+      url,
+      headers: requestHeaders,
+      data,
+      validateStatus: () => true, // Accepter tous les codes de statut
+      timeout: 10000 // 10 secondes de timeout
+    });
 
-  for (const proxy of CORS_PROXIES) {
-    try {
-      const url = proxy ? `${proxy}${encodeURIComponent(baseUrl)}` : baseUrl;
-      console.log(`Essai avec ${proxy ? 'proxy: ' + proxy : 'connexion directe'}`);
+    console.log(`Réponse reçue: ${response.status}`);
 
-      response = await axios({
-        method: event.httpMethod.toLowerCase(),
-        url,
-        headers: requestHeaders,
-        data,
-        validateStatus: () => true, // Accepter tous les codes de statut
-        timeout: 10000 // 10 secondes de timeout
-      });
+    // Retourner la réponse
+    return {
+      statusCode: response.status,
+      headers,
+      body: JSON.stringify(response.data)
+    };
+  } catch (error) {
+    console.error('Erreur lors de la requête:', error.message);
 
-      console.log(`Réponse reçue: ${response.status}`);
-
-      // Si la requête a réussi, sortir de la boucle
-      if (response.status >= 200 && response.status < 500) {
-        break;
-      }
-    } catch (error) {
-      console.error(`Erreur avec ${proxy || 'connexion directe'}:`, error.message);
-      lastError = error;
-    }
+    // Retourner une réponse d'erreur
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        message: 'Erreur lors de la communication avec le serveur',
+        error: error.message
+      })
+    };
   }
 
-  // Si aucun proxy n'a fonctionné
-  if (!response) {
-    console.error('Tous les proxies ont échoué');
-
-    // Essayer une dernière fois avec une approche différente
-    try {
-      // Utiliser un proxy CORS externe comme dernier recours
-      const corsAnywhereUrl = 'https://cors-anywhere.herokuapp.com/';
-      const url = `${corsAnywhereUrl}${baseUrl}`;
-
-      console.log('Dernier essai avec cors-anywhere');
-
-      response = await axios({
-        method: event.httpMethod.toLowerCase(),
-        url,
-        headers: {
-          ...requestHeaders,
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        data,
-        timeout: 15000
-      });
-    } catch (finalError) {
-      console.error('Erreur finale:', finalError.message);
-
-      // Retourner une réponse d'erreur
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({
-          message: 'Impossible de communiquer avec le serveur après plusieurs tentatives',
-          error: lastError ? lastError.message : finalError.message,
-          fallback: true
-        })
-      };
-    }
-  }
-
-  // Retourner la réponse
-  return {
-    statusCode: response.status,
-    headers,
-    body: JSON.stringify(response.data)
-  };
 };

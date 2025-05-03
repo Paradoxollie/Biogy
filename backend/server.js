@@ -16,55 +16,17 @@ const allowedOrigins = [
   'http://localhost:8888'
 ];
 
+// Configuration CORS simplifiée
 app.use(cors({
-  origin: function(origin, callback) {
-    // Permettre les requêtes sans origine (comme les appels API mobiles ou curl)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('CORS bloqué pour:', origin);
-      callback(null, true); // Temporairement permissif pour le débogage
-    }
-  },
+  origin: 'https://biogy.netlify.app', // Spécifier exactement l'origine autorisée
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   credentials: true,
   maxAge: 86400 // Cache preflight pour 24 heures
 }));
 
-// Middleware pour les requêtes OPTIONS (preflight)
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', 'https://biogy.netlify.app');
-  }
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400');
-  res.status(200).send();
-});
-
 app.use(express.json()); // Pour parser le JSON dans les requêtes
 app.use(express.urlencoded({ extended: true })); // Pour parser les données de formulaire
-
-// Middleware pour ajouter les en-têtes CORS à toutes les réponses
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', 'https://biogy.netlify.app');
-  }
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
 
 // Routes de base
 app.get('/', (req, res) => {

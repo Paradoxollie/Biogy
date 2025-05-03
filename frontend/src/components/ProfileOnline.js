@@ -31,60 +31,24 @@ function ProfileOnline() {
         setLoading(true);
         console.log('Chargement du profil utilisateur en ligne...');
 
-        // Utiliser la fonction Netlify pour récupérer le profil
+        // Utiliser directement l'API via la redirection Netlify
         const endpoint = isOwnProfile ? '' : `/${userId}`;
 
-        // Essayer d'abord avec la fonction Netlify améliorée
-        try {
-          console.log('Tentative avec la fonction profile-online...');
-          const response = await axios({
-            method: 'GET',
-            url: `/.netlify/functions/profile-online${endpoint}`,
-            headers: {
-              'Authorization': `Bearer ${userInfo.token}`
-            },
-            timeout: 15000
-          });
+        console.log('Tentative d\'accès direct à l\'API via redirection...');
+        const response = await axios({
+          method: 'GET',
+          url: `/api/social/profile${endpoint}`,
+          headers: {
+            'Authorization': `Bearer ${userInfo.token}`
+          },
+          timeout: 10000
+        });
 
-          console.log('Données du profil reçues via profile-online:', response.data);
-          setProfile(response.data);
-          setUsingFallback(false);
-          return;
-        } catch (netlifyError) {
-          console.error('Erreur avec la fonction profile-online:', netlifyError);
-
-          // Essayer avec la fonction de diagnostic CORS
-          try {
-            console.log('Tentative avec la fonction cors-diagnostic...');
-            const corsResponse = await axios({
-              method: 'GET',
-              url: '/.netlify/functions/cors-diagnostic',
-              params: {
-                endpoint: `social/profile${endpoint}`,
-                method: 'GET',
-                useToken: 'true'
-              },
-              headers: {
-                'Authorization': `Bearer ${userInfo.token}`
-              },
-              timeout: 15000
-            });
-
-            if (corsResponse.data && corsResponse.data.actual && corsResponse.data.actual.data) {
-              console.log('Données du profil reçues via cors-diagnostic:', corsResponse.data.actual.data);
-              setProfile(corsResponse.data.actual.data);
-              setUsingFallback(false);
-              return;
-            } else {
-              throw new Error('Données de profil non trouvées dans la réponse du diagnostic');
-            }
-          } catch (corsError) {
-            console.error('Erreur avec la fonction cors-diagnostic:', corsError);
-            throw corsError; // Passer à la gestion de fallback
-          }
-        }
+        console.log('Données du profil reçues:', response.data);
+        setProfile(response.data);
+        setUsingFallback(false);
       } catch (error) {
-        console.error('Toutes les tentatives de récupération en ligne ont échoué:', error);
+        console.error('Erreur lors de la récupération du profil:', error);
 
         // Essayer de récupérer le profil local comme fallback
         try {
