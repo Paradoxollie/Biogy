@@ -279,7 +279,7 @@ function ProfileEditPage() {
 
           console.log('Profil mis à jour avec succès');
           profileUpdateSuccess = true;
-      } catch (directError) {
+        } catch (directError) {
         console.error('Erreur avec l\'API directe:', directError);
 
         // Essayer avec la fonction Netlify proxy
