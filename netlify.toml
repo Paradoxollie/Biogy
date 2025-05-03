@@ -1,6 +1,6 @@
 [build]
   base = "/"
-  command = "cd frontend && npm ci && CI=false npm run build"
+  command = "cd frontend && npm ci && CI=false npm run build && cd ../netlify && npm install"
   publish = "frontend/build"
   functions = "netlify/functions"
 
@@ -18,13 +18,6 @@
   status = 200
   force = true
 
-  [redirects.headers]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    Access-Control-Allow-Credentials = "true"
-    Access-Control-Max-Age = "86400"
-
 # Redirections pour l'API (proxy CORS)
 [[redirects]]
   from = "/api/*"
@@ -32,34 +25,26 @@
   status = 200
   force = true
 
-  [redirects.headers]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    Access-Control-Allow-Credentials = "true"
-    Access-Control-Max-Age = "86400"
-
 # Gestion des requêtes OPTIONS (CORS preflight)
 [[redirects]]
   from = "/api/*"
   to = "https://biogy-api.onrender.com/api/:splat"
   status = 200
   force = true
-
-  [redirects.conditions]
-    method = "OPTIONS"
-
-  [redirects.headers]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    Access-Control-Allow-Credentials = "true"
-    Access-Control-Max-Age = "86400"
-
-# Pas besoin de redirection pour les fonctions Netlify car elles sont gérées automatiquement
+  conditions = {method = "OPTIONS"}
 
 # Redirections pour le SPA (Single Page Application)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Headers globaux pour toutes les routes
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    Access-Control-Allow-Credentials = "true"
+    Access-Control-Max-Age = "86400"

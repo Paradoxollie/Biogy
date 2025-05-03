@@ -1,11 +1,5 @@
 // Fonction Netlify spécifique pour les requêtes de profil
 const axios = require('axios');
-const { Config } = require("@netlify/functions");
-
-// Configuration du chemin pour la fonction
-exports.config = {
-  path: "/api/social/*"  // la fonction s'exécutera sur /api/social/…
-};
 
 // URL de l'API backend
 const API_URL = 'https://biogy-api.onrender.com/api';
