@@ -262,23 +262,23 @@ function ProfileEditPage() {
         console.error('Erreur avec api-proxy:', apiProxyError);
 
         try {
-        // Essayer directement avec l'API Render
-        const response = await fetch('https://biogy-api.onrender.com/api/social/profile', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userInfo.token}`
-          },
-          body: JSON.stringify(dataToSend)
-        });
+          // Essayer directement avec l'API Render
+          const response = await fetch('https://biogy-api.onrender.com/api/social/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userInfo.token}`
+            },
+            body: JSON.stringify(dataToSend)
+          });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(`Erreur API (${response.status}): ${errorData.message || 'Erreur inconnue'}`);
-        }
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Erreur API (${response.status}): ${errorData.message || 'Erreur inconnue'}`);
+          }
 
-        console.log('Profil mis à jour avec succès');
-        profileUpdateSuccess = true;
+          console.log('Profil mis à jour avec succès');
+          profileUpdateSuccess = true;
       } catch (directError) {
         console.error('Erreur avec l\'API directe:', directError);
 
