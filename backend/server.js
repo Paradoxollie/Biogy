@@ -11,7 +11,7 @@ const app = express();
 // Middlewares
 // Configuration CORS permissive
 const corsOptions = {
-  origin: ['https://biogy.netlify.app', 'http://localhost:3000'],
+  origin: '*', // Permettre toutes les origines
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   credentials: true,
@@ -29,18 +29,12 @@ app.use(express.urlencoded({ extended: true })); // Pour parser les données de 
 
 // Middleware pour ajouter explicitement les en-têtes CORS à chaque réponse
 app.use((req, res, next) => {
-  // Déterminer l'origine
-  const origin = req.headers.origin;
-  if (origin && corsOptions.origin.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', corsOptions.origin[0]);
-  }
-
-  res.header('Access-Control-Allow-Methods', corsOptions.methods.join(', '));
-  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
+  // Permettre toutes les origines
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', corsOptions.maxAge.toString());
+  res.header('Access-Control-Max-Age', '86400');
 
   // Log pour le débogage
   console.log(`CORS Headers set for request to ${req.path} from origin: ${req.headers.origin || 'unknown'}`);
@@ -51,12 +45,9 @@ app.use((req, res, next) => {
 // Routes de base
 app.get('/', (req, res) => {
   // Ajouter les en-têtes CORS explicitement à cette réponse aussi
-  const origin = req.headers.origin;
-  if (origin && corsOptions.origin.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', corsOptions.origin[0]);
-  }
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.send('API Biogy Backend is running...');
 });
 
@@ -65,17 +56,10 @@ app.use('/api/health', require('./routes/healthRoutes'));
 
 // Route de test CORS explicite
 app.get('/api/cors-test', (req, res) => {
-  const origin = req.headers.origin;
-
   // Ajouter les en-têtes CORS explicitement
-  if (origin && corsOptions.origin.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', corsOptions.origin[0]);
-  }
-
-  res.header('Access-Control-Allow-Methods', corsOptions.methods.join(', '));
-  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.header('Access-Control-Allow-Credentials', 'true');
 
   res.json({
@@ -105,12 +89,9 @@ app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
 
   // Ajouter les en-têtes CORS à la réponse d'erreur
-  const origin = req.headers.origin;
-  if (origin && corsOptions.origin.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', corsOptions.origin[0]);
-  }
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
 
   res.status(statusCode).json({
       message: err.message,

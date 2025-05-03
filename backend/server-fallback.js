@@ -15,7 +15,7 @@ const app = express();
 
 // Configuration CORS permissive
 const corsOptions = {
-  origin: ['https://biogy.netlify.app', 'http://localhost:3000'],
+  origin: '*', // Permettre toutes les origines
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   credentials: true,
@@ -32,21 +32,15 @@ app.use(express.urlencoded({ extended: true }));
 
 // Middleware pour ajouter les en-têtes CORS à toutes les réponses
 app.use((req, res, next) => {
-  // Déterminer l'origine
-  const origin = req.headers.origin;
-  if (corsOptions.origin.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', corsOptions.origin[0]);
-  }
-
-  res.header('Access-Control-Allow-Methods', corsOptions.methods.join(', '));
-  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
+  // Permettre toutes les origines
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', corsOptions.maxAge.toString());
+  res.header('Access-Control-Max-Age', '86400');
 
   // Log pour le débogage
-  console.log(`CORS Headers set for request to ${req.path} from origin: ${origin || 'unknown'} (Fallback Server)`);
+  console.log(`CORS Headers set for request to ${req.path} from origin: ${req.headers.origin || 'unknown'} (Fallback Server)`);
 
   next();
 });
@@ -120,6 +114,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => console.log(`🚀 Fallback Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Fallback Server running on port ${PORT}`);
+  console.log(`📡 Environment: ${process.env.NODE_ENV}`);
+  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'Not set'}`);
+});
