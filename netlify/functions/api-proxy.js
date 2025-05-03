@@ -4,6 +4,12 @@ const axios = require('axios');
 // URL de l'API backend
 const API_URL = 'https://biogy-api.onrender.com/api';
 
+// Ajouter un délai pour éviter les problèmes de rate limiting
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Nombre maximum de tentatives
+const MAX_RETRIES = 3;
+
 // Fonction pour simuler des données de forum
 const simulateForumData = () => {
   return {
@@ -103,7 +109,7 @@ exports.handler = async function(event, context) {
 
   // Extraire le chemin de l'API à partir du chemin de la fonction
   const path = event.path.replace('/.netlify/functions/api-proxy', '');
-  
+
   // Log pour le débogage
   console.log(`API Proxy: ${event.httpMethod} ${path}`);
   console.log(`Origin: ${event.headers.origin || event.headers.Origin || 'unknown'}`);
@@ -122,7 +128,7 @@ exports.handler = async function(event, context) {
         body: JSON.stringify(simulateForumData())
       };
     }
-    
+
     if (path === '/social/profile' || path.startsWith('/social/profile/')) {
       console.log('Simulation des données de profil');
       // Extraire l'ID utilisateur si présent dans le chemin
@@ -137,52 +143,79 @@ exports.handler = async function(event, context) {
       };
     }
 
-    // Pour les autres routes, essayer de contacter le backend réel
+    // Pour les autres routes, essayer de contacter le backend réel avec plusieurs tentatives
     try {
       // Construire l'URL complète
       const url = `${API_URL}${path}`;
       console.log(`Tentative de connexion à: ${url}`);
-      
+
       // Extraire les en-têtes d'autorisation
       const authHeader = event.headers.authorization || event.headers.Authorization;
       const requestHeaders = {};
-      
+
       if (authHeader) {
         requestHeaders['Authorization'] = authHeader;
       }
-      
-      // Effectuer la requête au backend
-      const response = await axios({
-        method: event.httpMethod,
-        url,
-        headers: {
-          ...requestHeaders,
-          'Content-Type': 'application/json',
-          'Origin': event.headers.origin || event.headers.Origin || 'https://biogy.netlify.app'
-        },
-        data: event.body ? JSON.parse(event.body) : undefined,
-        timeout: 10000,
-        validateStatus: () => true // Accepter tous les codes de statut
-      });
-      
-      console.log(`Réponse du backend: ${response.status}`);
-      
-      // Retourner la réponse du backend
-      return {
-        statusCode: response.status,
-        headers: {
-          ...headers,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(response.data)
-      };
+
+      let lastError = null;
+
+      // Essayer plusieurs fois avec un délai entre les tentatives
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          console.log(`Tentative ${attempt}/${MAX_RETRIES} pour ${url}`);
+
+          if (attempt > 1) {
+            // Attendre un peu plus longtemps entre chaque tentative
+            const waitTime = 1000 * attempt;
+            console.log(`Attente de ${waitTime}ms avant la prochaine tentative...`);
+            await delay(waitTime);
+          }
+
+          // Effectuer la requête au backend
+          const response = await axios({
+            method: event.httpMethod,
+            url,
+            headers: {
+              ...requestHeaders,
+              'Content-Type': 'application/json',
+              'Origin': event.headers.origin || event.headers.Origin || 'https://biogy.netlify.app'
+            },
+            data: event.body ? JSON.parse(event.body) : undefined,
+            timeout: 10000 * attempt, // Augmenter le timeout à chaque tentative
+            validateStatus: () => true // Accepter tous les codes de statut
+          });
+
+          console.log(`Réponse du backend (tentative ${attempt}): ${response.status}`);
+
+          // Si la réponse est un succès ou une erreur 4xx (client), retourner immédiatement
+          if (response.status < 500) {
+            return {
+              statusCode: response.status,
+              headers: {
+                ...headers,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(response.data)
+            };
+          }
+
+          // Si c'est une erreur 5xx (serveur), on va réessayer
+          lastError = new Error(`Erreur serveur: ${response.status}`);
+        } catch (error) {
+          console.error(`Erreur lors de la tentative ${attempt}: ${error.message}`);
+          lastError = error;
+        }
+      }
+
+      // Si on arrive ici, c'est que toutes les tentatives ont échoué
+      throw lastError || new Error('Toutes les tentatives ont échoué');
     } catch (error) {
       console.error(`Erreur lors de la connexion au backend: ${error.message}`);
-      
+
       // En cas d'erreur, retourner une réponse simulée pour les routes importantes
       if (path.startsWith('/forum') || path.startsWith('/social')) {
         console.log('Fallback vers des données simulées');
-        
+
         if (path.startsWith('/forum')) {
           return {
             statusCode: 200,
@@ -193,7 +226,7 @@ exports.handler = async function(event, context) {
             body: JSON.stringify(simulateForumData())
           };
         }
-        
+
         if (path.startsWith('/social')) {
           return {
             statusCode: 200,
@@ -205,7 +238,7 @@ exports.handler = async function(event, context) {
           };
         }
       }
-      
+
       // Pour les autres routes, retourner une erreur
       return {
         statusCode: 502,
@@ -222,7 +255,7 @@ exports.handler = async function(event, context) {
     }
   } catch (error) {
     console.error('Erreur dans la fonction API Proxy:', error);
-    
+
     return {
       statusCode: 500,
       headers: {
