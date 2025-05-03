@@ -1,5 +1,11 @@
 // Fonction Netlify spécifique pour les requêtes de profil
 const axios = require('axios');
+const { Config } = require("@netlify/functions");
+
+// Configuration du chemin pour la fonction
+exports.config = {
+  path: "/api/social/*"  // la fonction s'exécutera sur /api/social/…
+};
 
 // URL de l'API backend
 const API_URL = 'https://biogy-api.onrender.com/api';
@@ -42,8 +48,9 @@ exports.handler = async function(event, context) {
 
   try {
     // Extraire le chemin de la requête
-    const path = event.path.replace('/.netlify/functions/profile-proxy', '');
-    logDebug(`Chemin extrait: "${path}"`);
+    // Avec la nouvelle configuration, le chemin sera /api/social/profile ou /api/social/profile/...
+    const path = event.path.replace('/api/social', '');
+    logDebug(`Chemin de la requête: ${event.path}, chemin extrait: ${path}`);
 
     // Gérer les cas spéciaux
     if (path === '/test') {
@@ -58,8 +65,9 @@ exports.handler = async function(event, context) {
       };
     }
 
-    // Construire l'URL complète pour le profil
-    const endpoint = path ? `social/profile${path}` : 'social/profile';
+    // Construire l'URL complète pour l'API
+    // Le chemin sera /profile ou /profile/... ou vide
+    const endpoint = path ? `social${path}` : 'social/profile';
     const url = `${API_URL}/${endpoint}`;
 
     logDebug(`Forwarding ${event.httpMethod} request to: ${url}`);
