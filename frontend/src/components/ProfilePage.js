@@ -25,14 +25,15 @@ function ProfilePage() {
 
         // URL de l'API en fonction de si c'est le profil de l'utilisateur connecté ou non
         const url = isOwnProfile
-          ? `${API_URL}/api/social/profile`
-          : `${API_URL}/api/social/profile/${userId}`;
+          ? `/.netlify/functions/api-proxy/social/profile`
+          : `/.netlify/functions/api-proxy/social/profile/${userId}`;
 
         // Headers avec token si nécessaire
         const headers = userInfo
           ? { Authorization: `Bearer ${userInfo.token}` }
           : {};
 
+        console.log('Chargement du profil depuis:', url);
         const response = await fetch(url, { headers });
 
         if (!response.ok) {
@@ -46,6 +47,7 @@ function ProfilePage() {
         }
 
         const data = await response.json();
+        console.log('Données du profil reçues:', data);
         setProfile(data);
 
       } catch (error) {

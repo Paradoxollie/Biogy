@@ -52,8 +52,35 @@ const simulateForumData = () => {
   };
 };
 
+// Définir les avatars prédéfinis
+const PREDEFINED_AVATARS = [
+  { id: 'avatar1', name: 'Microscope', url: 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/microscope_avatar.png' },
+  { id: 'avatar2', name: 'ADN', url: 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/dna_avatar.png' },
+  { id: 'avatar3', name: 'Plante', url: 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/plant_avatar.png' },
+  { id: 'avatar4', name: 'Cellule', url: 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/cell_avatar.png' },
+  { id: 'avatar5', name: 'Neurone', url: 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/neuron_avatar.png' },
+  { id: 'avatar6', name: 'Éprouvette', url: 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/test_tube_avatar.png' },
+  { id: 'avatar7', name: 'Bactérie', url: 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/bacteria_avatar.png' },
+  { id: 'avatar8', name: 'Molécule', url: 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/molecule_avatar.png' },
+  { id: 'avatar9', name: 'Loupe', url: 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/magnifier_avatar.png' },
+  { id: 'avatar10', name: 'Cerveau', url: 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/brain_avatar.png' }
+];
+
 // Fonction pour simuler des données de profil
-const simulateProfileData = (userId) => {
+const simulateProfileData = (userId, requestBody) => {
+  // Récupérer l'avatar sélectionné depuis le localStorage ou utiliser un avatar par défaut
+  let selectedAvatarId = 'avatar5'; // Par défaut
+  let avatarUrl = 'https://res.cloudinary.com/dkgkwwgpz/image/upload/v1714579200/biogy/avatars/neuron_avatar.png';
+
+  // Si un avatar est spécifié dans la requête, l'utiliser
+  if (requestBody && requestBody.avatarId) {
+    selectedAvatarId = requestBody.avatarId;
+    const selectedAvatar = PREDEFINED_AVATARS.find(avatar => avatar.id === selectedAvatarId);
+    if (selectedAvatar) {
+      avatarUrl = selectedAvatar.url;
+    }
+  }
+
   return {
     _id: userId || 'simulated-user-id',
     user: {
@@ -64,7 +91,8 @@ const simulateProfileData = (userId) => {
     displayName: 'Utilisateur Simulé',
     bio: 'Ceci est un profil simulé pendant que nous résolvons des problèmes techniques.',
     avatar: {
-      url: 'https://via.placeholder.com/150'
+      id: selectedAvatarId,
+      url: avatarUrl
     },
     specialization: 'Biologie',
     institution: 'Université de Simulation',
@@ -130,16 +158,81 @@ exports.handler = async function(event, context) {
     }
 
     if (path === '/social/profile' || path.startsWith('/social/profile/')) {
-      console.log('Simulation des données de profil');
+      console.log('Simulation des données de profil:', path, event.httpMethod);
+
+      // Gérer la mise à jour de l'avatar prédéfini
+      if (path === '/social/profile/avatar/predefined' && event.httpMethod === 'POST') {
+        try {
+          const requestBody = JSON.parse(event.body || '{}');
+          console.log('Mise à jour de l\'avatar prédéfini:', requestBody);
+
+          // Vérifier si l'avatar existe
+          const avatarId = requestBody.avatarId;
+          const avatar = PREDEFINED_AVATARS.find(a => a.id === avatarId);
+
+          if (!avatar) {
+            return {
+              statusCode: 400,
+              headers: {
+                ...headers,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ message: 'Avatar non trouvé' })
+            };
+          }
+
+          // Simuler une réponse réussie
+          return {
+            statusCode: 200,
+            headers: {
+              ...headers,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              success: true,
+              message: 'Avatar mis à jour avec succès',
+              avatar: {
+                id: avatar.id,
+                url: avatar.url
+              }
+            })
+          };
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour de l\'avatar:', error);
+          return {
+            statusCode: 400,
+            headers: {
+              ...headers,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: 'Erreur lors de la mise à jour de l\'avatar' })
+          };
+        }
+      }
+
       // Extraire l'ID utilisateur si présent dans le chemin
-      const userId = path.startsWith('/social/profile/') ? path.split('/').pop() : null;
+      const userId = path.startsWith('/social/profile/') && !path.includes('/avatar/')
+        ? path.split('/').pop()
+        : null;
+
+      // Pour les requêtes PUT, utiliser les données du corps de la requête
+      let requestBody = null;
+      if (event.httpMethod === 'PUT') {
+        try {
+          requestBody = JSON.parse(event.body || '{}');
+          console.log('Données reçues pour la mise à jour du profil:', requestBody);
+        } catch (error) {
+          console.error('Erreur lors du parsing du corps de la requête:', error);
+        }
+      }
+
       return {
         statusCode: 200,
         headers: {
           ...headers,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(simulateProfileData(userId))
+        body: JSON.stringify(simulateProfileData(userId, requestBody))
       };
     }
 
