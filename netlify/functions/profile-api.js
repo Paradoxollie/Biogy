@@ -59,12 +59,28 @@ exports.handler = async function(event, context) {
         if (parsedBody.interests !== undefined) {
           console.log('Type de interests dans la requête:', typeof parsedBody.interests, Array.isArray(parsedBody.interests));
 
-          // S'assurer que interests est un tableau
-          if (!Array.isArray(parsedBody.interests) && typeof parsedBody.interests === 'string') {
-            parsedBody.interests = parsedBody.interests
-              .split(',')
-              .map(item => item.trim())
-              .filter(item => item);
+          try {
+            // S'assurer que interests est un tableau
+            if (Array.isArray(parsedBody.interests)) {
+              // Déjà un tableau, ne rien faire
+              console.log('interests est déjà un tableau:', parsedBody.interests);
+            } else if (typeof parsedBody.interests === 'string') {
+              // Convertir la chaîne en tableau
+              console.log('Conversion de interests de chaîne en tableau');
+              parsedBody.interests = parsedBody.interests
+                .split(',')
+                .map(item => item.trim())
+                .filter(item => item);
+              console.log('interests après conversion:', parsedBody.interests);
+            } else {
+              // Ni un tableau ni une chaîne, utiliser un tableau vide
+              console.log('interests n\'est ni un tableau ni une chaîne, utilisation d\'un tableau vide');
+              parsedBody.interests = [];
+            }
+          } catch (interestsError) {
+            console.error('Erreur lors du traitement des intérêts:', interestsError);
+            // En cas d'erreur, utiliser un tableau vide
+            parsedBody.interests = [];
           }
         }
 

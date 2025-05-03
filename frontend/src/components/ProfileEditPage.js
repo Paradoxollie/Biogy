@@ -85,9 +85,20 @@ function ProfileEditPage() {
           specialization: data.specialization || '',
           institution: data.institution || '',
           level: data.level || 'autre',
-          interests: Array.isArray(data.interests)
-            ? data.interests.join(', ')
-            : data.interests || '',
+          interests: (() => {
+            console.log('Traitement des intérêts lors du chargement:', data.interests);
+            if (Array.isArray(data.interests)) {
+              const interestsString = data.interests.join(', ');
+              console.log('Intérêts convertis de tableau en chaîne:', interestsString);
+              return interestsString;
+            } else if (typeof data.interests === 'string') {
+              console.log('Intérêts déjà sous forme de chaîne:', data.interests);
+              return data.interests;
+            } else {
+              console.log('Intérêts non définis ou de type inattendu, utilisation d\'une chaîne vide');
+              return '';
+            }
+          })(),
           socialLinks: {
             website: data.socialLinks?.website || '',
             linkedin: data.socialLinks?.linkedin || '',
@@ -172,19 +183,39 @@ function ProfileEditPage() {
       setError(null);
 
       // Préparer les données à envoyer
+      let interestsArray = [];
+
+      console.log('Type de interests avant traitement:', typeof formData.interests, Array.isArray(formData.interests));
+      console.log('Valeur de interests avant traitement:', formData.interests);
+
+      try {
+        if (Array.isArray(formData.interests)) {
+          // Si c'est déjà un tableau, l'utiliser directement
+          interestsArray = formData.interests;
+          console.log('interests est déjà un tableau');
+        } else if (typeof formData.interests === 'string') {
+          // Si c'est une chaîne, la diviser en tableau
+          interestsArray = formData.interests
+            .split(',')
+            .map(item => item.trim())
+            .filter(item => item);
+          console.log('interests converti de chaîne en tableau:', interestsArray);
+        } else {
+          // Si ce n'est ni un tableau ni une chaîne, utiliser un tableau vide
+          console.log('interests n\'est ni un tableau ni une chaîne, utilisation d\'un tableau vide');
+        }
+      } catch (error) {
+        console.error('Erreur lors du traitement des intérêts:', error);
+        // En cas d'erreur, utiliser un tableau vide
+      }
+
       const dataToSend = {
         ...formData,
-        interests: Array.isArray(formData.interests)
-          ? formData.interests
-          : typeof formData.interests === 'string'
-            ? formData.interests
-                .split(',')
-                .map(item => item.trim())
-                .filter(item => item)
-            : []
+        interests: interestsArray
       };
 
-      console.log('Type de interests:', typeof formData.interests, Array.isArray(formData.interests));
+      console.log('Type de interests après traitement:', typeof interestsArray, Array.isArray(interestsArray));
+      console.log('Valeur de interests après traitement:', interestsArray);
 
       console.log('URL de l\'API dans config:', API_URL);
       console.log('Données à envoyer:', dataToSend);
