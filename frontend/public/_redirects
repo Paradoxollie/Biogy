@@ -1,5 +1,1 @@
-# Proxy API requests to Render backend
-/api/*  https://biogy-api.onrender.com/api/:splat  200
 
-# Handle React Router
-/*    /index.html   200

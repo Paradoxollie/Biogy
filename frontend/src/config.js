@@ -3,15 +3,13 @@
  */
 
 // URL de l'API backend
-export const API_URL = 'https://biogy-api.onrender.com';
+export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Configuration des proxies CORS
 export const CORS_PROXIES = [
   'https://corsproxy.io/?',
-  'https://api.allorigins.win/raw?url=',
-  'https://cors-proxy.htmldriven.com/?url=',
-  'https://thingproxy.freeboard.io/fetch/',
-  'https://api.codetabs.com/v1/proxy/?quest='
+  'https://cors-anywhere.herokuapp.com/',
+  'https://api.allorigins.win/raw?url='
 ];
 
 // Configuration de l'authentification

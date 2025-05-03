@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import { API_URL } from '../config';
 
 // Liste des avatars prédéfinis
 const PREDEFINED_AVATARS = [
@@ -62,9 +62,17 @@ function ProfileEditPage() {
       try {
         setLoading(true);
 
-        const data = await api.get('social/profile',
-          api.withAuth({}, userInfo.token)
-        );
+        const response = await fetch(`${API_URL}/api/social/profile`, {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Erreur lors de la récupération du profil');
+        }
+
+        const data = await response.json();
 
         // Mettre à jour le formulaire avec les données du profil
         setFormData({
@@ -167,16 +175,33 @@ function ProfileEditPage() {
       };
 
       // Mettre à jour le profil
-      await api.put('social/profile', dataToSend,
-        api.withAuth({}, userInfo.token)
-      );
+      const profileResponse = await fetch(`${API_URL}/api/social/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userInfo.token}`
+        },
+        body: JSON.stringify(dataToSend)
+      });
+
+      if (!profileResponse.ok) {
+        throw new Error('Erreur lors de la mise à jour du profil');
+      }
 
       // Si un avatar est sélectionné, mettre à jour l'avatar
       if (selectedAvatar) {
-        await api.post('social/profile/avatar/predefined',
-          { avatarId: selectedAvatar },
-          api.withAuth({}, userInfo.token)
-        );
+        const avatarResponse = await fetch(`${API_URL}/api/social/profile/avatar/predefined`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userInfo.token}`
+          },
+          body: JSON.stringify({ avatarId: selectedAvatar })
+        });
+
+        if (!avatarResponse.ok) {
+          throw new Error('Erreur lors de la mise à jour de l\'avatar');
+        }
       }
 
       setSuccess(true);

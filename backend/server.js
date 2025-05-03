@@ -10,69 +10,45 @@ const app = express();
 
 // Middlewares
 // Configuration CORS permissive
-const corsOptions = {
-  origin: '*', // Permettre toutes les origines
+app.use(cors({
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  credentials: true,
-  maxAge: 86400 // 24 heures en secondes
-};
+  credentials: false
+}));
 
-// Appliquer CORS à toutes les routes
-app.use(cors(corsOptions));
-
-// Middleware pour les requêtes OPTIONS préliminaires
-app.options('*', cors(corsOptions));
+// Middleware pour les requêtes OPTIONS
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.status(200).send();
+});
 
 app.use(express.json()); // Pour parser le JSON dans les requêtes
 app.use(express.urlencoded({ extended: true })); // Pour parser les données de formulaire
 
-// Middleware pour ajouter explicitement les en-têtes CORS à chaque réponse
+// Middleware pour ajouter les en-têtes CORS à toutes les réponses
 app.use((req, res, next) => {
-  // Permettre toutes les origines
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400');
-
-  // Log pour le débogage
-  console.log(`CORS Headers set for request to ${req.path} from origin: ${req.headers.origin || 'unknown'}`);
-
   next();
 });
 
 // Routes de base
 app.get('/', (req, res) => {
-  // Ajouter les en-têtes CORS explicitement à cette réponse aussi
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.send('API Biogy Backend is running...');
 });
 
-// Routes de santé
-app.use('/api/health', require('./routes/healthRoutes'));
-
-// Route de test CORS explicite
-app.get('/api/cors-test', (req, res) => {
-  // Ajouter les en-têtes CORS explicitement
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-
+// Route de test CORS
+app.get('/api/health', (req, res) => {
   res.json({
-    status: 'success',
-    message: 'CORS test successful',
+    status: 'ok',
+    message: 'API is healthy and CORS is working!',
     timestamp: new Date().toISOString(),
     origin: req.headers.origin || 'unknown',
-    headers: {
-      'Access-Control-Allow-Origin': res.getHeader('Access-Control-Allow-Origin'),
-      'Access-Control-Allow-Methods': res.getHeader('Access-Control-Allow-Methods'),
-      'Access-Control-Allow-Headers': res.getHeader('Access-Control-Allow-Headers'),
-      'Access-Control-Allow-Credentials': res.getHeader('Access-Control-Allow-Credentials')
-    }
+    server: 'main'
   });
 });
 
@@ -87,48 +63,12 @@ app.use('/api/social', require('./routes/socialRoutes')); // Routes sociales
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-
-  // Ajouter les en-têtes CORS à la réponse d'erreur
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-
   res.status(statusCode).json({
       message: err.message,
       stack: process.env.NODE_ENV === 'production' ? null : err.stack
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
-// Afficher les routes disponibles pour le débogage
-console.log('Routes disponibles:');
-app._router.stack.forEach(middleware => {
-  if(middleware.route) { // routes registered directly on the app
-    console.log(`${middleware.route.path}`);
-  } else if(middleware.name === 'router') { // router middleware
-    middleware.handle.stack.forEach(handler => {
-      if(handler.route) {
-        const path = handler.route.path;
-        const methods = Object.keys(handler.route.methods).join(', ').toUpperCase();
-        console.log(`${methods} ${path}`);
-      }
-    });
-  }
-});
-
-// Ajouter une route de test explicite
-app.get('/api/test', (req, res) => {
-  res.json({
-    message: 'API test successful',
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV,
-    port: PORT
-  });
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'Not set'}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

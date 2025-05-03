@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import { API_URL } from '../config';
 
 function ProfilePage() {
   const { userId } = useParams();
@@ -23,17 +23,29 @@ function ProfilePage() {
       try {
         setLoading(true);
 
-        // Endpoint en fonction de si c'est le profil de l'utilisateur connecté ou non
-        const endpoint = isOwnProfile
-          ? 'social/profile'
-          : `social/profile/${userId}`;
+        // URL de l'API en fonction de si c'est le profil de l'utilisateur connecté ou non
+        const url = isOwnProfile
+          ? `${API_URL}/api/social/profile`
+          : `${API_URL}/api/social/profile/${userId}`;
 
-        // Options avec token si nécessaire
-        const options = userInfo
-          ? api.withAuth({}, userInfo.token)
+        // Headers avec token si nécessaire
+        const headers = userInfo
+          ? { Authorization: `Bearer ${userInfo.token}` }
           : {};
 
-        const data = await api.get(endpoint, options);
+        const response = await fetch(url, { headers });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Profil non trouvé');
+          } else if (response.status === 403) {
+            throw new Error('Ce profil est privé');
+          } else {
+            throw new Error('Erreur lors de la récupération du profil');
+          }
+        }
+
+        const data = await response.json();
         setProfile(data);
 
       } catch (error) {

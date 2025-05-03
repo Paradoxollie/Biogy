@@ -11,22 +11,13 @@ services:
         value: production
       - key: FRONTEND_URL
         value: https://biogy.netlify.app
-      - key: CORS_ENABLED
-        value: "true"
-    healthCheckPath: /api/health
     headers:
       - path: /*
         name: Access-Control-Allow-Origin
-        value: "https://biogy.netlify.app"
+        value: "*"
       - path: /*
         name: Access-Control-Allow-Methods
         value: "GET, POST, PUT, DELETE, OPTIONS, PATCH"
       - path: /*
         name: Access-Control-Allow-Headers
         value: "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-      - path: /*
-        name: Access-Control-Allow-Credentials
-        value: "true"
-      - path: /*
-        name: Access-Control-Max-Age
-        value: "86400"
