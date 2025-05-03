@@ -82,7 +82,15 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   // Si toutes les méthodes ont échoué, lancer la dernière erreur
   console.error(`❌ Toutes les méthodes ont échoué:`, lastError);
-  throw lastError || new Error('Impossible de se connecter à l\'API');
+
+  // Vérifier si l'erreur est due à un backend indisponible (404)
+  if (lastError && lastError.message && lastError.message.includes('404')) {
+    throw new Error('Le serveur backend est actuellement indisponible. Veuillez réessayer plus tard ou contacter l\'administrateur.');
+  } else if (lastError && lastError.message && lastError.message.includes('Failed to fetch')) {
+    throw new Error('Impossible de se connecter au serveur backend. Vérifiez votre connexion internet ou contactez l\'administrateur.');
+  } else {
+    throw lastError || new Error('Impossible de se connecter à l\'API');
+  }
 };
 
 // Méthodes HTTP courantes
