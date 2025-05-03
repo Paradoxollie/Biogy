@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 function ProfilePage() {
   const { userId } = useParams();
@@ -23,32 +23,18 @@ function ProfilePage() {
       try {
         setLoading(true);
 
-        // Utiliser la fonction Netlify CORS proxy pour éviter les problèmes CORS
-        const path = isOwnProfile
-          ? '/social/profile'
-          : `/social/profile/${userId}`;
+        // Déterminer l'endpoint en fonction de si c'est le profil de l'utilisateur connecté ou non
+        const endpoint = isOwnProfile
+          ? 'social/profile'
+          : `social/profile/${userId}`;
 
-        const url = `/.netlify/functions/cors-proxy${path}`;
-        console.log('Fetching profile via CORS proxy:', url);
+        console.log('Fetching profile:', endpoint);
 
-        // Headers avec token si nécessaire
-        const headers = userInfo
-          ? { Authorization: `Bearer ${userInfo.token}` }
-          : {};
+        // Utiliser le service API avec authentification si nécessaire
+        const options = userInfo ? api.withAuth({}, userInfo.token) : {};
+        const data = await api.get(endpoint, options);
 
-        const response = await fetch(url, { headers });
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('Profil non trouvé');
-          } else if (response.status === 403) {
-            throw new Error('Ce profil est privé');
-          } else {
-            throw new Error('Erreur lors de la récupération du profil');
-          }
-        }
-
-        const data = await response.json();
+        console.log('Profile data received:', data);
         setProfile(data);
 
       } catch (error) {

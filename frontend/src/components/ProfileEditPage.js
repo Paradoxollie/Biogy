@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
-import apiService from '../services/apiService';
+import api from '../services/api';
 
 // Liste des avatars prédéfinis
 const PREDEFINED_AVATARS = [
@@ -63,18 +62,9 @@ function ProfileEditPage() {
       try {
         setLoading(true);
 
-        // Utiliser la fonction Netlify CORS proxy pour éviter les problèmes CORS
-        const response = await fetch(`/.netlify/functions/cors-proxy/social/profile`, {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Erreur lors de la récupération du profil');
-        }
-
-        const data = await response.json();
+        // Utiliser le service API pour récupérer le profil
+        console.log('Fetching profile data...');
+        const data = await api.get('social/profile', api.withAuth({}, userInfo.token));
 
         console.log('Données du profil reçues:', data);
         console.log('Type de interests dans les données reçues:', typeof data.interests, Array.isArray(data.interests));
@@ -218,52 +208,32 @@ function ProfileEditPage() {
       console.log('Type de interests après traitement:', typeof interestsArray, Array.isArray(interestsArray));
       console.log('Valeur de interests après traitement:', interestsArray);
 
-      console.log('URL de l\'API dans config:', API_URL);
       console.log('Données à envoyer:', dataToSend);
 
       try {
-        // Utiliser la nouvelle fonction Netlify CORS proxy pour éviter les problèmes CORS
-        console.log('Utilisation de la fonction Netlify CORS proxy pour les requêtes API');
+        // Utiliser le service API pour mettre à jour le profil
+        console.log('Mise à jour du profil via le service API');
 
         // Mettre à jour le profil
-        const profileResponse = await fetch('/.netlify/functions/cors-proxy/social/profile', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userInfo.token}`
-          },
-          body: JSON.stringify(dataToSend)
-        });
+        const updatedProfile = await api.put(
+          'social/profile',
+          dataToSend,
+          api.withAuth({}, userInfo.token)
+        );
 
-        console.log('Réponse de la fonction Netlify:', profileResponse.status);
-
-        if (!profileResponse.ok) {
-          let errorMessage = 'Erreur lors de la mise à jour du profil';
-          try {
-            const errorData = await profileResponse.json();
-            console.error('Données d\'erreur:', errorData);
-            errorMessage = errorData.message || errorMessage;
-          } catch (jsonError) {
-            console.error('Erreur lors du parsing de la réponse d\'erreur:', jsonError);
-          }
-          throw new Error(errorMessage);
-        }
+        console.log('Profil mis à jour avec succès:', updatedProfile);
 
         // Si un avatar est sélectionné, mettre à jour l'avatar
         if (selectedAvatar) {
-          const avatarResponse = await fetch('/.netlify/functions/cors-proxy/social/profile/avatar/predefined', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${userInfo.token}`
-            },
-            body: JSON.stringify({ avatarId: selectedAvatar })
-          });
+          console.log('Mise à jour de l\'avatar:', selectedAvatar);
 
-          if (!avatarResponse.ok) {
-            const errorData = await avatarResponse.json();
-            throw new Error(errorData.message || 'Erreur lors de la mise à jour de l\'avatar');
-          }
+          const avatarData = await api.post(
+            'social/profile/avatar/predefined',
+            { avatarId: selectedAvatar },
+            api.withAuth({}, userInfo.token)
+          );
+
+          console.log('Avatar mis à jour avec succès:', avatarData);
         }
       } catch (apiError) {
         console.error('Erreur détaillée:', apiError);
