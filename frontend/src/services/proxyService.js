@@ -1,9 +1,13 @@
 import axios from 'axios';
+import mockProfileService from './mockProfileService';
 
 // URL de l'API backend (pour les cas où la redirection Netlify ne fonctionne pas)
 const API_FALLBACK_URL = 'https://biogy-api.onrender.com/api';
 // URL des fonctions Netlify
 const NETLIFY_FUNCTIONS_URL = '/.netlify/functions';
+
+// Variable pour indiquer si nous sommes en mode simulation
+let simulationMode = false;
 
 /**
  * Service de proxy pour envoyer des requêtes via un proxy CORS si les
@@ -29,27 +33,10 @@ export const proxyRequest = async (method, endpoint, data = null, headers = {}) 
       ? endpoint.substring(1)
       : endpoint;
 
-  // Vérifier si c'est une requête de profil pour utiliser la fonction Netlify dédiée
-  const isProfileRequest = normalizedEndpoint.startsWith('social/profile');
-
   try {
-    let url;
-
-    if (isProfileRequest) {
-      // Utiliser la fonction Netlify dédiée pour les profils
-      console.log(`Appel API via fonction Netlify dédiée pour profil: ${normalizedEndpoint}`);
-      url = `${NETLIFY_FUNCTIONS_URL}/profile-proxy`;
-
-      // Si c'est un profil spécifique, ajouter l'ID à l'URL
-      if (normalizedEndpoint !== 'social/profile') {
-        const profileId = normalizedEndpoint.replace('social/profile/', '');
-        url = `${url}/${profileId}`;
-      }
-    } else {
-      // Utiliser la redirection Netlify standard
-      console.log(`Appel API via proxy Netlify: ${normalizedEndpoint}`);
-      url = `/api/${normalizedEndpoint}`;
-    }
+    // Utiliser la redirection Netlify standard pour toutes les requêtes
+    console.log(`Appel API via proxy Netlify: ${normalizedEndpoint}`);
+    const url = `/api/${normalizedEndpoint}`;
 
     const response = await axios({
       method,
@@ -78,135 +65,29 @@ export const proxyRequest = async (method, endpoint, data = null, headers = {}) 
  */
 export const fetchProfile = async (token, userId = null) => {
   try {
-    console.log('Récupération du profil utilisateur via fonction Netlify dédiée');
+    console.log('Récupération du profil utilisateur via redirection Netlify');
 
-    // Essayer d'abord avec la fonction profile-proxy
-    try {
-      // Utiliser directement la fonction Netlify dédiée
-      const url = userId
-        ? `${NETLIFY_FUNCTIONS_URL}/profile-proxy/${userId}`
-        : `${NETLIFY_FUNCTIONS_URL}/profile-proxy`;
+    // Utiliser la redirection Netlify configurée dans netlify.toml
+    const endpoint = userId ? `social/profile/${userId}` : 'social/profile';
 
-      const headers = token ? {
-        'Authorization': `Bearer ${token}`
-      } : {};
+    const headers = token ? {
+      'Authorization': `Bearer ${token}`
+    } : {};
 
-      const response = await axios({
-        method: 'get',
-        url,
-        headers,
-        timeout: 10000
-      });
+    console.log(`Envoi de la requête à /api/${endpoint}`);
 
-      if (!response.data) {
-        throw new Error('Empty response received from server');
-      }
+    const response = await axios({
+      method: 'get',
+      url: `/api/${endpoint}`,
+      headers,
+      timeout: 30000
+    });
 
-      return response.data;
-    } catch (proxyError) {
-      console.error('Erreur avec profile-proxy, tentative avec api-test:', proxyError);
-
-      // Si la fonction profile-proxy n'est pas disponible, essayer avec api-test
-      try {
-        // Vérifier si la fonction api-test est disponible
-        const testResponse = await axios({
-          method: 'get',
-          url: `${NETLIFY_FUNCTIONS_URL}/api-test`,
-          timeout: 5000
-        });
-
-        console.log('Fonction api-test disponible, utilisation comme proxy');
-
-        // Utiliser api-test comme proxy pour récupérer le profil
-        const apiTestUrl = `${NETLIFY_FUNCTIONS_URL}/api-test`;
-        const headers = token ? {
-          'Authorization': `Bearer ${token}`
-        } : {};
-
-        const response = await axios({
-          method: 'post',
-          url: apiTestUrl,
-          headers,
-          data: {
-            action: 'fetchProfile',
-            userId: userId,
-            token: token
-          },
-          timeout: 10000
-        });
-
-        if (!response.data) {
-          throw new Error('Empty response received from api-test');
-        }
-
-        // Si nous avons une réponse de api-test, mais pas de données de profil réelles,
-        // utiliser des données simulées pour le moment
-        if (!response.data.profile) {
-          console.log('Aucune donnée de profil réelle, utilisation de données simulées');
-
-          // Créer un profil simulé basé sur les informations utilisateur
-          return {
-            _id: userId || (token ? 'user-profile' : 'guest-profile'),
-            user: {
-              _id: userId || (token ? 'user-id' : 'guest-id'),
-              username: 'Utilisateur',
-              role: 'user'
-            },
-            displayName: 'Utilisateur',
-            bio: 'Profil simulé - La connexion au serveur n\'a pas pu être établie.',
-            avatar: {
-              url: '/images/avatars/avatar1.png'
-            },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            specialization: 'Non spécifié',
-            institution: 'Non spécifié',
-            level: 'autre',
-            interests: ['Biologie'],
-            badges: [],
-            socialLinks: {},
-            settings: {
-              emailNotifications: true,
-              privateProfile: false,
-              showEmail: false
-            },
-            simulated: true
-          };
-        }
-
-        return response.data.profile;
-      } catch (apiTestError) {
-        console.error('Erreur avec api-test:', apiTestError);
-
-        // Si toutes les tentatives échouent, essayer directement avec l'API
-        try {
-          console.log('Tentative directe avec l\'API');
-
-          const endpoint = userId ? `social/profile/${userId}` : 'social/profile';
-          const url = `${API_FALLBACK_URL}/${endpoint}`;
-
-          const headers = token ? {
-            'Authorization': `Bearer ${token}`
-          } : {};
-
-          const response = await axios({
-            method: 'get',
-            url,
-            headers,
-            timeout: 10000
-          });
-
-          if (!response.data) {
-            throw new Error('Empty response received from direct API');
-          }
-
-          return response.data;
-        } catch (directError) {
-          console.error('Erreur avec l\'API directe:', directError);
-          throw directError;
-        }
-      }
+    if (!response.data) {
+      throw new Error('Empty response received from server');
     }
+
+    return response.data;
   } catch (error) {
     console.error('Erreur lors de la récupération du profil:', error);
     throw new Error(`Erreur lors de la récupération du profil: ${error.message}`);
@@ -222,16 +103,18 @@ export const updateProfile = async (token, profileData) => {
   }
 
   try {
-    console.log('Mise à jour du profil utilisateur via fonction Netlify dédiée');
+    console.log('Mise à jour du profil utilisateur via redirection Netlify');
 
     const headers = {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     };
 
+    console.log('Envoi de la requête à /api/social/profile');
+
     const response = await axios({
       method: 'put',
-      url: `${NETLIFY_FUNCTIONS_URL}/profile-proxy`,
+      url: '/api/social/profile',
       headers,
       data: profileData,
       timeout: 30000
@@ -257,16 +140,18 @@ export const updateAvatar = async (token, avatarId) => {
   }
 
   try {
-    console.log('Mise à jour de l\'avatar via fonction Netlify dédiée');
+    console.log('Mise à jour de l\'avatar via redirection Netlify');
 
     const headers = {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     };
 
+    console.log('Envoi de la requête à /api/social/profile/avatar/predefined');
+
     const response = await axios({
       method: 'post',
-      url: `${NETLIFY_FUNCTIONS_URL}/profile-proxy/avatar/predefined`,
+      url: '/api/social/profile/avatar/predefined',
       headers,
       data: { avatarId },
       timeout: 30000
