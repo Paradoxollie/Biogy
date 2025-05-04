@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BROWSER_API_URL } from '../config';
-import AvatarUploader from './AvatarUploader';
+import AvatarSelector from './AvatarSelector';
 
 function ProfileEditPage() {
   const { userInfo } = useAuth();
@@ -131,11 +131,26 @@ function ProfileEditPage() {
   };
 
   // Gérer le changement d'avatar
-  const handleAvatarChange = (avatar) => {
+  const handleAvatarChange = (avatarUrl) => {
+    // Mettre à jour l'état du formulaire
     setFormData(prev => ({
       ...prev,
-      avatar: avatar
+      avatar: {
+        url: avatarUrl
+      }
     }));
+
+    // Stocker l'avatar dans le localStorage pour une persistance temporaire
+    if (userInfo && userInfo._id) {
+      try {
+        const storedAvatars = JSON.parse(localStorage.getItem('userAvatars') || '{}');
+        storedAvatars[userInfo._id] = avatarUrl;
+        localStorage.setItem('userAvatars', JSON.stringify(storedAvatars));
+        console.log('Avatar stocké localement:', avatarUrl);
+      } catch (e) {
+        console.error('Erreur lors du stockage local de l\'avatar:', e);
+      }
+    }
   };
 
   // Soumettre le formulaire
@@ -248,8 +263,8 @@ function ProfileEditPage() {
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Informations de base</h2>
 
             {/* Sélection d'avatar */}
-            <AvatarUploader
-              onAvatarChange={handleAvatarChange}
+            <AvatarSelector
+              onAvatarSelect={handleAvatarChange}
               currentAvatarUrl={formData.avatar?.url || ''}
             />
 
