@@ -13,9 +13,9 @@ connectDB();
 
 const app = express();
 
-// Configuration CORS permissive
+// Configuration CORS spécifique
 const corsOptions = {
-  origin: '*', // Permettre toutes les origines
+  origin: ['https://biogy.netlify.app', 'http://localhost:3000', 'http://localhost:5173'], // Origines autorisées
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   credentials: true,
@@ -32,8 +32,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // Middleware pour ajouter les en-têtes CORS à toutes les réponses
 app.use((req, res, next) => {
-  // Permettre toutes les origines
-  res.header('Access-Control-Allow-Origin', '*');
+  const allowedOrigins = ['https://biogy.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
+  const origin = req.headers.origin;
+
+  // Vérifier si l'origine est autorisée
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    // Pour les requêtes sans origine ou avec une origine non autorisée
+    res.header('Access-Control-Allow-Origin', 'https://biogy.netlify.app');
+  }
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.header('Access-Control-Allow-Credentials', 'true');
