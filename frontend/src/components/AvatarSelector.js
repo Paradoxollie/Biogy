@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 const presetAvatars = [
   { id: 'default', url: '', label: 'Avatar par défaut' },
 
-  // Avatars personnalisés
-  { id: 'custom_avatar1', url: 'https://asset.cloudinary.com/dzf1anevr/0909532752405e56fbcf50f84bea066e', label: 'Avatar Personnalisé 1' },
-  { id: 'custom_avatar2', url: 'https://asset.cloudinary.com/dzf1anevr/e4e870ed9de4e26816d8763c55bed870', label: 'Avatar Personnalisé 2' },
-  { id: 'custom_avatar3', url: 'https://asset.cloudinary.com/dzf1anevr/a79dcb87285fbfde7f92740e95f90435', label: 'Avatar Personnalisé 3' },
+  // Avatars personnalisés avec URLs publiques alternatives
+  { id: 'custom_avatar1', url: 'https://cdn-icons-png.flaticon.com/512/4140/4140037.png', label: 'Avatar Personnalisé 1' },
+  { id: 'custom_avatar2', url: 'https://cdn-icons-png.flaticon.com/512/4140/4140047.png', label: 'Avatar Personnalisé 2' },
+  { id: 'custom_avatar3', url: 'https://cdn-icons-png.flaticon.com/512/4140/4140051.png', label: 'Avatar Personnalisé 3' },
 
   // Avatars féminins
   { id: 'girl_scientist1', url: 'https://cdn-icons-png.flaticon.com/512/4205/4205813.png', label: 'Scientifique F 1' },
