@@ -25,12 +25,16 @@ mongoose.connect(process.env.MONGO_URI)
     process.exit(1);
   });
 
-// ────────────────── Health check
+// ────────────────── Health checks
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
+app.get('/healthz', (_, res) => res.send('ok')); // Endpoint simplifié pour les health checks
 
 // ────────────────── Routes métiers
 app.use('/api/profile', require('./routes/profile'));   // upload avatar, etc.
-// app.use('/api/auth',    require('./routes/auth'));   // tes autres routes…
+app.use('/api/auth', require('./routes/authRoutes'));   // routes d'authentification
+app.use('/api/posts', require('./routes/postRoutes')); // routes des posts
+app.use('/api/forum', require('./routes/forumRoutes')); // routes du forum
+app.use('/api/social', require('./routes/socialRoutes')); // routes sociales
 
 // ────────────────── Lancement serveur
 const PORT = process.env.PORT || 4000;
