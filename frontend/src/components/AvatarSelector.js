@@ -1,22 +1,15 @@
 import React, { useState } from 'react';
-import scientist1 from '../images/scientist1.png';
-import scientist2 from '../images/scientist2.png';
-import microscope from '../images/microscope.png';
-import dna from '../images/dna.png';
-import flask from '../images/flask.png';
-import atom from '../images/atom.png';
-import plant from '../images/plant.png';
 
-// Liste des avatars prédéfinis avec des images importées
+// Liste des avatars prédéfinis avec des URLs externes
 const presetAvatars = [
   { id: 'default', url: '', label: 'Avatar par défaut' },
-  { id: 'scientist1', url: scientist1, label: 'Scientifique 1' },
-  { id: 'scientist2', url: scientist2, label: 'Scientifique 2' },
-  { id: 'microscope', url: microscope, label: 'Microscope' },
-  { id: 'dna', url: dna, label: 'ADN' },
-  { id: 'flask', url: flask, label: 'Fiole' },
-  { id: 'atom', url: atom, label: 'Atome' },
-  { id: 'plant', url: plant, label: 'Plante' }
+  { id: 'scientist1', url: 'https://cdn-icons-png.flaticon.com/512/3048/3048122.png', label: 'Scientifique 1' },
+  { id: 'scientist2', url: 'https://cdn-icons-png.flaticon.com/512/4205/4205906.png', label: 'Scientifique 2' },
+  { id: 'microscope', url: 'https://cdn-icons-png.flaticon.com/512/1048/1048317.png', label: 'Microscope' },
+  { id: 'dna', url: 'https://cdn-icons-png.flaticon.com/512/2941/2941522.png', label: 'ADN' },
+  { id: 'flask', url: 'https://cdn-icons-png.flaticon.com/512/1048/1048302.png', label: 'Fiole' },
+  { id: 'atom', url: 'https://cdn-icons-png.flaticon.com/512/1048/1048305.png', label: 'Atome' },
+  { id: 'plant', url: 'https://cdn-icons-png.flaticon.com/512/2971/2971246.png', label: 'Plante' }
 ];
 
 function AvatarSelector({ onAvatarSelect, currentAvatarUrl }) {
@@ -33,24 +26,24 @@ function AvatarSelector({ onAvatarSelect, currentAvatarUrl }) {
   return (
     <div className="mb-6">
       <label className="block text-gray-700 mb-3">Avatar</label>
-      
+
       <div className="grid grid-cols-4 gap-4">
         {presetAvatars.map((avatar) => (
-          <div 
+          <div
             key={avatar.id}
             onClick={() => handleAvatarSelect(avatar.url)}
             className={`
               cursor-pointer rounded-lg p-2 border-2 transition-all duration-200
-              ${selectedAvatar === avatar.url 
-                ? 'border-lab-purple bg-lab-purple/5 shadow-md' 
+              ${selectedAvatar === avatar.url
+                ? 'border-lab-purple bg-lab-purple/5 shadow-md'
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }
             `}
           >
             <div className="aspect-square rounded-full overflow-hidden bg-gray-100 flex items-center justify-center mb-2">
               {avatar.url ? (
-                <img 
-                  src={avatar.url} 
+                <img
+                  src={avatar.url}
                   alt={avatar.label}
                   className="w-full h-full object-cover"
                 />
@@ -64,7 +57,7 @@ function AvatarSelector({ onAvatarSelect, currentAvatarUrl }) {
           </div>
         ))}
       </div>
-      
+
       <p className="text-xs text-gray-500 mt-2">
         Cliquez sur un avatar pour le sélectionner
       </p>
