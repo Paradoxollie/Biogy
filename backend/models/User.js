@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt   = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -10,15 +10,14 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, 'L\'email est requis'],
+    required: true,
     unique: true,
-    trim: true,
+    lowercase: true,
   },
   password: {
     type: String,
-    required: [true, 'Le mot de passe est requis'],
-    minlength: [6, 'Le mot de passe doit contenir au moins 6 caractères'],
-    select: false, // Ne pas inclure le mot de passe par défaut dans les requêtes
+    required: true,
+    select: false,
   },
   role: {
     type: String,
@@ -39,12 +38,16 @@ const userSchema = new mongoose.Schema({
   timestamps: true, // Ajoute createdAt et updatedAt automatiquement
 });
 
-/* Méthode d'instance */
+/* Hash du mot de passe avant save */
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+/* Méthode d'instance pour vérifier */
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  // bcrypt.compare retourne une promesse
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);
