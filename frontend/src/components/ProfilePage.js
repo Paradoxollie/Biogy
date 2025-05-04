@@ -46,6 +46,11 @@ function ProfilePage() {
         }
 
         const data = await response.json();
+
+        // Log pour déboguer
+        console.log('Profil reçu du serveur:', data);
+        console.log('Avatar reçu:', data.avatar);
+
         setProfile(data);
 
         // Vérifier si l'utilisateur suit déjà ce profil

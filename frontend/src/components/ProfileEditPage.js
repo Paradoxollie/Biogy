@@ -164,18 +164,33 @@ function ProfileEditPage() {
       setError(null);
       setSuccess(null);
 
+      // Préparer les données à envoyer
+      const dataToSend = {
+        ...formData,
+        interests: formData.interests ? formData.interests.split(',').map(item => item.trim()) : []
+      };
+
+      // Log pour déboguer
+      console.log('Données envoyées au serveur:', dataToSend);
+      console.log('Avatar envoyé:', dataToSend.avatar);
+
       const response = await fetch(`${BROWSER_API_URL}/social/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${userInfo.token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSend)
       });
 
       if (!response.ok) {
         throw new Error('Erreur lors de la mise à jour du profil');
       }
+
+      // Récupérer et logger la réponse du serveur
+      const responseData = await response.json();
+      console.log('Réponse du serveur après mise à jour:', responseData);
+      console.log('Avatar dans la réponse:', responseData.avatar);
 
       setSuccess('Profil mis à jour avec succès');
 
