@@ -42,7 +42,7 @@ export const ROUTES = {
 
 // Configuration des fonctionnalités
 export const FEATURES = {
-  useProxies: true, // Activer l'utilisation des proxies CORS
+  useProxies: false, // Désactiver l'utilisation des proxies CORS
   useLocalStorage: true, // Activer l'utilisation du localStorage
   debug: process.env.NODE_ENV !== 'production' // Activer le mode debug en développement
 };

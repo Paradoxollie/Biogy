@@ -16,6 +16,7 @@ function AvatarUpload() {
 
   const uploadAvatar = async () => {
     if (!selectedFile) {
+      console.warn('Aucun fichier sélectionné');
       setError('Veuillez sélectionner un fichier');
       return;
     }
@@ -39,14 +40,19 @@ function AvatarUpload() {
       );
 
       const url = res.data.url;
-      dispatch({ type: 'SET_AVATAR', payload: url });
-      localStorage.setItem('avatar', url);
-      
+      if (url) {
+        dispatch({ type: 'SET_AVATAR', payload: url });
+        localStorage.setItem('avatar', url);
+        console.log('Avatar mis à jour avec succès:', url);
+      } else {
+        throw new Error('URL d\'avatar non reçue du serveur');
+      }
+
       setUploading(false);
       setSelectedFile(null);
     } catch (err) {
       console.error('Erreur lors de l\'upload:', err);
-      setError('Erreur lors de l\'upload de l\'avatar');
+      setError('Erreur lors de l\'upload de l\'avatar: ' + (err.response?.data?.message || err.message));
       setUploading(false);
     }
   };
@@ -54,34 +60,34 @@ function AvatarUpload() {
   return (
     <div className="avatar-upload">
       <h3>Changer d'avatar</h3>
-      
+
       <div className="file-input">
-        <input 
-          type="file" 
-          accept="image/*" 
-          onChange={handleFileChange} 
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
           disabled={uploading}
         />
       </div>
-      
+
       {selectedFile && (
         <div className="preview">
-          <img 
-            src={URL.createObjectURL(selectedFile)} 
-            alt="Aperçu" 
+          <img
+            src={URL.createObjectURL(selectedFile)}
+            alt="Aperçu"
             style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '50%' }}
           />
         </div>
       )}
-      
-      <button 
-        onClick={uploadAvatar} 
+
+      <button
+        onClick={uploadAvatar}
         disabled={!selectedFile || uploading}
         className="upload-button"
       >
         {uploading ? 'Envoi en cours...' : 'Envoyer'}
       </button>
-      
+
       {error && <div className="error">{error}</div>}
     </div>
   );
