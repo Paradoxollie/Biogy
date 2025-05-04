@@ -25,12 +25,8 @@
   methods = ["OPTIONS"]
   headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH", Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With, Accept, Origin"}
 
-# Netlify Functions redirects
-[[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-  force = true
+# Netlify Functions sont gérées automatiquement par Netlify
+# Pas besoin de redirection explicite pour /.netlify/functions/*
 
 # SPA fallback - this must be the last redirect
 [[redirects]]
