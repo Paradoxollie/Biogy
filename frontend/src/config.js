@@ -3,7 +3,10 @@
  */
 
 // URL de l'API backend
-export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+export const API_URL = process.env.REACT_APP_API_URL || 'https://biogy-api.onrender.com';
+
+// URL de l'API pour les requêtes directes depuis le navigateur (sans proxy)
+export const DIRECT_API_URL = '/api';
 
 // Configuration des proxies CORS
 export const CORS_PROXIES = [
@@ -46,6 +49,7 @@ export const FEATURES = {
 
 export default {
   API_URL,
+  DIRECT_API_URL,
   CORS_PROXIES,
   AUTH_CONFIG,
   TIMEOUTS,

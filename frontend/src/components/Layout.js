@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ApiHealthCheck from './ApiHealthCheck';
 
 function Layout({ children }) {
   const [scrolled, setScrolled] = useState(false);
@@ -276,6 +277,8 @@ function Layout({ children }) {
       <main className="flex-grow">
         {children}
       </main>
+
+      <ApiHealthCheck />
 
       <footer className="bg-gray-50 border-t border-lab-lines relative overflow-hidden">
         <div className="absolute -top-16 -left-16 w-32 h-32 opacity-5">

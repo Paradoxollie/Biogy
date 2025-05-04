@@ -1,0 +1,451 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { DIRECT_API_URL } from '../config';
+
+function ProfileEditPage() {
+  const { userInfo } = useAuth();
+  const navigate = useNavigate();
+  
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  
+  // État du formulaire
+  const [formData, setFormData] = useState({
+    displayName: '',
+    bio: '',
+    specialization: '',
+    institution: '',
+    level: 'autre',
+    interests: '',
+    socialLinks: {
+      website: '',
+      linkedin: '',
+      twitter: '',
+      github: '',
+      researchGate: ''
+    },
+    settings: {
+      emailNotifications: true,
+      privateProfile: false,
+      showEmail: false
+    }
+  });
+  
+  // Charger les données du profil
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!userInfo) {
+        navigate('/login', { state: { from: '/profile/edit' } });
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        
+        const response = await fetch(`${DIRECT_API_URL}/social/profile`, {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Erreur lors de la récupération du profil');
+        }
+        
+        const data = await response.json();
+        
+        // Mettre à jour le formulaire avec les données du profil
+        setFormData({
+          displayName: data.displayName || '',
+          bio: data.bio || '',
+          specialization: data.specialization || '',
+          institution: data.institution || '',
+          level: data.level || 'autre',
+          interests: data.interests ? data.interests.join(', ') : '',
+          socialLinks: {
+            website: data.socialLinks?.website || '',
+            linkedin: data.socialLinks?.linkedin || '',
+            twitter: data.socialLinks?.twitter || '',
+            github: data.socialLinks?.github || '',
+            researchGate: data.socialLinks?.researchGate || ''
+          },
+          settings: {
+            emailNotifications: data.settings?.emailNotifications ?? true,
+            privateProfile: data.settings?.privateProfile ?? false,
+            showEmail: data.settings?.showEmail ?? false
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProfile();
+  }, [userInfo, navigate]);
+  
+  // Gérer les changements dans le formulaire
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    if (name.startsWith('socialLinks.')) {
+      const socialLinkKey = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        socialLinks: {
+          ...prev.socialLinks,
+          [socialLinkKey]: value
+        }
+      }));
+    } else if (name.startsWith('settings.')) {
+      const settingKey = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          [settingKey]: type === 'checkbox' ? checked : value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+  
+  // Soumettre le formulaire
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!userInfo) {
+      navigate('/login', { state: { from: '/profile/edit' } });
+      return;
+    }
+    
+    try {
+      setSubmitting(true);
+      setError(null);
+      setSuccess(null);
+      
+      const response = await fetch(`${DIRECT_API_URL}/social/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userInfo.token}`
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour du profil');
+      }
+      
+      setSuccess('Profil mis à jour avec succès');
+      
+      // Rediriger vers la page de profil après 2 secondes
+      setTimeout(() => {
+        navigate('/profile');
+      }, 2000);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setError(error.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-lab-purple"></div>
+        <p className="mt-2 text-gray-600">Chargement du profil...</p>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="bg-white rounded-lg shadow-md p-6 sketch-container">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Modifier mon profil</h1>
+        
+        {error && (
+          <div className="bg-red-50 p-4 rounded-lg mb-6">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
+        
+        {success && (
+          <div className="bg-green-50 p-4 rounded-lg mb-6">
+            <p className="text-green-600">{success}</p>
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit}>
+          {/* Informations de base */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">Informations de base</h2>
+            
+            <div className="mb-4">
+              <label htmlFor="displayName" className="block text-gray-700 mb-1">Nom d'affichage</label>
+              <input
+                type="text"
+                id="displayName"
+                name="displayName"
+                value={formData.displayName}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="bio" className="block text-gray-700 mb-1">Bio</label>
+              <textarea
+                id="bio"
+                name="bio"
+                value={formData.bio}
+                onChange={handleChange}
+                rows="4"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+                maxLength="500"
+              ></textarea>
+              <p className="text-sm text-gray-500 mt-1">{formData.bio.length}/500 caractères</p>
+            </div>
+          </div>
+          
+          {/* Informations académiques */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">Informations académiques</h2>
+            
+            <div className="mb-4">
+              <label htmlFor="specialization" className="block text-gray-700 mb-1">Spécialisation</label>
+              <input
+                type="text"
+                id="specialization"
+                name="specialization"
+                value={formData.specialization}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="institution" className="block text-gray-700 mb-1">Institution</label>
+              <input
+                type="text"
+                id="institution"
+                name="institution"
+                value={formData.institution}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="level" className="block text-gray-700 mb-1">Niveau</label>
+              <select
+                id="level"
+                name="level"
+                value={formData.level}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+              >
+                <option value="lycee">Lycée</option>
+                <option value="bts">BTS</option>
+                <option value="dut">DUT / BUT</option>
+                <option value="licence">Licence</option>
+                <option value="master">Master</option>
+                <option value="doctorat">Doctorat</option>
+                <option value="professionnel">Professionnel</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="interests" className="block text-gray-700 mb-1">Centres d'intérêt</label>
+              <input
+                type="text"
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+                placeholder="Séparés par des virgules"
+              />
+              <p className="text-sm text-gray-500 mt-1">Ex: Biologie moléculaire, Génétique, Microbiologie</p>
+            </div>
+          </div>
+          
+          {/* Liens sociaux */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">Liens sociaux</h2>
+            
+            <div className="mb-4">
+              <label htmlFor="socialLinks.website" className="block text-gray-700 mb-1">Site web</label>
+              <input
+                type="url"
+                id="socialLinks.website"
+                name="socialLinks.website"
+                value={formData.socialLinks.website}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+                placeholder="https://monsite.com"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="socialLinks.linkedin" className="block text-gray-700 mb-1">LinkedIn</label>
+              <input
+                type="url"
+                id="socialLinks.linkedin"
+                name="socialLinks.linkedin"
+                value={formData.socialLinks.linkedin}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+                placeholder="https://linkedin.com/in/username"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="socialLinks.twitter" className="block text-gray-700 mb-1">Twitter</label>
+              <input
+                type="url"
+                id="socialLinks.twitter"
+                name="socialLinks.twitter"
+                value={formData.socialLinks.twitter}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+                placeholder="https://twitter.com/username"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="socialLinks.github" className="block text-gray-700 mb-1">GitHub</label>
+              <input
+                type="url"
+                id="socialLinks.github"
+                name="socialLinks.github"
+                value={formData.socialLinks.github}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+                placeholder="https://github.com/username"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="socialLinks.researchGate" className="block text-gray-700 mb-1">ResearchGate</label>
+              <input
+                type="url"
+                id="socialLinks.researchGate"
+                name="socialLinks.researchGate"
+                value={formData.socialLinks.researchGate}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
+                placeholder="https://researchgate.net/profile/username"
+              />
+            </div>
+          </div>
+          
+          {/* Paramètres */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">Paramètres</h2>
+            
+            <div className="mb-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="settings.emailNotifications"
+                  name="settings.emailNotifications"
+                  checked={formData.settings.emailNotifications}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-lab-purple focus:ring-lab-purple border-gray-300 rounded"
+                />
+                <label htmlFor="settings.emailNotifications" className="ml-2 block text-gray-700">
+                  Recevoir des notifications par email
+                </label>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="settings.privateProfile"
+                  name="settings.privateProfile"
+                  checked={formData.settings.privateProfile}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-lab-purple focus:ring-lab-purple border-gray-300 rounded"
+                />
+                <label htmlFor="settings.privateProfile" className="ml-2 block text-gray-700">
+                  Profil privé (visible uniquement par les utilisateurs connectés)
+                </label>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="settings.showEmail"
+                  name="settings.showEmail"
+                  checked={formData.settings.showEmail}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-lab-purple focus:ring-lab-purple border-gray-300 rounded"
+                />
+                <label htmlFor="settings.showEmail" className="ml-2 block text-gray-700">
+                  Afficher mon email sur mon profil
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          {/* Boutons */}
+          <div className="flex justify-end space-x-4">
+            <Link
+              to="/profile"
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300"
+            >
+              Annuler
+            </Link>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-4 py-2 bg-lab-purple text-white rounded-lg hover:bg-lab-purple/90 transition-all duration-300 disabled:opacity-50"
+            >
+              {submitting ? 'Enregistrement...' : 'Enregistrer'}
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      {/* Styles spécifiques pour l'effet crayon/schéma */}
+      <style jsx="true">{`
+        .sketch-container {
+          position: relative;
+          box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .sketch-container:before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border: 2px solid #333;
+          border-radius: 0.5rem;
+          opacity: 0.08;
+          pointer-events: none;
+          transform: translate(2px, 2px);
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default ProfileEditPage;

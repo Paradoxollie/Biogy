@@ -1,40 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
+import { DIRECT_API_URL } from '../config';
 
 function ProfilePage() {
   const { userId } = useParams();
   const { userInfo } = useAuth();
   const navigate = useNavigate();
-  
+
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
-  
+
   // Déterminer si c'est le profil de l'utilisateur connecté
   const isOwnProfile = !userId || (userInfo && userId === userInfo._id);
-  
+
   // Charger le profil
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        
+
         // URL de l'API en fonction de si c'est le profil de l'utilisateur connecté ou non
         const url = isOwnProfile
-          ? `${API_URL}/api/social/profile`
-          : `${API_URL}/api/social/profile/${userId}`;
-        
+          ? `${DIRECT_API_URL}/social/profile`
+          : `${DIRECT_API_URL}/social/profile/${userId}`;
+
         // Headers avec token si nécessaire
         const headers = userInfo
           ? { Authorization: `Bearer ${userInfo.token}` }
           : {};
-        
+
         const response = await fetch(url, { headers });
-        
+
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Profil non trouvé');
@@ -44,10 +44,10 @@ function ProfilePage() {
             throw new Error('Erreur lors de la récupération du profil');
           }
         }
-        
+
         const data = await response.json();
         setProfile(data);
-        
+
         // Vérifier si l'utilisateur suit déjà ce profil
         if (userInfo && data.followers && data.followers.includes(userInfo._id)) {
           setIsFollowing(true);
@@ -59,35 +59,35 @@ function ProfilePage() {
         setLoading(false);
       }
     };
-    
+
     fetchProfile();
   }, [userId, userInfo, isOwnProfile]);
-  
+
   // Gérer le suivi/désabonnement
   const handleFollow = async () => {
     if (!userInfo) {
       navigate('/login', { state: { from: `/profile/${userId}` } });
       return;
     }
-    
+
     try {
       setFollowLoading(true);
-      
-      const response = await fetch(`${API_URL}/api/social/profile/${userId}/follow`, {
+
+      const response = await fetch(`${DIRECT_API_URL}/social/profile/${userId}/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${userInfo.token}`
         }
       });
-      
+
       if (!response.ok) {
         throw new Error('Erreur lors du suivi/désabonnement');
       }
-      
+
       const data = await response.json();
       setIsFollowing(data.following);
-      
+
       // Mettre à jour le nombre d'abonnés dans le profil
       setProfile(prev => ({
         ...prev,
@@ -101,7 +101,7 @@ function ProfilePage() {
       setFollowLoading(false);
     }
   };
-  
+
   // Formater la date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -111,7 +111,7 @@ function ProfilePage() {
       day: 'numeric'
     });
   };
-  
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
@@ -120,7 +120,7 @@ function ProfilePage() {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -136,7 +136,7 @@ function ProfilePage() {
       </div>
     );
   }
-  
+
   if (!profile) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -152,7 +152,7 @@ function ProfilePage() {
       </div>
     );
   }
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* En-tête du profil */}
@@ -176,7 +176,7 @@ function ProfilePage() {
               )}
             </div>
           </div>
-          
+
           {/* Bouton de suivi ou d'édition */}
           <div className="absolute bottom-4 right-4">
             {isOwnProfile ? (
@@ -220,12 +220,12 @@ function ProfilePage() {
             )}
           </div>
         </div>
-        
+
         <div className="pt-20 pb-6 px-8">
           <h1 className="text-2xl font-bold text-gray-800">
             {profile.displayName || profile.user?.username || 'Utilisateur'}
           </h1>
-          
+
           <div className="flex items-center text-gray-500 mt-1">
             <span>@{profile.user?.username}</span>
             {profile.user?.role === 'admin' && (
@@ -236,7 +236,7 @@ function ProfilePage() {
             <span className="mx-2">•</span>
             <span>Membre depuis {formatDate(profile.createdAt)}</span>
           </div>
-          
+
           <div className="flex items-center mt-4 space-x-4 text-sm">
             <div>
               <span className="font-semibold">{profile.followers?.length || 0}</span> abonnés
@@ -245,14 +245,14 @@ function ProfilePage() {
               <span className="font-semibold">{profile.following?.length || 0}</span> abonnements
             </div>
           </div>
-          
+
           {profile.bio && (
             <div className="mt-6">
               <h3 className="text-gray-700 font-medium mb-2">Bio</h3>
               <p className="text-gray-600">{profile.bio}</p>
             </div>
           )}
-          
+
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             {profile.specialization && (
               <div>
@@ -260,14 +260,14 @@ function ProfilePage() {
                 <p className="text-gray-600">{profile.specialization}</p>
               </div>
             )}
-            
+
             {profile.institution && (
               <div>
                 <h3 className="text-gray-700 font-medium mb-1">Institution</h3>
                 <p className="text-gray-600">{profile.institution}</p>
               </div>
             )}
-            
+
             {profile.level && (
               <div>
                 <h3 className="text-gray-700 font-medium mb-1">Niveau</h3>
@@ -284,7 +284,7 @@ function ProfilePage() {
               </div>
             )}
           </div>
-          
+
           {profile.interests && profile.interests.length > 0 && (
             <div className="mt-6">
               <h3 className="text-gray-700 font-medium mb-2">Centres d'intérêt</h3>
@@ -300,7 +300,7 @@ function ProfilePage() {
               </div>
             </div>
           )}
-          
+
           {profile.socialLinks && Object.values(profile.socialLinks).some(link => link) && (
             <div className="mt-6">
               <h3 className="text-gray-700 font-medium mb-2">Liens</h3>
@@ -360,7 +360,7 @@ function ProfilePage() {
           )}
         </div>
       </div>
-      
+
       {/* Activité récente - à implémenter dans une future version */}
       <div className="bg-white rounded-lg shadow-md p-6 sketch-container">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Activité récente</h2>
@@ -368,14 +368,14 @@ function ProfilePage() {
           Cette fonctionnalité sera disponible prochainement.
         </p>
       </div>
-      
+
       {/* Styles spécifiques pour l'effet crayon/schéma */}
       <style jsx="true">{`
         .sketch-container {
           position: relative;
           box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
         }
-        
+
         .sketch-container:before {
           content: "";
           position: absolute;
