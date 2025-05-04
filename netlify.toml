@@ -11,7 +11,7 @@
 # API redirects - these must come before the SPA redirect
 [[redirects]]
   from = "/api/*"
-  to = "https://biogy-api.onrender.com/api/:splat"
+  to = "https://biogy.onrender.com/api/:splat"
   status = 200
   force = true
   headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH", Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With, Accept, Origin"}
@@ -19,7 +19,7 @@
 # Handle OPTIONS preflight requests for the API
 [[redirects]]
   from = "/api/*"
-  to = "https://biogy-api.onrender.com/api/:splat"
+  to = "https://biogy.onrender.com/api/:splat"
   status = 204
   force = true
   methods = ["OPTIONS"]

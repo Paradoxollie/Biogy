@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { DIRECT_API_URL } from '../config';
+import { API_URL } from '../config';
 
 function ProfileEditPage() {
   const { userInfo } = useAuth();
   const navigate = useNavigate();
-  
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  
+
   // État du formulaire
   const [formData, setFormData] = useState({
     displayName: '',
@@ -33,7 +33,7 @@ function ProfileEditPage() {
       showEmail: false
     }
   });
-  
+
   // Charger les données du profil
   useEffect(() => {
     const fetchProfile = async () => {
@@ -41,22 +41,22 @@ function ProfileEditPage() {
         navigate('/login', { state: { from: '/profile/edit' } });
         return;
       }
-      
+
       try {
         setLoading(true);
-        
-        const response = await fetch(`${DIRECT_API_URL}/social/profile`, {
+
+        const response = await fetch(`${API_URL}/api/social/profile`, {
           headers: {
             Authorization: `Bearer ${userInfo.token}`
           }
         });
-        
+
         if (!response.ok) {
           throw new Error('Erreur lors de la récupération du profil');
         }
-        
+
         const data = await response.json();
-        
+
         // Mettre à jour le formulaire avec les données du profil
         setFormData({
           displayName: data.displayName || '',
@@ -85,14 +85,14 @@ function ProfileEditPage() {
         setLoading(false);
       }
     };
-    
+
     fetchProfile();
   }, [userInfo, navigate]);
-  
+
   // Gérer les changements dans le formulaire
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (name.startsWith('socialLinks.')) {
       const socialLinkKey = name.split('.')[1];
       setFormData(prev => ({
@@ -118,22 +118,22 @@ function ProfileEditPage() {
       }));
     }
   };
-  
+
   // Soumettre le formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!userInfo) {
       navigate('/login', { state: { from: '/profile/edit' } });
       return;
     }
-    
+
     try {
       setSubmitting(true);
       setError(null);
       setSuccess(null);
-      
-      const response = await fetch(`${DIRECT_API_URL}/social/profile`, {
+
+      const response = await fetch(`${API_URL}/api/social/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -141,13 +141,13 @@ function ProfileEditPage() {
         },
         body: JSON.stringify(formData)
       });
-      
+
       if (!response.ok) {
         throw new Error('Erreur lors de la mise à jour du profil');
       }
-      
+
       setSuccess('Profil mis à jour avec succès');
-      
+
       // Rediriger vers la page de profil après 2 secondes
       setTimeout(() => {
         navigate('/profile');
@@ -159,7 +159,7 @@ function ProfileEditPage() {
       setSubmitting(false);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
@@ -168,29 +168,29 @@ function ProfileEditPage() {
       </div>
     );
   }
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow-md p-6 sketch-container">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Modifier mon profil</h1>
-        
+
         {error && (
           <div className="bg-red-50 p-4 rounded-lg mb-6">
             <p className="text-red-600">{error}</p>
           </div>
         )}
-        
+
         {success && (
           <div className="bg-green-50 p-4 rounded-lg mb-6">
             <p className="text-green-600">{success}</p>
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           {/* Informations de base */}
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Informations de base</h2>
-            
+
             <div className="mb-4">
               <label htmlFor="displayName" className="block text-gray-700 mb-1">Nom d'affichage</label>
               <input
@@ -202,7 +202,7 @@ function ProfileEditPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
               />
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="bio" className="block text-gray-700 mb-1">Bio</label>
               <textarea
@@ -217,11 +217,11 @@ function ProfileEditPage() {
               <p className="text-sm text-gray-500 mt-1">{formData.bio.length}/500 caractères</p>
             </div>
           </div>
-          
+
           {/* Informations académiques */}
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Informations académiques</h2>
-            
+
             <div className="mb-4">
               <label htmlFor="specialization" className="block text-gray-700 mb-1">Spécialisation</label>
               <input
@@ -233,7 +233,7 @@ function ProfileEditPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
               />
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="institution" className="block text-gray-700 mb-1">Institution</label>
               <input
@@ -245,7 +245,7 @@ function ProfileEditPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lab-purple"
               />
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="level" className="block text-gray-700 mb-1">Niveau</label>
               <select
@@ -265,7 +265,7 @@ function ProfileEditPage() {
                 <option value="autre">Autre</option>
               </select>
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="interests" className="block text-gray-700 mb-1">Centres d'intérêt</label>
               <input
@@ -280,11 +280,11 @@ function ProfileEditPage() {
               <p className="text-sm text-gray-500 mt-1">Ex: Biologie moléculaire, Génétique, Microbiologie</p>
             </div>
           </div>
-          
+
           {/* Liens sociaux */}
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Liens sociaux</h2>
-            
+
             <div className="mb-4">
               <label htmlFor="socialLinks.website" className="block text-gray-700 mb-1">Site web</label>
               <input
@@ -297,7 +297,7 @@ function ProfileEditPage() {
                 placeholder="https://monsite.com"
               />
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="socialLinks.linkedin" className="block text-gray-700 mb-1">LinkedIn</label>
               <input
@@ -310,7 +310,7 @@ function ProfileEditPage() {
                 placeholder="https://linkedin.com/in/username"
               />
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="socialLinks.twitter" className="block text-gray-700 mb-1">Twitter</label>
               <input
@@ -323,7 +323,7 @@ function ProfileEditPage() {
                 placeholder="https://twitter.com/username"
               />
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="socialLinks.github" className="block text-gray-700 mb-1">GitHub</label>
               <input
@@ -336,7 +336,7 @@ function ProfileEditPage() {
                 placeholder="https://github.com/username"
               />
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="socialLinks.researchGate" className="block text-gray-700 mb-1">ResearchGate</label>
               <input
@@ -350,11 +350,11 @@ function ProfileEditPage() {
               />
             </div>
           </div>
-          
+
           {/* Paramètres */}
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Paramètres</h2>
-            
+
             <div className="mb-4">
               <div className="flex items-center">
                 <input
@@ -370,7 +370,7 @@ function ProfileEditPage() {
                 </label>
               </div>
             </div>
-            
+
             <div className="mb-4">
               <div className="flex items-center">
                 <input
@@ -386,7 +386,7 @@ function ProfileEditPage() {
                 </label>
               </div>
             </div>
-            
+
             <div className="mb-4">
               <div className="flex items-center">
                 <input
@@ -403,7 +403,7 @@ function ProfileEditPage() {
               </div>
             </div>
           </div>
-          
+
           {/* Boutons */}
           <div className="flex justify-end space-x-4">
             <Link
@@ -422,14 +422,14 @@ function ProfileEditPage() {
           </div>
         </form>
       </div>
-      
+
       {/* Styles spécifiques pour l'effet crayon/schéma */}
       <style jsx="true">{`
         .sketch-container {
           position: relative;
           box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
         }
-        
+
         .sketch-container:before {
           content: "";
           position: absolute;

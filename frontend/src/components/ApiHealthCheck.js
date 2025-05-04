@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DIRECT_API_URL } from '../config';
+import { API_URL } from '../config';
 
 function ApiHealthCheck() {
   const [status, setStatus] = useState('checking');
@@ -9,12 +9,12 @@ function ApiHealthCheck() {
   useEffect(() => {
     const checkApiHealth = async () => {
       try {
-        const response = await fetch(`${DIRECT_API_URL}/health`);
-        
+        const response = await fetch(`${API_URL}/api/health`);
+
         if (!response.ok) {
           throw new Error(`API responded with status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         setStatus('healthy');
         setMessage(data.message || 'API is working properly');
@@ -24,10 +24,10 @@ function ApiHealthCheck() {
         setError(error.message);
       }
     };
-    
+
     checkApiHealth();
   }, []);
-  
+
   return (
     <div className="fixed bottom-4 right-4 z-50">
       <div className={`p-3 rounded-lg shadow-lg ${

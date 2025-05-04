@@ -1,6 +1,6 @@
 # API redirects - these must come before the SPA redirect
-/api/*  https://biogy-api.onrender.com/api/:splat  200!
-/api/*  https://biogy-api.onrender.com/api/:splat  204!  OPTIONS
+/api/*  https://biogy.onrender.com/api/:splat  200!
+/api/*  https://biogy.onrender.com/api/:splat  204!  OPTIONS
 
 # Netlify Functions redirects
 /.netlify/functions/*  /.netlify/functions/:splat  200

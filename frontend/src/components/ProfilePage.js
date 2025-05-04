@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { DIRECT_API_URL } from '../config';
+import { API_URL } from '../config';
 
 function ProfilePage() {
   const { userId } = useParams();
@@ -25,8 +25,8 @@ function ProfilePage() {
 
         // URL de l'API en fonction de si c'est le profil de l'utilisateur connecté ou non
         const url = isOwnProfile
-          ? `${DIRECT_API_URL}/social/profile`
-          : `${DIRECT_API_URL}/social/profile/${userId}`;
+          ? `${API_URL}/api/social/profile`
+          : `${API_URL}/api/social/profile/${userId}`;
 
         // Headers avec token si nécessaire
         const headers = userInfo
@@ -73,7 +73,7 @@ function ProfilePage() {
     try {
       setFollowLoading(true);
 
-      const response = await fetch(`${DIRECT_API_URL}/social/profile/${userId}/follow`, {
+      const response = await fetch(`${API_URL}/api/social/profile/${userId}/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
