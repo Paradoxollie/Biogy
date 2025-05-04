@@ -13,44 +13,30 @@ connectDB();
 
 const app = express();
 
-// Configuration CORS spécifique
-const corsOptions = {
-  origin: ['https://biogy.netlify.app', 'http://localhost:3000', 'http://localhost:5173'], // Origines autorisées
+// Configuration CORS permissive
+app.use(cors({
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  credentials: true,
-  maxAge: 86400 // 24 heures en secondes
-};
-
-app.use(cors(corsOptions));
+  credentials: false
+}));
 
 // Middleware pour les requêtes OPTIONS
-app.options('*', cors(corsOptions));
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.status(200).send();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Middleware pour ajouter les en-têtes CORS à toutes les réponses
 app.use((req, res, next) => {
-  const allowedOrigins = ['https://biogy.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
-  const origin = req.headers.origin;
-
-  // Vérifier si l'origine est autorisée
-  if (origin && allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    // Pour les requêtes sans origine ou avec une origine non autorisée
-    res.header('Access-Control-Allow-Origin', 'https://biogy.netlify.app');
-  }
-
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400');
-
-  // Log pour le débogage
-  console.log(`CORS Headers set for request to ${req.path} from origin: ${req.headers.origin || 'unknown'} (Fallback Server)`);
-
   next();
 });
 
@@ -123,10 +109,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Fallback Server running on port ${PORT}`);
-  console.log(`📡 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'Not set'}`);
-});
+app.listen(PORT, () => console.log(`🚀 Fallback Server running on port ${PORT}`));

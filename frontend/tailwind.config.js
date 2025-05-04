@@ -39,11 +39,6 @@ module.exports = {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
-        pulseGlow: {
-          '0%': { filter: 'drop-shadow(0 0 0 rgba(139, 92, 246, 0))' },
-          '50%': { filter: 'drop-shadow(0 0 3px rgba(139, 92, 246, 0.5))' },
-          '100%': { filter: 'drop-shadow(0 0 0 rgba(139, 92, 246, 0))' },
-        },
         bubble: {
           '0%': { opacity: '0', transform: 'translateY(0)' },
           '20%': { opacity: '0.8', transform: 'translateY(-8px) scale(1.1)' },
@@ -102,4 +97,4 @@ module.exports = {
     'bg-amber-400', 'bg-green-400', 'bg-red-400', 'bg-yellow-300', 'bg-indigo-300'
   ],
   plugins: [],
-}
+} 

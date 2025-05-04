@@ -2,9 +2,6 @@
 const proxy = require('./proxy');
 const directApi = require('./direct-api');
 const simple = require('./simple');
-const profileProxy = require('./profile-proxy');
-const testProfile = require('./test-profile');
-const apiTest = require('./api-test');
 
 exports.handler = async function(event, context) {
   // Définir les headers CORS
@@ -26,9 +23,9 @@ exports.handler = async function(event, context) {
   try {
     // Extraire le chemin de la requête
     const path = event.path;
-
+    
     console.log(`Routing request for path: ${path}`);
-
+    
     // Router la requête vers la bonne fonction
     if (path.startsWith('/.netlify/functions/proxy')) {
       console.log('Routing to proxy function');
@@ -39,15 +36,6 @@ exports.handler = async function(event, context) {
     } else if (path.startsWith('/.netlify/functions/simple')) {
       console.log('Routing to simple function');
       return await simple.handler(event, context);
-    } else if (path.startsWith('/.netlify/functions/profile-proxy')) {
-      console.log('Routing to profile-proxy function');
-      return await profileProxy.handler(event, context);
-    } else if (path.startsWith('/.netlify/functions/test-profile')) {
-      console.log('Routing to test-profile function');
-      return await testProfile.handler(event, context);
-    } else if (path.startsWith('/.netlify/functions/api-test')) {
-      console.log('Routing to api-test function');
-      return await apiTest.handler(event, context);
     } else if (path.startsWith('/.netlify/functions/index')) {
       // Si la requête est pour index.js, retourner une liste des fonctions disponibles
       return {
@@ -62,10 +50,7 @@ exports.handler = async function(event, context) {
           availableFunctions: [
             '/.netlify/functions/proxy',
             '/.netlify/functions/direct-api',
-            '/.netlify/functions/simple',
-            '/.netlify/functions/profile-proxy',
-            '/.netlify/functions/test-profile',
-            '/.netlify/functions/api-test'
+            '/.netlify/functions/simple'
           ],
           event: {
             path: event.path,
@@ -87,17 +72,14 @@ exports.handler = async function(event, context) {
           availableFunctions: [
             '/.netlify/functions/proxy',
             '/.netlify/functions/direct-api',
-            '/.netlify/functions/simple',
-            '/.netlify/functions/profile-proxy',
-            '/.netlify/functions/test-profile',
-            '/.netlify/functions/api-test'
+            '/.netlify/functions/simple'
           ]
         })
       };
     }
   } catch (error) {
     console.error('Router error:', error);
-
+    
     // Retourner l'erreur
     return {
       statusCode: 500,
