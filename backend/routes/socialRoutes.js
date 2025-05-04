@@ -10,8 +10,12 @@ const {
 } = require('../controllers/profileController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
+const avatarRoutes = require('./avatarRoutes');
 
 const router = express.Router();
+
+// Utiliser les routes d'avatar
+router.use('/profile/avatar', avatarRoutes);
 
 // Routes pour le profil
 router.route('/profile')

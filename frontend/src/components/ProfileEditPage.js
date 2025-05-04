@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BROWSER_API_URL } from '../config';
+import AvatarUploader from './AvatarUploader';
 
 function ProfileEditPage() {
   const { userInfo } = useAuth();
@@ -38,17 +39,7 @@ function ProfileEditPage() {
     }
   });
 
-  // Liste des avatars prédéfinis hébergés sur Cloudinary
-  const presetAvatars = [
-    { id: 'default', url: '', label: 'Avatar par défaut' },
-    { id: 'scientist1', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/scientist1_3048122_rvbpzl', label: 'Scientifique 1' },
-    { id: 'scientist2', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/scientist2_4205906_ixvpqm', label: 'Scientifique 2' },
-    { id: 'microscope', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/microscope_1048317_zcxbvn', label: 'Microscope' },
-    { id: 'dna', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/dna_2941522_qwerty', label: 'ADN' },
-    { id: 'flask', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/flask_1048302_asdfgh', label: 'Fiole' },
-    { id: 'atom', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/atom_1048305_zxcvbn', label: 'Atome' },
-    { id: 'plant', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/plant_2971246_poiuyt', label: 'Plante' }
-  ];
+
 
   // Charger les données du profil
   useEffect(() => {
@@ -139,14 +130,11 @@ function ProfileEditPage() {
     }
   };
 
-  // Gérer la sélection d'un avatar
-  const handleAvatarSelect = (avatarUrl) => {
+  // Gérer le changement d'avatar
+  const handleAvatarChange = (avatar) => {
     setFormData(prev => ({
       ...prev,
-      avatar: {
-        url: avatarUrl,
-        type: 'preset'
-      }
+      avatar: avatar
     }));
   };
 
@@ -177,26 +165,8 @@ function ProfileEditPage() {
         settings: formData.settings
       };
 
-      // Ajouter l'avatar si une URL est sélectionnée
-      if (formData.avatar && formData.avatar.url && formData.avatar.url.trim() !== '') {
-        // Extraire l'ID public Cloudinary de l'URL
-        const url = formData.avatar.url.trim();
-        let cloudinaryPublicId = '';
-
-        // Essayer d'extraire l'ID public de l'URL Cloudinary
-        const match = url.match(/\/v1\/avatars\/([^\/]+)$/);
-        if (match && match[1]) {
-          cloudinaryPublicId = `avatars/${match[1]}`;
-        }
-
-        // Utiliser le format attendu par le backend
-        dataToSend.avatar = {
-          url: url,
-          cloudinaryPublicId: cloudinaryPublicId
-        };
-
-        console.log('Avatar Cloudinary préparé:', dataToSend.avatar);
-      }
+      // Ne pas inclure l'avatar dans la mise à jour du profil
+      // car il est géré séparément par le composant AvatarUploader
 
       // Log pour déboguer
       console.log('Données envoyées au serveur:', dataToSend);
@@ -278,40 +248,10 @@ function ProfileEditPage() {
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Informations de base</h2>
 
             {/* Sélection d'avatar */}
-            <div className="mb-6">
-              <label className="block text-gray-700 mb-3">Avatar</label>
-              <div className="grid grid-cols-4 gap-4">
-                {presetAvatars.map((avatar) => (
-                  <div
-                    key={avatar.id}
-                    onClick={() => handleAvatarSelect(avatar.url)}
-                    className={`
-                      cursor-pointer rounded-lg p-2 border-2 transition-all duration-200
-                      ${formData.avatar.url === avatar.url
-                        ? 'border-lab-purple bg-lab-purple/5 shadow-md'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                      }
-                    `}
-                  >
-                    <div className="aspect-square rounded-full overflow-hidden bg-gray-100 flex items-center justify-center mb-2">
-                      {avatar.url ? (
-                        <img
-                          src={avatar.url}
-                          alt={avatar.label}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-1/2 w-1/2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-                    <p className="text-xs text-center text-gray-600">{avatar.label}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-2">Cliquez sur un avatar pour le sélectionner</p>
-            </div>
+            <AvatarUploader
+              onAvatarChange={handleAvatarChange}
+              currentAvatarUrl={formData.avatar?.url || ''}
+            />
 
             <div className="mb-4">
               <label htmlFor="displayName" className="block text-gray-700 mb-1">Nom d'affichage</label>
