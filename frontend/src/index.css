@@ -40,17 +40,7 @@ a.with-underline, .prose a {
   }
 }
 
-@keyframes pulseGlow {
-  0% {
-    filter: drop-shadow(0 0 0 rgba(139, 92, 246, 0));
-  }
-  50% {
-    filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.5));
-  }
-  100% {
-    filter: drop-shadow(0 0 0 rgba(139, 92, 246, 0));
-  }
-}
+
 
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out forwards;
