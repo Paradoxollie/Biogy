@@ -164,79 +164,48 @@ function ProfileEditPage() {
       setError(null);
       setSuccess(null);
 
-      // Préparer les données à envoyer
+      // Préparer les données à envoyer - version simplifiée
       const dataToSend = {
-        ...formData,
-        interests: formData.interests ? formData.interests.split(',').map(item => item.trim()) : []
+        displayName: formData.displayName,
+        bio: formData.bio,
+        specialization: formData.specialization,
+        institution: formData.institution,
+        level: formData.level,
+        // Traiter les intérêts comme une chaîne de caractères pour le serveur
+        interests: formData.interests,
+        socialLinks: formData.socialLinks,
+        settings: formData.settings
       };
 
-      // Essayons une approche plus simple pour l'avatar
-      // Si l'URL est vide, ne pas inclure l'avatar du tout
-      if (formData.avatar && formData.avatar.url && formData.avatar.url.trim() !== '') {
-        // Simplifier au maximum la structure de l'avatar
-        dataToSend.avatarUrl = formData.avatar.url.trim();
-        // Supprimer l'objet avatar complexe
-        delete dataToSend.avatar;
-      } else {
-        // Si pas d'avatar sélectionné, ne pas envoyer de propriété avatar
-        delete dataToSend.avatar;
-      }
+      // Ne pas inclure l'avatar pour l'instant, pour restaurer la fonctionnalité de base
 
       // Log pour déboguer
       console.log('Données envoyées au serveur:', dataToSend);
       console.log('Avatar envoyé:', dataToSend.avatar);
 
-      try {
-        const response = await fetch(`${BROWSER_API_URL}/social/profile`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userInfo.token}`
-          },
-          body: JSON.stringify(dataToSend)
+      // Requête simplifiée pour restaurer la fonctionnalité de base
+      const response = await fetch(`${BROWSER_API_URL}/social/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userInfo.token}`
+        },
+        body: JSON.stringify(dataToSend)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Erreur de réponse:', {
+          status: response.status,
+          statusText: response.statusText,
+          responseText: errorText
         });
 
-        // Récupérer le texte de la réponse pour le déboguer
-        const responseText = await response.text();
-        console.log('Réponse brute du serveur:', responseText);
-
-        // Essayer de parser la réponse JSON
-        let responseData;
-        try {
-          responseData = JSON.parse(responseText);
-          console.log('Réponse du serveur après mise à jour (parsée):', responseData);
-        } catch (e) {
-          console.error('Impossible de parser la réponse JSON:', e);
-        }
-
-        if (!response.ok) {
-          // Afficher des informations détaillées sur l'erreur
-          console.error('Erreur de réponse:', {
-            status: response.status,
-            statusText: response.statusText,
-            responseData: responseData || responseText
-          });
-
-          throw new Error(
-            responseData && responseData.message
-              ? responseData.message
-              : `Erreur lors de la mise à jour du profil (${response.status})`
-          );
-        }
-
-        // Si nous arrivons ici, la réponse est OK
-        if (responseData && responseData.avatar) {
-          console.log('Avatar dans la réponse:', responseData.avatar);
-        } else {
-          console.warn('L\'avatar n\'a pas été correctement enregistré dans la réponse du serveur');
-        }
-
-        return responseData;
-      } catch (error) {
-        // Capturer les erreurs de réseau ou de parsing
-        console.error('Erreur lors de la requête:', error);
-        throw error;
+        throw new Error('Erreur lors de la mise à jour du profil');
       }
+
+      const responseData = await response.json();
+      console.log('Réponse du serveur après mise à jour:', responseData);
 
       setSuccess('Profil mis à jour avec succès');
 
