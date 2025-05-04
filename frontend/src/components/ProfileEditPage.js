@@ -38,16 +38,16 @@ function ProfileEditPage() {
     }
   });
 
-  // Liste des avatars prédéfinis
+  // Liste des avatars prédéfinis hébergés sur Cloudinary
   const presetAvatars = [
     { id: 'default', url: '', label: 'Avatar par défaut' },
-    { id: 'scientist1', url: 'https://cdn-icons-png.flaticon.com/512/3048/3048122.png', label: 'Scientifique 1' },
-    { id: 'scientist2', url: 'https://cdn-icons-png.flaticon.com/512/4205/4205906.png', label: 'Scientifique 2' },
-    { id: 'microscope', url: 'https://cdn-icons-png.flaticon.com/512/1048/1048317.png', label: 'Microscope' },
-    { id: 'dna', url: 'https://cdn-icons-png.flaticon.com/512/2941/2941522.png', label: 'ADN' },
-    { id: 'flask', url: 'https://cdn-icons-png.flaticon.com/512/1048/1048302.png', label: 'Fiole' },
-    { id: 'atom', url: 'https://cdn-icons-png.flaticon.com/512/1048/1048305.png', label: 'Atome' },
-    { id: 'plant', url: 'https://cdn-icons-png.flaticon.com/512/2971/2971246.png', label: 'Plante' }
+    { id: 'scientist1', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/scientist1_3048122_rvbpzl', label: 'Scientifique 1' },
+    { id: 'scientist2', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/scientist2_4205906_ixvpqm', label: 'Scientifique 2' },
+    { id: 'microscope', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/microscope_1048317_zcxbvn', label: 'Microscope' },
+    { id: 'dna', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/dna_2941522_qwerty', label: 'ADN' },
+    { id: 'flask', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/flask_1048302_asdfgh', label: 'Fiole' },
+    { id: 'atom', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/atom_1048305_zxcvbn', label: 'Atome' },
+    { id: 'plant', url: 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/plant_2971246_poiuyt', label: 'Plante' }
   ];
 
   // Charger les données du profil
@@ -179,10 +179,23 @@ function ProfileEditPage() {
 
       // Ajouter l'avatar si une URL est sélectionnée
       if (formData.avatar && formData.avatar.url && formData.avatar.url.trim() !== '') {
+        // Extraire l'ID public Cloudinary de l'URL
+        const url = formData.avatar.url.trim();
+        let cloudinaryPublicId = '';
+
+        // Essayer d'extraire l'ID public de l'URL Cloudinary
+        const match = url.match(/\/v1\/avatars\/([^\/]+)$/);
+        if (match && match[1]) {
+          cloudinaryPublicId = `avatars/${match[1]}`;
+        }
+
         // Utiliser le format attendu par le backend
         dataToSend.avatar = {
-          url: formData.avatar.url.trim()
+          url: url,
+          cloudinaryPublicId: cloudinaryPublicId
         };
+
+        console.log('Avatar Cloudinary préparé:', dataToSend.avatar);
       }
 
       // Log pour déboguer
@@ -217,18 +230,6 @@ function ProfileEditPage() {
       // Vérifier si l'avatar a été correctement enregistré
       if (!responseData.avatar || !responseData.avatar.url) {
         console.warn('L\'avatar n\'a pas été correctement enregistré dans la réponse du serveur');
-
-        // Stocker l'avatar sélectionné dans le localStorage comme solution de contournement
-        if (formData.avatar && formData.avatar.url) {
-          try {
-            const storedAvatars = JSON.parse(localStorage.getItem('userAvatars') || '{}');
-            storedAvatars[userInfo._id] = formData.avatar.url;
-            localStorage.setItem('userAvatars', JSON.stringify(storedAvatars));
-            console.log('Avatar stocké localement:', formData.avatar.url);
-          } catch (e) {
-            console.error('Erreur lors du stockage local de l\'avatar:', e);
-          }
-        }
       }
 
       setSuccess('Profil mis à jour avec succès');
