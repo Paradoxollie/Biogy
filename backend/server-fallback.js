@@ -13,19 +13,21 @@ connectDB();
 
 const app = express();
 
-// Configuration CORS permissive
+// Configuration CORS avec origine dynamique
+const frontendUrl = process.env.FRONTEND_URL || 'https://biogy.netlify.app';
 app.use(cors({
-  origin: '*',
+  origin: frontendUrl,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  credentials: false
+  credentials: true
 }));
 
 // Middleware pour les requêtes OPTIONS
 app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', frontendUrl);
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
   res.status(200).send();
 });
 
@@ -34,9 +36,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Middleware pour ajouter les en-têtes CORS à toutes les réponses
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', frontendUrl);
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
   next();
 });
 
@@ -55,6 +58,9 @@ app.get('/api/health', (req, res) => {
     server: 'fallback'
   });
 });
+
+// Route de health check simple (recommandée pour Render)
+app.get('/healthz', (_, res) => res.send('ok'));
 
 // Fonction pour charger une route en toute sécurité
 const safelyLoadRoute = (path, routeModule) => {

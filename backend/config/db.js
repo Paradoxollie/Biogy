@@ -1,10 +1,18 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
+  // Utiliser MONGO_URI ou MONGODB_URI (pour compatibilité avec différents services)
+  const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
+
+  if (!uri) {
+    console.error('❌ MongoDB URI not found in environment variables');
+    process.exit(1);
+  }
+
   // En mode développement, si MongoDB n'est pas disponible, on utilise une simulation
-  if (process.env.NODE_ENV === 'development' && !process.env.MONGO_URI.includes('mongodb+srv')) {
+  if (process.env.NODE_ENV === 'development' && !uri.includes('mongodb+srv')) {
     try {
-      await mongoose.connect(process.env.MONGO_URI, {
+      await mongoose.connect(uri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
@@ -16,7 +24,7 @@ const connectDB = async () => {
     }
   } else {
     try {
-      await mongoose.connect(process.env.MONGO_URI, {
+      await mongoose.connect(uri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
