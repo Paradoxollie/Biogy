@@ -18,56 +18,14 @@ function ProjectsGallery() {
   const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
+      const response = await fetch(`${apiUrl}/api/posts`);
+      const data = await response.json();
 
-      // Simuler une réponse réussie avec des données fictives
-      // const response = await fetch(`${apiUrl}/api/posts`);
-      // const data = await response.json();
-      //
-      // if (!response.ok) {
-      //   throw new Error(data.message || 'Erreur lors de la récupération des projets');
-      // }
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de la récupération des projets');
+      }
 
-      // Données simulées pour le développement
-      const mockProjects = [
-        {
-          _id: "mock1",
-          user: {
-            _id: "user1",
-            username: "BiologyLover"
-          },
-          caption: "Observation de cellules végétales au microscope. On peut clairement voir les parois cellulaires et les chloroplastes.",
-          fileUrl: "https://images.unsplash.com/photo-1581093196277-9f608bb3b1b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-          fileType: "image",
-          likes: [],
-          comments: [
-            {
-              _id: "comment1",
-              user: {
-                _id: "user2",
-                username: "MicroBio"
-              },
-              text: "Très belle observation! Quelle est la magnification utilisée?",
-              createdAt: new Date(Date.now() - 86400000).toISOString()
-            }
-          ],
-          createdAt: new Date(Date.now() - 172800000).toISOString()
-        },
-        {
-          _id: "mock2",
-          user: {
-            _id: "user3",
-            username: "ScienceTeacher"
-          },
-          caption: "Résultats de notre expérience sur la croissance des plantes avec différents types d'engrais.",
-          fileUrl: "https://images.unsplash.com/photo-1516267126474-dd535294c7a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-          fileType: "image",
-          likes: [],
-          comments: [],
-          createdAt: new Date(Date.now() - 259200000).toISOString()
-        }
-      ];
-
-      setProjects(mockProjects);
+      setProjects(data);
     } catch (err) {
       console.error('Erreur:', err);
       setError(err.message || 'Une erreur est survenue lors de la récupération des projets');
