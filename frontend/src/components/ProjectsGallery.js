@@ -18,14 +18,56 @@ function ProjectsGallery() {
   const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${apiUrl}/api/posts`);
-      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Erreur lors de la récupération des projets');
-      }
+      // Simuler une réponse réussie avec des données fictives
+      // const response = await fetch(`${apiUrl}/api/posts`);
+      // const data = await response.json();
+      //
+      // if (!response.ok) {
+      //   throw new Error(data.message || 'Erreur lors de la récupération des projets');
+      // }
 
-      setProjects(data);
+      // Données simulées pour le développement
+      const mockProjects = [
+        {
+          _id: "mock1",
+          user: {
+            _id: "user1",
+            username: "BiologyLover"
+          },
+          caption: "Observation de cellules végétales au microscope. On peut clairement voir les parois cellulaires et les chloroplastes.",
+          fileUrl: "https://images.unsplash.com/photo-1581093196277-9f608bb3b1b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+          fileType: "image",
+          likes: [],
+          comments: [
+            {
+              _id: "comment1",
+              user: {
+                _id: "user2",
+                username: "MicroBio"
+              },
+              text: "Très belle observation! Quelle est la magnification utilisée?",
+              createdAt: new Date(Date.now() - 86400000).toISOString()
+            }
+          ],
+          createdAt: new Date(Date.now() - 172800000).toISOString()
+        },
+        {
+          _id: "mock2",
+          user: {
+            _id: "user3",
+            username: "ScienceTeacher"
+          },
+          caption: "Résultats de notre expérience sur la croissance des plantes avec différents types d'engrais.",
+          fileUrl: "https://images.unsplash.com/photo-1516267126474-dd535294c7a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+          fileType: "image",
+          likes: [],
+          comments: [],
+          createdAt: new Date(Date.now() - 259200000).toISOString()
+        }
+      ];
+
+      setProjects(mockProjects);
     } catch (err) {
       console.error('Erreur:', err);
       setError(err.message || 'Une erreur est survenue lors de la récupération des projets');
@@ -128,9 +170,9 @@ function ProjectsGallery() {
   // Ajouter une nouvelle fonction pour supprimer un post
   const handleDeletePost = async (projectId) => {
     if (!userInfo || userInfo.role !== 'admin') return;
-    
+
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) return;
-    
+
     try {
       const response = await fetch(`${apiUrl}/api/posts/${projectId}`, {
         method: 'DELETE',
@@ -139,15 +181,15 @@ function ProjectsGallery() {
           'Authorization': `Bearer ${userInfo.token}`
         }
       });
-      
+
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || 'Erreur lors de la suppression du post');
       }
-      
+
       // Mettre à jour l'état en retirant le post supprimé
       setProjects(projects.filter(project => project._id !== projectId));
-      
+
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
       alert(`Erreur: ${error.message}`);
@@ -157,14 +199,14 @@ function ProjectsGallery() {
   // Ajouter une fonction pour supprimer un commentaire
   const handleDeleteComment = async (projectId, commentId) => {
     if (!userInfo || userInfo.role !== 'admin') return;
-    
+
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) return;
-    
+
     try {
       console.log('Tentative de suppression du commentaire:', { projectId, commentId });
       console.log('URL:', `${apiUrl}/api/posts/${projectId}/comments/${commentId}`);
       console.log('Token:', userInfo.token.substring(0, 10) + '...');
-      
+
       const response = await fetch(`${apiUrl}/api/posts/${projectId}/comments/${commentId}`, {
         method: 'DELETE',
         headers: {
@@ -172,14 +214,14 @@ function ProjectsGallery() {
           'Authorization': `Bearer ${userInfo.token}`
         }
       });
-      
+
       const data = await response.json();
       console.log('Réponse du serveur:', data);
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Erreur lors de la suppression du commentaire');
       }
-      
+
       // Mettre à jour l'état en retirant le commentaire supprimé
       setProjects(projects.map(project => {
         if (project._id === projectId) {
@@ -190,7 +232,7 @@ function ProjectsGallery() {
         }
         return project;
       }));
-      
+
     } catch (error) {
       console.error('Erreur complète lors de la suppression du commentaire:', error);
       alert(`Erreur: ${error.message}`);
@@ -204,7 +246,7 @@ function ProjectsGallery() {
         {/* Fond spécial avec effet "laboratoire" */}
         <div className="absolute inset-0 -z-10 overflow-hidden rounded-2xl">
           <div className="absolute inset-0 bg-gradient-to-br from-lab-blue/5 via-transparent to-lab-purple/5"></div>
-          
+
           {/* Grille de laboratoire */}
           <div className="absolute inset-0">
             {Array.from({ length: 10 }).map((_, i) => (
@@ -215,7 +257,7 @@ function ProjectsGallery() {
             ))}
           </div>
         </div>
-        
+
         {/* Éléments décoratifs scientifiques */}
         <div className="absolute -top-10 -left-10 w-40 h-40 opacity-10 -z-5">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -230,7 +272,7 @@ function ProjectsGallery() {
             <path d="M35 40H65M35 50H65M35 60H65M35 70H65" stroke="#000" strokeWidth="3" strokeLinecap="round" />
           </svg>
         </div>
-        
+
         {/* ADN décoratif à gauche */}
         <div className="absolute -left-5 top-1/2 transform -translate-y-1/2 w-10 opacity-20">
           <svg viewBox="0 0 40 200" xmlns="http://www.w3.org/2000/svg" stroke="#3b82f6" fill="none">
@@ -248,7 +290,7 @@ function ProjectsGallery() {
             <path d="M10,200 L30,200" strokeWidth="0.7" />
           </svg>
         </div>
-        
+
         {/* Molécule décorative à droite */}
         <div className="absolute -right-5 top-1/2 transform -translate-y-1/2 w-10 opacity-20">
           <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -264,7 +306,7 @@ function ProjectsGallery() {
             <line x1="56.5" y1="63.5" x2="63.5" y2="56.5" stroke="rgba(0,0,0,0.3)" strokeWidth="2" />
           </svg>
         </div>
-        
+
         {/* Contenu de l'en-tête */}
         <div className="pt-12 pb-8 px-8 text-center relative z-0 border border-gray-200/30 rounded-2xl bg-white/40 backdrop-blur-sm shadow-lg">
           {/* Lignes décoratives sur le dessus */}
@@ -273,18 +315,18 @@ function ProjectsGallery() {
             <div className="w-36 h-1 bg-lab-purple/20 rounded"></div>
             <div className="w-24 h-1 bg-lab-teal/20 rounded"></div>
           </div>
-          
+
           {/* Titre principal avec style avancé */}
           <div className="relative inline-block mb-6">
             <h1 className="font-bold relative z-10 text-transparent bg-clip-text bg-gradient-to-br from-lab-blue via-lab-purple to-lab-teal font-display text-6xl tracking-tight">
               Galerie de Projets
             </h1>
-            
+
             {/* Couche d'effet en dessous */}
             <div className="absolute -bottom-1.5 left-0 w-full h-1.5 bg-lab-purple/40 rounded-full transform skew-x-3 blur-sm"></div>
             <div className="absolute -bottom-3 left-1 w-4/5 h-1 bg-lab-blue/30 rounded-full transform -skew-x-2"></div>
             <div className="absolute bottom-3 right-1 w-1/4 h-0.5 bg-lab-teal/20 rounded-full"></div>
-            
+
             {/* Effets scientifiques */}
             <div className="absolute -top-2 right-0 flex space-x-1">
               <div className="w-1 h-3 bg-lab-blue/20 rounded-full"></div>
@@ -292,18 +334,18 @@ function ProjectsGallery() {
               <div className="w-1 h-4 bg-lab-teal/20 rounded-full"></div>
             </div>
           </div>
-          
+
           {/* Sous-titre avec design amélioré */}
           <div className="relative max-w-2xl mx-auto">
             <div className="absolute left-0 -top-2 w-3 h-3 border-t border-l border-lab-blue/20 -z-0"></div>
             <div className="absolute right-0 -top-2 w-3 h-3 border-t border-r border-lab-purple/20 -z-0"></div>
             <div className="absolute left-0 -bottom-2 w-3 h-3 border-b border-l border-lab-teal/20 -z-0"></div>
             <div className="absolute right-0 -bottom-2 w-3 h-3 border-b border-r border-lab-purple/20 -z-0"></div>
-            
+
             <p className="text-gray-700 font-scientific text-lg max-w-2xl mx-auto px-2 leading-relaxed">
               Découvrez les expériences et projets partagés par notre communauté de biologistes et biotechnologistes.
             </p>
-            
+
             {/* Petites icônes scientifiques sous le texte */}
             <div className="flex justify-center mt-6 space-x-6">
               <div className="text-lab-blue/60 flex items-center">
@@ -327,7 +369,7 @@ function ProjectsGallery() {
               </div>
             </div>
           </div>
-          
+
           {/* Ligne de séparation du bas avec style laboratoire */}
           <div className="absolute bottom-3 left-6 right-6 h-0.5 bg-gradient-to-r from-transparent via-gray-200/50 to-transparent"></div>
         </div>
@@ -343,8 +385,8 @@ function ProjectsGallery() {
       ) : error ? (
         <div className="bg-red-100 border border-red-400 text-red-800 p-6 rounded-lg text-center relative sketch-border">
           <p>{error}</p>
-          <button 
-            onClick={() => fetchProjects()} 
+          <button
+            onClick={() => fetchProjects()}
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors sketch-button"
           >
             Réessayer
@@ -358,7 +400,7 @@ function ProjectsGallery() {
             <div className="absolute bottom-5 left-8 h-0.5 w-24 bg-gray-300 rotate-1"></div>
             <div className="absolute bottom-10 right-6 h-0.5 w-16 bg-gray-300 -rotate-2"></div>
           </div>
-          
+
           <svg className="mx-auto h-20 w-20 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.7}>
             <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
@@ -376,7 +418,7 @@ function ProjectsGallery() {
               <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-lab-blue/20"></div>
               <div className="absolute top-2 right-3 w-1 h-1 rounded-full bg-lab-purple/30"></div>
               <div className="absolute bottom-1 left-2 w-2 h-2 rounded-full bg-lab-teal/20"></div>
-              
+
               {/* Header du post avec style scientifique */}
               <div className="p-4 flex items-center justify-between border-b border-gray-200 sketch-border-bottom">
                 <div className="flex items-center space-x-3">
@@ -391,10 +433,10 @@ function ProjectsGallery() {
                 <div className="flex flex-col items-end">
                   <span className="text-xs text-gray-400 font-scientific">{formatDate(project.createdAt)}</span>
                   <div className="text-xs text-gray-300 sketch-linestyle mt-1">Projet N°{project._id.substring(project._id.length - 4)}</div>
-                  
+
                   {/* Bouton Admin pour supprimer le post - visible uniquement pour les admins */}
                   {userInfo && userInfo.role === 'admin' && (
-                    <button 
+                    <button
                       onClick={() => handleDeletePost(project._id)}
                       className="mt-2 text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
                       title="Supprimer ce projet (Admin uniquement)"
@@ -404,32 +446,32 @@ function ProjectsGallery() {
                   )}
                 </div>
               </div>
-              
+
               {/* Image/Vidéo avec cadre style scientifique */}
               <div className="relative overflow-hidden bg-black flex justify-center sketch-media-container">
                 <div className="absolute top-1 left-1 h-4 w-4 border-t border-l border-lab-purple/30 -z-0"></div>
                 <div className="absolute bottom-1 right-1 h-4 w-4 border-b border-r border-lab-blue/30 -z-0"></div>
-                
+
                 {project.fileType === 'image' ? (
                   <div className="sketch-media">
-                    <img 
-                      src={project.fileUrl} 
-                      alt={project.caption || 'Image de projet'} 
+                    <img
+                      src={project.fileUrl}
+                      alt={project.caption || 'Image de projet'}
                       className="object-contain max-h-[500px] w-auto"
                     />
                   </div>
                 ) : (
                   <div className="sketch-media">
-                    <video 
-                      src={project.fileUrl} 
-                      className="w-full max-h-[500px] object-contain" 
+                    <video
+                      src={project.fileUrl}
+                      className="w-full max-h-[500px] object-contain"
                       controls
                     >
                       Votre navigateur ne supporte pas la lecture de vidéos.
                     </video>
                   </div>
                 )}
-                
+
                 {/* Marques d'échelle */}
                 <div className="absolute top-2 right-2 flex space-x-1">
                   <div className="w-1 h-4 bg-lab-blue/20"></div>
@@ -437,17 +479,17 @@ function ProjectsGallery() {
                   <div className="w-1 h-8 bg-lab-blue/20"></div>
                 </div>
               </div>
-              
+
               {/* Actions (likes, commentaires) */}
               <div className="p-5 sketch-content">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex space-x-6">
                     {/* Bouton "Like" */}
-                    <button 
+                    <button
                       onClick={() => userInfo && handleLike(project._id)}
                       className={`flex items-center space-x-2 sketch-button-outline ${
                         userInfo && project.likes && project.likes.some(id => id === userInfo._id)
-                          ? 'text-red-500' 
+                          ? 'text-red-500'
                           : 'text-gray-600 hover:text-gray-700'
                       }`}
                       disabled={!userInfo || likeLoading === project._id}
@@ -455,17 +497,17 @@ function ProjectsGallery() {
                       {likeLoading === project._id ? (
                         <div className="h-5 w-5 border-t-2 border-red-500 rounded-full animate-spin"></div>
                       ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sketch-icon" 
-                          fill={userInfo && project.likes && project.likes.some(id => id === userInfo._id) ? "currentColor" : "none"} 
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sketch-icon"
+                          fill={userInfo && project.likes && project.likes.some(id => id === userInfo._id) ? "currentColor" : "none"}
                           viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                       )}
                       <span className="font-scientific">{project.likes ? project.likes.length : 0}</span>
                     </button>
-                    
+
                     {/* Bouton "Commenter" */}
-                    <button 
+                    <button
                       onClick={() => userInfo && setCommenting(commenting === project._id ? null : project._id)}
                       className="flex items-center space-x-2 text-gray-600 hover:text-gray-700 sketch-button-outline"
                       disabled={!userInfo}
@@ -476,13 +518,13 @@ function ProjectsGallery() {
                       <span className="font-scientific">{project.comments ? project.comments.length : 0}</span>
                     </button>
                   </div>
-                  
+
                   {/* Étiquette décorative */}
                   <div className="sketch-tag bg-lab-blue/10 px-2 py-1 text-xs text-lab-blue font-scientific">
                     {project.fileType === 'image' ? 'OBSERVATION' : 'EXPÉRIENCE'}
                   </div>
                 </div>
-                
+
                 {/* Légende avec style cahier de laboratoire */}
                 {project.caption && (
                   <div className="mb-4 p-3 bg-yellow-50/30 sketch-note relative">
@@ -493,7 +535,7 @@ function ProjectsGallery() {
                     </span>
                   </div>
                 )}
-                
+
                 {/* Affichage des commentaires avec style labo */}
                 {project.comments && project.comments.length > 0 && (
                   <div className="mt-4 space-y-2 sketch-comments">
@@ -507,7 +549,7 @@ function ProjectsGallery() {
                             <span className="font-medium text-lab-blue">{comment.user.username}</span>
                             <span className="text-gray-700 font-scientific">{comment.text}</span>
                           </div>
-                          
+
                           {/* Bouton Admin pour supprimer un commentaire - visible uniquement pour les admins */}
                           {userInfo && userInfo.role === 'admin' && (
                             <button
@@ -525,7 +567,7 @@ function ProjectsGallery() {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Zone de commentaire avec style scientifique */}
                 {commenting === project._id && (
                   <div className="mt-4 flex space-x-2 sketch-comment-form">
@@ -549,11 +591,11 @@ function ProjectsGallery() {
                     </button>
                   </div>
                 )}
-                
+
                 {/* Message d'invitation à la connexion */}
                 {!userInfo && (
                   <div className="mt-4 text-center text-gray-500 text-sm italic sketch-login-prompt py-2 border-t border-dashed border-gray-200">
-                    <Link to="/login" className="text-lab-blue hover:underline font-scientific">Connectez-vous</Link> 
+                    <Link to="/login" className="text-lab-blue hover:underline font-scientific">Connectez-vous</Link>
                     <span className="font-scientific"> pour aimer ou commenter ce projet</span>
                   </div>
                 )}
@@ -568,18 +610,18 @@ function ProjectsGallery() {
           <span className="font-scientific">Partager votre projet</span>
         </Link>
       </div>
-      
+
       {/* Styles spécifiques pour l'effet crayon/schéma */}
       <style jsx="true">{`
         .font-scientific {
           font-family: "Courier New", monospace;
         }
-        
+
         .sketch-container {
           position: relative;
           box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
         }
-        
+
         .sketch-container:before {
           content: "";
           position: absolute;
@@ -593,14 +635,14 @@ function ProjectsGallery() {
           pointer-events: none;
           transform: translate(2px, 2px);
         }
-        
+
         .sketch-border {
           position: relative;
           border-style: solid;
           border-width: 2px;
           border-color: rgba(0,0,0,0.1);
         }
-        
+
         .sketch-border:before {
           content: "";
           position: absolute;
@@ -614,11 +656,11 @@ function ProjectsGallery() {
           pointer-events: none;
           transform: translate(3px, 3px);
         }
-        
+
         .sketch-border-bottom {
           position: relative;
         }
-        
+
         .sketch-border-bottom:after {
           content: "";
           position: absolute;
@@ -627,26 +669,26 @@ function ProjectsGallery() {
           width: 90%;
           height: 1px;
           background: repeating-linear-gradient(
-            90deg, 
-            rgba(0,0,0,0.1), 
-            rgba(0,0,0,0.1) 5px, 
-            transparent 5px, 
+            90deg,
+            rgba(0,0,0,0.1),
+            rgba(0,0,0,0.1) 5px,
+            transparent 5px,
             transparent 7px
           );
         }
-        
+
         .sketch-media-container {
           position: relative;
           padding: 0.5rem;
           background-color: rgba(245, 245, 245, 0.5);
         }
-        
+
         .sketch-media {
           position: relative;
           overflow: hidden;
           box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
-        
+
         .sketch-media:before {
           content: "";
           position: absolute;
@@ -657,17 +699,17 @@ function ProjectsGallery() {
           border: 1px solid rgba(0,0,0,0.1);
           pointer-events: none;
         }
-        
+
         .sketch-button, .sketch-button-outline {
           position: relative;
           transition: all 0.2s;
           transform: scale(1);
         }
-        
+
         .sketch-button:hover, .sketch-button-outline:hover {
           transform: scale(1.05);
         }
-        
+
         .sketch-button:before {
           content: "";
           position: absolute;
@@ -681,19 +723,19 @@ function ProjectsGallery() {
           pointer-events: none;
           transform: translate(1px, 1px);
         }
-        
+
         .sketch-button-outline {
           padding: 0.25rem 0.5rem;
           border-radius: 0.25rem;
           background: rgba(255,255,255,0.5);
           box-shadow: 1px 1px 3px rgba(0,0,0,0.05);
         }
-        
+
         .sketch-avatar {
           position: relative;
           filter: saturate(0.9);
         }
-        
+
         .sketch-avatar:before {
           content: "";
           position: absolute;
@@ -705,31 +747,31 @@ function ProjectsGallery() {
           border-radius: 50%;
           pointer-events: none;
         }
-        
+
         .sketch-note {
           border-radius: 0.25rem;
           box-shadow: 1px 1px 3px rgba(0,0,0,0.05);
         }
-        
+
         .sketch-linestyle {
           font-style: italic;
           letter-spacing: 1px;
         }
-        
+
         .sketch-tag {
           border-radius: 0.25rem;
           border: 1px dashed rgba(59, 130, 246, 0.3);
         }
-        
+
         .sketch-comments {
           position: relative;
         }
-        
+
         .sketch-comment {
           position: relative;
           padding-left: 0.5rem;
         }
-        
+
         .sketch-comment:before {
           content: "";
           position: absolute;
@@ -741,20 +783,20 @@ function ProjectsGallery() {
           background-color: rgba(139, 92, 246, 0.5);
           transform: translateY(-50%);
         }
-        
+
         .sketch-comment-form {
           position: relative;
         }
-        
+
         .sketch-input {
           background-color: rgba(255, 255, 255, 0.8);
         }
-        
+
         .sketch-cta {
           position: relative;
           z-index: 1;
         }
-        
+
         .sketch-cta:before {
           content: "";
           position: absolute;
@@ -768,16 +810,16 @@ function ProjectsGallery() {
           pointer-events: none;
           z-index: -1;
         }
-        
+
         .styled-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
-        
+
         .styled-scrollbar::-webkit-scrollbar-track {
           background: rgba(0,0,0,0.03);
           border-radius: 10px;
         }
-        
+
         .styled-scrollbar::-webkit-scrollbar-thumb {
           background: rgba(139, 92, 246, 0.2);
           border-radius: 10px;
@@ -787,4 +829,4 @@ function ProjectsGallery() {
   );
 }
 
-export default ProjectsGallery; 
+export default ProjectsGallery;

@@ -37,26 +37,109 @@ function ForumPage() {
         setLoading(true);
 
         // Construire l'URL avec les paramètres
-        let url = `${API_URL}/api/forum/topics?page=${pagination.page}&limit=${pagination.limit}`;
+        // let url = `${API_URL}/api/forum/topics?page=${pagination.page}&limit=${pagination.limit}`;
+        //
+        // if (category !== 'all') {
+        //   url += `&category=${category}`;
+        // }
+        //
+        // if (search) {
+        //   url += `&search=${encodeURIComponent(search)}`;
+        // }
+        //
+        // const response = await fetch(url);
+        //
+        // if (!response.ok) {
+        //   throw new Error('Erreur lors de la récupération des sujets');
+        // }
+        //
+        // const data = await response.json();
 
+        // Données simulées pour le développement
+        const mockTopics = [
+          {
+            _id: "topic1",
+            title: "Introduction à la biologie moléculaire",
+            user: {
+              _id: "user1",
+              username: "ProfBio"
+            },
+            category: "general",
+            content: "Bienvenue dans ce sujet d'introduction à la biologie moléculaire...",
+            discussionCount: 5,
+            views: 120,
+            isSticky: true,
+            createdAt: new Date(Date.now() - 1000000).toISOString(),
+            lastActivity: new Date(Date.now() - 50000).toISOString(),
+            lastDiscussion: {
+              user: {
+                username: "Etudiant22"
+              }
+            }
+          },
+          {
+            _id: "topic2",
+            title: "Question sur la PCR quantitative",
+            user: {
+              _id: "user2",
+              username: "Chercheur42"
+            },
+            category: "question",
+            content: "J'ai une question concernant l'optimisation des cycles de PCR...",
+            discussionCount: 3,
+            views: 45,
+            isSticky: false,
+            createdAt: new Date(Date.now() - 500000).toISOString(),
+            lastActivity: new Date(Date.now() - 100000).toISOString(),
+            lastDiscussion: {
+              user: {
+                username: "BioExpert"
+              }
+            }
+          },
+          {
+            _id: "topic3",
+            title: "Partage de protocole: extraction d'ADN simplifiée",
+            user: {
+              _id: "user3",
+              username: "LabTech"
+            },
+            category: "methode",
+            content: "Voici un protocole simplifié pour l'extraction d'ADN que j'utilise...",
+            discussionCount: 8,
+            views: 210,
+            isSticky: false,
+            createdAt: new Date(Date.now() - 800000).toISOString(),
+            lastActivity: new Date(Date.now() - 75000).toISOString(),
+            lastDiscussion: {
+              user: {
+                username: "BiologisteAmateur"
+              }
+            }
+          }
+        ];
+
+        // Filtrer les sujets simulés selon la catégorie
+        let filteredTopics = mockTopics;
         if (category !== 'all') {
-          url += `&category=${category}`;
+          filteredTopics = mockTopics.filter(topic => topic.category === category);
         }
 
+        // Filtrer par recherche si nécessaire
         if (search) {
-          url += `&search=${encodeURIComponent(search)}`;
+          const searchLower = search.toLowerCase();
+          filteredTopics = filteredTopics.filter(topic =>
+            topic.title.toLowerCase().includes(searchLower) ||
+            topic.content.toLowerCase().includes(searchLower)
+          );
         }
 
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error('Erreur lors de la récupération des sujets');
-        }
-
-        const data = await response.json();
-
-        setTopics(data.topics);
-        setPagination(data.pagination);
+        setTopics(filteredTopics);
+        setPagination({
+          ...pagination,
+          total: filteredTopics.length,
+          pages: Math.max(1, Math.ceil(filteredTopics.length / pagination.limit))
+        });
       } catch (error) {
         console.error('Error fetching topics:', error);
         setError(error.message);

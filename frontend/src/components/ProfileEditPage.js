@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
+import { BROWSER_API_URL } from '../config';
 
 function ProfileEditPage() {
   const { userInfo } = useAuth();
@@ -45,7 +45,7 @@ function ProfileEditPage() {
       try {
         setLoading(true);
 
-        const response = await fetch(`${API_URL}/api/social/profile`, {
+        const response = await fetch(`${BROWSER_API_URL}/social/profile`, {
           headers: {
             Authorization: `Bearer ${userInfo.token}`
           }
@@ -133,7 +133,7 @@ function ProfileEditPage() {
       setError(null);
       setSuccess(null);
 
-      const response = await fetch(`${API_URL}/api/social/profile`, {
+      const response = await fetch(`${BROWSER_API_URL}/social/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
