@@ -39,7 +39,7 @@ const registerUser = async (req, res, next) => {
   } catch (error) {
     console.error('Error in registerUser:', error);
     // Transmettre l'erreur au gestionnaire d'erreurs Express si vous en avez un
-    // next(error); 
+    // next(error);
     // Sinon, renvoyer une réponse d'erreur générique ou spécifique
     res.status(res.statusCode || 500).json({ message: error.message || 'Erreur serveur' });
   }
@@ -52,22 +52,28 @@ const loginUser = async (req, res, next) => {
   const { username, password } = req.body;
 
   try {
-    // Trouver l'utilisateur par nom d'utilisateur
-    const user = await User.findOne({ username });
+    // Trouver l'utilisateur par nom d'utilisateur et inclure le mot de passe
+    // ⚠️ NE PAS mettre .lean() sinon on perd les méthodes d'instance
+    const user = await User.findOne({ username }).select('+password');
 
-    // Vérifier si l'utilisateur existe et si le mot de passe correspond
-    if (user && (await user.matchPassword(password))) {
-      const token = generateToken(user._id, user.role);
-      res.json({
-        _id: user._id,
-        username: user.username,
-        role: user.role,
-        token: token,
-      });
-    } else {
-      res.status(401); // Unauthorized
-      throw new Error('Nom d\'utilisateur ou mot de passe invalide');
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur introuvable' });
     }
+
+    // Vérifier si le mot de passe correspond
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Mot de passe invalide' });
+    }
+
+    // Générer le token et renvoyer les infos utilisateur
+    const token = generateToken(user._id, user.role);
+    res.json({
+      _id: user._id,
+      username: user.username,
+      role: user.role,
+      token: token,
+    });
   } catch (error) {
     console.error('Error in loginUser:', error);
     // next(error);
@@ -92,4 +98,4 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile }; 
+module.exports = { registerUser, loginUser, getUserProfile };
