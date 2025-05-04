@@ -164,7 +164,7 @@ function ProfileEditPage() {
       setError(null);
       setSuccess(null);
 
-      // Préparer les données à envoyer - version simplifiée
+      // Préparer les données à envoyer - version avec avatar
       const dataToSend = {
         displayName: formData.displayName,
         bio: formData.bio,
@@ -177,7 +177,13 @@ function ProfileEditPage() {
         settings: formData.settings
       };
 
-      // Ne pas inclure l'avatar pour l'instant, pour restaurer la fonctionnalité de base
+      // Ajouter l'avatar si une URL est sélectionnée
+      if (formData.avatar && formData.avatar.url && formData.avatar.url.trim() !== '') {
+        // Utiliser le format attendu par le backend
+        dataToSend.avatar = {
+          url: formData.avatar.url.trim()
+        };
+      }
 
       // Log pour déboguer
       console.log('Données envoyées au serveur:', dataToSend);
