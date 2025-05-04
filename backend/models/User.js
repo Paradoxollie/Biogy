@@ -1,28 +1,26 @@
+// backend/models/User.js
 const mongoose = require('mongoose');
 const bcrypt   = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: [true, 'Le nom d\'utilisateur est requis'],
-    unique: true,
-    trim: true,
-  },
-  email: {
+  username: {                       // ← login unique
     type: String,
     required: true,
     unique: true,
-    lowercase: true,
+    trim: true,
+    minlength: 3,
+    maxlength: 30,
+    match: /^[a-zA-Z0-9_.-]+$/,     // alphanum + _ . -
   },
   password: {
     type: String,
     required: true,
     select: false,
+    minlength: 8,
   },
   role: {
     type: String,
-    enum: ['student', 'admin'], // Rôles possibles
-    default: 'student',        // Rôle par défaut
+    default: 'user',
   },
   avatar: {
     url: {
@@ -38,16 +36,16 @@ const userSchema = new mongoose.Schema({
   timestamps: true, // Ajoute createdAt et updatedAt automatiquement
 });
 
-/* Hash du mot de passe avant save */
+/* Hash du mot de passe */
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-/* Méthode d'instance pour vérifier */
-userSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+/* Vérification */
+userSchema.methods.matchPassword = function (pwd) {
+  return bcrypt.compare(pwd, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);

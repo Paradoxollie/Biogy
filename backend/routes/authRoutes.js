@@ -1,17 +1,12 @@
-const express = require('express');
+const router = require('express').Router();
 const { registerUser, loginUser, getUserProfile } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
-const router = express.Router();
-
-// Route pour enregistrer un nouvel utilisateur
+// Routes d'authentification
 router.post('/register', registerUser);
-
-// Route pour connecter un utilisateur
 router.post('/login', loginUser);
 
-// Route pour obtenir le profil de l'utilisateur (protégée)
-// Le middleware `protect` s'exécute avant `getUserProfile`
+// Route protégée pour le profil
 router.get('/profile', protect, getUserProfile);
 
-module.exports = router; 
+module.exports = router;

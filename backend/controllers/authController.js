@@ -5,49 +5,21 @@ const generateToken = require('../utils/generateToken');
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
-  const { username, email, password, role } = req.body;
-
-  if (!username || !email || !password) {
-    return res.status(400).json({ message: 'Tous les champs sont requis' });
-  }
+  const { username, password, role } = req.body;
+  if (!username || !password)
+    return res.status(400).json({ message: 'Champs manquants' });
 
   try {
-    // Vérifier si l'utilisateur existe déjà (par email ou username)
-    const userExists = await User.findOne({
-      $or: [{ email }, { username }]
-    });
+    const exists = await User.findOne({ username });
+    if (exists)
+      return res.status(409).json({ message: 'Nom d\'utilisateur déjà pris' });
 
-    if (userExists) {
-      return res.status(400).json({
-        message: userExists.email === email
-          ? 'Cet email est déjà utilisé'
-          : 'Ce nom d\'utilisateur est déjà utilisé'
-      });
-    }
-
-    // Créer l'utilisateur (le mot de passe sera haché par le middleware pre-save)
-    const user = await User.create({
-      username,
-      email,
-      password,
-      role: role || 'student' // Assigner le rôle (ou 'student' par défaut)
-    });
-
-    // Générer le token et renvoyer les infos utilisateur
+    const user = await User.create({ username, password, role });
     const token = generateToken(user._id, user.role);
-    res.status(201).json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      token: token,
-    });
+    res.status(201).json({ token, username: user.username, role: user.role });
   } catch (error) {
     console.error('Error in registerUser:', error);
-    res.status(500).json({
-      message: error.message || 'Erreur lors de la création du compte',
-      error: process.env.NODE_ENV === 'development' ? error.toString() : undefined
-    });
+    res.status(500).json({ message: 'Erreur lors de la création du compte' });
   }
 };
 
@@ -55,39 +27,24 @@ const registerUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
+  const { username, password } = req.body;
+  if (!username || !password)
     return res.status(400).json({ message: 'Champs manquants' });
-  }
 
   try {
-    // Trouver l'utilisateur par email et inclure le mot de passe
-    // ⚠️ NE PAS mettre .lean() sinon on perd les méthodes d'instance
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ username }).select('+password');
+    if (!user)
+      return res.status(401).json({ message: 'Identifiants invalides' });
 
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur introuvable' });
-    }
-
-    // Vérifier si le mot de passe correspond
     const isMatch = await user.matchPassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Mot de passe invalide' });
-    }
+    if (!isMatch)
+      return res.status(401).json({ message: 'Identifiants invalides' });
 
-    // Générer le token et renvoyer les infos utilisateur
     const token = generateToken(user._id, user.role);
-    res.json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      token: token,
-    });
+    res.json({ token, username: user.username, role: user.role });
   } catch (error) {
     console.error('Error in loginUser:', error);
-    res.status(500).json({ message: error.message || 'Erreur serveur' });
+    res.status(500).json({ message: 'Erreur lors de la connexion' });
   }
 };
 
