@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import apiService from '../services/api';
-import MaintenancePage from './MaintenancePage';
+import { API_URL } from '../config';
 
 function ForumPage() {
   const [topics, setTopics] = useState([]);
@@ -38,20 +37,23 @@ function ForumPage() {
         setLoading(true);
 
         // Construire l'URL avec les paramètres
-        let endpoint = `forum/topics?page=${pagination.page}&limit=${pagination.limit}`;
+        let url = `${API_URL}/api/forum/topics?page=${pagination.page}&limit=${pagination.limit}`;
 
         if (category !== 'all') {
-          endpoint += `&category=${category}`;
+          url += `&category=${category}`;
         }
 
         if (search) {
-          endpoint += `&search=${encodeURIComponent(search)}`;
+          url += `&search=${encodeURIComponent(search)}`;
         }
 
-        console.log('Chargement des sujets du forum:', endpoint);
+        const response = await fetch(url);
 
-        // Utiliser le service API pour récupérer les sujets
-        const data = await apiService.get(endpoint);
+        if (!response.ok) {
+          throw new Error('Erreur lors de la récupération des sujets');
+        }
+
+        const data = await response.json();
 
         setTopics(data.topics);
         setPagination(data.pagination);
@@ -182,29 +184,20 @@ function ForumPage() {
             <p className="mt-2 text-gray-600 font-medium">Chargement des sujets...</p>
           </div>
         ) : error ? (
-          // Vérifier si l'erreur est liée à l'indisponibilité du backend
-          error.includes('serveur backend') || error.includes('Impossible de se connecter') ? (
-            <MaintenancePage
-              title="Forum temporairement indisponible"
-              message="Notre espace collaboratif est actuellement en maintenance. Nous travaillons à le remettre en ligne le plus rapidement possible."
-              returnPath="/"
-            />
-          ) : (
-            <div className="p-12 text-center">
-              <div className="mb-4 text-red-500">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <p className="text-red-500 font-medium mb-4">Erreur: {error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-gradient-to-r from-lab-purple to-lab-blue text-white rounded-lg shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-              >
-                Réessayer
-              </button>
+          <div className="p-12 text-center">
+            <div className="mb-4 text-red-500">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
             </div>
-          )
+            <p className="text-red-500 font-medium mb-4">Erreur: {error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-gradient-to-r from-lab-purple to-lab-blue text-white rounded-lg shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+            >
+              Réessayer
+            </button>
+          </div>
         ) : topics.length === 0 ? (
           <div className="p-12 text-center">
             <div className="mb-6 relative">

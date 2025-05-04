@@ -9,47 +9,17 @@ connectDB();
 const app = express();
 
 // Middlewares
-// Configuration CORS permissive
 app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  credentials: false
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
 }));
-
-// Middleware pour les requêtes OPTIONS
-app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.status(200).send();
-});
-
 app.use(express.json()); // Pour parser le JSON dans les requêtes
 app.use(express.urlencoded({ extended: true })); // Pour parser les données de formulaire
-
-// Middleware pour ajouter les en-têtes CORS à toutes les réponses
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  next();
-});
 
 // Routes de base
 app.get('/', (req, res) => {
   res.send('API Biogy Backend is running...');
-});
-
-// Route de test CORS
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'API is healthy and CORS is working!',
-    timestamp: new Date().toISOString(),
-    origin: req.headers.origin || 'unknown',
-    server: 'main'
-  });
 });
 
 // Routes spécifiques (à compléter dans routes/)
