@@ -13,9 +13,26 @@ function ProfilePage() {
   const [error, setError] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [localAvatarUrl, setLocalAvatarUrl] = useState('');
 
   // Déterminer si c'est le profil de l'utilisateur connecté
   const isOwnProfile = !userId || (userInfo && userId === userInfo._id);
+
+  // Charger l'avatar depuis le localStorage
+  useEffect(() => {
+    if (userInfo) {
+      try {
+        const storedAvatars = JSON.parse(localStorage.getItem('userAvatars') || '{}');
+        const storedAvatar = storedAvatars[userInfo._id];
+        if (storedAvatar) {
+          setLocalAvatarUrl(storedAvatar);
+          console.log('Avatar chargé depuis le localStorage:', storedAvatar);
+        }
+      } catch (e) {
+        console.error('Erreur lors du chargement de l\'avatar depuis le localStorage:', e);
+      }
+    }
+  }, [userInfo]);
 
   // Charger le profil
   useEffect(() => {
@@ -166,9 +183,16 @@ function ProfilePage() {
           {/* Avatar */}
           <div className="absolute -bottom-16 left-8">
             <div className="w-32 h-32 rounded-full bg-white p-1 shadow-lg">
-              {profile.avatar && profile.avatar.url ? (
+              {/* Utiliser l'avatar du serveur, ou l'avatar local, ou l'avatar par défaut */}
+              {(profile.avatar && profile.avatar.url) ? (
                 <img
                   src={profile.avatar.url}
+                  alt={profile.user?.username || 'Utilisateur'}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : localAvatarUrl ? (
+                <img
+                  src={localAvatarUrl}
                   alt={profile.user?.username || 'Utilisateur'}
                   className="w-full h-full rounded-full object-cover"
                 />

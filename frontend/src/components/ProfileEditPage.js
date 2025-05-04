@@ -212,6 +212,24 @@ function ProfileEditPage() {
 
       const responseData = await response.json();
       console.log('Réponse du serveur après mise à jour:', responseData);
+      console.log('Avatar dans la réponse:', responseData.avatar);
+
+      // Vérifier si l'avatar a été correctement enregistré
+      if (!responseData.avatar || !responseData.avatar.url) {
+        console.warn('L\'avatar n\'a pas été correctement enregistré dans la réponse du serveur');
+
+        // Stocker l'avatar sélectionné dans le localStorage comme solution de contournement
+        if (formData.avatar && formData.avatar.url) {
+          try {
+            const storedAvatars = JSON.parse(localStorage.getItem('userAvatars') || '{}');
+            storedAvatars[userInfo._id] = formData.avatar.url;
+            localStorage.setItem('userAvatars', JSON.stringify(storedAvatars));
+            console.log('Avatar stocké localement:', formData.avatar.url);
+          } catch (e) {
+            console.error('Erreur lors du stockage local de l\'avatar:', e);
+          }
+        }
+      }
 
       setSuccess('Profil mis à jour avec succès');
 
