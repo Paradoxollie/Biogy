@@ -167,7 +167,12 @@ function ProfileEditPage() {
       // Préparer les données à envoyer
       const dataToSend = {
         ...formData,
-        interests: formData.interests ? formData.interests.split(',').map(item => item.trim()) : []
+        interests: formData.interests ? formData.interests.split(',').map(item => item.trim()) : [],
+        // S'assurer que l'avatar est correctement formaté
+        avatar: {
+          url: formData.avatar.url,
+          type: 'preset'
+        }
       };
 
       // Log pour déboguer
@@ -191,6 +196,11 @@ function ProfileEditPage() {
       const responseData = await response.json();
       console.log('Réponse du serveur après mise à jour:', responseData);
       console.log('Avatar dans la réponse:', responseData.avatar);
+
+      // Vérifier si l'avatar a été correctement enregistré
+      if (!responseData.avatar || !responseData.avatar.url) {
+        console.warn('L\'avatar n\'a pas été correctement enregistré dans la réponse du serveur');
+      }
 
       setSuccess('Profil mis à jour avec succès');
 
