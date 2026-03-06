@@ -3,13 +3,16 @@ const mongoose = require('mongoose');
 let connectionPromise;
 let listenersRegistered = false;
 
+mongoose.set('bufferCommands', false);
+mongoose.set('bufferTimeoutMS', 0);
+
 const CONNECTION_OPTIONS = {
   appName: 'biogy-backend',
   family: 4,
   maxPoolSize: 10,
   minPoolSize: 0,
-  serverSelectionTimeoutMS: 10000,
-  socketTimeoutMS: 20000,
+  serverSelectionTimeoutMS: 3000,
+  socketTimeoutMS: 10000,
 };
 
 const registerConnectionListeners = () => {

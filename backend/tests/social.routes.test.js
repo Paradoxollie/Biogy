@@ -97,3 +97,35 @@ test('preset avatar route accepts multipart form fields for backward compatibili
   assert.equal(profile.avatar.url, avatarUrl);
   assert.equal(profile.avatar.cloudinaryPublicId, 'avatars/scientist1_3048122_rvbpzl');
 });
+
+test('legacy /api/profile routes remain compatible with the current profile controller', async () => {
+  const user = await registerUser('legacy-profile-user');
+  const avatarUrl = 'https://res.cloudinary.com/biogy/image/upload/v1/avatars/scientist2_4205906_ixvpqm';
+
+  const updateResponse = await request(app)
+    .put('/api/profile')
+    .set('Authorization', `Bearer ${user.token}`)
+    .send({
+      displayName: 'Legacy User',
+      avatarUrl,
+    });
+
+  assert.equal(updateResponse.statusCode, 200);
+  assert.equal(updateResponse.body.displayName, 'Legacy User');
+  assert.equal(updateResponse.body.avatar.url, avatarUrl);
+
+  const presetResponse = await request(app)
+    .post('/api/profile/avatar/preset')
+    .set('Authorization', `Bearer ${user.token}`)
+    .field('avatarUrl', '');
+
+  assert.equal(presetResponse.statusCode, 200);
+  assert.equal(presetResponse.body.avatar.url, '');
+
+  const profileResponse = await request(app)
+    .get('/api/profile')
+    .set('Authorization', `Bearer ${user.token}`);
+
+  assert.equal(profileResponse.statusCode, 200);
+  assert.equal(profileResponse.body.user._id, user._id);
+});
