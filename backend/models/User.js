@@ -1,16 +1,17 @@
-// backend/models/User.js
 const mongoose = require('mongoose');
-const bcrypt   = require('bcrypt');
+const bcrypt = require('bcryptjs');
+
+const { DEFAULT_USER_ROLE } = require('../utils/roles');
 
 const userSchema = new mongoose.Schema({
-  username: {                       // ← login unique
+  username: {
     type: String,
     required: true,
     unique: true,
     trim: true,
     minlength: 3,
     maxlength: 30,
-    match: /^[a-zA-Z0-9_.-]+$/,     // alphanum + _ . -
+    match: /^[a-zA-Z0-9_.-]+$/,
   },
   password: {
     type: String,
@@ -20,32 +21,33 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: 'user',
+    default: DEFAULT_USER_ROLE,
   },
   avatar: {
     url: {
       type: String,
-      default: ''
+      default: '',
     },
     cloudinaryPublicId: {
       type: String,
-      default: ''
-    }
-  }
+      default: '',
+    },
+  },
 }, {
-  timestamps: true, // Ajoute createdAt et updatedAt automatiquement
+  timestamps: true,
 });
 
-/* Hash du mot de passe */
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+userSchema.pre('save', async function savePassword(next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+
   this.password = await bcrypt.hash(this.password, 10);
-  next();
+  return next();
 });
 
-/* Vérification */
-userSchema.methods.matchPassword = function (pwd) {
-  return bcrypt.compare(pwd, this.password);
+userSchema.methods.matchPassword = function matchPassword(password) {
+  return bcrypt.compare(password, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);

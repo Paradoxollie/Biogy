@@ -1,39 +1,63 @@
 const mongoose = require('mongoose');
 
+let connectionPromise;
+let listenersRegistered = false;
+
+const CONNECTION_OPTIONS = {
+  appName: 'biogy-backend',
+  family: 4,
+  maxPoolSize: 10,
+  minPoolSize: 0,
+  serverSelectionTimeoutMS: 10000,
+  socketTimeoutMS: 20000,
+};
+
+const registerConnectionListeners = () => {
+  if (listenersRegistered) {
+    return;
+  }
+
+  listenersRegistered = true;
+
+  mongoose.connection.on('connected', () => {
+    console.log('MongoDB connected');
+  });
+
+  mongoose.connection.on('disconnected', () => {
+    console.warn('MongoDB disconnected');
+  });
+
+  mongoose.connection.on('error', (error) => {
+    console.error('MongoDB connection error:', error.message);
+  });
+};
+
 const connectDB = async () => {
-  // Utiliser MONGO_URI ou MONGODB_URI (pour compatibilité avec différents services)
   const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
 
   if (!uri) {
-    console.error('❌ MongoDB URI not found in environment variables');
-    process.exit(1);
+    throw new Error('MongoDB URI not found in environment variables');
   }
 
-  // En mode développement, si MongoDB n'est pas disponible, on utilise une simulation
-  if (process.env.NODE_ENV === 'development' && !uri.includes('mongodb+srv')) {
-    try {
-      await mongoose.connect(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-      console.log('✅ MongoDB connected');
-    } catch (error) {
-      console.warn('⚠️ MongoDB connection failed, using in-memory simulation for development');
-      // Simuler une connexion réussie pour le développement
-      mongoose.connection.readyState = 1; // 1 = connected
-    }
-  } else {
-    try {
-      await mongoose.connect(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-      console.log('✅ MongoDB Atlas connected');
-    } catch (error) {
-      console.error('❌ MongoDB connection failed:', error.message);
-      process.exit(1); // Stop le serveur si échec
-    }
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
   }
+
+  registerConnectionListeners();
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(uri, CONNECTION_OPTIONS)
+      .then(() => mongoose.connection)
+      .catch((error) => {
+        connectionPromise = null;
+        throw error;
+      });
+  }
+
+  return connectionPromise;
 };
 
+const isDatabaseReady = () => mongoose.connection.readyState === 1;
+
 module.exports = connectDB;
+module.exports.isDatabaseReady = isDatabaseReady;

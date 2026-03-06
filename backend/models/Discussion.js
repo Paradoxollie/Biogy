@@ -80,6 +80,9 @@ discussionSchema.pre('save', async function(next) {
   next();
 });
 
+discussionSchema.index({ topic: 1, parentDiscussion: 1, createdAt: 1 });
+discussionSchema.index({ parentDiscussion: 1, createdAt: 1 });
+
 const Discussion = mongoose.model('Discussion', discussionSchema);
 
 module.exports = Discussion;

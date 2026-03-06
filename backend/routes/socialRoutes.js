@@ -1,4 +1,5 @@
 const express = require('express');
+
 const {
   updateProfile,
   uploadAvatar,
@@ -6,35 +7,33 @@ const {
   getProfileByUserId,
   followUser,
   getFollowing,
-  getFollowers
+  getFollowers,
 } = require('../controllers/profileController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, optionalAuth } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const avatarRoutes = require('./avatarRoutes');
 
 const router = express.Router();
 
-// Utiliser les routes d'avatar
 router.use('/profile/avatar', avatarRoutes);
 
-// Routes pour le profil
 router.route('/profile')
-  .get(protect, getMyProfile)     // Récupérer son propre profil (authentifié)
-  .put(protect, updateProfile);   // Mettre à jour son profil (authentifié)
+  .get(protect, getMyProfile)
+  .put(protect, updateProfile);
 
 router.route('/profile/avatar')
-  .post(protect, upload.single('avatar'), uploadAvatar); // Télécharger un avatar (authentifié)
-
-router.route('/profile/:userId')
-  .get(getProfileByUserId);       // Récupérer le profil d'un utilisateur (public)
-
-router.route('/profile/:userId/follow')
-  .post(protect, followUser);     // Suivre/Ne plus suivre un utilisateur (authentifié)
+  .post(protect, upload.single('avatar'), uploadAvatar);
 
 router.route('/profile/following')
-  .get(protect, getFollowing);    // Récupérer les utilisateurs suivis (authentifié)
+  .get(protect, getFollowing);
 
 router.route('/profile/followers')
-  .get(protect, getFollowers);    // Récupérer les abonnés (authentifié)
+  .get(protect, getFollowers);
+
+router.route('/profile/:userId/follow')
+  .post(protect, followUser);
+
+router.route('/profile/:userId')
+  .get(optionalAuth, getProfileByUserId);
 
 module.exports = router;

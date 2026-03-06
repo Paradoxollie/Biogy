@@ -64,6 +64,9 @@ const postSchema = new mongoose.Schema({
   timestamps: true, // Ajoute createdAt et updatedAt
 });
 
+postSchema.index({ status: 1, createdAt: -1 });
+postSchema.index({ user: 1, createdAt: -1 });
+
 const Post = mongoose.model('Post', postSchema);
 
 module.exports = Post; 

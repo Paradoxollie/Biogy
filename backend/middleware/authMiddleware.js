@@ -1,57 +1,78 @@
 const jwt = require('jsonwebtoken');
+
 const User = require('../models/User');
+const { isAdminRole } = require('../utils/roles');
+
 require('dotenv').config();
 
-// Middleware pour protéger les routes
-const protect = async (req, res, next) => {
-  let token;
-
-  // Vérifier si le token est dans les en-têtes Authorization
+const extractBearerToken = (req) => {
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
-    try {
-      // Extraire le token (Bearer <token>)
-      token = req.headers.authorization.split(' ')[1];
+    return req.headers.authorization.split(' ')[1];
+  }
 
-      // Vérifier le token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  return null;
+};
 
-      // Trouver l'utilisateur par ID depuis le payload du token (sans le mot de passe)
-      // et l'attacher à l'objet req pour les routes suivantes
-      req.user = await User.findById(decoded.id).select('-password');
+const findUserFromRequest = async (req) => {
+  const token = extractBearerToken(req);
 
-      if (!req.user) {
-        return res.status(401).json({
-          message: 'Non autorisé, utilisateur non trouvé'
-        });
-      }
+  if (!token) {
+    return null;
+  }
 
-      next(); // Passer au prochain middleware/route
-    } catch (error) {
-      console.error('Token verification failed:', error);
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  return User.findById(decoded.id).select('-password');
+};
+
+const protect = async (req, res, next) => {
+  try {
+    const user = await findUserFromRequest(req);
+
+    if (!user) {
       return res.status(401).json({
-        message: 'Non autorisé, token invalide'
+        message: 'Non autorise, pas de token valide fourni',
       });
     }
-  } else {
+
+    req.user = user;
+    return next();
+  } catch (error) {
+    console.error('Token verification failed:', error);
     return res.status(401).json({
-      message: 'Non autorisé, pas de token fourni'
+      message: 'Non autorise, token invalide',
     });
   }
 };
 
-// Middleware pour vérifier si l'utilisateur est un admin
+const optionalAuth = async (req, res, next) => {
+  try {
+    const user = await findUserFromRequest(req);
+
+    if (user) {
+      req.user = user;
+    }
+  } catch (error) {
+    console.warn('Optional auth skipped due to invalid token:', error.message);
+  }
+
+  return next();
+};
+
 const admin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
-    next(); // L'utilisateur est admin, continuer
-  } else {
-    res.status(403).json({ 
-      message: 'Accès refusé. Rôle administrateur requis.' 
-    });
-    // Ne pas appeler next() pour arrêter l'exécution ici
+  if (req.user && isAdminRole(req.user.role)) {
+    return next();
   }
+
+  return res.status(403).json({
+    message: 'Acces refuse. Role administrateur requis.',
+  });
 };
 
-module.exports = { protect, admin }; 
+module.exports = {
+  protect,
+  optionalAuth,
+  admin,
+};

@@ -76,6 +76,10 @@ topicSchema.methods.incrementViews = async function() {
   return this.save();
 };
 
+topicSchema.index({ isSticky: -1, lastActivity: -1 });
+topicSchema.index({ category: 1, lastActivity: -1 });
+topicSchema.index({ user: 1, createdAt: -1 });
+
 const Topic = mongoose.model('Topic', topicSchema);
 
 module.exports = Topic;

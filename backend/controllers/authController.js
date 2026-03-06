@@ -1,25 +1,48 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const { DEFAULT_USER_ROLE, normalizeUserRole } = require('../utils/roles');
+
+const buildAuthResponse = (user) => {
+  const normalizedRole = normalizeUserRole(user.role);
+
+  return {
+    _id: user._id,
+    token: generateToken(user._id, normalizedRole),
+    username: user.username,
+    role: normalizedRole,
+  };
+};
 
 // @desc    Enregistrer un nouvel utilisateur
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
-  const { username, password, role } = req.body;
-  if (!username || !password)
+  const { username, password } = req.body;
+
+  if (!username || !password) {
     return res.status(400).json({ message: 'Champs manquants' });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 8 caracteres' });
+  }
 
   try {
     const exists = await User.findOne({ username });
-    if (exists)
-      return res.status(409).json({ message: 'Nom d\'utilisateur déjà pris' });
+    if (exists) {
+      return res.status(409).json({ message: 'Nom d utilisateur deja pris' });
+    }
 
-    const user = await User.create({ username, password, role });
-    const token = generateToken(user._id, user.role);
-    res.status(201).json({ token, username: user.username, role: user.role });
+    const user = await User.create({
+      username,
+      password,
+      role: DEFAULT_USER_ROLE,
+    });
+
+    return res.status(201).json(buildAuthResponse(user));
   } catch (error) {
     console.error('Error in registerUser:', error);
-    res.status(500).json({ message: 'Erreur lors de la création du compte' });
+    return res.status(500).json({ message: 'Erreur lors de la creation du compte' });
   }
 };
 
@@ -28,54 +51,59 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password)
+
+  if (!username || !password) {
     return res.status(400).json({ message: 'Champs manquants' });
+  }
 
   try {
     const user = await User.findOne({ username }).select('+password');
-    if (!user)
+    if (!user) {
       return res.status(401).json({ message: 'Identifiants invalides' });
+    }
 
     const isMatch = await user.matchPassword(password);
-    if (!isMatch)
+    if (!isMatch) {
       return res.status(401).json({ message: 'Identifiants invalides' });
+    }
 
-    const token = generateToken(user._id, user.role);
-    res.json({ token, username: user.username, role: user.role });
+    return res.json(buildAuthResponse(user));
   } catch (error) {
     console.error('Error in loginUser:', error);
-    res.status(500).json({ message: 'Erreur lors de la connexion' });
+    return res.status(500).json({ message: 'Erreur lors de la connexion' });
   }
 };
 
-// @desc    Obtenir le profil de l'utilisateur connecté (exemple de route protégée)
+// @desc    Obtenir le profil de l'utilisateur connecte
 // @route   GET /api/auth/profile
 // @access  Private
 const getUserProfile = async (req, res) => {
   try {
-    // req.user est ajouté par le middleware d'authentification
     if (!req.user) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      return res.status(404).json({ message: 'Utilisateur non trouve' });
     }
 
-    // Récupérer les informations complètes de l'utilisateur
     const user = await User.findById(req.user._id);
 
     if (!user) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé dans la base de données' });
+      return res.status(404).json({ message: 'Utilisateur non trouve dans la base de donnees' });
     }
 
-    res.json({
+    return res.json({
       _id: user._id,
       username: user.username,
       email: user.email,
-      role: user.role,
-      createdAt: user.createdAt
+      role: normalizeUserRole(user.role),
+      createdAt: user.createdAt,
     });
   } catch (error) {
     console.error('Error in getUserProfile:', error);
-    res.status(500).json({ message: 'Erreur lors de la récupération du profil' });
+    return res.status(500).json({ message: 'Erreur lors de la recuperation du profil' });
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile };
+module.exports = {
+  registerUser,
+  loginUser,
+  getUserProfile,
+};

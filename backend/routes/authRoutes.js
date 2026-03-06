@@ -1,12 +1,11 @@
 const router = require('express').Router();
+
 const { registerUser, loginUser, getUserProfile } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
+const { authLimiter } = require('../middleware/rateLimitMiddleware');
 
-// Routes d'authentification
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-
-// Route protégée pour le profil
+router.post('/register', authLimiter, registerUser);
+router.post('/login', authLimiter, loginUser);
 router.get('/profile', protect, getUserProfile);
 
 module.exports = router;

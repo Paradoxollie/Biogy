@@ -1,30 +1,50 @@
 require('dotenv').config();
-const express  = require('express');
-const cors     = require('cors');
-const mongoose = require('mongoose');
-const loadRoutes = require('./loadRoutes');      // ta fonction qui declare /api/auth, /api/posts, etc.
 
-const app = express();
+const app = require('./app');
+const connectDB = require('./config/db');
 
-/* ─── CORS AVANT TOUT ─── */
-app.use(cors({
-  origin: process.env.FRONTEND_URL,      // doit valoir https://biogy.netlify.app dans Render
-  credentials: true,
-}));
-app.options('*', cors());
+let serverInstance;
+let retryTimer;
 
-app.use(express.json());
+const DB_RETRY_DELAY_MS = 5000;
 
-/* ─── Health check ─── */
-app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
+const bootstrapDatabase = async () => {
+  try {
+    await connectDB();
+  } catch (error) {
+    console.error('Initial MongoDB connection failed:', error.message);
+    retryTimer = setTimeout(() => {
+      retryTimer = null;
+      bootstrapDatabase().catch(() => {});
+    }, DB_RETRY_DELAY_MS);
+  }
+};
 
-/* ─── Mongo ─── */
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => { console.error(err); process.exit(1); });
+const startServer = async () => {
+  if (serverInstance) {
+    return serverInstance;
+  }
 
-/* ─── Routes métier ─── */
-loadRoutes(app);
+  const port = Number(process.env.PORT) || 4000;
+  serverInstance = app.listen(port, () => {
+    console.log(`Server ready on ${port}`);
+  });
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 Server ready on ${PORT}`));
+  if (!retryTimer) {
+    bootstrapDatabase().catch(() => {});
+  }
+
+  return serverInstance;
+};
+
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error('Unable to start server:', error);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  app,
+  startServer,
+};

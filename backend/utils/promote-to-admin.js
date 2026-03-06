@@ -6,6 +6,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const { ADMIN_ROLE } = require('./roles');
 
 // Check if username is provided
 if (process.argv.length < 3) {
@@ -15,8 +16,12 @@ if (process.argv.length < 3) {
 
 const username = process.argv[2];
 
-// Utiliser directement l'URI MongoDB pour ce script
-const MONGO_URI = "mongodb+srv://Parad0x:4JQSXUPV0wga8Tic@parad0x.kee2wqc.mongodb.net/biogyDB?retryWrites=true&w=majority&appName=Parad0x";
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
+
+if (!MONGO_URI) {
+  console.error('Missing MONGO_URI or MONGODB_URI in the environment');
+  process.exit(1);
+}
 
 // Connect to MongoDB
 mongoose.connect(MONGO_URI)
@@ -33,7 +38,7 @@ mongoose.connect(MONGO_URI)
       }
       
       // Update the user's role to admin
-      user.role = 'admin';
+      user.role = ADMIN_ROLE;
       await user.save();
       
       console.log(`User "${username}" has been promoted to admin role`);
