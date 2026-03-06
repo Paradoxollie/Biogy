@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { BROWSER_API_URL } from '../config';
 
 function ProjectsGallery() {
   const [projects, setProjects] = useState([]);
@@ -12,7 +13,7 @@ function ProjectsGallery() {
   const [likeLoading, setLikeLoading] = useState(null); // ID du projet en cours de like
   const { userInfo } = useAuth();
 
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const apiUrl = BROWSER_API_URL;
 
   // Utiliser useCallback pour éviter les boucles infinies avec useEffect
   const fetchProjects = useCallback(async () => {

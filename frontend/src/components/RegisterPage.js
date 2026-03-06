@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { BROWSER_API_URL } from '../config';
 
 function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -28,7 +29,7 @@ function RegisterPage() {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const apiUrl = BROWSER_API_URL;
       
       const response = await fetch(`${apiUrl}/api/auth/register`, {
         method: 'POST',

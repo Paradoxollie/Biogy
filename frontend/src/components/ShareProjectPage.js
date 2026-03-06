@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { BROWSER_API_URL } from '../config';
 // import axios from 'axios'; // On utilisera fetch pour l'instant, mais axios est une option
 
 // Icône SVG pour l'upload (style crayonné)
@@ -112,7 +113,7 @@ function ShareProjectPage() {
     formData.append('caption', caption);
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; 
+      const apiUrl = BROWSER_API_URL;
       const postUrl = `${apiUrl}/api/posts`;
       
       console.log('Envoi de la requête d\'upload à:', postUrl);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { BROWSER_API_URL } from '../config';
 
 // Composant pour afficher un post en attente de modération
 const PendingPostCard = ({ post, onApprove, onReject, onDelete }) => {
@@ -112,7 +113,7 @@ const UserManagement = ({ userInfo }) => {
   const [newUsername, setNewUsername] = useState('');
   const [newRole, setNewRole] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const apiUrl = BROWSER_API_URL;
   
   // Récupérer la liste des utilisateurs
   const fetchUsers = useCallback(async () => {
@@ -437,7 +438,7 @@ function AdminPage() {
     setError('');
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const apiUrl = BROWSER_API_URL;
       const response = await fetch(`${apiUrl}/api/admin/posts/pending`, {
         headers: {
           'Authorization': `Bearer ${userInfo.token}`
@@ -465,7 +466,7 @@ function AdminPage() {
     setSuccess('');
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const apiUrl = BROWSER_API_URL;
       const response = await fetch(`${apiUrl}/api/admin/posts/${postId}/approve`, {
         method: 'PUT',
         headers: {
@@ -496,7 +497,7 @@ function AdminPage() {
     setSuccess('');
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const apiUrl = BROWSER_API_URL;
       const response = await fetch(`${apiUrl}/api/admin/posts/${postId}/reject`, {
         method: 'PUT',
         headers: {
@@ -527,7 +528,7 @@ function AdminPage() {
     setSuccess('');
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const apiUrl = BROWSER_API_URL;
       const response = await fetch(`${apiUrl}/api/admin/posts/${postId}`, {
         method: 'DELETE',
         headers: {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // Importer useAuth
+import { BROWSER_API_URL } from '../config';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -16,7 +17,7 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; 
+      const apiUrl = BROWSER_API_URL;
       console.log('Envoi de la demande de connexion à:', `${apiUrl}/api/auth/login`);
       
       const response = await fetch(`${apiUrl}/api/auth/login`, {
