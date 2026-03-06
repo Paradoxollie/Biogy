@@ -1,6 +1,7 @@
 const Post = require('../models/Post');
 const { deleteFromCloudinary } = require('../config/cloudinary');
 const User = require('../models/User');
+const { ensureDatabaseAvailable } = require('../utils/database');
 
 /**
  * @desc    Get all pending posts awaiting moderation
@@ -8,6 +9,10 @@ const User = require('../models/User');
  * @access  Private/Admin
  */
 const getPendingPosts = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const pendingPosts = await Post.find({ status: 'pending' })
       .sort({ createdAt: -1 })
@@ -26,6 +31,10 @@ const getPendingPosts = async (req, res) => {
  * @access  Private/Admin
  */
 const getAllPosts = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const posts = await Post.find({})
       .sort({ createdAt: -1 })
@@ -44,6 +53,10 @@ const getAllPosts = async (req, res) => {
  * @access  Private/Admin
  */
 const approvePost = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const post = await Post.findById(req.params.id);
     
@@ -77,6 +90,10 @@ const approvePost = async (req, res) => {
  * @access  Private/Admin
  */
 const rejectPost = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const post = await Post.findById(req.params.id);
     
@@ -111,6 +128,10 @@ const rejectPost = async (req, res) => {
  * @access  Private/Admin
  */
 const deletePostAdmin = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const post = await Post.findById(req.params.id);
     
@@ -145,6 +166,10 @@ const deletePostAdmin = async (req, res) => {
  * @access  Private (admin uniquement)
  */
 const updateUserRole = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const { role } = req.body;
     const userId = req.params.id;
@@ -191,6 +216,10 @@ const updateUserRole = async (req, res) => {
  * @access  Private (admin uniquement)
  */
 const findUserByUsername = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const { username } = req.params;
     
@@ -224,6 +253,10 @@ const findUserByUsername = async (req, res) => {
  * @access  Private/Admin
  */
 const getAllUsers = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const users = await User.find({})
       .select('-password')
@@ -242,6 +275,10 @@ const getAllUsers = async (req, res) => {
  * @access  Private/Admin
  */
 const deleteUser = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const userId = req.params.id;
     
@@ -285,6 +322,10 @@ const deleteUser = async (req, res) => {
  * @access  Private/Admin
  */
 const updateUsername = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const { username } = req.body;
     const userId = req.params.id;

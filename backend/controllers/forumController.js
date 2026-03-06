@@ -1,5 +1,10 @@
 const Topic = require('../models/Topic');
 const Discussion = require('../models/Discussion');
+const {
+  DATABASE_UNAVAILABLE_MESSAGE,
+  ensureDatabaseAvailable,
+  respondWithDatabaseFallback,
+} = require('../utils/database');
 const { uploadToCloudinary } = require('../utils/cloudinary');
 const { sanitizeDiscussionResponse, sanitizeTopicResponse } = require('../utils/html');
 const { isAdminRole } = require('../utils/roles');
@@ -23,6 +28,10 @@ const parseTags = (tags) => {
 // @route   POST /api/forum/topics
 // @access  Private
 const createTopic = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const { title, content, category, tags } = req.body;
 
@@ -77,6 +86,20 @@ const getTopics = async (req, res) => {
     const category = req.query.category;
     const search = req.query.search;
 
+    if (respondWithDatabaseFallback(res, {
+      topics: [],
+      pagination: {
+        page,
+        limit,
+        total: 0,
+        pages: 0,
+      },
+      unavailable: true,
+      message: DATABASE_UNAVAILABLE_MESSAGE,
+    })) {
+      return;
+    }
+
     const query = {};
 
     if (category && category !== 'all') {
@@ -122,6 +145,10 @@ const getTopics = async (req, res) => {
 // @route   GET /api/forum/topics/:id
 // @access  Public
 const getTopicById = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const topic = await Topic.findById(req.params.id)
       .populate('user', 'username')
@@ -151,6 +178,10 @@ const getTopicById = async (req, res) => {
 // @route   PUT /api/forum/topics/:id
 // @access  Private
 const updateTopic = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const { title, content, category, tags, isSticky, isClosed } = req.body;
 
@@ -201,6 +232,10 @@ const updateTopic = async (req, res) => {
 // @route   DELETE /api/forum/topics/:id
 // @access  Private
 const deleteTopic = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const topic = await Topic.findById(req.params.id);
 
@@ -226,6 +261,10 @@ const deleteTopic = async (req, res) => {
 // @route   POST /api/forum/topics/:id/like
 // @access  Private
 const likeTopic = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const topic = await Topic.findById(req.params.id);
 
@@ -261,6 +300,10 @@ const likeTopic = async (req, res) => {
 // @route   POST /api/forum/topics/:id/discussions
 // @access  Private
 const createDiscussion = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const { content, parentDiscussionId } = req.body;
     const topicId = req.params.id;
@@ -342,6 +385,21 @@ const getDiscussions = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
 
+    if (respondWithDatabaseFallback(res, {
+      discussions: [],
+      pagination: {
+        page,
+        limit,
+        total: 0,
+        pages: 0,
+      },
+      unavailable: true,
+      message: DATABASE_UNAVAILABLE_MESSAGE,
+      topicId,
+    })) {
+      return;
+    }
+
     const topic = await Topic.findById(topicId);
 
     if (!topic) {
@@ -388,6 +446,10 @@ const getDiscussions = async (req, res) => {
 // @route   PUT /api/forum/discussions/:id
 // @access  Private
 const updateDiscussion = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const { content } = req.body;
 
@@ -422,6 +484,10 @@ const updateDiscussion = async (req, res) => {
 // @route   DELETE /api/forum/discussions/:id
 // @access  Private
 const deleteDiscussion = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const discussion = await Discussion.findById(req.params.id);
 
@@ -455,6 +521,10 @@ const deleteDiscussion = async (req, res) => {
 // @route   POST /api/forum/discussions/:id/like
 // @access  Private
 const likeDiscussion = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const discussion = await Discussion.findById(req.params.id);
 

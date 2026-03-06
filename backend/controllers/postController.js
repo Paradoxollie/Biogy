@@ -1,11 +1,19 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
+const {
+  ensureDatabaseAvailable,
+  respondWithDatabaseFallback,
+} = require('../utils/database');
 
 // @desc    Créer un nouveau post (upload fichier + sauvegarde DB)
 // @route   POST /api/posts
 // @access  Private (utilisateurs connectés)
 const createPost = async (req, res, next) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   const { caption } = req.body;
   const file = req.file; // Fichier uploadé par Multer
 
@@ -64,6 +72,10 @@ const createPost = async (req, res, next) => {
 // @route   GET /api/posts
 // @access  Public
 const getApprovedPosts = async (req, res, next) => {
+  if (respondWithDatabaseFallback(res, [], 200)) {
+    return;
+  }
+
   try {
     // Récupérer les posts avec statut 'approved', triés par date de création décroissante
     // et peupler les informations de l'utilisateur (username seulement)
@@ -86,6 +98,10 @@ const getApprovedPosts = async (req, res, next) => {
 // @route   POST /api/posts/:id/like
 // @access  Private
 const likePost = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const post = await Post.findById(req.params.id);
     
@@ -124,6 +140,10 @@ const likePost = async (req, res) => {
 // @route   POST /api/posts/:id/comment
 // @access  Private
 const commentPost = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const { text } = req.body;
     
@@ -167,6 +187,10 @@ const commentPost = async (req, res) => {
 // @route   DELETE /api/posts/:id
 // @access  Private
 const deletePost = async (req, res, next) => {
+    if (!ensureDatabaseAvailable(res)) {
+        return;
+    }
+
     try {
         const post = await Post.findById(req.params.id);
 
@@ -203,6 +227,10 @@ const deletePost = async (req, res, next) => {
 // @route   DELETE /api/posts/:id/comments/:commentId
 // @access  Private (admin uniquement)
 const deleteComment = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const { id, commentId } = req.params;
     
@@ -256,4 +284,4 @@ const deleteComment = async (req, res) => {
   }
 };
 
-module.exports = { createPost, getApprovedPosts, likePost, commentPost, deletePost, deleteComment }; 
+module.exports = { createPost, getApprovedPosts, likePost, commentPost, deletePost, deleteComment };

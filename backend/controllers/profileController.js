@@ -1,5 +1,6 @@
 const Profile = require('../models/Profile');
 const User = require('../models/User');
+const { ensureDatabaseAvailable } = require('../utils/database');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
 const { isAdminRole } = require('../utils/roles');
 
@@ -27,6 +28,10 @@ const extractCloudinaryPublicId = (url = '') => {
 // @route   PUT /api/social/profile
 // @access  Private
 const updateProfile = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const {
       displayName,
@@ -101,6 +106,10 @@ const updateProfile = async (req, res) => {
 // @route   POST /api/social/profile/avatar
 // @access  Private
 const uploadAvatar = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'Aucun fichier fourni' });
@@ -157,6 +166,10 @@ const uploadAvatar = async (req, res) => {
 // @route   GET /api/social/profile
 // @access  Private
 const getMyProfile = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const profile = await Profile.findOne({ user: req.user._id })
       .populate('user', 'username role');
@@ -177,6 +190,10 @@ const getMyProfile = async (req, res) => {
 // @route   GET /api/social/profile/:userId
 // @access  Public
 const getProfileByUserId = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const profile = await Profile.findOne({ user: req.params.userId })
       .populate('user', 'username role');
@@ -203,6 +220,10 @@ const getProfileByUserId = async (req, res) => {
 // @route   POST /api/social/profile/:userId/follow
 // @access  Private
 const followUser = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     if (req.params.userId === req.user._id.toString()) {
       return res.status(400).json({ message: 'Vous ne pouvez pas vous suivre vous meme' });
@@ -259,6 +280,10 @@ const followUser = async (req, res) => {
 // @route   GET /api/social/profile/following
 // @access  Private
 const getFollowing = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const profile = await Profile.findOne({ user: req.user._id })
       .populate('following', 'username');
@@ -278,6 +303,10 @@ const getFollowing = async (req, res) => {
 // @route   GET /api/social/profile/followers
 // @access  Private
 const getFollowers = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     const profile = await Profile.findOne({ user: req.user._id })
       .populate('followers', 'username');

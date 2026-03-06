@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const { ensureDatabaseAvailable } = require('../utils/database');
 const { DEFAULT_USER_ROLE, normalizeUserRole } = require('../utils/roles');
 
 const buildAuthResponse = (user) => {
@@ -18,6 +19,10 @@ const buildAuthResponse = (user) => {
 // @access  Public
 const registerUser = async (req, res) => {
   const { username, password } = req.body;
+
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
 
   if (!username || !password) {
     return res.status(400).json({ message: 'Champs manquants' });
@@ -52,6 +57,10 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   if (!username || !password) {
     return res.status(400).json({ message: 'Champs manquants' });
   }
@@ -78,6 +87,10 @@ const loginUser = async (req, res) => {
 // @route   GET /api/auth/profile
 // @access  Private
 const getUserProfile = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
   try {
     if (!req.user) {
       return res.status(404).json({ message: 'Utilisateur non trouve' });
