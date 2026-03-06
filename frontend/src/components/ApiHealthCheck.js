@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_URL } from '../config';
+import { BROWSER_API_URL } from '../config';
 
 function ApiHealthCheck() {
   const [status, setStatus] = useState('checking');
@@ -9,7 +9,7 @@ function ApiHealthCheck() {
   useEffect(() => {
     const checkApiHealth = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/health`);
+        const response = await fetch(`${BROWSER_API_URL}/health`);
 
         if (!response.ok) {
           throw new Error(`API responded with status: ${response.status}`);

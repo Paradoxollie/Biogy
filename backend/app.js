@@ -55,10 +55,15 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/api/health', (_, res) => {
+  const databaseStatus = isDatabaseReady() ? 'connected' : 'connecting';
+
   res.json({
     status: 'ok',
     service: 'biogy-backend',
-    database: isDatabaseReady() ? 'connected' : 'connecting',
+    database: databaseStatus,
+    message: databaseStatus === 'connected'
+      ? 'Service operationnel'
+      : 'Base de donnees indisponible. Le service redemarre ou la configuration de production doit etre corrigee.',
     timestamp: new Date().toISOString(),
   });
 });

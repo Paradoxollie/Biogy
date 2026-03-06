@@ -31,7 +31,7 @@ function RegisterPage() {
     try {
       const apiUrl = BROWSER_API_URL;
       
-      const response = await fetch(`${apiUrl}/api/auth/register`, {
+      const response = await fetch(`${apiUrl}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

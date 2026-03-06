@@ -20,7 +20,7 @@ function LoginPage() {
       const apiUrl = BROWSER_API_URL;
       console.log('Envoi de la demande de connexion à:', `${apiUrl}/api/auth/login`);
       
-      const response = await fetch(`${apiUrl}/api/auth/login`, {
+      const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

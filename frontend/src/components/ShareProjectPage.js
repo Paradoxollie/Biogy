@@ -114,7 +114,7 @@ function ShareProjectPage() {
 
     try {
       const apiUrl = BROWSER_API_URL;
-      const postUrl = `${apiUrl}/api/posts`;
+      const postUrl = `${apiUrl}/posts`;
       
       console.log('Envoi de la requête d\'upload à:', postUrl);
       

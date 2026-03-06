@@ -125,7 +125,7 @@ const UserManagement = ({ userInfo }) => {
     setError('');
     
     try {
-      const response = await fetch(`${apiUrl}/api/admin/users`, {
+      const response = await fetch(`${apiUrl}/admin/users`, {
         headers: {
           'Authorization': `Bearer ${userInfo.token}`
         }
@@ -157,7 +157,7 @@ const UserManagement = ({ userInfo }) => {
     setSuccess('');
     
     try {
-      const response = await fetch(`${apiUrl}/api/admin/users/${userId}/role`, {
+      const response = await fetch(`${apiUrl}/admin/users/${userId}/role`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${userInfo.token}`,
@@ -199,7 +199,7 @@ const UserManagement = ({ userInfo }) => {
     setSuccess('');
     
     try {
-      const response = await fetch(`${apiUrl}/api/admin/users/${userId}/username`, {
+      const response = await fetch(`${apiUrl}/admin/users/${userId}/username`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${userInfo.token}`,
@@ -241,7 +241,7 @@ const UserManagement = ({ userInfo }) => {
     setSuccess('');
     
     try {
-      const response = await fetch(`${apiUrl}/api/admin/users/${userId}`, {
+      const response = await fetch(`${apiUrl}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${userInfo.token}`
@@ -439,7 +439,7 @@ function AdminPage() {
     
     try {
       const apiUrl = BROWSER_API_URL;
-      const response = await fetch(`${apiUrl}/api/admin/posts/pending`, {
+      const response = await fetch(`${apiUrl}/admin/posts/pending`, {
         headers: {
           'Authorization': `Bearer ${userInfo.token}`
         }
@@ -467,7 +467,7 @@ function AdminPage() {
     
     try {
       const apiUrl = BROWSER_API_URL;
-      const response = await fetch(`${apiUrl}/api/admin/posts/${postId}/approve`, {
+      const response = await fetch(`${apiUrl}/admin/posts/${postId}/approve`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${userInfo.token}`,
@@ -498,7 +498,7 @@ function AdminPage() {
     
     try {
       const apiUrl = BROWSER_API_URL;
-      const response = await fetch(`${apiUrl}/api/admin/posts/${postId}/reject`, {
+      const response = await fetch(`${apiUrl}/admin/posts/${postId}/reject`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${userInfo.token}`,
@@ -529,7 +529,7 @@ function AdminPage() {
     
     try {
       const apiUrl = BROWSER_API_URL;
-      const response = await fetch(`${apiUrl}/api/admin/posts/${postId}`, {
+      const response = await fetch(`${apiUrl}/admin/posts/${postId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${userInfo.token}`

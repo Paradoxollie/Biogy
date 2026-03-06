@@ -13,12 +13,14 @@ import TopicPage from './components/TopicPage';
 import NewTopicPage from './components/NewTopicPage';
 import ProfilePage from './components/ProfilePage';
 import ProfileEditPage from './components/ProfileEditPage';
+import SystemStatusBanner from './components/SystemStatusBanner';
 import AuthDebug from './context/AuthDebug';
 
 function App() {
   return (
     <>
-      <AuthDebug />
+      {process.env.NODE_ENV !== 'production' ? <AuthDebug /> : null}
+      <SystemStatusBanner />
       <Layout>
         <Routes>
           <Route path="/" element={<Homepage />} />

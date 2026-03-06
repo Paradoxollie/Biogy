@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
+import { BROWSER_API_URL } from '../config';
 
 function ForumPage() {
   const [topics, setTopics] = useState([]);
@@ -37,7 +37,7 @@ function ForumPage() {
         setLoading(true);
 
         // Construire l'URL avec les paramètres
-        let url = `${API_URL}/api/forum/topics?page=${pagination.page}&limit=${pagination.limit}`;
+        let url = `${BROWSER_API_URL}/forum/topics?page=${pagination.page}&limit=${pagination.limit}`;
 
         if (category !== 'all') {
           url += `&category=${category}`;

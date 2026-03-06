@@ -19,7 +19,7 @@ function ProjectsGallery() {
   const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${apiUrl}/api/posts`);
+      const response = await fetch(`${apiUrl}/posts`);
       const data = await response.json();
 
       if (!response.ok) {
@@ -51,7 +51,7 @@ function ProjectsGallery() {
 
     try {
       setLikeLoading(projectId);
-      const response = await fetch(`${apiUrl}/api/posts/${projectId}/like`, {
+      const response = await fetch(`${apiUrl}/posts/${projectId}/like`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ function ProjectsGallery() {
 
     try {
       setCommentLoading(true);
-      const response = await fetch(`${apiUrl}/api/posts/${projectId}/comment`, {
+      const response = await fetch(`${apiUrl}/posts/${projectId}/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ function ProjectsGallery() {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) return;
 
     try {
-      const response = await fetch(`${apiUrl}/api/posts/${projectId}`, {
+      const response = await fetch(`${apiUrl}/posts/${projectId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -163,10 +163,10 @@ function ProjectsGallery() {
 
     try {
       console.log('Tentative de suppression du commentaire:', { projectId, commentId });
-      console.log('URL:', `${apiUrl}/api/posts/${projectId}/comments/${commentId}`);
+      console.log('URL:', `${apiUrl}/posts/${projectId}/comments/${commentId}`);
       console.log('Token:', userInfo.token.substring(0, 10) + '...');
 
-      const response = await fetch(`${apiUrl}/api/posts/${projectId}/comments/${commentId}`, {
+      const response = await fetch(`${apiUrl}/posts/${projectId}/comments/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

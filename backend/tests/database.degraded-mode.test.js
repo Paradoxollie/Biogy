@@ -16,6 +16,7 @@ test('public posts endpoint falls back to an empty list when the database is una
     .get('/api/posts')
     .expect(200);
 
+  assert.equal(response.headers['x-biogy-database-unavailable'], '1');
   assert.deepEqual(response.body, []);
 });
 
@@ -24,6 +25,7 @@ test('public forum topics endpoint falls back to an empty payload when the datab
     .get('/api/forum/topics?page=2&limit=5')
     .expect(200);
 
+  assert.equal(response.headers['x-biogy-database-unavailable'], '1');
   assert.deepEqual(response.body, {
     topics: [],
     pagination: {
@@ -46,5 +48,6 @@ test('login fails fast with a 503 when the database is unavailable', async () =>
     })
     .expect(503);
 
+  assert.equal(response.headers['x-biogy-database-unavailable'], '1');
   assert.equal(response.body.code, 'DATABASE_UNAVAILABLE');
 });

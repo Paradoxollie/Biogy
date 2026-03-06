@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
+import { BROWSER_API_URL } from '../config';
 
 function TopicPage() {
   const { id } = useParams();
@@ -37,7 +37,7 @@ function TopicPage() {
         setLoading(true);
 
         // Récupérer le sujet
-        const topicResponse = await fetch(`${API_URL}/api/forum/topics/${id}`);
+        const topicResponse = await fetch(`${BROWSER_API_URL}/forum/topics/${id}`);
 
         if (!topicResponse.ok) {
           throw new Error('Erreur lors de la récupération du sujet');
@@ -47,7 +47,7 @@ function TopicPage() {
         setTopic(topicData);
 
         // Récupérer les discussions
-        const discussionsResponse = await fetch(`${API_URL}/api/forum/topics/${id}/discussions`);
+        const discussionsResponse = await fetch(`${BROWSER_API_URL}/forum/topics/${id}/discussions`);
 
         if (!discussionsResponse.ok) {
           throw new Error('Erreur lors de la récupération des discussions');
@@ -134,7 +134,7 @@ function TopicPage() {
         formData.append('images', file);
       });
 
-      const response = await fetch(`${API_URL}/api/forum/topics/${id}/discussions`, {
+      const response = await fetch(`${BROWSER_API_URL}/forum/topics/${id}/discussions`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${userInfo.token}`
@@ -152,7 +152,7 @@ function TopicPage() {
       setImagePreview([]);
 
       // Recharger les discussions
-      const discussionsResponse = await fetch(`${API_URL}/api/forum/topics/${id}/discussions`);
+      const discussionsResponse = await fetch(`${BROWSER_API_URL}/forum/topics/${id}/discussions`);
       const discussionsData = await discussionsResponse.json();
       setDiscussions(discussionsData.discussions);
 
@@ -186,7 +186,7 @@ function TopicPage() {
     try {
       setSubmitting(true);
 
-      const response = await fetch(`${API_URL}/api/forum/discussions/${discussionId}`, {
+      const response = await fetch(`${BROWSER_API_URL}/forum/discussions/${discussionId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -241,7 +241,7 @@ function TopicPage() {
     try {
       setSubmitting(true);
 
-      const response = await fetch(`${API_URL}/api/forum/discussions/${discussionId}`, {
+      const response = await fetch(`${BROWSER_API_URL}/forum/discussions/${discussionId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${userInfo.token}`
@@ -290,7 +290,7 @@ function TopicPage() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/forum/discussions/${discussionId}/like`, {
+      const response = await fetch(`${BROWSER_API_URL}/forum/discussions/${discussionId}/like`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${userInfo.token}`
@@ -336,7 +336,7 @@ function TopicPage() {
     try {
       setSubmitting(true);
 
-      const response = await fetch(`${API_URL}/api/forum/topics/${id}`, {
+      const response = await fetch(`${BROWSER_API_URL}/forum/topics/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${userInfo.token}`

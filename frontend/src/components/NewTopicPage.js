@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
+import { BROWSER_API_URL } from '../config';
 
 function NewTopicPage() {
   const [title, setTitle] = useState('');
@@ -49,7 +49,7 @@ function NewTopicPage() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${API_URL}/api/forum/topics`, {
+      const response = await fetch(`${BROWSER_API_URL}/forum/topics`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

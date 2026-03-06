@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "node --test tests/auth.security.test.js tests/forum.sanitization.test.js tests/social.routes.test.js tests/database.degraded-mode.test.js"
+    "test": "node --test --test-concurrency=1 tests/auth.security.test.js tests/forum.sanitization.test.js tests/social.routes.test.js tests/database.degraded-mode.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
