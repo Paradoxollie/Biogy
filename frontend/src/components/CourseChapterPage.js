@@ -64,10 +64,48 @@ function CellComparisonDiagram() {
   );
 }
 
+function BiotechDomainsDiagram() {
+  return (
+    <svg viewBox="0 0 480 300" className="w-full" role="img" aria-label="Les cinq domaines des biotechnologies">
+      <ellipse cx="240" cy="150" rx="90" ry="52" fill="#e0f2fe" stroke="#0ea5e9" strokeWidth="3" />
+      <text x="188" y="140" fontSize="20" fontWeight="bold" fill="#0f172a">Biotechnologies</text>
+      <text x="176" y="166" fontSize="12" fill="#334155">utiliser le vivant pour</text>
+      <text x="184" y="184" fontSize="12" fill="#334155">produire un bien ou un service</text>
+
+      <ellipse cx="108" cy="76" rx="74" ry="42" fill="#fff1f2" stroke="#ef4444" strokeWidth="3" />
+      <text x="78" y="72" fontSize="15" fontWeight="bold" fill="#991b1b">Rouges</text>
+      <text x="52" y="94" fontSize="12" fill="#7f1d1d">sante et diagnostic</text>
+
+      <ellipse cx="370" cy="68" rx="74" ry="42" fill="#fefce8" stroke="#eab308" strokeWidth="3" />
+      <text x="340" y="64" fontSize="15" fontWeight="bold" fill="#854d0e">Jaunes</text>
+      <text x="316" y="86" fontSize="12" fill="#713f12">environnement</text>
+
+      <ellipse cx="402" cy="210" rx="74" ry="42" fill="#f0fdf4" stroke="#65a30d" strokeWidth="3" />
+      <text x="372" y="206" fontSize="15" fontWeight="bold" fill="#3f6212">Vertes</text>
+      <text x="346" y="228" fontSize="12" fill="#365314">agriculture</text>
+
+      <ellipse cx="114" cy="220" rx="74" ry="42" fill="#eff6ff" stroke="#2563eb" strokeWidth="3" />
+      <text x="84" y="216" fontSize="15" fontWeight="bold" fill="#1d4ed8">Bleues</text>
+      <text x="64" y="238" fontSize="12" fill="#1e3a8a">milieux marins</text>
+
+      <ellipse cx="246" cy="258" rx="74" ry="32" fill="#f8fafc" stroke="#0f172a" strokeWidth="3" />
+      <text x="212" y="255" fontSize="15" fontWeight="bold" fill="#111827">Blanches</text>
+      <text x="206" y="274" fontSize="12" fill="#374151">industrie</text>
+
+      <line x1="172" y1="124" x2="144" y2="102" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="304" y1="120" x2="332" y2="96" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="320" y1="186" x2="348" y2="198" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="160" y1="190" x2="144" y2="200" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="240" y1="202" x2="240" y2="226" stroke="#94a3b8" strokeWidth="2" />
+    </svg>
+  );
+}
+
 function DiagramCard({ diagram }) {
   const diagrams = {
     microscope: <MicroscopeDiagram />,
     cells: <CellComparisonDiagram />,
+    domains: <BiotechDomainsDiagram />,
   };
 
   if (!diagrams[diagram.id]) {
@@ -178,6 +216,37 @@ function ChapterContent({ chapter, style }) {
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
+
+            {section.cards?.length ? (
+              <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {section.cards.map((card) => (
+                  <article
+                    key={card.title}
+                    className={`rounded-2xl border px-4 py-4 shadow-sm ${
+                      card.tone || 'border-gray-200 bg-gray-50'
+                    }`}
+                  >
+                    <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
+                      {card.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-gray-700">{card.text}</p>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+
+            {section.questions?.length ? (
+              <div className="mt-5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
+                  Questions
+                </h3>
+                <ul className="mt-3 space-y-2 text-sm leading-6 text-gray-700">
+                  {section.questions.map((question) => (
+                    <li key={question}>{question}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </article>
         ))}
       </section>

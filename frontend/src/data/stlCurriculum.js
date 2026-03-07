@@ -63,172 +63,229 @@ export const COURSE_REFERENCES = [
 
 const PREMIERE_BT1_CONTENT = {
   intro:
-    'En premiere STL, on apprend tres vite qu un resultat scientifique ne commence pas par une conclusion, mais par une observation rigoureuse. Ce premier chapitre t apprend a utiliser le microscope optique avec methode, a reconnaitre quelques organisations cellulaires simples et a produire une trace de travail exploitable en classe comme en TP.',
-  prerequisites: [
-    'Savoir qu une cellule est l unite de base du vivant.',
-    'Comprendre qu une observation scientifique doit rester fidele a ce qui est visible.',
-    'Connaitre les regles elementaires de soin du materiel de laboratoire.',
-  ],
+    'Dans ce premier chapitre, tu decouvres ce que recouvre le mot biotechnologies, les cinq grands domaines officiellement utilises en STL et les questions que ces applications peuvent poser dans la societe. L objectif n est pas de tout memoriser d un coup, mais de comprendre le cadre general de la specialite.',
   objectives: [
-    'Regler un microscope optique avec methode.',
-    'Identifier de grands indices d organisation cellulaire.',
-    'Distinguer observation, description et interpretation.',
-    'Produire un schema scientifique simple, propre et juste.',
+    'Definir les biotechnologies avec des mots simples et justes.',
+    'Identifier les cinq grands domaines des biotechnologies.',
+    'Relier une application a son domaine.',
+    'Commencer a reflechir aux enjeux et aux limites de ces techniques.',
   ],
   vocabulary: [
     {
-      term: 'Cellule',
+      term: 'Biotechnologies',
       definition:
-        'Plus petite unite structurale du vivant capable de realiser les fonctions essentielles de la vie.',
+        'Ensemble de techniques qui utilisent le vivant, ou des elements du vivant, pour produire un bien, un service ou une solution utile a l etre humain.',
     },
     {
-      term: 'Procaryote',
+      term: 'Application',
       definition:
-        'Cellule sans noyau individualise. Le materiel genetique n est pas contenu dans un noyau visible.',
+        'Usage concret d une connaissance ou d une technique dans un domaine donne.',
     },
     {
-      term: 'Eucaryote',
+      term: 'Fermentation',
       definition:
-        'Cellule possedant un noyau et plusieurs compartiments internes appeles organites.',
+        'Transformation biologique realisee par des micro-organismes, utilisee depuis tres longtemps pour fabriquer certains aliments ou boissons.',
     },
     {
-      term: 'Grossissement',
+      term: 'Micro-organisme',
       definition:
-        'Rapport entre la taille apparente de l image observee et la taille reelle de l objet.',
+        'Etre vivant microscopique, par exemple une bacterie ou une levure, souvent utilise en biotechnologies.',
     },
     {
-      term: 'Observation',
+      term: 'Ethique',
       definition:
-        'Description de ce qui est reellement visible, sans ajouter d hypothese non verifiee.',
+        'Reflexion sur ce qu il est juste, responsable ou acceptable de faire.',
     },
     {
-      term: 'Interpretation',
+      term: 'Domaine',
       definition:
-        'Explication proposee a partir des observations, des connaissances du cours et du contexte experimental.',
+        'Grand secteur d application dans lequel on classe les biotechnologies.',
     },
   ],
   diagrams: [
     {
-      id: 'microscope',
-      title: 'Schema 1 - Les reperes utiles sur le microscope',
+      id: 'domains',
+      title: 'Schema 1 - Les cinq domaines des biotechnologies',
       caption:
-        'Avant de commencer, il faut savoir nommer les parties principales du microscope et comprendre leur fonction.',
-    },
-    {
-      id: 'cells',
-      title: 'Schema 2 - Procaryote et eucaryote',
-      caption:
-        'Le microscope aide a distinguer de grandes organisations cellulaires, mais il faut rester prudent et s appuyer sur des indices visibles.',
+        'En STL, on distingue cinq grandes familles de biotechnologies. Elles sont souvent reperees par une couleur.',
     },
   ],
   sections: [
     {
-      title: '1. Pourquoi ce chapitre est important en STL',
+      title: '1. Decouvrir ce que sont les biotechnologies',
       body: [
-        'En STL, une grande partie du travail experimental commence par l observation. On ne peut pas analyser correctement un echantillon si l on n a pas d abord pris le temps de le regarder avec rigueur.',
-        'Le microscope permet d acceder a un niveau d organisation invisible a l oeil nu. Il sert a observer des cellules, des tissus, des levures, des bacteries ou encore certains details d un echantillon biologique.',
-        'Ce chapitre construit donc une methode generale : regarder, decrire avec precision, puis seulement interpreter. Cette logique sera utile toute l annee.',
+        'Les biotechnologies ne sont pas seulement un ensemble de techniques modernes. Elles existent depuis longtemps, par exemple avec la fabrication du pain, du fromage ou de certaines boissons grace a des fermentations.',
+        'Aujourd hui, elles mobilisent des connaissances en biologie, microbiologie, biochimie, genetique et biologie moleculaire pour repondre a des besoins dans la sante, l environnement, l industrie ou l agriculture.',
+        'Dans ce chapitre, tu dois d abord comprendre l idee generale avant d entrer plus tard dans les techniques de laboratoire.',
+      ],
+      questions: [
+        'Avec tes mots, propose une premiere definition des biotechnologies.',
+        'Pourquoi peut-on dire que les biotechnologies ne sont pas seulement une science recente ?',
+        'Quels besoins humains peuvent etre pris en charge par les biotechnologies ?',
       ],
     },
     {
-      title: '2. Ce que l on cherche quand on observe',
+      title: '2. Les disciplines mobilisees en biotechnologies',
       body: [
-        'Observer au microscope ne signifie pas reconnaitre immediatement la nature exacte d un echantillon. La premiere etape consiste a relever des indices fiables : forme generale, taille relative, presence ou absence d un noyau visible, organisation isolee ou en groupe, coloration eventuelle, contours plus ou moins nets.',
-        'Ces indices permettent ensuite d orienter une interpretation. Par exemple, la presence d un noyau visible est un argument en faveur d une cellule eucaryote. A l inverse, l absence de noyau visible peut orienter vers une organisation procaryote, mais cela doit rester prudent si les conditions d observation sont mediocres.',
-        'Une bonne observation repose donc sur un vocabulaire simple et juste. Il vaut mieux decrire peu, mais correctement, que conclure trop vite.',
+        'Les biotechnologies ne reposent pas sur une seule discipline. Elles croisent plusieurs champs scientifiques qui se completent.',
+        'C est pour cela qu en STL tu travailles a la fois des notions de biologie, de biochimie, de microbiologie, de genetique et d outils numeriques.',
+      ],
+      cards: [
+        {
+          title: 'Biologie',
+          text: 'Etude du vivant, de son organisation et de son fonctionnement.',
+        },
+        {
+          title: 'Microbiologie',
+          text: 'Etude des micro-organismes comme les bacteries, les levures ou certains champignons.',
+        },
+        {
+          title: 'Biochimie',
+          text: 'Etude des molecules du vivant et des reactions chimiques qui les concernent.',
+        },
+        {
+          title: 'Genetique',
+          text: 'Etude de l heredite, des genes et de la transmission des caracteres.',
+        },
+        {
+          title: 'Biologie moleculaire',
+          text: 'Etude de l ADN, de l ARN et des mecanismes moleculaires de la cellule.',
+        },
+        {
+          title: 'Bioinformatique',
+          text: 'Utilisation des outils numeriques pour traiter et exploiter des donnees biologiques.',
+        },
+      ],
+      questions: [
+        'Pourquoi les biotechnologies font-elles appel a plusieurs disciplines a la fois ?',
+        'Quelle difference fais-tu entre genetique et biologie moleculaire ?',
       ],
     },
     {
-      title: '3. Les regles de base pour utiliser un microscope',
+      title: '3. Les cinq domaines d application',
       body: [
-        'Le microscope optique doit etre manipule avec soin. On le transporte a deux mains, on place la lame correctement sur la platine et on verifie toujours l objectif engage avant de commencer.',
-        'L observation debute au plus faible grossissement. Cette etape est essentielle, car le champ observe est plus large et la mise au point est plus facile. C est a ce moment-la que l on repere l echantillon.',
-        'On utilise d abord la vis macrometrique pour approcher la nettete, puis la vis micrometrique pour l affiner. Il faut avancer lentement afin d eviter tout contact entre l objectif et la lame.',
-        'La lumiere, le diaphragme et le contraste doivent aussi etre ajustes. Une image mediocre ne signifie pas toujours que l echantillon est mauvais. Tres souvent, le probleme vient d un reglage insuffisant.',
+        'Pour mieux les classer, on regroupe souvent les biotechnologies en cinq domaines, chacun associe a une couleur. Cette classification est tres utile en STL parce qu elle permet de relier rapidement une technique a son grand secteur d application.',
+        'Il faut connaitre cette classification, mais aussi comprendre que certaines applications peuvent mobiliser plusieurs domaines en meme temps.',
+      ],
+      cards: [
+        {
+          title: 'Rouges',
+          text: 'Sante humaine et animale, diagnostic, therapie, production de medicaments.',
+          tone: 'border-red-200 bg-red-50',
+        },
+        {
+          title: 'Bleues',
+          text: 'Milieux marins, ressources aquatiques, aquaculture, molecules d interet issues de la mer.',
+          tone: 'border-blue-200 bg-blue-50',
+        },
+        {
+          title: 'Vertes',
+          text: 'Agriculture, production vegetale, alimentation humaine et animale, amelioration des cultures.',
+          tone: 'border-green-200 bg-green-50',
+        },
+        {
+          title: 'Jaunes',
+          text: 'Environnement, traitement des pollutions, valorisation et elimination de dechets.',
+          tone: 'border-amber-200 bg-amber-50',
+        },
+        {
+          title: 'Blanches',
+          text: 'Industrie, production de molecules ou de materiaux a l aide de systemes biologiques.',
+          tone: 'border-slate-300 bg-slate-50',
+        },
+      ],
+      questions: [
+        'Associe un exemple de ton choix a chacun des cinq domaines.',
+        'Pourquoi une application concrete peut-elle parfois relever de plusieurs domaines ?',
       ],
     },
     {
-      title: '4. Grossissement et qualite de l observation',
+      title: '4. Les enjeux et les limites',
       body: [
-        'Le grossissement total s obtient en multipliant le grossissement de l oculaire par celui de l objectif. Par exemple, avec un oculaire x10 et un objectif x40, le grossissement total est x400.',
-        'Augmenter le grossissement ne suffit pas a mieux observer. Plus le grossissement augmente, plus le champ diminue, plus la mise au point devient delicate et plus les reglages doivent etre precis.',
-        'En pratique, on ne change d objectif qu apres avoir obtenu une image nette au grossissement inferieur. C est une regle tres importante en TP.',
+        'Les biotechnologies apportent des solutions reelles: produire des medicaments, mieux detecter certaines maladies, depolluer, fabriquer autrement ou ameliorer des productions agricoles.',
+        'Mais elles soulevent aussi des questions. Il faut prendre en compte la securite, l impact sur l environnement, le cout, les usages possibles et les questions ethiques.',
+        'En STL, on n attend pas de toi une opinion rapide. On attend un raisonnement argumente, capable de peser des benefices et des limites.',
+      ],
+      questions: [
+        'Quels benefices concrets les biotechnologies peuvent-elles apporter a la societe ?',
+        'Quelles precautions faut-il prendre avant de generaliser une application biotech ?',
+        'Pourquoi les questions ethiques font-elles partie du chapitre ?',
       ],
     },
     {
-      title: '5. Observer, decrire, puis interpreter',
+      title: '5. Application - Analyser une entreprise ou un projet biotech',
       body: [
-        'La difference entre observation et interpretation est fondamentale. Dire "je vois des cellules allongees regroupees en chaines" est une observation. Dire "il s agit d une bacterie precise" est deja une interpretation.',
-        'L interpretation peut etre juste, mais elle doit venir apres. Elle repose sur plusieurs indices coherents, et parfois sur d autres techniques que le microscope seul.',
-        'Cette distinction est attendue dans les productions ecrites de STL. Elle montre que l eleve sait raisonner de facon scientifique et ne confond pas ce qu il voit avec ce qu il suppose.',
+        'Pour terminer le chapitre, il faut etre capable de lire un exemple concret et de montrer en quoi il releve des biotechnologies.',
+        'La bonne methode consiste a reperer le vivant utilise, l objectif du projet, le domaine concerne et les avantages ou limites possibles.',
       ],
-    },
-    {
-      title: '6. Faire un schema scientifique utile',
-      body: [
-        'Le schema d observation n est pas un dessin artistique. Son role est de conserver une trace claire, lisible et exploitable de ce qui a ete vu.',
-        'Un bon schema comporte un titre, un grossissement, des traits propres, des proportions globalement respectees et des legendes alignees. Les structures nommees doivent etre celles qui ont reellement ete observees.',
-        'Il ne faut pas ajouter un detail invisible pour "faire plus complet". En science, la justesse prime sur l esthetique.',
+      cards: [
+        {
+          title: 'Cas 1 - Sante',
+          text: 'Une equipe cherche a produire de nouvelles molecules antibiotiques a partir de micro-organismes peu etudies.',
+        },
+        {
+          title: 'Cas 2 - Environnement',
+          text: 'Un test biologique permet de detecter plus rapidement des pollutions dans l eau.',
+        },
+        {
+          title: 'Cas 3 - Industrie',
+          text: 'Des micro-organismes et des enzymes sont utilises pour transformer une biomasse vegetale en bioethanol.',
+        },
       ],
-    },
-    {
-      title: '7. Ce que tu dois etre capable de faire a la fin du chapitre',
-      body: [
-        'A la fin de ce chapitre, tu dois savoir preparer une observation simple, regler correctement le microscope, produire une description precise et transformer cette observation en schema scientifique simple.',
-        'Tu dois aussi etre capable d expliquer, a l oral comme a l ecrit, pourquoi une conclusion prudente vaut mieux qu une affirmation trop rapide.',
+      questions: [
+        'Quel est le domaine de chaque cas ?',
+        'Quel vivant, ou quelle propriete du vivant, est mobilise ?',
+        'Quel service est rendu a l etre humain ?',
       ],
     },
   ],
   method: {
-    title: 'Methode - Reussir une observation microscopique',
+    title: 'Methode - Analyser un document de biotechnologies',
     steps: [
-      'Verifier la proprete de la lame, de la lamelle et des lentilles.',
-      'Placer correctement la preparation sur la platine et la centrer.',
-      'Commencer avec le plus faible objectif.',
-      'Faire une mise au point progressive, sans brutalite.',
-      'Ajuster la lumiere avant de changer d objectif.',
-      'Noter ce qui est visible avant toute interpretation.',
-      'Realiser un schema simple avec titre, grossissement et legendes.',
+      'Identifier le probleme ou le besoin auquel on cherche a repondre.',
+      'Reperer quel etre vivant, ou quelle molecule du vivant, est utilise.',
+      'Nommer le domaine des biotechnologies concerne.',
+      'Relever le benefice attendu.',
+      'Chercher aussi les limites, risques ou questions ethiques possibles.',
+      'Conclure avec une phrase simple et argumentee.',
     ],
   },
   commonMistakes: [
-    'Passer trop vite a un fort grossissement sans avoir trouve la zone utile.',
-    'Confondre ce qui est observe et ce qui est suppose.',
-    'Forcer la mise au point et risquer de casser la preparation.',
-    'Ajouter sur le schema des structures qui n ont pas ete vues.',
-    'Oublier le titre, le grossissement ou les legendes.',
+    'Donner une couleur sans expliquer le domaine correspondant.',
+    'Confondre biotechnologies et simple innovation technique sans vivant.',
+    'Ne citer que les avantages sans discuter les limites.',
+    'Donner un exemple sans montrer pourquoi il releve des biotechnologies.',
   ],
   keyPoints: [
-    'Le microscope se regle toujours avec methode.',
-    'On commence au plus faible grossissement.',
-    'Observer n est pas interpreter.',
-    'Un schema scientifique doit rester fidele a ce qui a ete vu.',
-    'La rigueur d observation est une competence de base en STL.',
+    'Les biotechnologies utilisent le vivant ou des elements du vivant.',
+    'On distingue cinq grands domaines: rouge, bleu, vert, jaune et blanc.',
+    'Une application biotech doit etre reliee a un besoin humain concret.',
+    'Les biotechnologies ont des avantages, mais aussi des limites et des enjeux ethiques.',
   ],
   selfCheck: [
-    'Pourquoi commence-t-on toujours par le plus faible grossissement ?',
-    'Quelle difference fais-tu entre une observation et une interpretation ?',
-    'Quels indices peux-tu relever pour decrire une cellule observee ?',
-    'Pourquoi un schema d observation doit-il rester simple et exact ?',
+    'Peux-tu definir les biotechnologies en une phrase claire ?',
+    'Peux-tu citer les cinq domaines et donner un exemple pour chacun ?',
+    'Sais-tu expliquer pourquoi une fermentation est une biotechnologie ancienne ?',
+    'Sais-tu discuter un avantage et une limite d une application biotech ?',
   ],
   practice: [
     {
       question:
-        'Tu observes des cellules arrondies, parfois groupees, avec un noyau visible. Que peux-tu dire avec prudence ?',
+        'Une entreprise utilise des levures pour produire une molecule d interet pour la sante. Pourquoi s agit-il d une biotechnologie ?',
       expected:
-        'Tu peux dire que l observation est compatible avec une organisation eucaryote, car un noyau visible est observe. Tu decris d abord les indices avant d aller plus loin.',
+        'Parce qu elle utilise un etre vivant, ici la levure, pour produire un bien ou un service utile a l etre humain.',
     },
     {
       question:
-        'Un eleve passe directement a l objectif le plus puissant et ne voit presque rien. Quelle est la principale erreur ?',
+        'Un procede permet de depolluer de l eau grace a des bacteries. Quelle couleur peux-tu proposer en premier ?',
       expected:
-        'Il a saute l etape de reperage au faible grossissement. Il fallait d abord localiser correctement l echantillon puis affiner la mise au point progressivement.',
+        'On proposera d abord le domaine jaune, car il s agit d une application environnementale.',
     },
     {
       question:
-        'Sur son schema, une eleve ajoute une membrane interne non visible pour faire "comme dans le cours". Pourquoi ce choix est-il faux ?',
+        'Pourquoi ne suffit-il pas de dire qu une biotechnologie est "utile" pour conclure qu elle est acceptable ?',
       expected:
-        'Parce qu un schema d observation doit representer uniquement ce qui est reellement observe. Ajouter un detail invisible transforme l observation en schema theorique non annonce.',
+        'Parce qu il faut aussi prendre en compte les risques, les limites, le cout, l impact sur l environnement et les questions ethiques.',
     },
   ],
   sources: [
@@ -241,12 +298,8 @@ const PREMIERE_BT1_CONTENT = {
       url: 'https://pedagogie.ac-lyon.fr/biotechnologies/stl/',
     },
     {
-      title: 'Microscopie optique',
-      url: 'https://sti-biotechnologies-pedagogie.web.ac-grenoble.fr/content/microscopie-optique',
-    },
-    {
-      title: 'Le microscope photonique',
-      url: 'https://stl-bjb.ac-dijon.fr/spip.php?article185',
+      title: 'Biotechnologies 1re STL - manuel numerique eleve',
+      url: 'https://www.editions-delagrave.fr/site/302881',
     },
     {
       title: 'Accompagnement des techniques de biotechnologies',
@@ -340,13 +393,13 @@ const COURSE_LEVELS = [
           {
             id: 'bt1-microscopie',
             code: 'BT1',
-            title: 'Observer la diversite du vivant a l echelle microscopique',
+            title: 'Decouverte des biotechnologies',
             summary:
-              'Apprendre a observer, regler le microscope et decrire ce que l on voit avec precision.',
+              'Comprendre ce que sont les biotechnologies, leurs grands domaines et leurs enjeux.',
             skills: [
-              'utiliser le microscope optique',
-              'distinguer observation et interpretation',
-              'realiser un schema scientifique',
+              'definir les biotechnologies',
+              'reconnaitre les cinq domaines officiels',
+              'relier une application a son domaine',
             ],
             content: PREMIERE_BT1_CONTENT,
           },
