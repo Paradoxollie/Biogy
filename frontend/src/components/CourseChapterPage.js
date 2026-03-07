@@ -162,6 +162,150 @@ function DocumentCard({ document }) {
   );
 }
 
+function SupportList({ supports }) {
+  if (!supports?.length) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 space-y-3">
+      {supports.map((support) => (
+        <div key={`${support.label}-${support.detail || ''}`} className="rounded-2xl border border-gray-200 bg-white px-4 py-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Support</p>
+          {support.url ? (
+            <a
+              href={support.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex text-sm font-semibold text-lab-blue hover:underline"
+            >
+              {support.label}
+            </a>
+          ) : (
+            <p className="mt-2 text-sm font-semibold text-gray-800">{support.label}</p>
+          )}
+          {support.detail ? (
+            <p className="mt-2 text-sm leading-6 text-gray-600">{support.detail}</p>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function QuestionSetCard({ item, style }) {
+  return (
+    <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
+      <div className={`mb-4 h-1.5 w-14 rounded-full ${style.line}`} />
+      {item.tag ? (
+        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${style.badge}`}>
+          {item.tag}
+        </span>
+      ) : null}
+      <h3 className="mt-3 text-2xl font-bold text-gray-800">{item.title}</h3>
+      {item.intro ? (
+        <p className="mt-4 text-[15px] leading-8 text-gray-700">{item.intro}</p>
+      ) : null}
+
+      <SupportList supports={item.supports} />
+
+      {item.documents?.length ? (
+        <div
+          className={`mt-5 grid gap-4 ${
+            item.documents.length > 2
+              ? 'md:grid-cols-2 xl:grid-cols-3'
+              : item.documents.length > 1
+                ? 'xl:grid-cols-2'
+                : ''
+          }`}
+        >
+          {item.documents.map((document) => (
+            <DocumentCard key={`${item.title}-${document.title}`} document={document} />
+          ))}
+        </div>
+      ) : null}
+
+      {item.instruction ? (
+        <div className={`mt-5 rounded-2xl border p-4 ${style.note}`}>
+          <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">Consigne</h4>
+          <p className="mt-2 text-sm leading-6 text-gray-700">{item.instruction}</p>
+        </div>
+      ) : null}
+
+      {item.questions?.length ? (
+        <div className="mt-5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+          <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
+            {item.questionsTitle || 'Questions'}
+          </h4>
+          <ul className="mt-3 space-y-2 text-sm leading-6 text-gray-700">
+            {item.questions.map((question) => (
+              <li key={question}>{question}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function CourseSectionCard({ item, style }) {
+  return (
+    <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
+      <div className={`mb-4 h-1.5 w-14 rounded-full ${style.line}`} />
+      <h3 className="text-2xl font-bold text-gray-800">{item.title}</h3>
+
+      {item.body?.length ? (
+        <div className="mt-4 space-y-4 text-[15px] leading-8 text-gray-700">
+          {item.body.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
+      ) : null}
+
+      {item.documents?.length ? (
+        <div
+          className={`mt-5 grid gap-4 ${
+            item.documents.length > 2
+              ? 'md:grid-cols-2 xl:grid-cols-3'
+              : item.documents.length > 1
+                ? 'xl:grid-cols-2'
+                : ''
+          }`}
+        >
+          {item.documents.map((document) => (
+            <DocumentCard key={`${item.title}-${document.title}`} document={document} />
+          ))}
+        </div>
+      ) : null}
+
+      {item.cards?.length ? (
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {item.cards.map((card) => (
+            <article
+              key={card.title}
+              className={`rounded-2xl border px-4 py-4 shadow-sm ${
+                card.tone || 'border-gray-200 bg-gray-50'
+              }`}
+            >
+              <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">{card.title}</h4>
+              <p className="mt-2 text-sm leading-6 text-gray-700">{card.text}</p>
+            </article>
+          ))}
+        </div>
+      ) : null}
+
+      {item.takeaway ? (
+        <div className={`mt-5 rounded-2xl border p-4 ${style.note}`}>
+          <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
+            {item.takeawayTitle || 'A retenir'}
+          </h4>
+          <p className="mt-2 text-sm leading-6 text-gray-700">{item.takeaway}</p>
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
 function ChapterLessons({ level, chapter, activeLessonId, style }) {
   if (!chapter.lessons?.length) {
     return null;
@@ -294,6 +438,44 @@ function ChapterContent({ chapter, style }) {
         </section>
       ) : null}
 
+      {content.questionSets?.length ? (
+        <section className="mt-8">
+          <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800">
+              {content.questionSetsTitle || 'Questions et supports'}
+            </h2>
+            {content.questionSetsIntro ? (
+              <p className="mt-3 text-sm leading-7 text-gray-600">{content.questionSetsIntro}</p>
+            ) : null}
+          </div>
+
+          <div className="mt-5 space-y-5">
+            {content.questionSets.map((item) => (
+              <QuestionSetCard key={item.title} item={item} style={style} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {content.courseSections?.length ? (
+        <section className="mt-8">
+          <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800">
+              {content.courseSectionsTitle || 'Cours'}
+            </h2>
+            {content.courseSectionsIntro ? (
+              <p className="mt-3 text-sm leading-7 text-gray-600">{content.courseSectionsIntro}</p>
+            ) : null}
+          </div>
+
+          <div className="mt-5 space-y-5">
+            {content.courseSections.map((item) => (
+              <CourseSectionCard key={item.title} item={item} style={style} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {content.vocabulary?.length ? (
         <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
           <h2 className="text-2xl font-bold text-gray-800">Vocabulaire essentiel</h2>
@@ -316,106 +498,108 @@ function ChapterContent({ chapter, style }) {
         </section>
       ) : null}
 
-      <section className="mt-8 space-y-5">
-        {content.sections.map((section) => (
-          <article key={section.title} className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-            <div className={`mb-4 h-1.5 w-14 rounded-full ${style.line}`} />
-            {section.tag ? (
-              <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${style.badge}`}>
-                {section.tag}
-              </span>
-            ) : null}
-            <h2 className="text-2xl font-bold text-gray-800">{section.title}</h2>
+      {content.sections?.length ? (
+        <section className="mt-8 space-y-5">
+          {content.sections.map((section) => (
+            <article key={section.title} className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
+              <div className={`mb-4 h-1.5 w-14 rounded-full ${style.line}`} />
+              {section.tag ? (
+                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${style.badge}`}>
+                  {section.tag}
+                </span>
+              ) : null}
+              <h2 className="text-2xl font-bold text-gray-800">{section.title}</h2>
 
-            {section.supports?.length ? (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {section.supports.map((support) =>
-                  support.url ? (
-                    <a
-                      key={support.label}
-                      href={support.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600 transition hover:bg-white"
-                    >
-                      {support.label}
-                    </a>
-                  ) : (
-                    <span
-                      key={support.label}
-                      className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600"
-                    >
-                      {support.label}
-                    </span>
-                  ),
-                )}
-              </div>
-            ) : null}
+              {section.supports?.length ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {section.supports.map((support) =>
+                    support.url ? (
+                      <a
+                        key={support.label}
+                        href={support.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600 transition hover:bg-white"
+                      >
+                        {support.label}
+                      </a>
+                    ) : (
+                      <span
+                        key={support.label}
+                        className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600"
+                      >
+                        {support.label}
+                      </span>
+                    ),
+                  )}
+                </div>
+              ) : null}
 
-            <div className="mt-4 space-y-4 text-[15px] leading-8 text-gray-700">
-              {section.body.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
-
-            {section.documents?.length ? (
-              <div
-                className={`mt-5 grid gap-4 ${
-                  section.documents.length > 2
-                    ? 'md:grid-cols-2 xl:grid-cols-3'
-                    : section.documents.length > 1
-                      ? 'xl:grid-cols-2'
-                      : ''
-                }`}
-              >
-                {section.documents.map((document) => (
-                  <DocumentCard key={`${section.title}-${document.title}`} document={document} />
+              <div className="mt-4 space-y-4 text-[15px] leading-8 text-gray-700">
+                {section.body.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
                 ))}
               </div>
-            ) : null}
 
-            {section.cards?.length ? (
-              <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {section.cards.map((card) => (
-                  <article
-                    key={card.title}
-                    className={`rounded-2xl border px-4 py-4 shadow-sm ${
-                      card.tone || 'border-gray-200 bg-gray-50'
-                    }`}
-                  >
-                    <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
-                      {card.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-gray-700">{card.text}</p>
-                  </article>
-                ))}
-              </div>
-            ) : null}
-
-            {section.questions?.length ? (
-              <div className="mt-5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
-                  {section.questionsTitle || 'Questions'}
-                </h3>
-                <ul className="mt-3 space-y-2 text-sm leading-6 text-gray-700">
-                  {section.questions.map((question) => (
-                    <li key={question}>{question}</li>
+              {section.documents?.length ? (
+                <div
+                  className={`mt-5 grid gap-4 ${
+                    section.documents.length > 2
+                      ? 'md:grid-cols-2 xl:grid-cols-3'
+                      : section.documents.length > 1
+                        ? 'xl:grid-cols-2'
+                        : ''
+                  }`}
+                >
+                  {section.documents.map((document) => (
+                    <DocumentCard key={`${section.title}-${document.title}`} document={document} />
                   ))}
-                </ul>
-              </div>
-            ) : null}
+                </div>
+              ) : null}
 
-            {section.takeaway ? (
-              <div className={`mt-5 rounded-2xl border p-4 ${style.note}`}>
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
-                  {section.takeawayTitle || 'Ce qu il faut retenir'}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-gray-700">{section.takeaway}</p>
-              </div>
-            ) : null}
-          </article>
-        ))}
-      </section>
+              {section.cards?.length ? (
+                <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {section.cards.map((card) => (
+                    <article
+                      key={card.title}
+                      className={`rounded-2xl border px-4 py-4 shadow-sm ${
+                        card.tone || 'border-gray-200 bg-gray-50'
+                      }`}
+                    >
+                      <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
+                        {card.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-gray-700">{card.text}</p>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+
+              {section.questions?.length ? (
+                <div className="mt-5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                  <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
+                    {section.questionsTitle || 'Questions'}
+                  </h3>
+                  <ul className="mt-3 space-y-2 text-sm leading-6 text-gray-700">
+                    {section.questions.map((question) => (
+                      <li key={question}>{question}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {section.takeaway ? (
+                <div className={`mt-5 rounded-2xl border p-4 ${style.note}`}>
+                  <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
+                    {section.takeawayTitle || 'Ce qu il faut retenir'}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-gray-700">{section.takeaway}</p>
+                </div>
+              ) : null}
+            </article>
+          ))}
+        </section>
+      ) : null}
 
       {content.method?.steps?.length ? (
         <section className={`mt-8 rounded-3xl border p-6 shadow-lg ${style.note}`}>
