@@ -184,6 +184,21 @@ function ChapterContent({ chapter, style }) {
         </div>
       </section>
 
+      {content.chapterQuestions?.length ? (
+        <section className={`mt-8 rounded-3xl border p-6 shadow-lg ${style.note}`}>
+          <h2 className="text-2xl font-bold text-gray-800">
+            {content.chapterQuestionsTitle || 'Questions du chapitre'}
+          </h2>
+          <ul className="mt-5 space-y-3 text-sm leading-6 text-gray-700">
+            {content.chapterQuestions.map((item) => (
+              <li key={item} className="rounded-2xl border border-white/80 bg-white/80 px-4 py-3">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {content.vocabulary?.length ? (
         <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
           <h2 className="text-2xl font-bold text-gray-800">Vocabulaire essentiel</h2>
@@ -210,7 +225,38 @@ function ChapterContent({ chapter, style }) {
         {content.sections.map((section) => (
           <article key={section.title} className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
             <div className={`mb-4 h-1.5 w-14 rounded-full ${style.line}`} />
+            {section.tag ? (
+              <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${style.badge}`}>
+                {section.tag}
+              </span>
+            ) : null}
             <h2 className="text-2xl font-bold text-gray-800">{section.title}</h2>
+
+            {section.supports?.length ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {section.supports.map((support) =>
+                  support.url ? (
+                    <a
+                      key={support.label}
+                      href={support.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600 transition hover:bg-white"
+                    >
+                      {support.label}
+                    </a>
+                  ) : (
+                    <span
+                      key={support.label}
+                      className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600"
+                    >
+                      {support.label}
+                    </span>
+                  ),
+                )}
+              </div>
+            ) : null}
+
             <div className="mt-4 space-y-4 text-[15px] leading-8 text-gray-700">
               {section.body.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
@@ -238,13 +284,22 @@ function ChapterContent({ chapter, style }) {
             {section.questions?.length ? (
               <div className="mt-5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
                 <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
-                  Questions
+                  {section.questionsTitle || 'Questions'}
                 </h3>
                 <ul className="mt-3 space-y-2 text-sm leading-6 text-gray-700">
                   {section.questions.map((question) => (
                     <li key={question}>{question}</li>
                   ))}
                 </ul>
+              </div>
+            ) : null}
+
+            {section.takeaway ? (
+              <div className={`mt-5 rounded-2xl border p-4 ${style.note}`}>
+                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
+                  {section.takeawayTitle || 'Ce qu il faut retenir'}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-gray-700">{section.takeaway}</p>
               </div>
             ) : null}
           </article>
@@ -279,7 +334,7 @@ function ChapterContent({ chapter, style }) {
 
       <div className="mt-8 grid gap-6 xl:grid-cols-2">
         <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800">A retenir</h2>
+          <h2 className="text-2xl font-bold text-gray-800">{content.keyPointsTitle || 'A retenir'}</h2>
           <ul className="mt-5 space-y-3 text-sm leading-6 text-gray-700">
             {content.keyPoints.map((item) => (
               <li key={item} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
@@ -290,7 +345,9 @@ function ChapterContent({ chapter, style }) {
         </section>
 
         <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800">Questions pour verifier</h2>
+          <h2 className="text-2xl font-bold text-gray-800">
+            {content.selfCheckTitle || 'Questions pour verifier'}
+          </h2>
           <ul className="mt-5 space-y-3 text-sm leading-6 text-gray-700">
             {content.selfCheck.map((item) => (
               <li key={item} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
@@ -303,7 +360,12 @@ function ChapterContent({ chapter, style }) {
 
       {content.practice?.length ? (
         <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800">Petit entrainement</h2>
+          <h2 className="text-2xl font-bold text-gray-800">
+            {content.practiceTitle || 'Petit entrainement'}
+          </h2>
+          {content.practiceIntro ? (
+            <p className="mt-3 text-sm leading-7 text-gray-600">{content.practiceIntro}</p>
+          ) : null}
           <div className="mt-5 space-y-4">
             {content.practice.map((item) => (
               <article key={item.question} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
