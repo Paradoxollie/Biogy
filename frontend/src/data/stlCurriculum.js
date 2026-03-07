@@ -18,6 +18,19 @@ import {
   PREMIERE_BIOBIO_TRANSVERSAL_C_LESSONS,
   PREMIERE_BIOBIO_TRANSVERSAL_D_LESSONS,
 } from './premiereBiobioContent';
+import {
+  PREMIERE_AT7_CONTENT,
+  PREMIERE_C8_CONTENT,
+  PREMIERE_MODULE_1_CONTENT,
+  PREMIERE_MODULE_2_CONTENT,
+  PREMIERE_MODULE_3_CONTENT,
+  PREMIERE_MODULE_4_CONTENT,
+  PREMIERE_MODULE_5_CONTENT,
+  PREMIERE_MODULE_6_CONTENT,
+  PREMIERE_MODULE_7_CONTENT,
+  PREMIERE_MODULE_C_CONTENT,
+  PREMIERE_MODULE_D_CONTENT,
+} from './premiereBiotechContent';
 
 export const COURSE_REFERENCES = [
   {
@@ -1003,6 +1016,7 @@ const COURSE_LEVELS = [
                 title: 'Gestion des risques au laboratoire',
                 summary:
                   'Activite technologique sur l analyse a priori des risques, les pictogrammes et la prevention.',
+                content: PREMIERE_AT7_CONTENT,
               },
             ],
           },
@@ -1017,6 +1031,7 @@ const COURSE_LEVELS = [
               'reperer une source d erreur',
               'ameliorer la fiabilite d une procedure',
             ],
+            content: PREMIERE_MODULE_C_CONTENT,
           },
           {
             id: 'module-d-numerique',
@@ -1029,6 +1044,7 @@ const COURSE_LEVELS = [
               'traiter une information numerique',
               'presenter un resultat clairement',
             ],
+            content: PREMIERE_MODULE_D_CONTENT,
           },
         ],
       },
@@ -1047,6 +1063,7 @@ const COURSE_LEVELS = [
               'comparer des organisations biologiques',
               'decrire avec precision',
             ],
+            content: PREMIERE_MODULE_1_CONTENT,
           },
           {
             id: 'module-2-culture',
@@ -1059,6 +1076,7 @@ const COURSE_LEVELS = [
               'cultiver un micro-organisme',
               'choisir des conditions de culture',
             ],
+            content: PREMIERE_MODULE_2_CONTENT,
           },
           {
             id: 'module-3-identification',
@@ -1071,6 +1089,7 @@ const COURSE_LEVELS = [
               'relier un test a une information',
               'construire une conclusion prudente',
             ],
+            content: PREMIERE_MODULE_3_CONTENT,
           },
           {
             id: 'module-4-denombrement',
@@ -1083,6 +1102,7 @@ const COURSE_LEVELS = [
               'compter et exprimer un resultat',
               'exploiter un critere microbiologique simple',
             ],
+            content: PREMIERE_MODULE_4_CONTENT,
           },
           {
             id: 'module-5-solutions',
@@ -1095,6 +1115,7 @@ const COURSE_LEVELS = [
               'realiser une dilution',
               'tracer une preparation',
             ],
+            content: PREMIERE_MODULE_5_CONTENT,
           },
           {
             id: 'module-6-biomolecules',
@@ -1107,6 +1128,7 @@ const COURSE_LEVELS = [
               'observer un resultat',
               'relier un test a une biomolecule',
             ],
+            content: PREMIERE_MODULE_6_CONTENT,
           },
           {
             id: 'module-7-separation',
@@ -1119,6 +1141,7 @@ const COURSE_LEVELS = [
               'justifier une methode',
               'interpreter une separation simple',
             ],
+            content: PREMIERE_MODULE_7_CONTENT,
           },
           {
             id: 'module-8-concentration',
@@ -1138,6 +1161,7 @@ const COURSE_LEVELS = [
                 title: 'Dosage volumétrique',
                 summary:
                   'Cours sur le vocabulaire de la volumetrie, les reactions support et le calcul a l equivalence.',
+                content: PREMIERE_C8_CONTENT,
               },
             ],
           },
