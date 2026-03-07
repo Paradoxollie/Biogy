@@ -3,6 +3,13 @@ import globulesRougesImage from '../assets/courses/premiere/c1/globules-rouges.p
 import hcbLogoImage from '../assets/courses/premiere/c1/hcb-logo.png';
 import futurolSchemaImage from '../assets/courses/premiere/c1/futurol-schema.jpg';
 import videoQrImage from '../assets/courses/premiere/c1/video-qr.png';
+import c4EpiImage from '../assets/courses/premiere/c4/epi.jpg';
+import c4Schema5MImage from '../assets/courses/premiere/c4/schema-5m.png';
+import c4DangerBioImage from '../assets/courses/premiere/c4/danger-biologique.png';
+import c4BaobabImage from '../assets/courses/premiere/c4/baobab.png';
+import c4DasriImage from '../assets/courses/premiere/c4/dasri.png';
+import c4AcetoneImage from '../assets/courses/premiere/c4/acetone.jpg';
+import c4BioethanolImage from '../assets/courses/premiere/c4/bioethanol.png';
 
 export const COURSE_REFERENCES = [
   {
@@ -434,14 +441,6 @@ const PREMIERE_BT1_CONTENT = {
         'Une application biotechnologique doit toujours etre evaluee en tenant compte de son utilite, de ses risques et de ses consequences possibles.',
     },
   ],
-  diagrams: [
-    {
-      id: 'domains',
-      title: 'Schema - Les cinq domaines des biotechnologies',
-      caption:
-        'Les cinq domaines a connaitre sont identifies par une couleur. Tu dois savoir les nommer et donner un exemple pour chacun.',
-    },
-  ],
   method: {
     title: 'Methode - Analyser un document de biotechnologies',
     steps: [
@@ -465,6 +464,404 @@ const PREMIERE_BT1_CONTENT = {
     'Je sais expliquer pourquoi les biotechnologies sont a la fois anciennes et modernes.',
     'Je sais nommer les cinq domaines des biotechnologies et donner un exemple pour chacun.',
     'Je sais montrer qu une application biotechnologique peut soulever des enjeux ethiques.',
+  ],
+};
+
+const PREMIERE_C4_CONTENT = {
+  intro:
+    'Ce cours est centre sur la securite au laboratoire de biotechnologies. Tu dois apprendre a identifier un danger, analyser une situation de travail et proposer des moyens de prevention adaptes avant, pendant et apres une manipulation.',
+  objectives: [
+    'Definir le vocabulaire specifique a la securite au laboratoire.',
+    'Analyser une situation de travail avec la regle des 5 M.',
+    'Realiser une analyse a priori des risques.',
+    'Distinguer un danger biologique d un danger chimique.',
+  ],
+  chapterQuestionsTitle: 'Questions du cours',
+  chapterQuestions: [
+    'Quels dangers peuvent etre presents dans un laboratoire de biotechnologies ?',
+    'Comment analyser correctement une situation de travail ?',
+    'Comment reconnaitre un danger biologique ?',
+    'Comment lire une etiquette de danger chimique ?',
+  ],
+  questionSetsTitle: 'Travail guide',
+  questionSetsIntro:
+    'Comme pour le premier cours, commence par observer les supports puis reponds aux questions. La page contient directement les extraits utiles. Les reponses ne sont pas donnees dans cette partie.',
+  questionSets: [
+    {
+      tag: 'Travail 1',
+      title: 'Le vocabulaire specifique a la securite au laboratoire',
+      intro:
+        'On commence par une situation tres simple de la vie quotidienne : faire cuire des pates. Elle sert de support pour comprendre le vocabulaire du risque avant de passer au laboratoire.',
+      supports: [
+        {
+          label: 'Situation support',
+          detail:
+            'Une personne fait cuire des pates dans une casserole d eau bouillante sur une plaque de cuisson. Elle utilise une casserole, un couvercle et une cuillere.',
+        },
+      ],
+      instruction:
+        'A partir de cette situation, propose une definition simple des termes utilises en securite au laboratoire : danger, risque, dommage, situation de travail, manipulateur, prevention.',
+      questions: [
+        'Q1. A partir de la situation support, complete ton tableau de vocabulaire et formule les definitions des termes de securite.',
+      ],
+    },
+    {
+      tag: 'Etape 1',
+      title: 'Analyser une situation de travail avec la regle des 5 M',
+      intro:
+        'La situation de travail rassemble tous les elements impliques dans une manipulation. Pour l analyser, on utilise la regle des 5 M.',
+      supports: [
+        {
+          label: 'Schema des 5 M',
+          detail:
+            'Les 5 M sont : Manipulateur, Matiere, Materiel, Methode de travail, Milieu.',
+          imageSrc: c4Schema5MImage,
+          imageAlt: 'Schema des 5 M utilise en analyse des risques',
+        },
+        {
+          label: 'Situation support',
+          detail:
+            'Reprends la situation "faire cuire des pates" et classe chaque element observe dans la bonne categorie des 5 M.',
+        },
+      ],
+      instruction:
+        'Observe le schema puis decris la situation de travail en classant les informations dans chacune des cinq categories.',
+      questions: [
+        'Q2. Complete la situation de travail "faire cuire des pates" en respectant la regle des 5 M.',
+      ],
+    },
+    {
+      tag: 'Etapes 2 et 3',
+      title: 'Situation exposante, evenement dangereux et dommage',
+      intro:
+        'Une fois la situation de travail decrite, il faut identifier les situations exposantes, les evenements dangereux possibles et les dommages qui peuvent en resulter.',
+      documents: [
+        {
+          label: 'Repere',
+          title: 'Les notions a distinguer',
+          body: [
+            'La situation exposante est un moment de la manipulation ou le manipulateur peut entrer en contact avec un danger.',
+            'L evenement dangereux est un evenement possible qui provoque la rencontre entre le danger et une porte d entree du manipulateur.',
+            'Le dommage correspond a l atteinte a la sante qui peut apparaitre apres la survenue de cet evenement dangereux.',
+          ],
+        },
+      ],
+      instruction:
+        'Reprends la situation "faire cuire des pates" et identifie un moment d exposition, un evenement dangereux possible et le dommage attendu.',
+      questions: [
+        'Q3. Complete le schema d apparition du dommage pour la situation "faire cuire des pates".',
+      ],
+    },
+    {
+      tag: 'Etape 4',
+      title: 'Choisir des moyens de prevention',
+      intro:
+        'Une fois les risques identifies, il faut proposer des moyens de prevention adaptes. On cherche d abord a limiter l apparition de l evenement dangereux, puis on mobilise des protections collectives et individuelles si necessaire.',
+      documents: [
+        {
+          label: 'Document 1',
+          title: 'Exemples d equipements de protection',
+          imageSrc: c4EpiImage,
+          imageAlt: 'Exemples d EPI en laboratoire: blouse, lunettes, gants, hotte, masque',
+          body: [
+            'Les EPI protègent directement le manipulateur : blouse, lunettes, gants, masque.',
+            'Les EPC protègent l ensemble des manipulateurs : hotte aspirante, ecran, dispositif de confinement.',
+          ],
+        },
+      ],
+      instruction:
+        'A partir du document et de la demarche de prevention, explique quels moyens permettent de limiter le risque au laboratoire.',
+    },
+    {
+      tag: 'Mise en oeuvre',
+      title: 'Analyser la preparation d une suspension bacterienne',
+      intro:
+        'La situation de travail suivante sert d application au laboratoire : preparation d une suspension bacterienne par un eleve de premiere STL.',
+      supports: [
+        {
+          label: 'Situation support',
+          detail:
+            'Un eleve de premiere STL prepare une suspension bacterienne a partir d un tube de culture. Il utilise un tube, une anse ou une pipette, un poste de travail et du materiel de laboratoire adapte.',
+        },
+      ],
+      instruction:
+        'Decris d abord la situation de travail avec les 5 M, puis repere une situation exposante, un evenement dangereux possible et un dommage pour le manipulateur.',
+      questions: [
+        'Q4. Decris la situation de travail de preparation d une suspension bacterienne en utilisant la regle des 5 M.',
+        'Q5. Complete le schema d apparition du dommage pour cette situation de travail.',
+      ],
+    },
+    {
+      tag: 'Document 2',
+      title: 'Les dangers biologiques',
+      intro:
+        'Certains micro-organismes sont inoffensifs, d autres peuvent provoquer des maladies. Il faut savoir reconnaitre un danger biologique et comprendre qu il ne se limite pas aux seuls agents infectieux.',
+      documents: [
+        {
+          label: 'Document',
+          title: 'Le danger biologique',
+          imageSrc: c4DangerBioImage,
+          imageAlt: 'Extrait de document sur le danger biologique au laboratoire',
+          body: [
+            'Un agent biologique peut provoquer des infections, des allergies, des maladies liees a des toxines ou d autres atteintes a la sante.',
+            'Le danger biologique est repere par un pictogramme specifique au laboratoire.',
+          ],
+        },
+      ],
+      instruction:
+        'Lis le document puis distingue ce qui est non pathogene de ce qui peut presenter un danger pour le manipulateur.',
+      questions: [
+        'Q6. Cite des agents biologiques non pathogenes qui peuvent etre rencontres ou utilises au laboratoire.',
+      ],
+    },
+    {
+      tag: 'Document 3',
+      title: 'Exploiter une fiche de type Baobab',
+      intro:
+        'La base Baobab de l INRS permet d obtenir des informations utiles sur les agents biologiques: groupe de risque, reservoirs, voies de transmission et maladies associees.',
+      documents: [
+        {
+          label: 'Repere',
+          title: 'Base Baobab',
+          imageSrc: c4BaobabImage,
+          imageAlt: 'Capture d ecran de la base Baobab de l INRS',
+          body: [
+            'Extrait de fiche a exploiter : Pseudomonas aeruginosa est une bacterie opportuniste appartenant au groupe de risque 2.',
+            'Elle peut etre retrouvee dans l eau, le sol ou des milieux humides et se transmettre notamment par contact avec des surfaces ou des materiels contamines.',
+            'Elle peut provoquer diverses infections, en particulier chez des personnes fragilisees.',
+          ],
+        },
+      ],
+      instruction:
+        'A partir de cette fiche extraite, releve les informations demandees sans les recopier mot pour mot.',
+      questions: [
+        'Q7. A partir de la fiche de type Baobab, complete les informations essentielles concernant Pseudomonas aeruginosa : nom, groupe de risque, reservoirs, voies de transmission, maladies possibles.',
+      ],
+    },
+    {
+      tag: 'Document 4',
+      title: 'Classer un agent biologique infectieux',
+      intro:
+        'Les agents biologiques infectieux sont classes selon quatre groupes de risque croissant. Pour classer correctement un micro-organisme, il faut raisonner a partir de sa gravite et de l existence ou non d une prevention ou d un traitement.',
+      documents: [
+        {
+          label: 'Repere',
+          title: 'Les quatre groupes de risque',
+          body: [
+            'Groupe 1 : agent peu susceptible de provoquer une maladie chez l humain.',
+            'Groupe 2 : agent pouvant provoquer une maladie, mais avec un risque de propagation limite et une prevention ou un traitement generalement disponibles.',
+            'Groupe 3 : agent pouvant provoquer une maladie grave, avec un risque de propagation plus important.',
+            'Groupe 4 : agent provoquant une maladie tres grave, avec un risque eleve et sans traitement efficace disponible.',
+          ],
+        },
+      ],
+      instruction:
+        'Utilise la description des groupes pour justifier ton classement, pas seulement pour donner un numero.',
+      questions: [
+        'Q8. Classe Staphylococcus aureus dans l un des quatre groupes infectieux et justifie ton choix.',
+      ],
+    },
+    {
+      tag: 'Document 5',
+      title: 'Eliminer des dechets infectieux',
+      intro:
+        'Les dechets d activite de soins a risques infectieux, ou DASRI, doivent etre stockes dans des emballages specifiques pour eviter toute contamination ou blessure.',
+      documents: [
+        {
+          label: 'Document',
+          title: 'Conditionnement des DASRI',
+          imageSrc: c4DasriImage,
+          imageAlt: 'Extrait de document sur le conditionnement des dechets DASRI',
+          body: [
+            'Les dechets infectieux sont stockes dans des emballages jaunes, a usage unique, resistants, impermeables et fermables de maniere definitive.',
+            'Le conditionnement depend aussi de la nature du dechet : objets piquants ou coupants d un cote, dechets solides comme les boites de Petri de l autre.',
+          ],
+        },
+      ],
+      instruction:
+        'Observe les deux types de contenants presentes puis justifie le choix du materiel de collecte selon le dechet considere.',
+      questions: [
+        'Q9. Explique pourquoi les dechets infectieux sont confines dans des emballages specifiques.',
+        'Q10. Indique le type de conteneur DASRI a choisir pour une lame, une lamelle, des pipettes en verre et une boite de Petri apres culture.',
+      ],
+    },
+    {
+      tag: 'Danger chimique',
+      title: 'Lire une etiquette de produit chimique',
+      intro:
+        'Au laboratoire, un produit chimique ne se manipule jamais sans lecture de son etiquette. Les pictogrammes, la mention d avertissement, les mentions de danger et les conseils de prudence sont complementaires.',
+      documents: [
+        {
+          label: 'Document',
+          title: 'Etiquette d acetone',
+          imageSrc: c4AcetoneImage,
+          imageAlt: 'Etiquette de danger du produit acetone',
+          body: [
+            'Cette etiquette comporte des pictogrammes, une mention d avertissement, des mentions de danger et des conseils de prudence.',
+            'Elle permet de comprendre a la fois les dangers du produit et les precautions a mettre en place avant la manipulation.',
+          ],
+        },
+        {
+          label: 'Document complementaire',
+          title: 'Etiquette simplifiee de bioethanol',
+          imageSrc: c4BioethanolImage,
+          imageAlt: 'Etiquette simplifiee de bioethanol',
+          body: [
+            'L etiquette d un produit ne se limite pas au nom du produit : elle apporte aussi des informations sur sa dangerosite.',
+          ],
+        },
+      ],
+      instruction:
+        'Observe les etiquettes et repere les elements qui renseignent sur le danger et sur la conduite a tenir.',
+      questions: [
+        'Q11. Repere sur l etiquette d acetone les pictogrammes de danger, la mention d avertissement, les mentions de danger et les conseils de prudence.',
+        'Q12. Cite deux precautions a prendre lors de l utilisation du produit presente.',
+        'Q13. A partir des etiquettes observees, associe les pictogrammes vus dans le cours au danger principal qu ils signalent.',
+      ],
+    },
+  ],
+  courseSectionsTitle: 'Cours a retenir',
+  courseSectionsIntro:
+    'Une fois le travail guide termine, retiens les definitions, la demarche et les reperes indispensables pour travailler en securite au laboratoire.',
+  courseSections: [
+    {
+      title: '1. Le vocabulaire de la securite',
+      body: [
+        'Le danger est un agent ou une situation capable de provoquer une atteinte a la sante.',
+        'Le risque correspond a la possibilite qu un dommage survienne lors de l exposition a ce danger.',
+        'Le dommage est l atteinte a la sante elle-meme: blessure, irritation, infection, allergie, intoxication.',
+        'La prevention regroupe les moyens mis en place pour eviter ou limiter la survenue du dommage.',
+      ],
+      takeawayTitle: 'A retenir',
+      takeaway:
+        'Au laboratoire, il faut toujours distinguer danger, exposition, risque et dommage.',
+    },
+    {
+      title: '2. La regle des 5 M',
+      body: [
+        'Pour analyser une situation de travail, on decrit cinq elements: le Manipulateur, la Matiere utilisee, le Materiel, la Methode de travail et le Milieu.',
+        'Cette analyse permet d identifier de facon rigoureuse les elements qui interviennent dans une manipulation et les points de vigilance associes.',
+      ],
+      documents: [
+        {
+          label: 'Schema',
+          title: 'Regle des 5 M',
+          imageSrc: c4Schema5MImage,
+          imageAlt: 'Schema rappelant les 5 M de l analyse de situation de travail',
+        },
+      ],
+      takeawayTitle: 'A retenir',
+      takeaway:
+        'Une situation de travail se decrit toujours de facon complete avant de chercher les risques.',
+    },
+    {
+      title: '3. La demarche a priori des risques',
+      body: [
+        'La prevention repose sur une analyse a priori des risques. On identifie d abord la situation de travail, puis les situations exposantes, les evenements dangereux possibles et enfin les dommages associes.',
+        'Une fois l analyse terminee, on choisit des moyens de prevention adaptes. En priorite, on cherche a supprimer ou reduire la possibilite de l evenement dangereux.',
+        'Si cela ne suffit pas, on ajoute des protections collectives, puis des protections individuelles.',
+      ],
+      cards: [
+        {
+          title: 'Etape 1',
+          text: 'Decrire la situation de travail avec les 5 M.',
+        },
+        {
+          title: 'Etape 2',
+          text: 'Identifier les situations exposantes.',
+        },
+        {
+          title: 'Etape 3',
+          text: 'Reperer les evenements dangereux et les dommages possibles.',
+        },
+        {
+          title: 'Etape 4',
+          text: 'Choisir les moyens de prevention les plus adaptes.',
+        },
+      ],
+      takeawayTitle: 'A retenir',
+      takeaway:
+        'La prevention ne se limite pas aux EPI. Elle commence par l analyse de la situation et par la reduction du danger.',
+    },
+    {
+      title: '4. Les dangers biologiques',
+      body: [
+        'Un danger biologique peut etre lie a un agent infectieux, a une toxine, a un allergene ou a tout autre agent biologique susceptible de nuire au manipulateur.',
+        'Les agents biologiques infectieux sont classes en quatre groupes de risque croissant. Ce classement aide a adapter les conditions de manipulation, de protection et d elimination des dechets.',
+      ],
+      documents: [
+        {
+          label: 'Document',
+          title: 'Danger biologique',
+          imageSrc: c4DangerBioImage,
+          imageAlt: 'Extrait rappelant la notion de danger biologique',
+        },
+      ],
+      takeawayTitle: 'A retenir',
+      takeaway:
+        'Tous les micro-organismes ne sont pas dangereux, mais certains exigent des precautions strictes au laboratoire.',
+    },
+    {
+      title: '5. Elimination des dechets infectieux',
+      body: [
+        'Les dechets biologiques infectieux sont elimines dans des contenants DASRI adaptes. Le choix du contenant depend du type de dechet.',
+        'Les objets piquants, coupants ou cassants sont places dans des conteneurs rigides, alors que des dechets solides comme des boites de Petri peuvent etre places dans des emballages carton adaptes.',
+      ],
+      documents: [
+        {
+          label: 'Document',
+          title: 'Conditionnement des DASRI',
+          imageSrc: c4DasriImage,
+          imageAlt: 'Document sur les conteneurs DASRI utilises au laboratoire',
+        },
+      ],
+      takeawayTitle: 'A retenir',
+      takeaway:
+        'Le tri des dechets fait partie de la securite. Un mauvais conditionnement peut exposer les manipulateurs et l environnement.',
+    },
+    {
+      title: '6. Les dangers chimiques',
+      body: [
+        'Depuis l application du reglement CLP, les produits chimiques sont etiquetes avec des pictogrammes normalises, des mentions de danger et des conseils de prudence.',
+        'La lecture de l etiquette est obligatoire avant toute manipulation. Elle permet de savoir quels risques existent et quelles precautions doivent etre mises en place.',
+      ],
+      documents: [
+        {
+          label: 'Document',
+          title: 'Exemple d etiquette chimique',
+          imageSrc: c4AcetoneImage,
+          imageAlt: 'Etiquette de produit chimique a analyser',
+        },
+      ],
+      takeawayTitle: 'A retenir',
+      takeaway:
+        'Un produit chimique ne se manipule jamais sans lecture de son etiquette et sans mise en place des precautions correspondantes.',
+    },
+  ],
+  method: {
+    title: 'Methode - Analyser une situation de travail',
+    steps: [
+      'Decris la situation de travail avec la regle des 5 M.',
+      'Repere le danger present dans cette situation.',
+      'Identifie une ou plusieurs situations exposantes.',
+      'Cherche quel evenement dangereux peut survenir.',
+      'Deduis le dommage possible pour le manipulateur.',
+      'Propose ensuite les moyens de prevention les plus adaptes.',
+    ],
+  },
+  keyPointsTitle: 'Conclusion',
+  keyPoints: [
+    'La securite au laboratoire repose sur un vocabulaire precis et sur une analyse rigoureuse des situations de travail.',
+    'La demarche a priori des risques permet d identifier les situations exposantes, les evenements dangereux et les dommages possibles.',
+    'Les dangers biologiques et les dangers chimiques ne se reperent pas de la meme facon, mais ils exigent tous une prevention adaptee.',
+    'Les EPI, les EPC, la lecture des etiquettes et le tri des dechets sont des elements essentiels du travail au laboratoire.',
+  ],
+  selfCheckTitle: 'Je verifie que j ai compris',
+  selfCheck: [
+    'Je sais distinguer danger, risque, dommage et prevention.',
+    'Je sais decrire une situation de travail avec la regle des 5 M.',
+    'Je sais reconnaitre un danger biologique et un danger chimique.',
+    'Je sais justifier un moyen de prevention ou un choix de contenant DASRI.',
   ],
 };
 
@@ -590,6 +987,7 @@ const COURSE_LEVELS = [
                 title: 'Risques et sécurité au laboratoire de biotechnologies',
                 summary:
                   'Cours centre sur le vocabulaire du risque, la demarche des 5M et les dangers chimiques ou biologiques.',
+                content: PREMIERE_C4_CONTENT,
               },
               {
                 id: 'at7-gestion-risques-laboratoire',
