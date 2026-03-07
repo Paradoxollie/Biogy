@@ -145,6 +145,16 @@ function DocumentCard({ document }) {
 
       <h3 className="mt-3 text-base font-semibold leading-6 text-gray-800">{document.title}</h3>
 
+      {document.imageSrc ? (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+          <img
+            src={document.imageSrc}
+            alt={document.imageAlt || document.title}
+            className="h-auto w-full object-contain"
+          />
+        </div>
+      ) : null}
+
       {document.body?.length ? (
         <div className="mt-3 space-y-3 text-sm leading-6 text-gray-700">
           {document.body.map((paragraph) => (

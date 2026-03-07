@@ -1,3 +1,8 @@
+import biotechDomainsImage from '../assets/courses/premiere/c1/biotech-domains.png';
+import globulesRougesImage from '../assets/courses/premiere/c1/globules-rouges.png';
+import hcbLogoImage from '../assets/courses/premiere/c1/hcb-logo.png';
+import futurolSchemaImage from '../assets/courses/premiere/c1/futurol-schema.jpg';
+
 export const COURSE_REFERENCES = [
   {
     id: 'stl-hub',
@@ -205,6 +210,8 @@ const PREMIERE_BT1_CONTENT = {
           label: 'Document',
           title: 'Fabrication de globules rouges in vitro',
           source: 'Hopital Saint-Antoine, Paris',
+          imageSrc: globulesRougesImage,
+          imageAlt: 'Schema simplifie de fabrication de globules rouges in vitro',
           body: [
             'Des chercheurs ont montre la faisabilite de la fabrication de globules rouges hors de l organisme.',
             'Cette production pourrait aider a constituer des reserves de sang plus importantes tout en limitant certaines complications liees aux transfusions.',
@@ -270,6 +277,8 @@ const PREMIERE_BT1_CONTENT = {
         {
           label: 'Document 3',
           title: 'Futurol',
+          imageSrc: futurolSchemaImage,
+          imageAlt: 'Schema simplifie du procede Futurol de production de bioethanol',
           body: [
             'Des enzymes, des bacteries et des levures sont mobilisees pour transformer une biomasse vegetale en bioethanol.',
             'Le projet vise une production industrielle d energie et de matieres premieres chimiques.',
@@ -350,6 +359,16 @@ const PREMIERE_BT1_CONTENT = {
       body: [
         'En STL, les biotechnologies sont classees en cinq grands domaines. Chacun est associe a une couleur. Il faut connaitre cette classification et savoir donner au moins un exemple pour chaque domaine.',
       ],
+      documents: [
+        {
+          label: 'Schema de synthese',
+          title: 'Classification des biotechnologies par domaines',
+          imageSrc: biotechDomainsImage,
+          imageAlt: 'Schema des cinq domaines des biotechnologies',
+          footer:
+            'Ce schema sert de repere visuel. Il ne remplace pas l apprentissage des definitions et des exemples.',
+        },
+      ],
       cards: [
         {
           title: 'Rouge',
@@ -387,6 +406,16 @@ const PREMIERE_BT1_CONTENT = {
         'Les biotechnologies peuvent apporter des benefices importants en sante, en environnement, en alimentation ou en industrie.',
         'Cependant, la manipulation du vivant peut soulever des risques, des limites techniques, des questions de securite et des enjeux ethiques ou societaux.',
         'Le developpement des biotechnologies doit donc etre encadre et discute avec rigueur.',
+      ],
+      documents: [
+        {
+          label: 'Repere institutionnel',
+          title: 'Haut Conseil des biotechnologies',
+          imageSrc: hcbLogoImage,
+          imageAlt: 'Logo du Haut Conseil des biotechnologies',
+          footer:
+            'Ce repere rappelle que les biotechnologies sont aussi un sujet de reflexion sanitaire, environnementale et ethique.',
+        },
       ],
       takeawayTitle: 'A retenir',
       takeaway:
