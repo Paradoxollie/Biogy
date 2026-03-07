@@ -445,8 +445,8 @@ const TERMINALE_S1_CONTENT = {
 const COURSE_LEVELS = [
   {
     id: 'premiere',
-    title: 'Premiere STL',
-    shortTitle: 'Premiere',
+    title: 'Première STL',
+    shortTitle: 'Première',
     intro:
       'En premiere STL, tu poses les bases scientifiques et techniques de toute la serie. Les chapitres sont ranges pour te permettre de travailler par themes, avec une progression claire et utile en classe comme en TP.',
     sourceIds: [
@@ -459,13 +459,12 @@ const COURSE_LEVELS = [
     sections: [
       {
         id: 'biotechnologies-transversal',
-        title:
-          'Specialite biotechnologies - Travailler ensemble au laboratoire de biotechnologies',
+        title: 'Travailler ensemble au laboratoire de biotechnologies',
         chapters: [
           {
             id: 'module-a-projet',
             code: 'A',
-            title: "S initier a la recherche experimentale et a la demarche de projet en biotechnologies",
+            title: "S'initier à la recherche expérimentale et à la démarche de projet en biotechnologies",
             summary:
               'Chapitre officiel transversal centre sur la decouverte de la specialite, le questionnement scientifique et la demarche de projet.',
             skills: [
@@ -477,7 +476,7 @@ const COURSE_LEVELS = [
               {
                 id: 'c1-decouverte-biotechnologies',
                 code: 'C1',
-                title: 'Decouverte des biotechnologies',
+                title: 'Découverte des biotechnologies',
                 summary:
                   'Premier cours d entree dans la specialite : definition, domaines, exemples et enjeux.',
                 content: PREMIERE_BT1_CONTENT,
@@ -487,7 +486,7 @@ const COURSE_LEVELS = [
           {
             id: 'module-b-risques',
             code: 'B',
-            title: 'Prevenir les risques au laboratoire de biotechnologies',
+            title: 'Prévenir les risques au laboratoire de biotechnologies',
             summary:
               'Chapitre officiel transversal dedie a la prevention des risques, a la securite et a la gestion des dechets.',
             skills: [
@@ -499,7 +498,7 @@ const COURSE_LEVELS = [
               {
                 id: 'c4-risques-securite-laboratoire',
                 code: 'C4',
-                title: 'Risques et securite au laboratoire de biotechnologies',
+                title: 'Risques et sécurité au laboratoire de biotechnologies',
                 summary:
                   'Cours centre sur le vocabulaire du risque, la demarche des 5M et les dangers chimiques ou biologiques.',
               },
@@ -515,7 +514,7 @@ const COURSE_LEVELS = [
           {
             id: 'module-c-mesures',
             code: 'C',
-            title: 'Obtenir des resultats de mesure fiables en biotechnologies',
+            title: 'Obtenir des résultats de mesure fiables',
             summary:
               'Chapitre officiel transversal sur la qualite des mesures, la rigueur experimentale et la validation des resultats.',
             skills: [
@@ -527,7 +526,7 @@ const COURSE_LEVELS = [
           {
             id: 'module-d-numerique',
             code: 'D',
-            title: 'Utiliser des outils numeriques en biotechnologies',
+            title: 'Utiliser des outils numériques en biotechnologies',
             summary:
               'Chapitre officiel transversal sur l usage du numerique pour traiter, organiser et communiquer des donnees.',
             skills: [
@@ -540,13 +539,12 @@ const COURSE_LEVELS = [
       },
       {
         id: 'biotechnologies-fondamentaux',
-        title:
-          'Specialite biotechnologies - Acquerir les fondamentaux technologiques et scientifiques des biotechnologies',
+        title: 'Acquérir les fondamentaux technologiques et scientifiques des biotechnologies',
         chapters: [
           {
             id: 'module-1-diversite',
             code: '1',
-            title: 'Observer la diversite du vivant',
+            title: "Observer la diversité du vivant à l'échelle microscopique",
             summary:
               'Chapitre officiel sur les outils d observation et la comparaison des organisations du vivant.',
             skills: [
@@ -570,7 +568,7 @@ const COURSE_LEVELS = [
           {
             id: 'module-3-identification',
             code: '3',
-            title: 'Caracteriser pour identifier les micro-organismes',
+            title: 'Caractériser pour identifier les micro-organismes',
             summary:
               'Chapitre officiel sur l observation, les tests et la construction d une identification microbienne.',
             skills: [
@@ -582,7 +580,7 @@ const COURSE_LEVELS = [
           {
             id: 'module-4-denombrement',
             code: '4',
-            title: 'Realiser un denombrement de micro-organismes presents dans un produit biologique',
+            title: 'Réaliser un dénombrement de micro-organismes présents dans un produit biologique',
             summary:
               'Chapitre officiel sur les methodes de denombrement et l exploitation quantitative en microbiologie.',
             skills: [
@@ -594,7 +592,7 @@ const COURSE_LEVELS = [
           {
             id: 'module-5-solutions',
             code: '5',
-            title: 'Preparer des solutions utilisables au laboratoire',
+            title: 'Préparer des solutions utilisables au laboratoire',
             summary:
               'Chapitre officiel sur les solutions, les dilutions et la rigueur de preparation au laboratoire.',
             skills: [
@@ -606,7 +604,7 @@ const COURSE_LEVELS = [
           {
             id: 'module-6-biomolecules',
             code: '6',
-            title: 'Detecter et caracteriser les biomolecules',
+            title: 'Détecter et caractériser les biomolécules',
             summary:
               'Chapitre officiel sur les tests de reconnaissance et la caracterisation simple des biomolecules.',
             skills: [
@@ -618,7 +616,7 @@ const COURSE_LEVELS = [
           {
             id: 'module-7-separation',
             code: '7',
-            title: 'Separer les composants d un melange',
+            title: "Séparer les composants d'un mélange",
             summary:
               'Chapitre officiel sur les techniques de separation exploitees en biotechnologies.',
             skills: [
@@ -630,7 +628,7 @@ const COURSE_LEVELS = [
           {
             id: 'module-8-concentration',
             code: '8',
-            title: 'Determiner la concentration d une biomolecule dans un produit biologique',
+            title: "Déterminer la concentration d'une biomolécule dans un produit biologique",
             summary:
               'Chapitre officiel sur les strategies de dosage et l exploitation quantitative de resultats.',
             skills: [
@@ -642,7 +640,7 @@ const COURSE_LEVELS = [
               {
                 id: 'c8-dosage-volumetrique',
                 code: 'C8',
-                title: 'Dosage volumetrique',
+                title: 'Dosage volumétrique',
                 summary:
                   'Cours sur le vocabulaire de la volumetrie, les reactions support et le calcul a l equivalence.',
               },
@@ -652,7 +650,7 @@ const COURSE_LEVELS = [
       },
       {
         id: 'biochimie-biologie',
-        title: 'Specialite biochimie-biologie',
+        title: 'Spécialité biochimie-biologie',
         chapters: [
           {
             id: 'bb1-nutrition',
