@@ -1,538 +1,607 @@
-import React, { useState, useEffect } from 'react';
+import React, { startTransition, useDeferredValue, useEffect, useState } from 'react';
+
+const CATEGORY_STYLES = {
+  red: {
+    card: 'border-rose-200 bg-rose-50',
+    badge: 'bg-rose-600 text-white',
+    softBadge: 'bg-rose-100 text-rose-700',
+    title: 'text-rose-900',
+    border: 'border-rose-400',
+    button: 'border-rose-200 bg-white text-rose-800 hover:bg-rose-100',
+  },
+  white: {
+    card: 'border-slate-200 bg-slate-50',
+    badge: 'bg-slate-700 text-white',
+    softBadge: 'bg-slate-200 text-slate-700',
+    title: 'text-slate-900',
+    border: 'border-slate-400',
+    button: 'border-slate-200 bg-white text-slate-800 hover:bg-slate-100',
+  },
+  green: {
+    card: 'border-emerald-200 bg-emerald-50',
+    badge: 'bg-emerald-600 text-white',
+    softBadge: 'bg-emerald-100 text-emerald-700',
+    title: 'text-emerald-900',
+    border: 'border-emerald-400',
+    button: 'border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-100',
+  },
+  yellow: {
+    card: 'border-amber-200 bg-amber-50',
+    badge: 'bg-amber-500 text-slate-900',
+    softBadge: 'bg-amber-100 text-amber-800',
+    title: 'text-amber-950',
+    border: 'border-amber-400',
+    button: 'border-amber-200 bg-white text-amber-900 hover:bg-amber-100',
+  },
+  blue: {
+    card: 'border-sky-200 bg-sky-50',
+    badge: 'bg-sky-600 text-white',
+    softBadge: 'bg-sky-100 text-sky-700',
+    title: 'text-sky-900',
+    border: 'border-sky-400',
+    button: 'border-sky-200 bg-white text-sky-800 hover:bg-sky-100',
+  },
+  multi: {
+    card: 'border-teal-200 bg-teal-50',
+    badge: 'bg-teal-600 text-white',
+    softBadge: 'bg-teal-100 text-teal-700',
+    title: 'text-teal-900',
+    border: 'border-teal-400',
+    button: 'border-teal-200 bg-white text-teal-800 hover:bg-teal-100',
+  },
+};
+
+const PAGE_PILLARS = [
+  {
+    title: 'Culture scientifique STL',
+    description:
+      'Une veille exploitable pour ouvrir une sequence, nourrir un oral ou relier une notion a une actualite.',
+  },
+  {
+    title: 'Projet technologique',
+    description:
+      'Des sujets utiles pour faire emerger un probleme, contextualiser un protocole ou identifier un enjeu de production.',
+  },
+  {
+    title: 'Laboratoire et techniques',
+    description:
+      'La page met en avant les actualites qui font sens avec les analyses, les procedes et la qualite en STL.',
+  },
+  {
+    title: 'One Health et enjeux',
+    description:
+      'Les liens sante-environnement-biodiversite sont rendus visibles pour rester au plus pres des attendus recents.',
+  },
+];
+
+const formatDate = (value) => {
+  if (!value) {
+    return 'Date inconnue';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'Date inconnue';
+  }
+
+  return date.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
+const formatDateTime = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const matchesSearch = (article, query) => {
+  if (!query) {
+    return true;
+  }
+
+  const haystack = [article.title, article.description, article.source, article.whyItMatters]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return haystack.includes(query);
+};
 
 function ScienceWatchPage() {
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [selectedColor, setSelectedColor] = useState(null);
-  const [forceRefresh, setForceRefresh] = useState(false);
-  const [biotechOnly, setBiotechOnly] = useState(true);
-  const [articleCount, setArticleCount] = useState({});
+  const [digest, setDigest] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearchTerm = useDeferredValue(searchTerm.trim().toLowerCase());
 
-  // Définition des catégories de biotechnologie par couleur
-  const biotechColors = {
-    green: {
-      name: 'Verte',
-      description: 'Agro-alimentaire, production végétale, biomatériaux, énergie',
-      color: 'green',
-      bgColor: 'bg-green-500',
-      textColor: 'text-green-800',
-      bgColorLight: 'bg-green-100',
-      borderColor: 'border-green-500',
-      keywords: ['agro-alimentaire', 'agro alimentaire', 'agriculture biotechnologie', 'plante transgénique', 'amélioration végétale', 'biomatériau', 'biocarburant', 'énergie verte', 'biomasse', 'bioéthanol', 'OGM', 'céréale génétiquement', 'agroalimentaire biotech', 'biotechnologie végétale', 'fermentation']
-    },
-    red: {
-      name: 'Rouge',
-      description: 'Santé, pharmaceutique, médecine',
-      color: 'red',
-      bgColor: 'bg-red-500',
-      textColor: 'text-red-800',
-      bgColorLight: 'bg-red-100',
-      borderColor: 'border-red-500',
-      keywords: ['biotechnologie médicale', 'médic', 'pharmac', 'thérapie génique', 'médicament biotechnologique', 'vaccin', 'anticorps', 'anticorps monoclonal', 'biopharmaceutique', 'cellule souche', 'génétique', 'crispr', 'ADN', 'ARN', 'génomique', 'biocapteur', 'glycémie', 'diabète', 'biotechnologie santé']
-    },
-    white: {
-      name: 'Blanche',
-      description: 'Applications industrielles, procédés biologiques',
-      color: 'gray',
-      bgColor: 'bg-gray-500',
-      textColor: 'text-gray-800',
-      bgColorLight: 'bg-gray-100',
-      borderColor: 'border-gray-500',
-      keywords: ['biotechnologie industrielle', 'biocatalyse', 'bioproduction', 'biochimie industrielle', 'polymère biosourcé', 'textile biotechnologie', 'procédé biologique', 'fermentation industrielle', 'bioréacteur', 'bioraffinerie', 'solvant biosourcé', 'biosynthèse', 'enzyme industrielle', 'biotech industrielle', 'catalyseur biologique']
-    },
-    yellow: {
-      name: 'Jaune',
-      description: 'Protection de l\'environnement, traitement des pollutions',
-      color: 'yellow',
-      bgColor: 'bg-yellow-500',
-      textColor: 'text-yellow-800',
-      bgColorLight: 'bg-yellow-100',
-      borderColor: 'border-yellow-500',
-      keywords: ['bioremédiation', 'biodépollution', 'traitement biologique', 'déchet biologique', 'biodégradation', 'dépollution', 'écologie industrielle', 'biotechnologie environnementale', 'bioréhabilitation', 'sol pollué', 'eau traitement biologique', 'assainissement', 'développement durable biotech', 'impact environnemental', 'microorganisme dépolluant']
-    },
-    blue: {
-      name: 'Bleue',
-      description: 'Biodiversité marine, aquaculture, cosmétique marine',
-      color: 'blue',
-      bgColor: 'bg-blue-500',
-      textColor: 'text-blue-800',
-      bgColorLight: 'bg-blue-100',
-      borderColor: 'border-blue-500',
-      keywords: ['biotechnologie marine', 'aquaculture', 'algue', 'microalgue', 'biotechnologie bleue', 'ressource marine', 'cosmétique marine', 'milieu aquatique biotechnologie', 'bio-océanographie', 'spiruline', 'organisme marin', 'biodiversité marine', 'aquatique biotechnologie', 'phytoplancton']
-    },
-    black: {
-      name: 'Noire',
-      description: 'Éducation, formations, ressources pédagogiques',
-      color: 'black',
-      bgColor: 'bg-gray-800',
-      textColor: 'text-gray-100',
-      bgColorLight: 'bg-gray-200',
-      borderColor: 'border-gray-800',
-      keywords: ['éducation', 'formation', 'académie', 'pédagogie', 'didactique', 'enseignement', 'apprendre', 'étudiant', 'lycée', 'université', 'cours', 'programme', 'curriculum', 'apprentissage', 'ressource éducative']
-    },
-    multi: {
-      name: 'Multi-couleurs',
-      description: 'Sources d\'actualités générales touchant plusieurs domaines biotechnologiques',
-      color: 'purple',
-      bgColor: 'bg-purple-500',
-      textColor: 'text-purple-800',
-      bgColorLight: 'bg-purple-100',
-      borderColor: 'border-purple-500',
-      keywords: []
+  const fetchDigest = async (forceRefresh = false) => {
+    if (!digest) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
     }
-  };
 
-  // NOUVEAU: Utilisation d'un endpoint unique pour tous les articles
-  const fetchArticles = async (colorKey) => {
-    setLoading(true);
-    setError(null);
-    
+    setError('');
+
     try {
-      // Construire l'URL avec les paramètres appropriés
-      let url = '/.netlify/functions/biotech-veille';
-      
-      // Ajouter les paramètres à l'URL
       const params = new URLSearchParams();
-      if (colorKey) {
-        params.append('color', colorKey);
-      }
       if (forceRefresh) {
-        params.append('refresh', 'true');
+        params.set('refresh', 'true');
       }
-      // Ajouter le paramètre de filtrage biotech
-      params.append('biotechOnly', biotechOnly.toString());
-      // Limiter le nombre d'articles pour réduire le risque de timeout
-      params.append('max', '20');
-      
-      const fullUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
-      console.log(`Chargement des articles depuis: ${fullUrl}`);
-      
-      // Ajouter un timeout côté client
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-      
-      try {
-        const response = await fetch(fullUrl, {
-          signal: controller.signal,
-          // Préciser les options de cache pour éviter les problèmes côté client
-          cache: 'no-cache',
-          headers: {
-            'pragma': 'no-cache',
-            'cache-control': 'no-cache'
-          }
-        });
-        
-        // Nettoyer le timeout
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          // En cas d'erreur, afficher le code et message d'erreur
-          console.error(`Erreur réseau: ${response.status} ${response.statusText}`);
-          
-          if (response.status === 502 || response.status === 504) {
-            // Si on a une erreur de gateway ou de timeout, essayer directement la fonction de debug
-            console.log("Tentative de diagnostic du serveur...");
-            try {
-              const debugResponse = await fetch('/.netlify/functions/debug-status');
-              if (debugResponse.ok) {
-                const debugData = await debugResponse.json();
-                console.log("Diagnostic:", debugData);
-                
-                // Continuer avec les données de secours simulées
-                setArticles([]);
-                throw new Error(`La passerelle Netlify a renvoyé une erreur ${response.status}. Veuillez réessayer plus tard.`);
-              }
-            } catch (debugError) {
-              console.error("Échec du diagnostic:", debugError);
-            }
-          }
-          
-          throw new Error(`Erreur réseau: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.error) {
-          throw new Error(data.error);
-        }
-        
-        if (data.articles && Array.isArray(data.articles)) {
-          setArticles(data.articles);
-          
-          // Calculer le nombre d'articles par couleur
-          const countByColor = data.articles.reduce((acc, article) => {
-            const color = article.biotechColor || 'unclassified';
-            acc[color] = (acc[color] || 0) + 1;
-            return acc;
-          }, {});
-          
-          setArticleCount(countByColor);
-        } else {
-          console.error("Format de données incorrect:", data);
-          throw new Error("Format de données incorrect");
-        }
-      } catch (fetchError) {
-        // Nettoyer le timeout en cas d'erreur
-        clearTimeout(timeoutId);
-        
-        // Si l'erreur est due à un abort, c'est un timeout client
-        if (fetchError.name === 'AbortError') {
-          throw new Error("La requête a pris trop de temps. Veuillez réessayer plus tard.");
-        }
-        
-        throw fetchError;
+
+      const response = await fetch(`/.netlify/functions/biotech-veille${params.toString() ? `?${params.toString()}` : ''}`, {
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur reseau ${response.status}`);
       }
-    } catch (err) {
-      setError(err.message);
-      console.error("Erreur lors du chargement des articles:", err);
+
+      const payload = await response.json();
+      if (!payload || !payload.sections || !payload.categories) {
+        throw new Error('Format de veille invalide');
+      }
+
+      setDigest(payload);
+    } catch (requestError) {
+      console.error('ScienceWatchPage fetch error:', requestError);
+      setError("La veille STL n'a pas pu etre chargee.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  // Précalculer le nombre d'articles par couleur au montage initial
   useEffect(() => {
-    // Obtenir un aperçu du nombre d'articles disponibles par couleur
-    const preloadArticleCounts = async () => {
-      try {
-        const response = await fetch('/.netlify/functions/biotech-veille?counts=true');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.counts) {
-            setArticleCount(data.counts);
-          }
-        }
-      } catch (error) {
-        console.error("Erreur lors du préchargement des compteurs:", error);
-      }
-    };
-    
-    preloadArticleCounts();
+    fetchDigest(false);
   }, []);
 
-  // Charger les articles au montage du composant, sans filtre
-  useEffect(() => {
-    // Ne charge pas automatiquement tous les articles au démarrage (trop lourd)
-    // Au lieu de cela, on affiche un écran de sélection de couleur
-    setLoading(false);
-  }, []);
+  const categories = digest?.categories || [];
+  const visibleCategories = categories.filter((category) => category.key !== 'multi');
+  const categoryKeys = selectedCategory === 'all'
+    ? categories.map((category) => category.key)
+    : [selectedCategory];
 
-  // Gérer le changement de couleur sélectionnée
-  const handleColorSelect = (color) => {
-    setSelectedColor(color);
-    setArticles([]);
-    fetchArticles(color);
-  };
-
-  // Sélecteur de couleur
-  const renderColorSelector = () => {
-    return (
-      <div className="mb-8 p-6 rounded-lg shadow-md bg-white">
-        <h2 className="text-2xl font-bold mb-4 text-center">Sélectionnez une catégorie de biotechnologie</h2>
-        <p className="mb-4 text-center text-gray-600">Choisissez une catégorie spécifique ou affichez toutes les actualités</p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Object.entries(biotechColors)
-            .filter(([key]) => key !== 'black') // Exclure la biotechnologie noire qui n'est pas pertinente
-            .map(([key, data]) => (
-              <button
-                key={key}
-                onClick={() => handleColorSelect(key)}
-                className={`p-4 rounded-lg ${data.bgColorLight} border-l-4 ${data.borderColor} transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${data.color}-500 relative`}
-              >
-                <h3 className={`font-bold ${data.textColor}`}>{data.name}</h3>
-                <p className="text-sm">{data.description}</p>
-                
-                {/* Badge du nombre d'articles si disponible */}
-                {articleCount[key] && (
-                  <span className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    {articleCount[key]}
-                  </span>
-                )}
-              </button>
-            ))}
-        </div>
-        
-        {/* Option pour afficher tous les articles */}
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => handleColorSelect(null)}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-          >
-            Afficher toutes les catégories
-          </button>
-        </div>
-      </div>
+  const filteredSections = categoryKeys.reduce((accumulator, categoryKey) => {
+    const sectionArticles = (digest?.sections?.[categoryKey] || []).filter((article) =>
+      matchesSearch(article, deferredSearchTerm),
     );
-  };
-  
-  // Obtenir la légende des couleurs de biotech
-  const renderBiotechLegend = () => {
-    return (
-      <div className="mb-8 p-6 rounded-lg shadow-md bg-white">
-        <h2 className="text-2xl font-bold mb-4 text-center">Les couleurs des biotechnologies</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Object.entries(biotechColors)
-            .filter(([key]) => key !== 'black') // Exclure la biotechnologie noire
-            .map(([key, data]) => (
-              <div key={key} className={`p-4 rounded-lg ${data.bgColorLight} border-l-4 ${data.borderColor}`}>
-                <h3 className={`font-bold ${data.textColor}`}>{data.name}</h3>
-                <p className="text-sm">{data.description}</p>
-              </div>
-            ))}
-        </div>
-      </div>
-    );
-  };
-  
-  // Organiser les articles par couleur de biotechnologie avec limite et diversité de sources
-  const organizeArticlesByColor = (articleList) => {
-    // Initialize categories including 'unclassified'
-    const organizedByColor = Object.keys(biotechColors).reduce((acc, color) => {
-        acc[color] = [];
-        return acc;
-    }, { unclassified: [] });
-    
-    // Group articles by their pre-assigned biotechColor from the function
-    articleList.forEach(article => {
-      const color = article.biotechColor && biotechColors[article.biotechColor] ? article.biotechColor : 'unclassified';
-      if (organizedByColor[color]) {
-        organizedByColor[color].push(article);
-      } else {
-        organizedByColor.unclassified.push(article);
-      }
-    });
-    
-    return organizedByColor;
-  };
 
-  // Get articles organized by biotech color with limit
-  const articlesByBiotechColor = organizeArticlesByColor(articles);
-
-  // Ajouter cette fonction pour gérer le rafraîchissement des articles:
-  const handleRefresh = () => {
-    setArticles([]);
-    fetchArticles(selectedColor);
-  };
-
-  // Ajouter cette fonction pour gérer le changement de l'option de rafraîchissement forcé:
-  const handleForceRefreshToggle = () => {
-    setForceRefresh(!forceRefresh);
-  };
-
-  // Ajouter cette fonction pour gérer le changement du filtrage biotechnologie
-  const handleBiotechOnlyToggle = () => {
-    setBiotechOnly(!biotechOnly);
-    // Si des articles sont déjà chargés, rafraîchir avec le nouveau paramètre
-    if (articles.length > 0) {
-      setArticles([]);
-      setTimeout(() => fetchArticles(selectedColor), 100);
+    if (sectionArticles.length > 0) {
+      accumulator[categoryKey] = sectionArticles;
     }
-  };
+
+    return accumulator;
+  }, {});
+
+  const filteredHighlights = (digest?.highlights || []).filter((article) => {
+    const categoryMatches = selectedCategory === 'all' || article.categoryKey === selectedCategory;
+    return categoryMatches && matchesSearch(article, deferredSearchTerm);
+  });
+
+  const featuredArticle = filteredHighlights[0] || null;
+  const secondaryHighlights = filteredHighlights.slice(1, 4);
+  const hasResults = Object.keys(filteredSections).length > 0;
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold text-center mb-6">Veille Scientifique Biotechnologie</h1>
-      
-      {/* Afficher le sélecteur de couleur si aucun article n'a été chargé et pas de chargement en cours */}
-      {!loading && articles.length === 0 && !error && renderColorSelector()}
-      
-      {/* Afficher la légende des couleurs seulement après avoir chargé des articles */}
-      {articles.length > 0 && renderBiotechLegend()}
-      
-      {/* Bouton de retour à la sélection */}
-      {articles.length > 0 && (
-        <div className="flex justify-center mb-6">
-          <button 
-            onClick={() => {
-              setArticles([]);
-              setSelectedColor(null);
-              setError(null);
-            }}
-            className="mr-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300"
-          >
-            ← Retour à la sélection
-          </button>
-          
-          <div className="flex flex-col items-center">
-            <button 
-              onClick={handleRefresh}
-              disabled={loading}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Chargement...
-                </>
-              ) : (
-                <>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Rafraîchir
-                </>
-              )}
-            </button>
-            
-            <div className="flex flex-col space-y-2 mt-2">
-              <div className="flex items-center">
-                <input 
-                  type="checkbox" 
-                  id="forceRefresh" 
-                  checked={forceRefresh} 
-                  onChange={handleForceRefreshToggle} 
-                  className="mr-2"
-                />
-                <label htmlFor="forceRefresh" className="text-sm text-gray-600">
-                  Ignorer le cache (plus frais mais plus lent)
-                </label>
+    <div className="container mx-auto px-4 pb-14 pt-6">
+      <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-br from-emerald-50 via-white to-sky-50 shadow-sm">
+        <div className="grid gap-8 px-6 py-8 lg:grid-cols-[1.4fr_0.9fr] lg:px-10 lg:py-10">
+          <div>
+            <p className="mb-3 inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-slate-600">
+              Veille scientifique STL
+            </p>
+            <h1 className="max-w-3xl text-4xl font-black leading-tight text-slate-900 lg:text-5xl">
+              Une vraie page d'actualite pour la STL, pensee pour les usages attendus en France
+            </h1>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700 lg:text-lg">
+              Cette veille garde les categories officielles des biotechnologies, mais les traduit enfin en usages STL clairs :
+              culture scientifique, projet technologique, techniques de laboratoire, oral et enjeux One Health.
+            </p>
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              {PAGE_PILLARS.map((pillar) => (
+                <article key={pillar.title} className="rounded-2xl border border-white/70 bg-white/80 p-4 shadow-sm backdrop-blur">
+                  <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">{pillar.title}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">{pillar.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <aside className="rounded-[1.75rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">Cadre officiel</p>
+                <h2 className="mt-2 text-2xl font-black">Ce que la veille privilegie</h2>
               </div>
-              
-              <div className="flex items-center">
-                <input 
-                  type="checkbox" 
-                  id="biotechOnly" 
-                  checked={biotechOnly} 
-                  onChange={handleBiotechOnlyToggle} 
-                  className="mr-2"
-                />
-                <label htmlFor="biotechOnly" className="text-sm text-gray-600">
-                  Filtrer strictement les articles de biotechnologie
-                </label>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
+                Mise a jour {formatDateTime(digest?.generatedAt) || 'en attente'}
+              </span>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm font-semibold text-white">Serie STL : biotechnologies, sante, environnement, bio-industries</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  La page met l'accent sur les situations technologiques, les applications du vivant et les enjeux contemporains
+                  utilises pour donner du sens aux enseignements.
+                </p>
               </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm font-semibold text-white">Dynamique recente : oral, projet, culture scientifique et One Health</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  La selection cherche des sujets mobilisables en cours, en projet, en questionnement technologique et en ouverture scientifique.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              {(digest?.officialReferences || []).map((reference) => (
+                <a
+                  key={reference.url}
+                  href={reference.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white transition hover:bg-white/10"
+                >
+                  <span>{reference.title}</span>
+                  <span className="text-emerald-200">Ouvrir</span>
+                </a>
+              ))}
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-[1.75rem] border border-slate-200 bg-white px-5 py-5 shadow-sm lg:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Navigation editoriale</p>
+            <h2 className="mt-1 text-2xl font-black text-slate-900">Filtrer la veille STL</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Les cinq categories officielles sont conservees. La rubrique transversale reste disponible pour la culture scientifique.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 lg:min-w-[28rem]">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => startTransition(() => setSelectedCategory('all'))}
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                  selectedCategory === 'all'
+                    ? 'border-slate-900 bg-slate-900 text-white'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                Toute la veille
+              </button>
+              {visibleCategories.map((category) => {
+                const style = CATEGORY_STYLES[category.key];
+                return (
+                  <button
+                    key={category.key}
+                    type="button"
+                    onClick={() => startTransition(() => setSelectedCategory(category.key))}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                      selectedCategory === category.key
+                        ? style.badge
+                        : style.button
+                    }`}
+                  >
+                    {category.name}
+                    <span className="ml-2 rounded-full bg-black/10 px-2 py-0.5 text-xs">{category.count}</span>
+                  </button>
+                );
+              })}
+              {categories
+                .filter((category) => category.key === 'multi')
+                .map((category) => {
+                  const style = CATEGORY_STYLES.multi;
+                  return (
+                    <button
+                      key={category.key}
+                      type="button"
+                      onClick={() => startTransition(() => setSelectedCategory(category.key))}
+                      className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                        selectedCategory === category.key
+                          ? style.badge
+                          : style.button
+                      }`}
+                    >
+                      {category.shortTitle}
+                      <span className="ml-2 rounded-full bg-black/10 px-2 py-0.5 text-xs">{category.count}</span>
+                    </button>
+                  );
+                })}
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <label className="flex-1">
+                <span className="sr-only">Rechercher dans la veille STL</span>
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Rechercher un theme, une technique, une source..."
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={() => fetchDigest(true)}
+                disabled={loading || refreshing}
+                className="rounded-2xl bg-lab-teal px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {refreshing ? 'Actualisation...' : 'Actualiser la veille'}
+              </button>
             </div>
           </div>
         </div>
-      )}
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-          <strong className="font-bold">Erreur!</strong>
-          <span className="block sm:inline"> {error}</span>
+      </section>
+
+      {error ? (
+        <div className="mt-8 rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-red-700 shadow-sm">
+          <p className="font-semibold">Impossible de charger la veille STL.</p>
+          <p className="mt-1 text-sm">{error}</p>
         </div>
-      )}
+      ) : null}
 
       {loading ? (
-        <div className="text-center py-10">
-          <div className="flex justify-center mb-4">
-            <svg className="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </div>
-          <p>Chargement des articles depuis les flux RSS...</p> 
-          <p className="text-sm text-gray-500 mt-2">Cette opération peut prendre quelques instants...</p>
+        <div className="mt-8 rounded-[1.75rem] border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-lab-teal" />
+          <p className="mt-4 text-lg font-semibold text-slate-800">Chargement de la veille STL...</p>
+          <p className="mt-2 text-sm text-slate-500">Selection des sujets, classement par categories et mise en forme editoriale.</p>
         </div>
-      ) : (
-        <div>
-          {/* Display articles grouped by biotech color */}
-          {Object.entries(articlesByBiotechColor).map(([colorKey, colorArticles]) => {
-            if (colorArticles.length === 0) return null; 
-            
-            const colorData = biotechColors[colorKey] || {
-              name: 'Non classifié',
-              description: 'Articles non classifiés ou sans couleur définie',
-              color: 'gray',
-              bgColor: 'bg-gray-500',
-              textColor: 'text-gray-800',
-              bgColorLight: 'bg-gray-100',
-              borderColor: 'border-gray-500',
-            };
-            
-            return (
-              <div key={colorKey} className="mb-10">
-                <div className={`p-3 ${colorData.bgColorLight} border-l-4 ${colorData.borderColor} mb-4`}>
-                  <h2 className={`text-xl font-bold ${colorData.textColor}`}>
-                    Biotechnologie {colorData.name} 
-                    <span className="ml-2 text-sm font-normal">({colorArticles.length} article{colorArticles.length > 1 ? 's' : ''})</span>
-                  </h2>
-                  <p className="text-sm">{colorData.description}</p>
-                </div>
-                
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {colorArticles.map((article, index) => (
-                    <div key={`${colorKey}-${index}-${article.link || index}`} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
-                      <div className="h-40 overflow-hidden flex-shrink-0 bg-gray-100">
-                        <img
-                          src={article.imageUrl || `https://placehold.co/600x400?text=Biotechnologie+${colorData.name}`}
-                          alt={article.title || 'Titre non disponible'}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            // First try to fix common URL issues
-                            const url = e.target.src;
-                            if (url.startsWith('http:') && !url.includes('placehold.co')) {
-                              // Try to fix mixed content by using HTTPS
-                              e.target.src = url.replace('http:', 'https:');
-                            } else if (url.startsWith('//')) {
-                              // Fix protocol-relative URLs
-                              e.target.src = 'https:' + url;
-                            } else if (!url.startsWith('http') && !url.startsWith('https://placehold.co')) {
-                              // Try to add missing protocol
-                              e.target.src = 'https:' + url;
-                            } else {
-                              // If all attempts fail, use a placeholder with the biotech color
-                              e.target.src = `https://placehold.co/600x400?text=${encodeURIComponent('Biotechnologie ' + colorData.name)}`;
-                            }
-                          }}
-                        />
-                      </div>
-                      <div className="p-4 flex flex-col flex-grow">
-                        <div className="flex justify-between items-start mb-2 flex-shrink-0">
-                          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium truncate flex-shrink" title={article.source || 'Source inconnue'}>
-                            {article.source || 'Source inconnue'}
-                          </span>
-                          <span className={`inline-block ${colorData.bgColorLight} ${colorData.textColor} text-xs px-2 py-1 rounded font-medium flex-shrink-0`}>
-                            {colorData.name}
-                          </span>
-                        </div>
-                        <h3 className="text-lg font-semibold mb-2 line-clamp-3 flex-grow" title={article.title || ''}>
-                          {article.title || 'Titre non disponible'}
-                        </h3>
-                        <p className="text-gray-700 text-sm mb-4 line-clamp-3 flex-shrink-0">
-                          {article.description || 'Description non disponible'}
-                        </p>
-                        <div className="flex justify-between items-center mt-auto pt-2 border-t border-gray-200 flex-shrink-0">
-                          <a
-                            href={article.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium ${!article.link ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            // Prevent click if no link
-                            onClick={(e) => !article.link && e.preventDefault()} 
-                          >
-                            {article.link ? "Lire l'article" : "Lien indisponible"}
-                          </a>
-                          <span className="text-xs text-gray-500">
-                            {article.pubDate ? new Date(article.pubDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date inconnue'}
-                          </span>
-                        </div>
-                      </div>
+      ) : null}
+
+      {!loading && featuredArticle ? (
+        <section className="mt-8">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">A la une STL</p>
+              <h2 className="mt-1 text-3xl font-black text-slate-900">Les sujets les plus exploitables en classe</h2>
+            </div>
+            <p className="max-w-xl text-right text-sm leading-6 text-slate-600">
+              Les cartes mettent en avant les usages STL, la categorie officielle et l'interet pedagogique du sujet.
+            </p>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-[1.35fr_0.95fr]">
+            <article className="overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white shadow-sm">
+              <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
+                <div className="min-h-[18rem] bg-slate-100">
+                  {featuredArticle.imageUrl ? (
+                    <img
+                      src={featuredArticle.imageUrl}
+                      alt={featuredArticle.title}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 px-6 text-center text-lg font-semibold text-slate-500">
+                      Veille STL
                     </div>
-                  ))}
+                  )}
+                </div>
+                <div className="flex flex-col p-6">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${CATEGORY_STYLES[featuredArticle.categoryKey || 'multi'].badge}`}>
+                      {STL_CATEGORIES_LABEL(featuredArticle.categoryKey, digest)}
+                    </span>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                      {featuredArticle.kind === 'background' ? 'Repere de fond' : 'Actualite'}
+                    </span>
+                    <span className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">{featuredArticle.source}</span>
+                  </div>
+
+                  <h3 className="mt-4 text-3xl font-black leading-tight text-slate-900">{featuredArticle.title}</h3>
+                  <p className="mt-4 text-sm leading-7 text-slate-700">{featuredArticle.description}</p>
+
+                  <div className="mt-5 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+                    <span className="font-semibold text-slate-900">Pourquoi c'est STL :</span> {featuredArticle.whyItMatters}
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {(featuredArticle.usages || []).map((usage) => (
+                      <span key={usage} className="rounded-full bg-lab-teal/10 px-3 py-1 text-xs font-semibold text-lab-teal">
+                        {usage}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="mt-auto flex items-center justify-between pt-6">
+                    <span className="text-sm text-slate-500">{formatDate(featuredArticle.pubDate)}</span>
+                    <a
+                      href={featuredArticle.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+                    >
+                      Lire l'article
+                    </a>
+                  </div>
                 </div>
               </div>
+            </article>
+
+            <div className="grid gap-4">
+              {secondaryHighlights.map((article) => {
+                const style = CATEGORY_STYLES[article.categoryKey || 'multi'];
+                return (
+                  <article key={`${article.link || article.title}`} className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${style.softBadge}`}>
+                        {STL_CATEGORIES_LABEL(article.categoryKey, digest)}
+                      </span>
+                      <span className="text-xs uppercase tracking-[0.16em] text-slate-500">{article.source}</span>
+                    </div>
+                    <h3 className="mt-3 text-xl font-black leading-tight text-slate-900">{article.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{article.description}</p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {(article.usages || []).map((usage) => (
+                        <span key={usage} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                          {usage}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-5 flex items-center justify-between">
+                      <span className="text-sm text-slate-500">{formatDate(article.pubDate)}</span>
+                      <a
+                        href={article.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold text-lab-teal hover:underline"
+                      >
+                        Ouvrir
+                      </a>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {!loading && !hasResults ? (
+        <div className="mt-8 rounded-[1.75rem] border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
+          <h2 className="text-2xl font-black text-slate-900">Aucun resultat pour cette recherche</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            Essaie une autre categorie ou retire quelques mots dans le champ de recherche.
+          </p>
+        </div>
+      ) : null}
+
+      {!loading && hasResults ? (
+        <section className="mt-10 space-y-10">
+          {Object.entries(filteredSections).map(([categoryKey, articles]) => {
+            const category = categories.find((item) => item.key === categoryKey);
+            const style = CATEGORY_STYLES[categoryKey] || CATEGORY_STYLES.multi;
+            const liveCount = articles.filter((article) => article.kind === 'news').length;
+
+            return (
+              <section key={categoryKey}>
+                <div className={`rounded-[1.6rem] border ${style.card} p-5 shadow-sm`}>
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${style.badge}`}>
+                          {category?.name || 'Transversale'}
+                        </span>
+                        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          {articles.length} sujet{articles.length > 1 ? 's' : ''}
+                        </span>
+                        {category?.usedBackground ? (
+                          <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700">
+                            {liveCount} actualite{liveCount > 1 ? 's' : ''} + repere de fond
+                          </span>
+                        ) : null}
+                      </div>
+                      <h2 className={`mt-3 text-3xl font-black ${style.title}`}>{category?.title || 'Culture scientifique STL'}</h2>
+                      <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-700">{category?.description}</p>
+                      <p className="mt-2 max-w-4xl text-sm leading-7 text-slate-600">{category?.lens}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/60 bg-white/80 px-4 py-3 text-sm leading-6 text-slate-700">
+                      <p className="font-semibold text-slate-900">Domaine STL</p>
+                      <p>{category?.domain || 'Culture scientifique'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {articles.map((article) => {
+                    const cardStyle = CATEGORY_STYLES[article.categoryKey || categoryKey] || CATEGORY_STYLES.multi;
+                    return (
+                      <article key={`${article.link || article.title}`} className="flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-sm">
+                        <div className="h-44 bg-slate-100">
+                          {article.imageUrl ? (
+                            <img
+                              src={article.imageUrl}
+                              alt={article.title}
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                              onError={(event) => {
+                                event.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className={`flex h-full items-center justify-center bg-gradient-to-br px-6 text-center text-base font-semibold ${cardStyle.softBadge}`}>
+                              {article.kind === 'background' ? 'Repere de fond STL' : category?.shortTitle || 'Veille STL'}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex flex-1 flex-col p-5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${cardStyle.softBadge}`}>
+                              {article.kind === 'background' ? 'Repere de fond' : 'Actualite'}
+                            </span>
+                            <span className="text-xs uppercase tracking-[0.16em] text-slate-500">{article.source}</span>
+                          </div>
+
+                          <h3 className="mt-4 text-xl font-black leading-tight text-slate-900">{article.title}</h3>
+                          <p className="mt-3 line-clamp-4 text-sm leading-6 text-slate-600">{article.description}</p>
+
+                          <div className={`mt-4 rounded-2xl border ${cardStyle.card} p-4 text-sm leading-6 text-slate-700`}>
+                            <span className="font-semibold text-slate-900">Interet STL :</span> {article.whyItMatters}
+                          </div>
+
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {(article.usages || []).map((usage) => (
+                              <span key={usage} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                                {usage}
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="mt-auto flex items-center justify-between pt-6">
+                            <span className="text-sm text-slate-500">{formatDate(article.pubDate)}</span>
+                            <a
+                              href={article.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+                            >
+                              Lire
+                            </a>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
             );
           })}
-          
-          {/* Display message if no articles loaded at all */} 
-          {articles.length === 0 && !loading && !error && (
-             <p className="text-center text-gray-500 mt-10">Veuillez sélectionner une catégorie de biotechnologie ci-dessus.</p>
-          )}
-          
-          {articles.length === 0 && !loading && error && (
-             <p className="text-center text-gray-500 mt-10">Aucun article n'a pu être chargé depuis les flux RSS.</p>
-          )}
-        </div>
-      )}
+        </section>
+      ) : null}
     </div>
   );
 }
 
-export default ScienceWatchPage; 
+const STL_CATEGORIES_LABEL = (categoryKey, digest) => {
+  const category = (digest?.categories || []).find((item) => item.key === categoryKey);
+  return category ? category.shortTitle : 'Transversale';
+};
+
+export default ScienceWatchPage;

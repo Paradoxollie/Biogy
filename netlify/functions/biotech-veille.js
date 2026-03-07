@@ -1,714 +1,763 @@
 const Parser = require('rss-parser');
+
 const parser = new Parser({
-  timeout: 3000, // Réduire le timeout par flux pour éviter de bloquer trop longtemps
+  timeout: 5000,
   headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
-    'Accept': 'application/rss+xml, application/xml, text/xml; q=0.1'
+    'User-Agent': 'Biogy-STL-Watch/1.0',
+    Accept: 'application/rss+xml, application/xml, text/xml;q=0.9',
   },
   customFields: {
     item: [
       ['description', 'description'],
       ['content:encoded', 'contentEncoded'],
-      ['pubDate', 'pubDate']
-    ]
-  }
+      ['pubDate', 'pubDate'],
+      ['dc:date', 'dcDate'],
+      ['media:content', 'mediaContent'],
+      ['media:thumbnail', 'mediaThumbnail'],
+      ['enclosure', 'enclosure'],
+    ],
+  },
 });
 
-// Mots-clés généraux de biotechnologie pour filtrer les articles
-const BIOTECH_KEYWORDS = [
-  // Termes généraux
-  'biotechnologie', 'biotech', 'biologie', 'génétique', 'génome', 
-  'ADN', 'ARN', 'CRISPR', 'enzyme', 'protéine', 'bactérie', 
-  'microbiologie', 'fermentation', 'biocarburant', 'biomatériau',
-  'biomolécule', 'bioréacteur', 'thérapie génique', 'OGM', 'transgénique',
-  'biosynthèse', 'bioingénierie', 'biocapteur', 'biocatalyseur', 'biomédical',
-  'culture cellulaire', 'clonage', 'séquençage', 'micro-organisme', 'levure',
-  'immunologie', 'anticorps', 'bioprocédé', 'biotransformation',
-  
-  // Termes spécifiques à la biotechnologie bleue (marine)
-  'aquaculture', 'biotechnologie marine', 'biotechnologie bleue', 'algue', 'microalgue',
-  'ressource marine', 'biologie marine', 'biomasse marine', 'biodiversité marine',
-  'valorisation marine', 'écosystème marin', 'organisme marin', 'phytoplancton',
-  'aquatique', 'océan', 'mer', 'maritime', 'pêche', 'pisciculture', 'maritime',
-  
-  // Termes spécifiques à la biotechnologie verte (agronomie)
-  'amélioration végétale', 'plante génétiquement', 'agriculture biotech', 'biotechnologie verte',
-  'agroalimentaire biotech', 'biofertilisant', 'fertilisation biologique', 'biocontrôle',
-  'agronomie', 'semence', 'nutrition végétale', 'sélection variétale', 'photosynthèse',
-  
-  // Termes spécifiques à la biotechnologie jaune (environnement)
-  'biodépollution', 'bioremédiation', 'traitement biologique', 'biorestauration',
-  'décontamination biologique', 'dépollution', 'biotechnologie environnementale',
-  'écologie', 'déchet', 'environnement', 'recyclage biologique', 'traitement eau',
-  
-  // Termes spécifiques à la biotechnologie blanche (industrielle)
-  'biotechnologie industrielle', 'enzyme industrielle', 'fermentation industrielle',
-  'procédé industriel', 'biocatalyse', 'industrie', 'procédé', 'bioéconomie',
-  'bioproduction', 'biocarburant', 'biomasse', 'chimie verte',
-  
-  // Termes plus généraux mais souvent liés
-  'innovation', 'recherche', 'développement durable', 'laboratoire', 'startup',
-  'bioéconomie', 'économie circulaire', 'valorisation', 'science', 'technologie'
+const CACHE_TTL_MS = 20 * 60 * 1000;
+const FEED_TIMEOUT_MS = 3500;
+const MAX_ITEMS_PER_FEED = 6;
+const MAX_SECTION_ITEMS = 6;
+const MIN_LIVE_ITEMS_PER_CATEGORY = 3;
+const CATEGORY_ORDER = ['red', 'white', 'green', 'yellow', 'blue', 'multi'];
+
+let digestCache = {
+  data: null,
+  timestamp: 0,
+};
+
+const STL_CATEGORIES = {
+  red: {
+    key: 'red',
+    name: 'Rouge',
+    title: 'Sante, diagnostic et biotechnologies medicales',
+    shortTitle: 'Sante',
+    official: true,
+    domain: 'Sante humaine',
+    description:
+      'Vaccins, therapie, diagnostic, immunologie, biologie moleculaire et innovations biomedicales mobilisables en STL.',
+    lens:
+      'Utile pour contextualiser les analyses biologiques, les techniques de laboratoire et les enjeux de sante publique.',
+    keywords: [
+      'sante',
+      'medical',
+      'medecine',
+      'vaccin',
+      'diagnostic',
+      'immun',
+      'cancer',
+      'biomarqueur',
+      'therapie',
+      'cellule',
+      'micro-aiguille',
+      'crispr',
+      'genom',
+      'sequenc',
+      'anticorps',
+      'pathogene',
+      'microbiote',
+    ],
+    defaultUsages: ['Techniques de labo', 'Oral STL'],
+  },
+  white: {
+    key: 'white',
+    name: 'Blanche',
+    title: 'Bioproduction, procedes et bio-industries',
+    shortTitle: 'Bio-industries',
+    official: true,
+    domain: 'Production industrielle',
+    description:
+      'Fermentation, enzymes, bioproduction, procedes, qualite et valorisation industrielle du vivant.',
+    lens:
+      'Pertinent pour la demarche de projet, l optimisation de procedes et les situations professionnelles STL.',
+    keywords: [
+      'industrie',
+      'industriel',
+      'bioproduction',
+      'fermentation',
+      'enzyme',
+      'bioreacteur',
+      'bioprocede',
+      'production',
+      'materiau',
+      'bioplastique',
+      'process',
+      'qualite',
+      'usine',
+      'catalyse',
+      'bioraffinerie',
+      'bioeconomie',
+    ],
+    defaultUsages: ['Projet technologique', 'Qualite / production'],
+  },
+  green: {
+    key: 'green',
+    name: 'Verte',
+    title: 'Agronomie, alimentation et ressources du vivant',
+    shortTitle: 'Agronomie',
+    official: true,
+    domain: 'Agronomie et alimentation',
+    description:
+      'Selection, microbiologie alimentaire, production vegetale, agro-ressources et biotechnologies pour l alimentation.',
+    lens:
+      'Permet de relier les actualites a la qualite sanitaire, a la transformation biologique et aux filieres agroalimentaires.',
+    keywords: [
+      'agro',
+      'aliment',
+      'alimentaire',
+      'agriculture',
+      'vegetal',
+      'plante',
+      'culture',
+      'agronomie',
+      'selection',
+      'semence',
+      'ferme',
+      'microorganisme',
+      'sol',
+      'levure',
+      'fermentation',
+      'nutrition',
+      'microalgue',
+    ],
+    defaultUsages: ['Contextualisation de TP', 'Culture scientifique'],
+  },
+  yellow: {
+    key: 'yellow',
+    name: 'Jaune',
+    title: 'Environnement, traitement et depollution',
+    shortTitle: 'Environnement',
+    official: true,
+    domain: 'Environnement',
+    description:
+      'Qualite de l eau, bioremediation, dechets, bioindication et surveillance des milieux.',
+    lens:
+      'Alimente les enjeux de developpement durable, d analyse des pollutions et de prevention en STL.',
+    keywords: [
+      'environnement',
+      'eau',
+      'pollu',
+      'depoll',
+      'bioremed',
+      'dechet',
+      'recycl',
+      'station',
+      'traitement',
+      'assainissement',
+      'microplastique',
+      'biodiversite',
+      'sol',
+      'ecosysteme',
+      'carbone',
+    ],
+    defaultUsages: ['One Health', 'Oral STL'],
+  },
+  blue: {
+    key: 'blue',
+    name: 'Bleue',
+    title: 'Ressources marines, aquaculture et biomolecules',
+    shortTitle: 'Milieux marins',
+    official: true,
+    domain: 'Milieux marins',
+    description:
+      'Aquaculture, biodiversite marine, algues, biomolecules et innovations issues du vivant marin.',
+    lens:
+      'Ouvre la STL a la biodiversite, aux ressources marines et a la valorisation biotechnologique des milieux aquatiques.',
+    keywords: [
+      'marin',
+      'marine',
+      'mer',
+      'ocean',
+      'aquaculture',
+      'algue',
+      'microalgue',
+      'littoral',
+      'peche',
+      'biodiversite marine',
+      'aquatique',
+      'phytoplancton',
+      'spiruline',
+      'ressource marine',
+    ],
+    defaultUsages: ['Culture scientifique', 'Projet technologique'],
+  },
+  multi: {
+    key: 'multi',
+    name: 'Transversale',
+    title: 'Recherche, innovation et culture scientifique STL',
+    shortTitle: 'Transversale',
+    official: false,
+    domain: 'Culture scientifique',
+    description:
+      'Articles transversaux utiles pour ouvrir une sequence, nourrir un oral ou relier plusieurs domaines STL.',
+    lens:
+      'Permet de garder une veille scientifique generale sans perdre le lien avec les attendus STL.',
+    keywords: [
+      'recherche',
+      'innovation',
+      'science',
+      'technologie',
+      'donnee',
+      'ethique',
+      'societe',
+      'laboratoire',
+      'ingenierie',
+      'souverainete',
+    ],
+    defaultUsages: ['Culture scientifique', 'Oral STL'],
+  },
+};
+
+const SOURCE_REGISTRY = [
+  {
+    id: 'inserm',
+    source: 'Inserm',
+    url: 'https://presse.inserm.fr/feed/',
+    type: 'official',
+    defaultCategory: 'red',
+    categories: ['red', 'multi'],
+  },
+  {
+    id: 'futura-sante',
+    source: 'Futura Sciences - Sante',
+    url: 'https://www.futura-sciences.com/rss/sante/actualites.xml',
+    type: 'media',
+    defaultCategory: 'red',
+    categories: ['red'],
+  },
+  {
+    id: 'futura-environnement',
+    source: 'Futura Sciences - Environnement',
+    url: 'https://www.futura-sciences.com/rss/environnement/actualites.xml',
+    type: 'media',
+    defaultCategory: 'yellow',
+    categories: ['yellow', 'green', 'blue'],
+  },
+  {
+    id: 'futura-nature',
+    source: 'Futura Sciences - Nature',
+    url: 'https://www.futura-sciences.com/rss/nature/actualites.xml',
+    type: 'media',
+    defaultCategory: 'green',
+    categories: ['green', 'blue', 'yellow'],
+  },
+  {
+    id: 'techniques-ingenieur',
+    source: "Techniques de l'Ingenieur",
+    url: "https://www.techniques-ingenieur.fr/actualite/articles/feed/",
+    type: 'media',
+    defaultCategory: 'white',
+    categories: ['white', 'yellow', 'multi'],
+  },
+  {
+    id: 'conversation-environnement',
+    source: 'The Conversation - Environnement',
+    url: 'https://theconversation.com/fr/environnement/articles.atom',
+    type: 'media',
+    defaultCategory: 'yellow',
+    categories: ['yellow', 'green', 'blue', 'multi'],
+  },
+  {
+    id: 'lemonde-sciences',
+    source: 'Le Monde - Sciences',
+    url: 'https://www.lemonde.fr/sciences/rss_full.xml',
+    type: 'media',
+    defaultCategory: 'multi',
+    categories: ['multi', 'red', 'white', 'green', 'yellow', 'blue'],
+  },
+  {
+    id: 'cnrs',
+    source: 'CNRS Le Journal',
+    url: 'https://lejournal.cnrs.fr/rss',
+    type: 'official',
+    defaultCategory: 'multi',
+    categories: ['multi', 'red', 'white', 'green', 'yellow', 'blue'],
+  },
+  {
+    id: 'conversation-fr',
+    source: 'The Conversation - France',
+    url: 'https://theconversation.com/fr/articles.atom?language=fr',
+    type: 'media',
+    defaultCategory: 'multi',
+    categories: ['multi', 'red', 'white', 'green', 'yellow', 'blue'],
+  },
+  {
+    id: 'conversation-sante',
+    source: 'The Conversation - Sante',
+    url: 'https://theconversation.com/fr/sante/articles.atom',
+    type: 'media',
+    defaultCategory: 'red',
+    categories: ['red', 'multi'],
+  },
+  {
+    id: 'conversation-technologie',
+    source: 'The Conversation - Technologie',
+    url: 'https://theconversation.com/fr/technologie/articles.atom',
+    type: 'media',
+    defaultCategory: 'white',
+    categories: ['white', 'multi'],
+  },
 ];
 
-// FALLBACK ARTICLES - articles pré-définis pour garantir un minimum par couleur
-const FALLBACK_ARTICLES = {
-  blue: [
+const BACKGROUND_ARTICLES = {
+  red: [
     {
-      title: "Les algues, un potentiel immense pour la biotechnologie bleue",
-      description: "Les algues constituent une ressource naturelle dont le potentiel est encore largement sous-exploité. Riches en molécules d'intérêt pour de nombreux secteurs (alimentaire, cosmétique, pharmaceutique), elles représentent un enjeu majeur pour la biotechnologie bleue.",
-      pubDate: new Date().toISOString(),
-      source: "Mer et Marine (Archive)",
-      biotechColor: "blue",
-      link: "https://www.meretmarine.com/fr/content/les-biotechnologies-marines-un-secteur-plein-davenir",
-      imageUrl: "https://images.unsplash.com/photo-1621494547431-5769f12d686c?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
+      title: 'Vaccins et anticorps : repere de fond pour comprendre les innovations de sante',
+      link: 'https://presse.inserm.fr/',
+      source: 'Inserm',
+      kind: 'background',
+      description:
+        'Un point d entree utile pour relier actualite biomedicale, diagnostic, immunologie et techniques de laboratoire en STL.',
+      pubDate: '2025-01-01T00:00:00.000Z',
+      imageUrl: null,
     },
-    {
-      title: "Biotechnologie marine : des applications prometteuses pour la santé",
-      description: "De nombreux organismes marins produisent des molécules aux propriétés pharmacologiques uniques, offrant de nouvelles perspectives pour le développement de médicaments innovants contre le cancer, les maladies infectieuses ou neurodégénératives.",
-      pubDate: new Date(Date.now() - 2*24*60*60*1000).toISOString(),
-      source: "IFREMER (Archive)",
-      biotechColor: "blue",
-      link: "https://wwz.ifremer.fr/Recherche/Departements-scientifiques/Departement-Ressources-Biologiques-et-Environnement/Biotechnologies-et-Ressources-Marines",
-      imageUrl: "https://images.unsplash.com/photo-1576514129883-2f1678c39bac?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    },
-    {
-      title: "Les microalgues, l'or bleu de la biotechnologie",
-      description: "Les microalgues représentent un potentiel considérable pour produire des biocarburants, des compléments alimentaires, des cosmétiques et des médicaments de manière durable et écologique.",
-      pubDate: new Date(Date.now() - 4*24*60*60*1000).toISOString(),
-      source: "Sciences et Avenir (Archive)",
-      biotechColor: "blue",
-      link: "https://www.sciencesetavenir.fr/nature-environnement/microalgues-la-promesse-de-l-or-bleu_125747",
-      imageUrl: "https://images.unsplash.com/photo-1580377968242-e11d25c4c07e?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    },
-    {
-      title: "Aquaculture du futur : les biotechnologies au service d'une production durable",
-      description: "L'aquaculture fait face à de nombreux défis pour répondre à la demande croissante de produits de la mer tout en limitant son impact environnemental. Les biotechnologies marines offrent des solutions innovantes pour améliorer la santé des élevages et optimiser les rendements.",
-      pubDate: new Date(Date.now() - 6*24*60*60*1000).toISOString(),
-      source: "Cluster Maritime Français (Archive)",
-      biotechColor: "blue",
-      link: "https://www.cluster-maritime.fr/fr/maritime-innovation/biotechnologies-marines",
-      imageUrl: "https://images.unsplash.com/photo-1534236780928-e84cb529000b?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    },
-    {
-      title: "Biotechnologie bleue : valorisation des déchets de la pêche en France",
-      description: "Les coproduits de la pêche et de l'aquaculture représentent une ressource importante pour les biotechnologies bleues. Ces déchets peuvent être transformés en produits à forte valeur ajoutée comme des compléments alimentaires, des bioplastiques ou des ingrédients cosmétiques.",
-      pubDate: new Date(Date.now() - 8*24*60*60*1000).toISOString(),
-      source: "ADEME (Archive)",
-      biotechColor: "blue",
-      link: "https://www.ademe.fr/expertises/economie-circulaire/passer-a-laction/valorisation-biomasse/dossier/produits-biosources/valoriser-coproduits-peche-laquaculture",
-      imageUrl: "https://images.unsplash.com/photo-1578981257191-7e50167396b0?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    }
   ],
   white: [
     {
-      title: "Bioraffineries : la biotechnologie blanche révolutionne l'industrie chimique",
-      description: "Les bioraffineries utilisent des procédés biologiques pour transformer la biomasse en produits chimiques, carburants et matériaux. Cette approche basée sur les biotechnologies blanches offre une alternative durable aux procédés pétrochimiques traditionnels.",
-      pubDate: new Date().toISOString(),
-      source: "Usine Nouvelle (Archive)",
-      biotechColor: "white",
-      link: "https://www.usinenouvelle.com/article/la-chimie-verte-francaise-se-structure.N151482",
-      imageUrl: "https://images.unsplash.com/photo-1581093577421-e484c139d871?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
+      title: 'Bioproduction et enzymes : repere de fond sur les bio-industries',
+      link: 'https://www.techniques-ingenieur.fr/base-documentaire/procedes-chimie-bio-agro-th2/biotechnologies-et-chimie-de-fermentation-42164210/',
+      source: "Techniques de l'Ingenieur",
+      kind: 'background',
+      description:
+        'Une ressource de contexte pour relier fermentation, enzymes, qualite et optimisation des procedes.',
+      pubDate: '2025-01-01T00:00:00.000Z',
+      imageUrl: null,
     },
-    {
-      title: "Enzymes industrielles : le cœur de la biotechnologie blanche",
-      description: "Les enzymes sont des catalyseurs biologiques permettant de réaliser des réactions chimiques dans des conditions douces. Leur utilisation dans l'industrie permet de réduire la consommation d'énergie et l'impact environnemental tout en améliorant l'efficacité des procédés.",
-      pubDate: new Date(Date.now() - 3*24*60*60*1000).toISOString(),
-      source: "Techniques de l'Ingénieur (Archive)",
-      biotechColor: "white",
-      link: "https://www.techniques-ingenieur.fr/base-documentaire/procedes-chimie-bio-agro-th2/biotechnologies-et-chimie-de-fermentation-42164210/",
-      imageUrl: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    },
-    {
-      title: "Bioplastiques : les biotechnologies au service d'un avenir sans pétrole",
-      description: "Les biotechnologies blanches permettent de produire des polymères biodégradables à partir de ressources renouvelables comme l'amidon, la cellulose ou les huiles végétales. Ces matériaux représentent une alternative durable aux plastiques conventionnels issus du pétrole.",
-      pubDate: new Date(Date.now() - 5*24*60*60*1000).toISOString(),
-      source: "Industrie & Technologies (Archive)",
-      biotechColor: "white",
-      link: "https://www.industrie-techno.com/article/bioeconomie-les-promesses-de-la-chimie-verte.55634",
-      imageUrl: "https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    },
-    {
-      title: "Fermentation industrielle : une technologie ancestrale réinventée par les biotechnologies",
-      description: "La fermentation est un procédé biologique exploité depuis des millénaires pour la production d'aliments et de boissons. Aujourd'hui, les biotechnologies blanches l'utilisent pour produire des molécules complexes à haute valeur ajoutée pour les industries pharmaceutique, cosmétique et alimentaire.",
-      pubDate: new Date(Date.now() - 7*24*60*60*1000).toISOString(),
-      source: "Process Alimentaire (Archive)",
-      biotechColor: "white",
-      link: "https://www.processalimentaire.com/ingredients/fermentation-une-biotechnologie-en-plein-essor",
-      imageUrl: "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    },
-    {
-      title: "Biocarburants de deuxième génération : les promesses de la biotechnologie blanche",
-      description: "Les biotechnologies blanches permettent de produire des biocarburants à partir de résidus agricoles ou forestiers sans entrer en compétition avec l'alimentation humaine. Ces procédés enzymatiques transforment la cellulose et l'hémicellulose en sucres fermentescibles pour produire de l'éthanol ou d'autres biocarburants.",
-      pubDate: new Date(Date.now() - 9*24*60*60*1000).toISOString(),
-      source: "INRAE (Archive)",
-      biotechColor: "white",
-      link: "https://www.inrae.fr/actualites/biocarburants-2e-generation",
-      imageUrl: "https://images.unsplash.com/photo-1500382017256-9822c1c2245c?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    }
-  ],
-  yellow: [
-    {
-      title: "Bioremédiation : des microorganismes pour dépolluer les sols contaminés",
-      description: "La bioremédiation utilise des microorganismes pour dégrader les polluants présents dans les sols ou les eaux. Cette approche de biotechnologie jaune offre une solution écologique et économique pour traiter les sites pollués par des hydrocarbures, métaux lourds ou pesticides.",
-      pubDate: new Date().toISOString(),
-      source: "ADEME (Archive)",
-      biotechColor: "yellow",
-      link: "https://www.ademe.fr/expertises/sols-pollues/elements-contexte/perspectives/filiere-bioremediation",
-      imageUrl: "https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    },
-    {
-      title: "Traitement biologique des eaux usées : les innovations de la biotechnologie environnementale",
-      description: "Les procédés biologiques de traitement des eaux usées utilisent des bactéries, champignons ou algues pour éliminer les polluants. Les biotechnologies jaunes développent des techniques plus performantes pour traiter les pollutions émergentes comme les résidus pharmaceutiques ou les microplastiques.",
-      pubDate: new Date(Date.now() - 2*24*60*60*1000).toISOString(),
-      source: "Actu-Environnement (Archive)",
-      biotechColor: "yellow",
-      link: "https://www.actu-environnement.com/ae/dossiers/traitement-eaux-usees/procedes-biologiques.php",
-      imageUrl: "https://images.unsplash.com/photo-1501531835477-57224b837134?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    },
-    {
-      title: "Biotechnologies jaunes : surveiller la qualité de l'environnement grâce aux biocapteurs",
-      description: "Les biocapteurs utilisent des organismes vivants ou des molécules biologiques pour détecter et mesurer des polluants dans l'environnement. Ces outils issus des biotechnologies jaunes permettent une surveillance précise, rapide et économique de la qualité de l'air, de l'eau ou des sols.",
-      pubDate: new Date(Date.now() - 4*24*60*60*1000).toISOString(),
-      source: "Environnement Magazine (Archive)",
-      biotechColor: "yellow",
-      link: "https://www.environnement-magazine.fr/eau/article/2020/04/24/128940/biocapteurs-une-revolution-pour-surveillance-des-milieux",
-      imageUrl: "https://images.unsplash.com/photo-1627636588610-109fa098aa31?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    },
-    {
-      title: "Valorisation des déchets organiques par biotechnologie : vers une économie circulaire",
-      description: "Les biotechnologies jaunes permettent de transformer les déchets organiques en ressources valorisables comme du compost, du biogaz ou des bioproduits. Ces approches contribuent à réduire l'empreinte environnementale des activités humaines tout en créant de la valeur à partir de résidus.",
-      pubDate: new Date(Date.now() - 6*24*60*60*1000).toISOString(),
-      source: "GoodPlanet Info (Archive)",
-      biotechColor: "yellow",
-      link: "https://www.goodplanet.info/actualite/2020/01/15/les-biotechnologies-au-service-de-leconomie-circulaire/",
-      imageUrl: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    },
-    {
-      title: "Phytoremédiation : des plantes pour dépolluer l'environnement",
-      description: "La phytoremédiation utilise des plantes pour extraire, dégrader ou immobiliser les polluants présents dans les sols, les eaux ou l'air. Cette technique de biotechnologie jaune représente une solution écologique et économique pour la réhabilitation des sites contaminés.",
-      pubDate: new Date(Date.now() - 8*24*60*60*1000).toISOString(),
-      source: "Notre Environnement (Archive)",
-      biotechColor: "yellow",
-      link: "https://www.notre-environnement.gouv.fr/themes/sante-environnement/article/les-phytotechnologies",
-      imageUrl: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    }
   ],
   green: [
     {
-      title: "Sélection variétale assistée par marqueurs : la révolution génomique en agriculture",
-      description: "La sélection assistée par marqueurs permet d'identifier précisément les gènes d'intérêt pour créer de nouvelles variétés végétales plus résistantes aux maladies ou mieux adaptées aux conditions climatiques. Cette approche de biotechnologie verte accélère considérablement les programmes d'amélioration des plantes.",
-      pubDate: new Date().toISOString(),
-      source: "INRAE (Archive)",
-      biotechColor: "green",
-      link: "https://www.inrae.fr/actualites/selection-genetique-plantes-animaux-elevage",
-      imageUrl: "https://images.unsplash.com/photo-1620856405654-fffdb09f2332?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
+      title: 'Agronomie, alimentation et vivant : repere de fond pour la STL',
+      link: 'https://www.inrae.fr/actualites',
+      source: 'INRAE',
+      kind: 'background',
+      description:
+        'Un repere fiable pour faire le lien entre microbiologie alimentaire, production vegetale et innovation en agronomie.',
+      pubDate: '2025-01-01T00:00:00.000Z',
+      imageUrl: null,
     },
+  ],
+  yellow: [
     {
-      title: "Biofertilisants : les microorganismes au service d'une agriculture durable",
-      description: "Les biofertilisants sont composés de microorganismes bénéfiques qui favorisent la croissance des plantes en améliorant la disponibilité des nutriments dans le sol. Ces produits issus des biotechnologies vertes constituent une alternative écologique aux engrais chimiques conventionnels.",
-      pubDate: new Date(Date.now() - 3*24*60*60*1000).toISOString(),
-      source: "Agro Media (Archive)",
-      biotechColor: "green",
-      link: "https://www.agro-media.fr/actualite/agriculture-les-biofertilisants-ont-le-vent-en-poupe-46588.html",
-      imageUrl: "https://images.unsplash.com/photo-1625246333195-78d73de2f637?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
+      title: 'Bioremediation et qualite de l eau : repere de fond environnemental',
+      link: 'https://www.actu-environnement.com/ae/dossiers/traitement-eaux-usees/procedes-biologiques.php',
+      source: 'Actu-Environnement',
+      kind: 'background',
+      description:
+        'Une ressource de contexte pour lire les actualites sur l eau, les pollutions et les traitements biologiques.',
+      pubDate: '2025-01-01T00:00:00.000Z',
+      imageUrl: null,
     },
+  ],
+  blue: [
     {
-      title: "Biopesticides : la biotechnologie verte pour protéger les cultures",
-      description: "Les biopesticides sont des produits naturels issus de plantes, microorganismes ou insectes utilisés pour lutter contre les ravageurs des cultures. Ces solutions développées par les biotechnologies vertes offrent une alternative plus respectueuse de l'environnement aux pesticides chimiques.",
-      pubDate: new Date(Date.now() - 5*24*60*60*1000).toISOString(),
-      source: "Actu-Environnement (Archive)",
-      biotechColor: "green",
-      link: "https://www.actu-environnement.com/ae/news/biocontrole-biopesticides-phytosanitaires-marche-developpement-33629.php4",
-      imageUrl: "https://images.unsplash.com/photo-1599332483383-2dda37d26fe1?q=80&w=1000&auto=format&fit=crop",
-      langue: "fr",
-      fallback: true
-    }
-  ]
+      title: 'Algues, aquaculture et biodiversite : repere de fond sur les biotech bleues',
+      link: 'https://wwz.ifremer.fr/Recherche/Departements-scientifiques/Departement-Ressources-Biologiques-et-Environnement/Biotechnologies-et-Ressources-Marines',
+      source: 'Ifremer',
+      kind: 'background',
+      description:
+        'Une base de contexte pour relier ressources marines, aquaculture et valorisation biotechnologique du milieu marin.',
+      pubDate: '2025-01-01T00:00:00.000Z',
+      imageUrl: null,
+    },
+  ],
+  multi: [
+    {
+      title: 'Recherche et innovation : repere de fond pour ouvrir la veille STL',
+      link: 'https://lejournal.cnrs.fr/',
+      source: 'CNRS Le Journal',
+      kind: 'background',
+      description:
+        'Un point d entree transversal pour nourrir l oral, la culture scientifique et les passerelles entre domaines STL.',
+      pubDate: '2025-01-01T00:00:00.000Z',
+      imageUrl: null,
+    },
+  ],
 };
 
-// Sources françaises de biotechnologie par catégorie - OPTIMISÉES POUR DES CONTENUS RÉCENTS
-const SOURCES_BIOTECH = [
-  // Rouge - Santé/Médecine - Sources à jour
-  { url: 'https://presse.inserm.fr/feed/', source: 'INSERM', color: 'red', langue: 'fr', priorité: 1 },
-  { url: 'https://www.sciencesetavenir.fr/sante/rss.xml', source: 'Sciences et Avenir (Santé)', color: 'red', langue: 'fr', priorité: 1 },
-  { url: 'https://www.futura-sciences.com/rss/sante/actualites.xml', source: 'Futura Sciences (Santé)', color: 'red', langue: 'fr', priorité: 1 },
-  { url: 'https://www.allodocteurs.fr/rss/rss.xml', source: 'Allo Docteurs', color: 'red', langue: 'fr', priorité: 1 },
-  { url: 'https://www.santepubliquefrance.fr/rss', source: 'Santé Publique France', color: 'red', langue: 'fr', priorité: 1 },
-  
-  // Verte - Agronomie - Sources à jour
-  { url: 'https://www.inrae.fr/flux/actualites/all/rss.xml', source: 'INRAE', color: 'green', langue: 'fr', priorité: 1 },
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/agronomie.xml', source: 'Actu-Environnement (Agronomie)', color: 'green', langue: 'fr', priorité: 1 },
-  { url: 'https://www.agro-media.fr/feed/', source: 'Agro Media', color: 'green', langue: 'fr', priorité: 1 },
-  { url: 'https://www.campagnesetenvironnement.fr/feed/', source: 'Campagnes et Environnement', color: 'green', langue: 'fr', priorité: 1 },
-  { url: 'https://www.lafranceagricole.fr/rss', source: 'La France Agricole', color: 'green', langue: 'fr', priorité: 1 },
-  
-  // Bleue - Marine - Sources à jour
-  { url: 'https://www.meretmarine.com/fr/rss.xml', source: 'Mer et Marine', color: 'blue', langue: 'fr', priorité: 1 },
-  { url: 'https://wwz.ifremer.fr/layout/set/rss/Actualites-et-Agenda/Toutes-les-actualites', source: 'IFREMER', color: 'blue', langue: 'fr', priorité: 1 },
-  { url: 'https://lemarin.ouest-france.fr/rss/rss.xml', source: 'Le Marin', color: 'blue', langue: 'fr', priorité: 1 },
-  { url: 'https://www.futura-sciences.com/rss/planete/actualites.xml', source: 'Futura Sciences (Planète)', color: 'blue', langue: 'fr', priorité: 1 },
-  
-  // Jaune - Environnement - Sources à jour
-  { url: 'https://www.actu-environnement.com/feeds/rss/ae/eau.xml', source: 'Actu-Environnement (Eau)', color: 'yellow', langue: 'fr', priorité: 1 },
-  { url: 'https://www.goodplanet.info/feed/', source: 'GoodPlanet Info', color: 'yellow', langue: 'fr', priorité: 1 },
-  { url: 'https://www.novethic.fr/rss/theme/environnement.xml', source: 'Novethic (Environnement)', color: 'yellow', langue: 'fr', priorité: 1 },
-  { url: 'https://www.notre-environnement.gouv.fr/flux-rss', source: 'Notre Environnement', color: 'yellow', langue: 'fr', priorité: 1 },
-  { url: 'https://reporterre.net/spip.php?page=backend', source: 'Reporterre', color: 'yellow', langue: 'fr', priorité: 1 },
-  
-  // Blanche - Industrielle - Sources à jour
-  { url: 'https://www.industrie-techno.com/rss', source: 'Industrie & Technologies', color: 'white', langue: 'fr', priorité: 1 },
-  { url: 'https://www.usinenouvelle.com/flux/rss', source: 'Usine Nouvelle', color: 'white', langue: 'fr', priorité: 1 },
-  { url: 'https://www.techniques-ingenieur.fr/actualite/articles/feed/', source: 'Techniques de l\'Ingénieur', color: 'white', langue: 'fr', priorité: 1 },
-  { url: 'https://www.processalimentaire.com/rss/actualites/innovation', source: 'Process Alimentaire', color: 'white', langue: 'fr', priorité: 1 },
-  { url: 'https://www.formule-verte.com/feed/', source: 'Formule Verte', color: 'white', langue: 'fr', priorité: 1 },
-  
-  // Multidisciplinaire - Sources à jour
-  { url: 'https://lejournal.cnrs.fr/rss', source: 'CNRS Le Journal', color: 'multi', langue: 'fr', priorité: 1 },
-  { url: 'https://theconversation.com/fr/sciences/feed', source: 'The Conversation (Sciences)', color: 'multi', langue: 'fr', priorité: 1 },
-  { url: 'https://www.futura-sciences.com/rss/actualites.xml', source: 'Futura Sciences', color: 'multi', langue: 'fr', priorité: 1 },
-  { url: 'https://www.lemonde.fr/sciences/rss_full.xml', source: 'Le Monde (Sciences)', color: 'multi', langue: 'fr', priorité: 1 },
-  { url: 'https://www.pourlascience.fr/feed/actualites.xml', source: 'Pour la Science', color: 'multi', langue: 'fr', priorité: 1 }
+const USAGE_RULES = [
+  {
+    label: 'Techniques de labo',
+    keywords: ['diagnostic', 'analyse', 'dosage', 'culture', 'sequenc', 'pcr', 'capteur', 'enzyme', 'biomarqueur'],
+  },
+  {
+    label: 'Projet technologique',
+    keywords: ['process', 'procede', 'prototype', 'optimis', 'production', 'fermentation', 'bior', 'innovation'],
+  },
+  {
+    label: 'One Health',
+    keywords: ['ecosysteme', 'environnement', 'zoonose', 'sante publique', 'biodiversite', 'eau', 'pollu', 'microbiote'],
+  },
+  {
+    label: 'Oral STL',
+    keywords: ['enjeu', 'impact', 'innovation', 'ethique', 'societe', 'souverainete', 'prevention'],
+  },
 ];
 
-const MAX_ARTICLES_PER_SOURCE = 4;
-const FETCH_TIMEOUT = 12000; // Augmenter considérablement le timeout
-const MIN_ARTICLES_PER_COLOR = 6; // Minimum d'articles par couleur
+const OFFICIAL_REFERENCES = [
+  {
+    title: 'Programmes et ressources en serie STL',
+    url: 'https://eduscol.education.fr/1652/programmes-et-ressources-en-serie-stl',
+    source: 'eduscol',
+  },
+  {
+    title: 'Programme de terminale STL - biochimie-biologie-biotechnologies',
+    url: 'https://eduscol.education.fr/document/23101/download',
+    source: 'eduscol',
+  },
+  {
+    title: 'Biotechnologies et STMS - ressources et actualites',
+    url: 'https://eduscol.education.fr/2340/biotechnologies-sciences-et-techniques-medico-sociales',
+    source: 'eduscol',
+  },
+];
 
-// Fonctions utilitaires
-const getDescription = (item) => {
-  let desc = item.description || item.contentEncoded || item.content || '';
-  desc = desc.replace(/<[^>]*>/g, '').trim();
-  // Limiter la longueur
-  return desc.length > 500 ? desc.substring(0, 500) + '...' : desc;
+const SOURCE_WEIGHTS = {
+  official: 30,
+  media: 18,
 };
 
-const getPubDate = (item) => {
-  return item.pubDate || item.dcDate || item.isoDate || new Date().toISOString();
-};
+const stripHtml = (value = '') =>
+  String(value)
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-const getImageUrl = (item) => {
-  // Essayer d'extraire de contentEncoded ou description
-  const content = item.contentEncoded || item.description || item.content || '';
-  const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
-  if (imgMatch && imgMatch[1]) {
-    return imgMatch[1];
+const normalizeDate = (value) => {
+  const date = value ? new Date(value) : new Date();
+  if (Number.isNaN(date.getTime())) {
+    return new Date();
   }
-  
-  // Essayer enclosure (souvent pour images)
+  return date;
+};
+
+const extractImageUrl = (item) => {
   if (item.enclosure && item.enclosure.url) {
     return item.enclosure.url;
   }
-  
-  return null;
-};
 
-// Fonction pour vérifier si un texte contient des mots-clés liés à la biotechnologie
-const isBiotechArticle = (item, color) => {
-  const textToSearch = [
-    item.title || '',
-    item.description || '',
-    item.content || '',
-    item.contentEncoded || ''
-  ].join(' ').toLowerCase();
-  
-  // La recherche est plus souple pour les catégories problématiques (bleu, jaune, vert)
-  const minKeywordsNeeded = (color === 'blue' || color === 'yellow' || color === 'green') ? 1 : 1;
-  
-  // Compter combien de mots-clés sont présents
-  const matchedKeywords = BIOTECH_KEYWORDS.filter(keyword => 
-    textToSearch.includes(keyword.toLowerCase())
-  );
-  
-  return matchedKeywords.length >= minKeywordsNeeded;
-};
-
-// Filtrer les articles par mots-clés de biotechnologie et couleur
-function filterBiotechArticles(articles, requestedColor, allColors = false) {
-  console.log(`Filtrage des articles pour la couleur: ${requestedColor}, tous? ${allColors}`);
-  console.log(`Total d'articles avant filtrage: ${articles.length}`);
-  
-  // Articles par couleur
-  const articlesByColor = {
-    red: [],
-    green: [],
-    blue: [],
-    yellow: [],
-    white: [],
-    multi: []
-  };
-  
-  // Filtrer d'abord par mots-clés de biotechnologie (filtrage très souple)
-  const biotechArticles = articles.filter(article => {
-    // Vérifier si l'article contient des mots-clés de biotechnologie
-    // Utilisation de toLowerCase pour ignorer la casse
-    const title = article.title ? article.title.toLowerCase() : '';
-    const description = article.description ? article.description.toLowerCase() : '';
-    
-    // Recherche souple : un seul mot-clé suffit pour être considéré comme un article de biotechnologie
-    return BIOTECH_KEYWORDS.some(keyword => 
-      title.includes(keyword.toLowerCase()) || 
-      description.includes(keyword.toLowerCase())
-    );
-  });
-  
-  console.log(`Articles après filtrage par mots-clés biotech: ${biotechArticles.length}`);
-  
-  // Répartir les articles par couleur
-  biotechArticles.forEach(article => {
-    if (article.biotechColor) {
-      // Si l'article a déjà une couleur assignée, l'ajouter au tableau correspondant
-      articlesByColor[article.biotechColor].push(article);
-    } else {
-      // Déterminer la couleur en fonction de la source
-      const source = article.source || '';
-      const sourceInfo = SOURCES_BIOTECH.find(s => source.includes(s.source));
-      
-      if (sourceInfo) {
-        article.biotechColor = sourceInfo.color;
-        articlesByColor[sourceInfo.color].push(article);
-      } else {
-        // Si pas de correspondance, assigner à "multi" par défaut
-        article.biotechColor = 'multi';
-        articlesByColor.multi.push(article);
-      }
-    }
-  });
-  
-  // Ajouter les articles de secours si nécessaire pour atteindre le minimum requis
-  Object.keys(articlesByColor).forEach(color => {
-    if (articlesByColor[color].length < MIN_ARTICLES_PER_COLOR && FALLBACK_ARTICLES[color]) {
-      console.log(`Ajout d'articles de secours pour la couleur ${color} (${articlesByColor[color].length}/${MIN_ARTICLES_PER_COLOR})`);
-      
-      // Calculer combien d'articles de secours sont nécessaires
-      const nbFallbackNeeded = MIN_ARTICLES_PER_COLOR - articlesByColor[color].length;
-      
-      // Ajouter uniquement le nombre nécessaire d'articles de secours
-      const fallbackToAdd = FALLBACK_ARTICLES[color].slice(0, nbFallbackNeeded);
-      articlesByColor[color] = [...articlesByColor[color], ...fallbackToAdd];
-      
-      console.log(`Après ajout de secours: ${articlesByColor[color].length}/${MIN_ARTICLES_PER_COLOR}`);
-    }
-  });
-  
-  console.log(`Articles par couleur après filtrage:`);
-  Object.keys(articlesByColor).forEach(color => {
-    console.log(`${color}: ${articlesByColor[color].length}`);
-  });
-  
-  // Retourner tous les articles si demandé, sinon seulement ceux de la couleur spécifiée
-  if (allColors) {
-    // Fusionner tous les tableaux en un seul
-    let allArticles = Object.values(articlesByColor).flat();
-    return allArticles;
-  } else {
-    return articlesByColor[requestedColor] || [];
+  if (item.mediaContent && item.mediaContent.$ && item.mediaContent.$.url) {
+    return item.mediaContent.$.url;
   }
-}
 
-// Handler de la fonction Netlify
-exports.handler = async (event, context) => {
+  if (item.mediaThumbnail && item.mediaThumbnail.$ && item.mediaThumbnail.$.url) {
+    return item.mediaThumbnail.$.url;
+  }
+
+  const content = item.contentEncoded || item.description || '';
+  const imageMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return imageMatch ? imageMatch[1] : null;
+};
+
+const keywordScore = (text, keywords) =>
+  keywords.reduce((score, keyword) => {
+    if (text.includes(keyword)) {
+      return score + 1;
+    }
+    return score;
+  }, 0);
+
+const inferCategory = (source, text) => {
+  let bestCategory = source.defaultCategory;
+  let bestScore = source.defaultCategory === 'multi' ? 0 : 1;
+
+  source.categories.forEach((categoryKey) => {
+    if (categoryKey === 'multi') {
+      return;
+    }
+
+    const category = STL_CATEGORIES[categoryKey];
+    const score = keywordScore(text, category.keywords);
+    if (score > bestScore) {
+      bestScore = score;
+      bestCategory = categoryKey;
+    }
+  });
+
+  if (bestScore === 0 && source.defaultCategory === 'multi') {
+    return 'multi';
+  }
+
+  return bestCategory;
+};
+
+const computeUsages = (text, categoryKey) => {
+  const usages = [];
+
+  USAGE_RULES.forEach((rule) => {
+    if (keywordScore(text, rule.keywords) > 0) {
+      usages.push(rule.label);
+    }
+  });
+
+  STL_CATEGORIES[categoryKey].defaultUsages.forEach((usage) => {
+    if (!usages.includes(usage) && usages.length < 2) {
+      usages.push(usage);
+    }
+  });
+
+  if (usages.length === 0) {
+    usages.push('Culture scientifique');
+  }
+
+  return usages.slice(0, 2);
+};
+
+const buildWhyItMatters = (categoryKey) => STL_CATEGORIES[categoryKey].lens;
+
+const computeArticleScore = (article, sourceType, categoryKey) => {
+  const publicationDate = normalizeDate(article.pubDate);
+  const ageInDays = Math.max(
+    0,
+    Math.floor((Date.now() - publicationDate.getTime()) / (24 * 60 * 60 * 1000)),
+  );
+  const recencyScore = Math.max(0, 25 - ageInDays);
+  const text = `${article.title} ${article.description}`.toLowerCase();
+  const categoryScore = keywordScore(text, STL_CATEGORIES[categoryKey].keywords) * 4;
+  const usageScore = computeUsages(text, categoryKey).length * 5;
+  return recencyScore + categoryScore + usageScore + (SOURCE_WEIGHTS[sourceType] || 10);
+};
+
+const dedupeArticles = (articles) => {
+  const seen = new Set();
+  return articles.filter((article) => {
+    const key = `${article.link || ''}::${article.title.toLowerCase()}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+};
+
+const normalizeFeedArticles = (source, feed) => {
+  const items = Array.isArray(feed.items) ? feed.items.slice(0, MAX_ITEMS_PER_FEED) : [];
+  return items
+    .map((item) => {
+      const title = stripHtml(item.title || '');
+      const description = stripHtml(item.description || item.contentEncoded || item.content || '');
+      if (!title || !description) {
+        return null;
+      }
+
+      const text = `${title} ${description}`.toLowerCase();
+      const categoryKey = inferCategory(source, text);
+      const usages = computeUsages(text, categoryKey);
+
+      return {
+        title,
+        description: description.slice(0, 360),
+        link: item.link || '',
+        pubDate: normalizeDate(item.pubDate || item.dcDate).toISOString(),
+        imageUrl: extractImageUrl(item),
+        source: source.source,
+        sourceType: source.type,
+        biotechColor: categoryKey,
+        categoryKey,
+        usages,
+        whyItMatters: buildWhyItMatters(categoryKey),
+        score: computeArticleScore({ title, description, pubDate: item.pubDate || item.dcDate }, source.type, categoryKey),
+        kind: 'news',
+      };
+    })
+    .filter(Boolean);
+};
+
+const fetchSourceArticles = async (source) => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FEED_TIMEOUT_MS);
+    const response = await fetch(source.url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Biogy-STL-Watch/1.0',
+        Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9',
+      },
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Status code ${response.status}`);
+    }
+
+    const xml = await response.text();
+    const feed = await parser.parseString(xml);
+
+    return normalizeFeedArticles(source, feed);
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.warn(`biotech-veille: unable to fetch ${source.source}: Feed timeout`);
+      return [];
+    }
+
+    console.warn(`biotech-veille: unable to fetch ${source.source}: ${error.message}`);
+    return [];
+  }
+};
+
+const addBackgroundArticles = (sections) => {
+  const usedBackground = {};
+
+  CATEGORY_ORDER.forEach((categoryKey) => {
+    const currentItems = sections[categoryKey] || [];
+    const liveItems = currentItems.filter((item) => item.kind === 'news');
+
+    if (liveItems.length >= MIN_LIVE_ITEMS_PER_CATEGORY || !BACKGROUND_ARTICLES[categoryKey]) {
+      usedBackground[categoryKey] = false;
+      return;
+    }
+
+    const fallbacksNeeded = MIN_LIVE_ITEMS_PER_CATEGORY - liveItems.length;
+    const backgroundItems = BACKGROUND_ARTICLES[categoryKey]
+      .slice(0, fallbacksNeeded)
+      .map((item, index) => ({
+        ...item,
+        sourceType: 'official',
+        biotechColor: categoryKey,
+        categoryKey,
+        usages: STL_CATEGORIES[categoryKey].defaultUsages.slice(0, 2),
+        whyItMatters: buildWhyItMatters(categoryKey),
+        score: 1 - index,
+      }));
+
+    sections[categoryKey] = [...currentItems, ...backgroundItems];
+    usedBackground[categoryKey] = backgroundItems.length > 0;
+  });
+
+  return usedBackground;
+};
+
+const buildDigest = async () => {
+  const fetchedArticles = await Promise.all(SOURCE_REGISTRY.map(fetchSourceArticles));
+  const dedupedArticles = dedupeArticles(fetchedArticles.flat());
+
+  const sections = CATEGORY_ORDER.reduce((accumulator, categoryKey) => {
+    accumulator[categoryKey] = [];
+    return accumulator;
+  }, {});
+
+  dedupedArticles.forEach((article) => {
+    const categoryKey = article.categoryKey || 'multi';
+    sections[categoryKey].push(article);
+  });
+
+  CATEGORY_ORDER.forEach((categoryKey) => {
+    sections[categoryKey].sort((left, right) => right.score - left.score);
+    sections[categoryKey] = sections[categoryKey].slice(0, MAX_SECTION_ITEMS);
+  });
+
+  const usedBackground = addBackgroundArticles(sections);
+
+  const counts = CATEGORY_ORDER.reduce((accumulator, categoryKey) => {
+    accumulator[categoryKey] = sections[categoryKey].length;
+    return accumulator;
+  }, {});
+
+  const highlights = dedupeArticles(
+    CATEGORY_ORDER
+      .map((categoryKey) => sections[categoryKey].slice(0, 2))
+      .flat()
+      .sort((left, right) => right.score - left.score),
+  ).slice(0, 8);
+
+  const flatArticles = CATEGORY_ORDER.map((categoryKey) => sections[categoryKey]).flat();
+
+  return {
+    generatedAt: new Date().toISOString(),
+    categories: CATEGORY_ORDER.map((categoryKey) => ({
+      ...STL_CATEGORIES[categoryKey],
+      count: counts[categoryKey],
+      usedBackground: usedBackground[categoryKey],
+    })),
+    counts,
+    sections,
+    highlights,
+    articles: flatArticles,
+    usedBackground,
+    officialReferences: OFFICIAL_REFERENCES,
+  };
+};
+
+const getDigest = async (forceRefresh) => {
+  if (!forceRefresh && digestCache.data && Date.now() - digestCache.timestamp < CACHE_TTL_MS) {
+    return digestCache.data;
+  }
+
+  const digest = await buildDigest();
+  digestCache = {
+    data: digest,
+    timestamp: Date.now(),
+  };
+  return digest;
+};
+
+exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Content-Type': 'application/json',
   };
 
-  // Récupérer le paramètre 'color' de la requête
-  const params = event.queryStringParameters || {};
-  const requestedColor = params.color || 'all';
-  const maxParam = params.max ? parseInt(params.max, 10) : 20; 
-  const max = isNaN(maxParam) ? 20 : Math.min(maxParam, 30); 
-  const forceRefresh = params.refresh === 'true';
-  
-  // Mesurer le temps d'exécution pour éviter de dépasser les limites de Netlify
-  const startTime = Date.now();
-  
-  console.log(`Biotech-veille function invoked. Requested color: ${requestedColor}, max: ${max}, forceRefresh: ${forceRefresh}`);
-
-  try {
-    // Récupération directe des articles via les flux RSS - approche directe plutôt que fetch-all
-    console.log("Récupération directe des flux RSS...");
-
-    // Filtrer les sources selon la couleur demandée
-    let sourcesToFetch = [];
-    if (requestedColor !== 'all') {
-      sourcesToFetch = SOURCES_BIOTECH.filter(source => source.color === requestedColor);
-    } else {
-      // Pour "all", prendre un sous-ensemble bien réparti de sources
-      const colorGroups = {};
-      
-      // Regrouper par couleur et priorité
-      SOURCES_BIOTECH.forEach(source => {
-        if (!colorGroups[source.color]) {
-          colorGroups[source.color] = [];
-        }
-        colorGroups[source.color].push(source);
-      });
-      
-      // Prendre les 2-3 meilleures sources de chaque couleur
-      Object.values(colorGroups).forEach(sources => {
-        // Trier par priorité
-        sources.sort((a, b) => a.priorité - b.priorité);
-        // Prendre les 2-3 premières
-        sourcesToFetch = [...sourcesToFetch, ...sources.slice(0, 3)];
-      });
-    }
-    
-    console.log(`Récupération de ${sourcesToFetch.length} sources...`);
-    
-    // Récupérer les articles de manière parallèle mais avec un timeout strict
-    const articlePromises = sourcesToFetch.map(source => {
-      return new Promise(async (resolve) => {
-        try {
-          const feedResponse = await parser.parseURL(source.url);
-          
-          // Extraire et transformer les données
-          const articles = feedResponse.items
-            .slice(0, 5) // Limiter à 5 articles par source
-            .map(item => ({
-              title: item.title,
-              link: item.link,
-              pubDate: getPubDate(item),
-              description: getDescription(item),
-              content: item.contentEncoded || item.content || '',
-              contentSnippet: item.contentSnippet || '',
-              imageUrl: getImageUrl(item),
-              source: source.source,
-              biotechColor: source.color,
-              langue: source.langue
-            }));
-            
-          console.log(`Récupéré ${articles.length} articles de ${source.source}`);
-          
-          // Filtrer les articles par mots-clés biotechnologie
-          const biotechArticles = articles.filter(article => isBiotechArticle(article, source.color));
-          console.log(`Dont ${biotechArticles.length} articles de biotechnologie de ${source.source}`);
-          
-          resolve(biotechArticles);
-        } catch (error) {
-          console.log(`Erreur lors de la récupération de ${source.source}: ${error.message}`);
-          resolve([]); // Continuer avec un tableau vide
-        }
-      });
-    });
-    
-    // Timeout global pour toutes les requêtes
-    const timeoutPromise = new Promise(resolve => {
-      setTimeout(() => {
-        console.log("Timeout global atteint pour la récupération des articles");
-        resolve([]);
-      }, 7000); // 7 secondes max pour rester dans les limites de Netlify
-    });
-    
-    // Attendre que toutes les requêtes soient terminées ou que le timeout soit atteint
-    const results = await Promise.race([
-      Promise.all(articlePromises),
-      timeoutPromise.then(() => articlePromises.map(() => []))
-    ]);
-    
-    // Fusionner tous les articles
-    let allArticles = results.flat();
-    console.log(`Total d'articles récupérés: ${allArticles.length}`);
-    
-    // Si nous n'avons pas assez d'articles, essayer de manière séquentielle pour les sources restantes
-    if (allArticles.length < 10 && requestedColor === 'all') {
-      console.log("Pas assez d'articles, tentative séquentielle pour les principales sources...");
-      
-      // Prendre une source par couleur pour compléter rapidement
-      const mainSources = ['red', 'blue', 'green', 'white', 'yellow'].map(color => {
-        const sources = SOURCES_BIOTECH.filter(s => s.color === color);
-        return sources.length > 0 ? sources[0] : null;
-      }).filter(s => s !== null);
-      
-      for (const source of mainSources) {
-        if (Date.now() - startTime > 7000) {
-          console.log("Temps imparti dépassé, arrêt des requêtes séquentielles");
-          break;
-        }
-        
-        try {
-          console.log(`Tentative séquentielle pour ${source.source}...`);
-          const feedResponse = await parser.parseURL(source.url);
-          
-          const articles = feedResponse.items
-            .slice(0, 3) // Seulement 3 articles par source en séquentiel
-            .map(item => ({
-              title: item.title,
-              link: item.link,
-              pubDate: getPubDate(item),
-              description: getDescription(item),
-              content: item.contentEncoded || item.content || '',
-              contentSnippet: item.contentSnippet || '',
-              imageUrl: getImageUrl(item),
-              source: source.source,
-              biotechColor: source.color,
-              langue: source.langue
-            }));
-            
-          // Filtrer les articles de biotechnologie
-          const biotechArticles = articles.filter(article => isBiotechArticle(article, source.color));
-          allArticles = [...allArticles, ...biotechArticles];
-          
-          console.log(`Ajout de ${biotechArticles.length} articles de ${source.source}`);
-        } catch (error) {
-          console.log(`Erreur séquentielle pour ${source.source}: ${error.message}`);
-          continue;
-        }
-      }
-    }
-    
-    // Vérification finale du nombre d'articles par couleur
-    const articlesByColor = {};
-    ['red', 'blue', 'green', 'white', 'yellow'].forEach(color => {
-      articlesByColor[color] = allArticles.filter(article => article.biotechColor === color);
-    });
-    
-    let usesFallback = false;
-    let filteredArticles = [];
-    
-    if (requestedColor !== 'all') {
-      // Filtrer par couleur demandée
-      filteredArticles = allArticles.filter(article => article.biotechColor === requestedColor);
-      
-      // Si pas assez d'articles après filtrage (moins de 3), ajouter quelques fallbacks
-      if (filteredArticles.length < 3 && FALLBACK_ARTICLES[requestedColor]) {
-        console.log(`Pas assez d'articles pour ${requestedColor}, ajout de quelques fallbacks`);
-        usesFallback = true;
-        
-        // Ne prendre que le complément nécessaire
-        const neededFallbacks = 3 - filteredArticles.length;
-        const fallbacksToAdd = FALLBACK_ARTICLES[requestedColor].slice(0, neededFallbacks);
-        
-        filteredArticles = [...filteredArticles, ...fallbacksToAdd];
-      }
-    } else {
-      // Pour "all", s'assurer d'avoir quelques articles de chaque couleur
-      let hasEnoughPerColor = true;
-      
-      // Vérifier s'il y a au moins 2 articles par couleur
-      for (const color of ['red', 'blue', 'green', 'white', 'yellow']) {
-        if (articlesByColor[color].length < 2) {
-          hasEnoughPerColor = false;
-          break;
-        }
-      }
-      
-      if (hasEnoughPerColor) {
-        // On a assez d'articles de chaque couleur, les combiner
-        filteredArticles = allArticles;
-      } else {
-        // On n'a pas assez d'articles, compléter chaque couleur avec des fallbacks
-        usesFallback = true;
-        console.log("Utilisation de fallbacks pour compléter certaines couleurs manquantes");
-        
-        for (const color of ['red', 'blue', 'green', 'white', 'yellow']) {
-          const colorArticles = articlesByColor[color];
-          
-          // Si moins de 2 articles pour cette couleur
-          if (colorArticles.length < 2 && FALLBACK_ARTICLES[color]) {
-            // Ajouter juste ce qu'il faut pour atteindre 2 articles
-            const needed = 2 - colorArticles.length;
-            const fallbacksToAdd = FALLBACK_ARTICLES[color].slice(0, needed);
-            filteredArticles = [...filteredArticles, ...colorArticles, ...fallbacksToAdd];
-          } else {
-            // Sinon ajouter tous les articles de cette couleur
-            filteredArticles = [...filteredArticles, ...colorArticles];
-          }
-        }
-        
-        // Ajouter quelques articles multi-disciplines
-        if (filteredArticles.length < 10) {
-          const multiArticles = allArticles.filter(article => article.biotechColor === 'multi');
-          filteredArticles = [...filteredArticles, ...multiArticles];
-        }
-      }
-    }
-    
-    // Trier les articles par date de publication (du plus récent au plus ancien)
-    filteredArticles.sort((a, b) => {
-      const dateA = a.pubDate ? new Date(a.pubDate) : new Date(0);
-      const dateB = b.pubDate ? new Date(b.pubDate) : new Date(0);
-      return dateB - dateA;
-    });
-    
-    // Limiter le nombre d'articles retournés
-    const limitedArticles = filteredArticles.slice(0, max);
-    
-    console.log(`Retournant ${limitedArticles.length} articles pour couleur: ${requestedColor} (fallback: ${usesFallback})`);
-    
+  if (event.httpMethod === 'OPTIONS') {
     return {
-      statusCode: 200,
+      statusCode: 204,
       headers,
-      body: JSON.stringify({ 
-        articles: limitedArticles,
-        usesFallback: usesFallback
-      })
-    };
-  } catch (error) {
-    console.error('Erreur dans biotech-veille:', error);
-    
-    // En cas d'erreur complète, retourner un minimum d'articles de fallback
-    let emergencyArticles = [];
-    let errorMessage = `Erreur lors de la récupération des articles: ${error.message}`;
-    
-    if (requestedColor !== 'all' && FALLBACK_ARTICLES[requestedColor]) {
-      emergencyArticles = FALLBACK_ARTICLES[requestedColor].slice(0, Math.min(max, 5));
-    } else {
-      // Prendre quelques articles de chaque couleur
-      for (const color of ['red', 'blue', 'green', 'white', 'yellow']) {
-        if (FALLBACK_ARTICLES[color]) {
-          emergencyArticles.push(FALLBACK_ARTICLES[color][0]); // Juste 1 article par couleur
-        }
-      }
-      
-      if (emergencyArticles.length < 5 && FALLBACK_ARTICLES.multi) {
-        emergencyArticles = [...emergencyArticles, ...FALLBACK_ARTICLES.multi.slice(0, 2)];
-      }
-    }
-    
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ 
-        articles: emergencyArticles,
-        error: errorMessage,
-        usesFallback: true
-      })
+      body: '',
     };
   }
-}; 
+
+  try {
+    const params = event.queryStringParameters || {};
+    const category = params.color || params.category || 'all';
+    const countsOnly = params.counts === 'true';
+    const forceRefresh = params.refresh === 'true';
+    const digest = await getDigest(forceRefresh);
+
+    if (countsOnly) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          generatedAt: digest.generatedAt,
+          counts: digest.counts,
+        }),
+      };
+    }
+
+    if (category !== 'all' && digest.sections[category]) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          ...digest,
+          highlights: digest.highlights.filter((article) => article.categoryKey === category).slice(0, 4),
+          sections: {
+            [category]: digest.sections[category],
+          },
+          articles: digest.sections[category],
+        }),
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(digest),
+    };
+  } catch (error) {
+    console.error('biotech-veille failure:', error);
+
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        error: "La veille STL n'a pas pu etre chargee.",
+      }),
+    };
+  }
+};
