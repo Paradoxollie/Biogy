@@ -895,6 +895,41 @@ const TERMINALE_S1_CONTENT = {
     'Relier activite enzymatique et conditions du milieu.',
     'Lire une voie metabolique simple.',
   ],
+  diagrams: [
+    {
+      title: 'Schema - Enzyme, substrat et produit',
+      caption:
+        'Ce schema rappelle la logique generale de la reaction enzymatique : reconnaissance du substrat, formation transitoire du complexe puis liberation du produit.',
+      diagramSpec: {
+        kind: 'flow',
+        title: 'Principe d une reaction enzymatique',
+        footer: 'La specificite depend de la reconnaissance entre le substrat et le site actif.',
+        nodes: [
+          { title: 'Substrat', text: 'Molecule de depart', tone: 'blue' },
+          { title: 'Enzyme', text: 'Site actif complementaire', tone: 'teal' },
+          { title: 'Complexe', text: 'Association transitoire', tone: 'amber' },
+          { title: 'Produit', text: 'Molecule transformee', tone: 'green' },
+        ],
+      },
+    },
+    {
+      title: 'Schema - Lire une voie metabolique simple',
+      caption:
+        'Une voie metabolique se lit comme une suite de transformations reliees entre elles par des enzymes et par des etapes de regulation.',
+      diagramSpec: {
+        kind: 'flow',
+        title: 'Organisation generale d une voie metabolique',
+        footer: 'Le produit d une etape devient souvent le substrat de la suivante.',
+        nodes: [
+          { title: 'Molecule A', text: 'Substrat initial', tone: 'blue' },
+          { title: 'Enzyme 1', text: 'Premiere transformation', tone: 'teal' },
+          { title: 'Intermediaire', text: 'Produit de transition', tone: 'amber' },
+          { title: 'Enzyme 2', text: 'Nouvelle etape', tone: 'violet' },
+          { title: 'Molecule finale', text: 'Produit final', tone: 'green' },
+        ],
+      },
+    },
+  ],
   sections: [
     {
       title: '1. Le role d une enzyme',

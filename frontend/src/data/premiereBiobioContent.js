@@ -17,6 +17,7 @@ const createDocument = (title, body, extra = {}) => ({
   label: extra.label || 'Document',
   title,
   source: extra.source,
+  diagramSpec: extra.diagramSpec,
   body: Array.isArray(body) ? body : [body],
 });
 
@@ -2807,3 +2808,362 @@ export const PREMIERE_BIOBIO_TRANSVERSAL_D_LESSONS = [
     ],
   }),
 ];
+
+const createVisualDocument = (title, body, diagramSpec) =>
+  createDocument(title, body, {
+    label: 'Schema',
+    diagramSpec,
+  });
+
+const flowDiagram = (title, footer, nodes) => ({
+  kind: 'flow',
+  title,
+  footer,
+  nodes,
+});
+
+const comparisonDiagram = (title, footer, columns) => ({
+  kind: 'comparison',
+  title,
+  footer,
+  columns,
+});
+
+const cycleDiagram = (title, footer, center, nodes) => ({
+  kind: 'cycle',
+  title,
+  footer,
+  center,
+  nodes,
+});
+
+const barsDiagram = (title, footer, bars) => ({
+  kind: 'bars',
+  title,
+  footer,
+  bars,
+});
+
+const curveDiagram = (title, footer, xLabel, yLabel, points) => ({
+  kind: 'curve',
+  title,
+  footer,
+  xLabel,
+  yLabel,
+  points,
+});
+
+const BIOBIO_VISUAL_SUPPORTS = {
+  'bb1-1-se-nourrir': createVisualDocument(
+    'Schema - Des aliments aux fonctions de l organisme',
+    [
+      "Ce schema relie les besoins de l'organisme a la ration alimentaire, puis aux nutriments utilises pour produire de l'energie, construire et proteger le corps.",
+    ],
+    flowDiagram('Se nourrir pour couvrir plusieurs besoins', 'Un meme repas doit couvrir des besoins differents.', [
+      { title: 'Besoins', text: "Energie, croissance, entretien, protection", tone: 'blue' },
+      { title: 'Aliments', text: 'Repas varie et adapte', tone: 'teal' },
+      { title: 'Nutriments', text: 'Glucose, acides amines, lipides, eau, ions', tone: 'amber' },
+      { title: 'Fonctions', text: 'Fonctionner, construire, proteger', tone: 'green' },
+    ]),
+  ),
+  'bb1-2-aliments-nutriments': createVisualDocument(
+    'Schema - Grandes etapes de la digestion',
+    [
+      "Le support rappelle le trajet des aliments et les transformations qui les rendent absorbables par l'organisme.",
+    ],
+    flowDiagram('Du bol alimentaire aux nutriments', 'Les transformations mecaniques et chimiques se completent.', [
+      { title: 'Bouche', text: 'Mastication et salive', tone: 'blue' },
+      { title: 'Estomac', text: 'Brassage et debut de digestion chimique', tone: 'teal' },
+      { title: 'Intestin grele', text: 'Fin de digestion et absorption', tone: 'amber' },
+      { title: 'Nutriments', text: "Molecules utilisables par l'organisme", tone: 'green' },
+    ]),
+  ),
+  'bb1-3-absorption-devenir': createVisualDocument(
+    'Schema - Devenir des nutriments apres absorption',
+    [
+      "Ce schema permet de suivre le trajet des nutriments depuis l'intestin jusqu'a leur utilisation, leur stockage ou leur elimination.",
+    ],
+    flowDiagram('Absorber puis distribuer', 'Apres absorption, les nutriments ne suivent pas tous exactement le meme devenir.', [
+      { title: 'Intestin', text: 'Passage des nutriments a travers la paroi', tone: 'blue' },
+      { title: 'Transport', text: 'Sang et parfois lymphe', tone: 'teal' },
+      { title: 'Organes', text: 'Consommation immediate ou stockage', tone: 'amber' },
+      { title: 'Devenir', text: 'Utilisation, reserve ou elimination', tone: 'green' },
+    ]),
+  ),
+  'bb1-4-rein-excretion': createVisualDocument(
+    'Schema - Role du rein dans l excretion',
+    [
+      "Le rein trie le plasma, recupere ce qui reste utile et forme une urine adaptee a l'etat de l'organisme.",
+    ],
+    flowDiagram('Du sang a l urine', "Le rein filtre, reabsorbe puis elimine l'inutile.", [
+      { title: 'Sang', text: 'Apport en eau et solutes', tone: 'blue' },
+      { title: 'Filtration', text: 'Passage initial dans le nephron', tone: 'teal' },
+      { title: 'Reabsorption', text: 'Retour des elements utiles', tone: 'amber' },
+      { title: 'Urine', text: 'Elimination finale', tone: 'green' },
+    ]),
+  ),
+  'bb1-5-stabilite-milieu-interieur': createVisualDocument(
+    'Schema - Stabilite du milieu interieur',
+    [
+      "Le milieu interieur reste compatible avec la vie grace a des mecanismes de regulation qui corrigent les variations trop importantes.",
+    ],
+    cycleDiagram(
+      'Maintenir un milieu interieur stable',
+      "La regulation relie variation detectee, correction et retour a l'equilibre.",
+      { title: 'Milieu interieur', text: 'Eau, ions, glucose, temperature' },
+      [
+        { title: 'Detecter', text: 'Recepteurs et organes sensibles', tone: 'blue' },
+        { title: 'Corriger', text: 'Actions physiologiques adaptees', tone: 'teal' },
+        { title: 'Limiter les ecarts', text: 'Retour vers des valeurs compatibles', tone: 'amber' },
+        { title: 'Proteger les cellules', text: 'Fonctionnement stable des organes', tone: 'green' },
+      ],
+    ),
+  ),
+  'bb2-1-genotype-phenotype': createVisualDocument(
+    'Schema - Du gene au phenotype',
+    [
+      "Le phenotype ne depend pas d'une simple etiquette genetique : il se construit a partir de l'expression des genes et de la synthese de molecules fonctionnelles.",
+    ],
+    flowDiagram('Relier genotype et phenotype', "Le phenotype resulte de l'expression du genotype dans un contexte donne.", [
+      { title: 'ADN / genes', text: 'Information hereditaire', tone: 'blue' },
+      { title: 'Expression', text: 'Synthese de molecules utiles', tone: 'teal' },
+      { title: 'Proteines', text: 'Fonctions biologiques concretes', tone: 'amber' },
+      { title: 'Phenotype', text: 'Caractere observable', tone: 'green' },
+    ]),
+  ),
+  'bb2-2-organes-amphicrines': createVisualDocument(
+    'Schema - Fonctions endocrine et exocrine',
+    [
+      "Certains organes exercent une double fonction. Le schema aide a distinguer secretion vers le sang et secretion vers un conduit.",
+    ],
+    comparisonDiagram('Comparer les grandes fonctions de secretion', "Un organe amphicrine combine les deux logiques de secretion.", [
+      { title: 'Endocrine', text: 'Secretion vers le sang', bullets: ['Hormones', 'Action a distance'], tone: 'blue' },
+      { title: 'Exocrine', text: 'Secretion vers un conduit ou une surface', bullets: ['Sucs digestifs', 'Action locale'], tone: 'teal' },
+      { title: 'Amphicrine', text: 'Un meme organe assure les deux fonctions', bullets: ['Exemple : pancreas'], tone: 'amber' },
+    ]),
+  ),
+  'bb2-3-regulation-hormonale': createVisualDocument(
+    'Schema - Boucle de regulation hormonale',
+    [
+      "La regulation hormonale ne se limite pas a une hormone isolee. Elle s'organise en boucle avec controle et retroaction.",
+    ],
+    cycleDiagram(
+      'Principe general de regulation',
+      "La correction d'une variation s'accompagne souvent d'un retrocontrole.",
+      { title: 'Variable regulee', text: 'Exemple : glycemie ou concentration hormonale' },
+      [
+        { title: 'Variation', text: "Une valeur s'ecarte de la reference", tone: 'rose' },
+        { title: 'Glande', text: 'Production ou inhibition hormonale', tone: 'blue' },
+        { title: 'Organe cible', text: 'Reponse biologique', tone: 'teal' },
+        { title: 'Retrocontrole', text: 'Limitation de la reponse', tone: 'amber' },
+      ],
+    ),
+  ),
+  'bb2-4-gametogenese-fecondation': createVisualDocument(
+    'Schema - De la gametogenese a la cellule-oeuf',
+    [
+      "Ce schema met en ordre les etapes principales conduisant des cellules germinales aux gametes, puis a la fecondation.",
+    ],
+    flowDiagram('Former puis reunir les gametes', "La fecondation retablit une combinaison genetique complete.", [
+      { title: 'Cellules germinales', text: 'Cellules de depart', tone: 'blue' },
+      { title: 'Meiose', text: 'Reduction chromosomique', tone: 'teal' },
+      { title: 'Gametes', text: 'Ovule et spermatozoide', tone: 'amber' },
+      { title: 'Fecondation', text: 'Formation de la cellule-oeuf', tone: 'green' },
+    ]),
+  ),
+  'bb2-5-transmission-caracteres': createVisualDocument(
+    'Schema - Transmission des caracteres',
+    [
+      "Le schema rappelle que les alleles sont transmis par les gametes et se recombinent chez la descendance.",
+    ],
+    comparisonDiagram('Des parents a la descendance', 'La transmission des caracteres passe par la formation des gametes puis leur association.', [
+      { title: 'Parent 1', text: 'Porte une combinaison d alleles', tone: 'blue' },
+      { title: 'Gametes', text: 'Chaque gamete ne porte qu un allele de chaque gene', tone: 'teal' },
+      { title: 'Parent 2 et descendance', text: 'Nouvelle combinaison allelique chez le descendant', tone: 'amber' },
+    ]),
+  ),
+  'bba-1-structures-biomolecules': createVisualDocument(
+    'Schema - Grandes familles de biomolecules',
+    [
+      "Les biomolecules n'ont pas les memes unites de base ni les memes roles. Le schema sert de repere d'ensemble.",
+    ],
+    comparisonDiagram('Comparer quelques grandes familles', "Chaque famille se reconnait par sa structure generale et son role biologique.", [
+      { title: 'Glucides', text: 'Energie et reserves', tone: 'amber' },
+      { title: 'Lipides', text: 'Reserves et membranes', tone: 'rose' },
+      { title: 'Proteines', text: 'Structure et fonctions enzymatiques', tone: 'teal' },
+      { title: 'Acides nucleiques', text: 'Information genetique', tone: 'blue' },
+    ]),
+  ),
+  'bba-2-diversite-fonctions': createVisualDocument(
+    'Schema - Diversite des fonctions biologiques',
+    [
+      "Une meme classe de biomolecules peut remplir plusieurs fonctions selon le contexte du vivant considere.",
+    ],
+    cycleDiagram(
+      'Biomolecules et fonctions',
+      "Une molecule biologique se comprend toujours par sa structure et par sa fonction.",
+      { title: 'Biomolecules', text: 'Des structures variees au service du vivant' },
+      [
+        { title: 'Energie', text: 'Fournir ou stocker', tone: 'amber' },
+        { title: 'Structure', text: 'Constituer cellules et tissus', tone: 'blue' },
+        { title: 'Information', text: 'Conserver et transmettre', tone: 'teal' },
+        { title: 'Communication', text: 'Reguler et coordonner', tone: 'violet' },
+      ],
+    ),
+  ),
+  'bba-3-acides-nucleiques': createVisualDocument(
+    'Schema - Comparer ADN et ARN',
+    [
+      "Le support aide a distinguer leur organisation generale et leur role sans entrer dans un niveau de detail inutile pour le chapitre.",
+    ],
+    comparisonDiagram('ADN et ARN : points communs et differences', 'Les deux molecules portent une information, mais ne jouent pas exactement le meme role.', [
+      { title: 'ADN', text: 'Stockage stable de l information genetique', bullets: ['Double chaine', 'Support des genes'], tone: 'blue' },
+      { title: 'ARN', text: 'Intervient dans l expression genetique', bullets: ['Le plus souvent simple chaine', 'Role dans la synthese'], tone: 'teal' },
+    ]),
+  ),
+  'bba-4-membranes': createVisualDocument(
+    'Schema - Organisation d une membrane',
+    [
+      "La membrane cellulaire associe une structure generale stable et des elements mobiles impliques dans les echanges et la communication.",
+    ],
+    comparisonDiagram('Les principaux constituants de la membrane', "La membrane ne se resume pas a une simple frontiere : elle controle aussi les echanges.", [
+      { title: 'Phospholipides', text: 'Base de la bicouche', tone: 'blue' },
+      { title: 'Proteines', text: 'Transport, reception, reconnaissance', tone: 'teal' },
+      { title: 'Fonction globale', text: 'Delimiter et echanger', tone: 'amber' },
+    ]),
+  ),
+  'bbb-1-observer-vivant': createVisualDocument(
+    'Schema - Observation du vivant a plusieurs echelles',
+    [
+      "Ce support relie observation macroscopique, microscopie et comparaison des organisations cellulaires.",
+    ],
+    flowDiagram("Passer d'une observation a une interpretation", "L'observation gagne en precision quand on change d'echelle et d'outil.", [
+      { title: 'Echantillon', text: 'Objet biologique de depart', tone: 'blue' },
+      { title: 'Microscope', text: 'Agrandir et regler', tone: 'teal' },
+      { title: 'Cellule', text: 'Observer et decrire', tone: 'amber' },
+      { title: 'Interpretation', text: 'Comparer et conclure', tone: 'green' },
+    ]),
+  ),
+  'bbb-2-divisions-cellulaires': createVisualDocument(
+    'Schema - Mitose et meiose',
+    [
+      "Le schema aide a comparer deux divisions cellulaires qui n'ont ni les memes etapes generales ni les memes consequences biologiques.",
+    ],
+    comparisonDiagram('Comparer deux divisions cellulaires', "Le type de division depend du contexte biologique et du resultat attendu.", [
+      { title: 'Mitose', text: 'Conserver le patrimoine genetique des cellules filles', tone: 'blue' },
+      { title: 'Meiose', text: 'Produire des cellules sexuelles et reduire le nombre de chromosomes', tone: 'amber' },
+    ]),
+  ),
+  'bbc-1-communication-hormonale': createVisualDocument(
+    'Schema - Communication hormonale',
+    [
+      "Le message hormonal circule par le sang et n'agit que sur les cellules capables de le recevoir.",
+    ],
+    flowDiagram('Du signal hormonal a la reponse', "Une hormone n'agit pas sur toutes les cellules, mais sur des cibles precises.", [
+      { title: 'Glande', text: 'Produit l hormone', tone: 'blue' },
+      { title: 'Sang', text: 'Transport du message', tone: 'teal' },
+      { title: 'Cellule cible', text: 'Recepteur adapte', tone: 'amber' },
+      { title: 'Reponse', text: 'Effet physiologique', tone: 'green' },
+    ]),
+  ),
+  'bbc-2-transport-molecules': createVisualDocument(
+    'Schema - Transport de molecules a travers une membrane',
+    [
+      "Le passage d'une molecule depend de sa nature, du gradient et parfois d'un apport energetique.",
+    ],
+    comparisonDiagram('Quelques mecanismes de transport', "Tous les transports membranaires ne demandent pas les memes conditions.", [
+      { title: 'Diffusion simple', text: 'Passage selon le gradient', tone: 'blue' },
+      { title: 'Osmose', text: "Deplacement de l'eau", tone: 'teal' },
+      { title: 'Transport actif', text: 'Necessite une depense d energie', tone: 'amber' },
+    ]),
+  ),
+  'bbd-1-analyser-document': createVisualDocument(
+    'Schema - Demarche d analyse de document',
+    [
+      "Le support rappelle l'ordre des operations pour repondre de facon rigoureuse a partir d'un document scientifique.",
+    ],
+    flowDiagram('Lire puis exploiter un document', "L'analyse ne consiste pas a recopier le document, mais a en tirer des informations utiles.", [
+      { title: 'Identifier', text: 'Nature, titre, contexte', tone: 'blue' },
+      { title: 'Prelever', text: 'Donnees et indices utiles', tone: 'teal' },
+      { title: 'Relier', text: 'Mettre en lien avec le cours', tone: 'amber' },
+      { title: 'Conclure', text: 'Reponse redigee et justifiee', tone: 'green' },
+    ]),
+  ),
+  'bbd-2-organigrammes': createVisualDocument(
+    'Schema - Lire un organigramme',
+    [
+      "Un organigramme guide un choix ou une identification. Chaque branche correspond a une question precise ou a une condition.",
+    ],
+    flowDiagram('Suivre une suite de choix', "Pour exploiter un organigramme, il faut repondre a chaque question dans l'ordre.", [
+      { title: 'Question 1', text: 'Observer un premier critere', tone: 'blue' },
+      { title: 'Oui / non', text: 'Suivre la bonne branche', tone: 'teal' },
+      { title: 'Question suivante', text: 'Affiner le raisonnement', tone: 'amber' },
+      { title: 'Conclusion', text: 'Identifier ou decider', tone: 'green' },
+    ]),
+  ),
+  'bbd-3-analyser-courbe': createVisualDocument(
+    'Graphique - Lire une courbe simplement',
+    [
+      "Ce graphique simplifie rappelle qu'il faut d'abord repere la tendance generale avant d'interpreter les variations plus fines.",
+    ],
+    curveDiagram(
+      'Exemple de courbe a analyser',
+      'Repere variation, palier et evolution globale avant de conclure.',
+      'Temps',
+      'Grandeur mesuree',
+      [
+        { label: 't1', y: 20 },
+        { label: 't2', y: 34 },
+        { label: 't3', y: 52 },
+        { label: 't4', y: 56 },
+        { label: 't5', y: 62 },
+      ],
+    ),
+  ),
+  'bbd-4-utiliser-echelle': createVisualDocument(
+    'Schema - Passer de l image a la taille reelle',
+    [
+      "Le schema rappelle qu'une image seule ne suffit pas : il faut une echelle, une comparaison et un controle de coherence.",
+    ],
+    flowDiagram("Utiliser une barre d'echelle", "La conversion doit etre suivie d'un controle d'ordre de grandeur.", [
+      { title: 'Barre d echelle', text: 'Repere de reference', tone: 'blue' },
+      { title: 'Mesure sur l image', text: 'Comparer objet et barre', tone: 'teal' },
+      { title: 'Conversion', text: 'Exprimer la taille reelle', tone: 'amber' },
+      { title: 'Controle', text: 'Verifier la coherence biologique', tone: 'green' },
+    ]),
+  ),
+  'bbd-5-representer-observation': createVisualDocument(
+    'Schema - Construire une representation scientifique',
+    [
+      "Le support montre qu'un schema d'observation se construit par selection, simplification et legende, pas par decoration.",
+    ],
+    flowDiagram('De l observation au schema', "Le schema scientifique met en avant l'essentiel sans deformer.", [
+      { title: 'Observer', text: 'Regarder avec precision', tone: 'blue' },
+      { title: 'Selectionner', text: 'Garder les elements utiles', tone: 'teal' },
+      { title: 'Tracer', text: 'Representer proprement', tone: 'amber' },
+      { title: 'Legender', text: 'Donner du sens au schema', tone: 'green' },
+    ]),
+  ),
+};
+
+const attachVisualSupport = (lesson) => {
+  const visual = BIOBIO_VISUAL_SUPPORTS[lesson.id];
+
+  if (!visual || !lesson.content?.questionSets?.length) {
+    return;
+  }
+
+  lesson.content.questionSets[0].documents = [
+    ...(lesson.content.questionSets[0].documents || []),
+    visual,
+  ];
+};
+
+[
+  ...PREMIERE_BIOBIO_THEME_1_LESSONS,
+  ...PREMIERE_BIOBIO_THEME_2_LESSONS,
+  ...PREMIERE_BIOBIO_TRANSVERSAL_A_LESSONS,
+  ...PREMIERE_BIOBIO_TRANSVERSAL_B_LESSONS,
+  ...PREMIERE_BIOBIO_TRANSVERSAL_C_LESSONS,
+  ...PREMIERE_BIOBIO_TRANSVERSAL_D_LESSONS,
+].forEach(attachVisualSupport);

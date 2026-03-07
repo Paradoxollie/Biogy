@@ -380,6 +380,178 @@ function TitrationDiagram() {
   );
 }
 
+function getToneClasses(tone) {
+  const tones = {
+    blue: 'border-blue-200 bg-blue-50',
+    teal: 'border-teal-200 bg-teal-50',
+    green: 'border-green-200 bg-green-50',
+    amber: 'border-amber-200 bg-amber-50',
+    rose: 'border-rose-200 bg-rose-50',
+    slate: 'border-slate-200 bg-slate-50',
+    violet: 'border-violet-200 bg-violet-50',
+  };
+
+  return tones[tone] || 'border-gray-200 bg-gray-50';
+}
+
+function DiagramTextBlock({ item }) {
+  return (
+    <>
+      <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">{item.title}</h4>
+      {item.text ? <p className="mt-2 text-sm leading-6 text-gray-700">{item.text}</p> : null}
+      {item.bullets?.length ? (
+        <ul className="mt-2 space-y-1 text-sm leading-6 text-gray-700">
+          {item.bullets.map((bullet) => (
+            <li key={bullet}>{bullet}</li>
+          ))}
+        </ul>
+      ) : null}
+    </>
+  );
+}
+
+function StructuredDiagram({ spec }) {
+  if (!spec) {
+    return null;
+  }
+
+  if (spec.kind === 'flow') {
+    return (
+      <div className="space-y-4">
+        {spec.title ? <h4 className="text-base font-bold text-gray-800">{spec.title}</h4> : null}
+        <div className="flex flex-wrap items-center gap-3">
+          {spec.nodes.map((node, index) => (
+            <React.Fragment key={node.title}>
+              <article className={`min-w-[140px] flex-1 rounded-2xl border px-4 py-4 ${getToneClasses(node.tone)}`}>
+                <DiagramTextBlock item={node} />
+              </article>
+              {index < spec.nodes.length - 1 ? (
+                <div className="px-1 text-xl font-bold text-gray-400">→</div>
+              ) : null}
+            </React.Fragment>
+          ))}
+        </div>
+        {spec.footer ? <p className="text-sm leading-6 text-gray-600">{spec.footer}</p> : null}
+      </div>
+    );
+  }
+
+  if (spec.kind === 'comparison') {
+    return (
+      <div className="space-y-4">
+        {spec.title ? <h4 className="text-base font-bold text-gray-800">{spec.title}</h4> : null}
+        <div className={`grid gap-4 ${spec.columns.length > 2 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+          {spec.columns.map((column) => (
+            <article key={column.title} className={`rounded-2xl border px-4 py-4 ${getToneClasses(column.tone)}`}>
+              <DiagramTextBlock item={column} />
+            </article>
+          ))}
+        </div>
+        {spec.footer ? <p className="text-sm leading-6 text-gray-600">{spec.footer}</p> : null}
+      </div>
+    );
+  }
+
+  if (spec.kind === 'cycle') {
+    return (
+      <div className="space-y-4">
+        {spec.title ? <h4 className="text-base font-bold text-gray-800">{spec.title}</h4> : null}
+        <div className="rounded-3xl border border-gray-200 bg-white p-4">
+          <div className="mx-auto max-w-sm rounded-3xl border border-lab-blue/20 bg-lab-blue/5 px-5 py-4 text-center">
+            <h5 className="text-base font-bold text-gray-800">{spec.center.title}</h5>
+            {spec.center.text ? <p className="mt-2 text-sm leading-6 text-gray-700">{spec.center.text}</p> : null}
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {spec.nodes.map((node) => (
+              <article key={node.title} className={`rounded-2xl border px-4 py-4 ${getToneClasses(node.tone)}`}>
+                <DiagramTextBlock item={node} />
+              </article>
+            ))}
+          </div>
+        </div>
+        {spec.footer ? <p className="text-sm leading-6 text-gray-600">{spec.footer}</p> : null}
+      </div>
+    );
+  }
+
+  if (spec.kind === 'bars') {
+    return (
+      <div className="space-y-4">
+        {spec.title ? <h4 className="text-base font-bold text-gray-800">{spec.title}</h4> : null}
+        <div className="rounded-3xl border border-gray-200 bg-white p-4">
+          <div className="flex h-52 items-end justify-between gap-3">
+            {spec.bars.map((bar) => (
+              <div key={bar.label} className="flex flex-1 flex-col items-center gap-3">
+                <div className="text-xs font-semibold text-gray-500">{bar.valueLabel || bar.value}</div>
+                <div
+                  className={`w-full rounded-t-2xl ${bar.colorClass || 'bg-lab-blue'}`}
+                  style={{ height: `${Math.max(16, Math.min(100, bar.value))}%` }}
+                />
+                <div className="text-center text-xs font-semibold text-gray-700">{bar.label}</div>
+              </div>
+            ))}
+          </div>
+          {spec.footer ? <p className="mt-4 text-sm leading-6 text-gray-600">{spec.footer}</p> : null}
+        </div>
+      </div>
+    );
+  }
+
+  if (spec.kind === 'curve') {
+    const points = spec.points || [];
+    const maxY = Math.max(...points.map((point) => point.y), 1);
+    const width = 420;
+    const height = 180;
+    const startX = 44;
+    const startY = 150;
+    const graphWidth = 320;
+    const graphHeight = 108;
+    const stepX = points.length > 1 ? graphWidth / (points.length - 1) : graphWidth;
+    const polyline = points
+      .map((point, index) => {
+        const x = startX + index * stepX;
+        const y = startY - (point.y / maxY) * graphHeight;
+        return `${x},${y}`;
+      })
+      .join(' ');
+
+    return (
+      <div className="space-y-4">
+        {spec.title ? <h4 className="text-base font-bold text-gray-800">{spec.title}</h4> : null}
+        <div className="rounded-3xl border border-gray-200 bg-white p-4">
+          <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label={spec.title || 'Graphique'}>
+            <line x1={startX} y1={startY} x2={startX + graphWidth + 20} y2={startY} stroke="#94a3b8" strokeWidth="2" />
+            <line x1={startX} y1={24} x2={startX} y2={startY} stroke="#94a3b8" strokeWidth="2" />
+            <polyline points={polyline} fill="none" stroke="#0ea5e9" strokeWidth="4" />
+            {points.map((point, index) => {
+              const x = startX + index * stepX;
+              const y = startY - (point.y / maxY) * graphHeight;
+
+              return (
+                <g key={point.label}>
+                  <circle cx={x} cy={y} r="4" fill="#0284c7" />
+                  <text x={x - 8} y={startY + 18} fontSize="10" fill="#475569">
+                    {point.label}
+                  </text>
+                </g>
+              );
+            })}
+            <text x={width / 2 - 40} y={height - 4} fontSize="11" fill="#475569">
+              {spec.xLabel || 'Abscisses'}
+            </text>
+            <text x="10" y={height / 2} fontSize="11" fill="#475569" transform={`rotate(-90 10 ${height / 2})`}>
+              {spec.yLabel || 'Ordonnees'}
+            </text>
+          </svg>
+          {spec.footer ? <p className="mt-4 text-sm leading-6 text-gray-600">{spec.footer}</p> : null}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 function getDiagramNode(diagramId) {
   const diagrams = {
     microscope: <MicroscopeDiagram />,
@@ -400,8 +572,16 @@ function getDiagramNode(diagramId) {
   return diagrams[diagramId] || null;
 }
 
+function renderDiagramContent({ diagramId, diagramSpec }) {
+  if (diagramSpec) {
+    return <StructuredDiagram spec={diagramSpec} />;
+  }
+
+  return getDiagramNode(diagramId);
+}
+
 function DiagramCard({ diagram }) {
-  const node = getDiagramNode(diagram.id);
+  const node = renderDiagramContent({ diagramId: diagram.id, diagramSpec: diagram.diagramSpec });
 
   if (!node) {
     return null;
@@ -436,7 +616,7 @@ function DocumentCard({ document, onOpenImage }) {
 
       <h3 className="mt-3 text-base font-semibold leading-6 text-gray-800">{document.title}</h3>
 
-      {document.imageSrc || document.diagramId ? (
+      {document.imageSrc || document.diagramId || document.diagramSpec ? (
         <div className="mt-4">
           <button
             type="button"
@@ -444,6 +624,7 @@ function DocumentCard({ document, onOpenImage }) {
               onOpenImage?.({
                 src: document.imageSrc,
                 diagramId: document.diagramId,
+                diagramSpec: document.diagramSpec,
                 alt: document.imageAlt || document.title,
                 title: document.title,
               })
@@ -456,6 +637,8 @@ function DocumentCard({ document, onOpenImage }) {
                 alt={document.imageAlt || document.title}
                 className="h-auto w-full object-contain"
               />
+            ) : document.diagramSpec ? (
+              <div className="p-4">{renderDiagramContent({ diagramSpec: document.diagramSpec })}</div>
             ) : (
               <div className="p-4">{getDiagramNode(document.diagramId)}</div>
             )}
@@ -466,13 +649,14 @@ function DocumentCard({ document, onOpenImage }) {
               onOpenImage?.({
                 src: document.imageSrc,
                 diagramId: document.diagramId,
+                diagramSpec: document.diagramSpec,
                 alt: document.imageAlt || document.title,
                 title: document.title,
               })
             }
             className="mt-2 text-sm font-semibold text-lab-blue hover:underline"
           >
-            {document.diagramId ? 'Agrandir le schema' : 'Agrandir l image'}
+            {document.diagramId || document.diagramSpec ? 'Agrandir le schema' : 'Agrandir l image'}
           </button>
         </div>
       ) : null}
@@ -520,7 +704,7 @@ function SupportList({ supports, onOpenImage }) {
           {support.detail ? (
             <p className="mt-2 text-sm leading-6 text-gray-600">{support.detail}</p>
           ) : null}
-          {support.imageSrc || support.diagramId ? (
+          {support.imageSrc || support.diagramId || support.diagramSpec ? (
             <div className="mt-3">
               <button
                 type="button"
@@ -528,6 +712,7 @@ function SupportList({ supports, onOpenImage }) {
                   onOpenImage?.({
                     src: support.imageSrc,
                     diagramId: support.diagramId,
+                    diagramSpec: support.diagramSpec,
                     alt: support.imageAlt || support.label,
                     title: support.label,
                   })
@@ -540,6 +725,8 @@ function SupportList({ supports, onOpenImage }) {
                     alt={support.imageAlt || support.label}
                     className="h-auto max-w-[220px] object-contain"
                   />
+                ) : support.diagramSpec ? (
+                  <div className="max-w-[320px] p-3">{renderDiagramContent({ diagramSpec: support.diagramSpec })}</div>
                 ) : (
                   <div className="max-w-[260px] p-3">{getDiagramNode(support.diagramId)}</div>
                 )}
@@ -550,13 +737,14 @@ function SupportList({ supports, onOpenImage }) {
                   onOpenImage?.({
                     src: support.imageSrc,
                     diagramId: support.diagramId,
+                    diagramSpec: support.diagramSpec,
                     alt: support.imageAlt || support.label,
                     title: support.label,
                   })
                 }
                 className="mt-2 text-sm font-semibold text-lab-blue hover:underline"
               >
-                {support.diagramId ? 'Agrandir le schema' : 'Agrandir le support'}
+                {support.diagramId || support.diagramSpec ? 'Agrandir le schema' : 'Agrandir le support'}
               </button>
             </div>
           ) : null}
@@ -798,9 +986,9 @@ function ImageLightbox({ image, onClose }) {
           <h3 className="pr-20 text-lg font-bold text-gray-800">{image.title}</h3>
         ) : null}
         <div className="mt-4 max-h-[82vh] overflow-auto rounded-2xl border border-gray-200 bg-gray-50 p-3">
-          {image.diagramId ? (
+          {image.diagramId || image.diagramSpec ? (
             <div className="mx-auto max-w-5xl bg-white p-4">
-              {getDiagramNode(image.diagramId)}
+              {renderDiagramContent({ diagramId: image.diagramId, diagramSpec: image.diagramSpec })}
             </div>
           ) : (
             <img src={image.src} alt={image.alt || image.title || 'Image'} className="mx-auto h-auto w-full object-contain" />
