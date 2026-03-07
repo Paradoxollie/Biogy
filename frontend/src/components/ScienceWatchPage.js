@@ -53,30 +53,30 @@ const CATEGORY_STYLES = {
 
 const PAGE_PILLARS = [
   {
-    title: 'Culture scientifique STL',
+    title: 'Relier l actualite au cours',
     description:
-      'Des sujets utilisables pour ouvrir un chapitre, nourrir un questionnement scientifique ou preparer un oral.',
+      'Chaque sujet selectionne peut servir a ouvrir un chapitre, enrichir une notion ou illustrer une application concrete du programme.',
     badge: 'bg-lab-blue/10 text-lab-blue',
     line: 'bg-lab-blue',
   },
   {
-    title: 'Projet technologique',
+    title: 'Preparer le projet et l oral',
     description:
-      'Une veille qui aide a contextualiser une demarche de projet, un besoin, un procede ou une contrainte de production.',
+      'La veille aide a trouver des exemples serieux pour le projet technologique, le Grand oral et les prises de parole en classe.',
     badge: 'bg-lab-purple/10 text-lab-purple',
     line: 'bg-lab-purple',
   },
   {
-    title: 'Laboratoire et techniques',
+    title: 'Mieux comprendre le laboratoire',
     description:
-      'Les actualites retenues privilegient les analyses, la qualite, les protocoles et les pratiques de laboratoire utiles en STL.',
+      'Les articles retenus montrent des techniques, des protocoles, des mesures et des pratiques de laboratoire utiles en STL.',
     badge: 'bg-lab-teal/10 text-lab-teal',
     line: 'bg-lab-teal',
   },
   {
-    title: 'One Health et enjeux',
+    title: 'Prendre du recul',
     description:
-      'Les liens entre sante, environnement, alimentation et biodiversite sont visibles pour coller aux attendus recents.',
+      'Sante, environnement, alimentation et bioethique : la veille sert aussi a comprendre les grands enjeux scientifiques et citoyens.',
     badge: 'bg-lab-green/10 text-lab-green',
     line: 'bg-lab-green',
   },
@@ -277,14 +277,14 @@ function ScienceWatchPage() {
                 Veille scientifique STL
               </p>
               <h1 className="mt-5 text-3xl font-bold leading-tight text-gray-800 lg:text-4xl">
-                Une page d&apos;actualites plus claire, plus utile et plus credible pour la STL
+                Comprendre l actualite scientifique pour mieux apprendre en STL
               </h1>
               <p className="mt-3 text-3xl font-bold leading-tight text-transparent bg-clip-text bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal lg:text-4xl">
-                Les categories officielles restent, mais leur usage devient enfin lisible sur Biogy
+                Une veille guidee pour relier les informations recentes aux chapitres, aux TP et au projet technologique
               </p>
               <p className="mt-5 max-w-3xl text-base leading-7 text-gray-600">
-                Cette veille conserve les categories officielles des biotechnologies et les relie aux vrais usages attendus
-                en STL : culture scientifique, projet technologique, techniques de laboratoire, oral et ouverture One Health.
+                Tu peux utiliser cette page pour enrichir un cours, preparer un oral, trouver un exemple precis ou mieux
+                comprendre une technique rencontree en classe.
               </p>
 
               <div className="mt-7 grid gap-4 sm:grid-cols-3">
@@ -301,10 +301,10 @@ function ScienceWatchPage() {
 
             <aside className="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-lab-bg p-6 shadow-lg">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-lab-purple">Cadre officiel</p>
-              <h2 className="mt-2 text-2xl font-bold text-gray-800">Une veille pensee pour les attendus STL</h2>
+              <h2 className="mt-2 text-2xl font-bold text-gray-800">Une veille utile pour les eleves de STL</h2>
               <p className="mt-3 text-sm leading-7 text-gray-600">
-                La selection privilegie les situations technologiques, la culture scientifique, le lien au laboratoire,
-                les enjeux contemporains et les contextes exploitables en classe ou en projet.
+                Les sujets sont tries pour rester lisibles, fiables et directement exploitables en cours, en TP, pour le projet
+                technologique ou pour le Grand oral.
               </p>
 
               <div className="mt-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -348,9 +348,9 @@ function ScienceWatchPage() {
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lab-teal">Navigation</p>
-            <h2 className="mt-2 text-2xl font-bold text-gray-800">Filtrer la veille STL</h2>
+            <h2 className="mt-2 text-2xl font-bold text-gray-800">Choisir une categorie de veille</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-600">
-              Les couleurs officielles restent visibles, mais la lecture est simplifiee et plus proche du reste de l&apos;identite Biogy.
+              Selectionne une categorie, recherche un theme, puis ouvre la source si tu veux aller plus loin.
             </p>
           </div>
 
@@ -449,11 +449,11 @@ function ScienceWatchPage() {
         <section className="mt-10">
           <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lab-purple">A la une STL</p>
-              <h2 className="mt-2 text-3xl font-bold text-gray-800">Les sujets les plus exploitables dans le cadre STL</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lab-purple">A la une</p>
+              <h2 className="mt-2 text-3xl font-bold text-gray-800">Des sujets utiles pour le cours et pour la culture scientifique</h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-gray-600">
-              Chaque carte met en avant la categorie officielle, l&apos;interet pedagogique du sujet et ses usages possibles en classe.
+              Chaque carte te donne la categorie, l interet du sujet et des pistes d usage en classe, en TP ou a l oral.
             </p>
           </div>
 

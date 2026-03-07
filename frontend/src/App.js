@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Homepage from './components/Homepage';
+import ApprendrePage from './components/ApprendrePage';
 import Layout from './components/Layout';
 import ShareProjectPage from './components/ShareProjectPage';
 import LoginPage from './components/LoginPage';
@@ -24,7 +25,7 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Homepage />} />
-          <Route path="/apprendre" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-blue">Section Apprendre</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
+          <Route path="/apprendre" element={<ApprendrePage />} />
           <Route path="/recherche" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-purple">Section Recherche</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
           <Route path="/actualites" element={<ScienceWatchPage />} />
           <Route path="/methodes" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-green">Section Méthodes</h1><p className="mt-4">Cette section est en cours de développement</p></div>} />
