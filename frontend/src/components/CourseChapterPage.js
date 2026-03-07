@@ -105,14 +105,305 @@ function BiotechDomainsDiagram() {
   );
 }
 
-function DiagramCard({ diagram }) {
+function MeasurementReliabilityDiagram() {
+  return (
+    <svg viewBox="0 0 480 260" className="w-full" role="img" aria-label="Lecture de mesure et fiabilite d un resultat">
+      <rect x="36" y="36" width="112" height="168" rx="18" fill="#eff6ff" stroke="#3b82f6" strokeWidth="3" />
+      <rect x="72" y="72" width="40" height="96" rx="12" fill="#dbeafe" stroke="#60a5fa" strokeWidth="3" />
+      <line x1="72" y1="116" x2="112" y2="116" stroke="#1d4ed8" strokeWidth="3" />
+      <circle cx="144" cy="108" r="10" fill="#fecaca" />
+      <circle cx="144" cy="138" r="10" fill="#bbf7d0" />
+      <line x1="154" y1="108" x2="202" y2="92" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="154" y1="138" x2="202" y2="140" stroke="#94a3b8" strokeWidth="2" />
+      <text x="206" y="94" fontSize="12" fill="#334155">Regard trop haut</text>
+      <text x="206" y="144" fontSize="12" fill="#334155">Oeil a hauteur</text>
+      <text x="42" y="226" fontSize="12" fill="#334155">Lecture correcte du menisque</text>
+
+      <rect x="266" y="40" width="174" height="156" rx="20" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="3" />
+      <line x1="292" y1="176" x2="420" y2="176" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="292" y1="66" x2="292" y2="176" stroke="#94a3b8" strokeWidth="2" />
+      <circle cx="330" cy="120" r="7" fill="#38bdf8" />
+      <circle cx="356" cy="116" r="7" fill="#38bdf8" />
+      <circle cx="382" cy="118" r="7" fill="#38bdf8" />
+      <circle cx="408" cy="84" r="7" fill="#ef4444" />
+      <text x="314" y="60" fontSize="12" fill="#334155">Mesures proches</text>
+      <text x="396" y="74" fontSize="12" fill="#7f1d1d">Valeur a verifier</text>
+      <text x="304" y="196" fontSize="12" fill="#334155">Comparer les valeurs obtenues</text>
+    </svg>
+  );
+}
+
+function DataVisualizationDiagram() {
+  return (
+    <svg viewBox="0 0 480 260" className="w-full" role="img" aria-label="Organisation de donnees et representation graphique">
+      <rect x="26" y="36" width="156" height="176" rx="18" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="3" />
+      <text x="48" y="60" fontSize="14" fontWeight="bold" fill="#1f2937">Tableau propre</text>
+      <line x1="44" y1="78" x2="164" y2="78" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="44" y1="108" x2="164" y2="108" stroke="#e2e8f0" strokeWidth="2" />
+      <line x1="44" y1="138" x2="164" y2="138" stroke="#e2e8f0" strokeWidth="2" />
+      <line x1="44" y1="168" x2="164" y2="168" stroke="#e2e8f0" strokeWidth="2" />
+      <line x1="84" y1="52" x2="84" y2="196" stroke="#e2e8f0" strokeWidth="2" />
+      <line x1="128" y1="52" x2="128" y2="196" stroke="#e2e8f0" strokeWidth="2" />
+      <text x="48" y="96" fontSize="11" fill="#334155">Temps</text>
+      <text x="92" y="96" fontSize="11" fill="#334155">Abs.</text>
+      <text x="134" y="96" fontSize="11" fill="#334155">Obs.</text>
+
+      <rect x="214" y="36" width="240" height="176" rx="18" fill="#eff6ff" stroke="#60a5fa" strokeWidth="3" />
+      <text x="240" y="60" fontSize="14" fontWeight="bold" fill="#1f2937">Graphique adapte</text>
+      <line x1="244" y1="176" x2="424" y2="176" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="244" y1="82" x2="244" y2="176" stroke="#94a3b8" strokeWidth="2" />
+      <rect x="270" y="136" width="22" height="40" rx="4" fill="#38bdf8" />
+      <rect x="312" y="112" width="22" height="64" rx="4" fill="#0ea5e9" />
+      <rect x="354" y="92" width="22" height="84" rx="4" fill="#2563eb" />
+      <polyline points="272,118 324,104 368,88 404,72" fill="none" stroke="#0f766e" strokeWidth="3" />
+      <circle cx="272" cy="118" r="4" fill="#0f766e" />
+      <circle cx="324" cy="104" r="4" fill="#0f766e" />
+      <circle cx="368" cy="88" r="4" fill="#0f766e" />
+      <circle cx="404" cy="72" r="4" fill="#0f766e" />
+      <text x="236" y="198" fontSize="12" fill="#334155">Tableau lisible puis graphique interpretable</text>
+    </svg>
+  );
+}
+
+function CultureConditionsDiagram() {
+  return (
+    <svg viewBox="0 0 480 280" className="w-full" role="img" aria-label="Conditions de culture des micro-organismes">
+      <circle cx="240" cy="138" r="72" fill="#ecfeff" stroke="#14b8a6" strokeWidth="4" />
+      <circle cx="240" cy="138" r="54" fill="#ccfbf1" stroke="#2dd4bf" strokeWidth="3" strokeDasharray="6 6" />
+      <text x="198" y="134" fontSize="18" fontWeight="bold" fill="#115e59">Culture</text>
+      <text x="186" y="156" fontSize="12" fill="#134e4a">croissance microbienne</text>
+
+      <line x1="240" y1="66" x2="240" y2="26" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="308" y1="110" x2="374" y2="78" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="308" y1="166" x2="378" y2="196" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="172" y1="166" x2="102" y2="196" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="172" y1="110" x2="106" y2="76" stroke="#94a3b8" strokeWidth="2" />
+
+      <text x="214" y="18" fontSize="12" fill="#334155">Temperature</text>
+      <text x="384" y="78" fontSize="12" fill="#334155">Nutriments</text>
+      <text x="384" y="202" fontSize="12" fill="#334155">Oxygene / temps</text>
+      <text x="26" y="202" fontSize="12" fill="#334155">Asepsie</text>
+      <text x="24" y="74" fontSize="12" fill="#334155">pH / milieu</text>
+      <text x="144" y="252" fontSize="12" fill="#334155">La croissance depend des conditions choisies</text>
+    </svg>
+  );
+}
+
+function IdentificationFlowDiagram() {
+  return (
+    <svg viewBox="0 0 520 240" className="w-full" role="img" aria-label="Demarche d identification d un micro-organisme">
+      <rect x="24" y="84" width="96" height="58" rx="14" fill="#eff6ff" stroke="#3b82f6" strokeWidth="3" />
+      <rect x="152" y="84" width="96" height="58" rx="14" fill="#ecfeff" stroke="#14b8a6" strokeWidth="3" />
+      <rect x="280" y="84" width="96" height="58" rx="14" fill="#fefce8" stroke="#eab308" strokeWidth="3" />
+      <rect x="408" y="84" width="88" height="58" rx="14" fill="#f0fdf4" stroke="#65a30d" strokeWidth="3" />
+      <text x="42" y="108" fontSize="13" fontWeight="bold" fill="#1f2937">Observer</text>
+      <text x="38" y="126" fontSize="11" fill="#334155">culture / microscope</text>
+      <text x="166" y="108" fontSize="13" fontWeight="bold" fill="#1f2937">Orienter</text>
+      <text x="166" y="126" fontSize="11" fill="#334155">hypotheses</text>
+      <text x="298" y="108" fontSize="13" fontWeight="bold" fill="#1f2937">Tester</text>
+      <text x="294" y="126" fontSize="11" fill="#334155">tests discriminants</text>
+      <text x="424" y="108" fontSize="13" fontWeight="bold" fill="#1f2937">Conclure</text>
+      <text x="422" y="126" fontSize="11" fill="#334155">prudemment</text>
+      <line x1="120" y1="113" x2="152" y2="113" stroke="#94a3b8" strokeWidth="3" />
+      <line x1="248" y1="113" x2="280" y2="113" stroke="#94a3b8" strokeWidth="3" />
+      <line x1="376" y1="113" x2="408" y2="113" stroke="#94a3b8" strokeWidth="3" />
+      <text x="118" y="42" fontSize="12" fill="#334155">Plusieurs indices convergents</text>
+      <text x="162" y="192" fontSize="12" fill="#334155">Un test seul ne suffit pas toujours</text>
+    </svg>
+  );
+}
+
+function SerialDilutionDiagram() {
+  return (
+    <svg viewBox="0 0 520 280" className="w-full" role="img" aria-label="Gamme de dilutions et boites de denombrement">
+      <text x="28" y="34" fontSize="14" fontWeight="bold" fill="#1f2937">Dilutions successives</text>
+      {[0, 1, 2, 3].map((index) => {
+        const x = 36 + index * 86;
+        const label = ['10^-1', '10^-2', '10^-3', '10^-4'][index];
+        return (
+          <g key={label}>
+            <rect x={x} y="62" width="36" height="94" rx="12" fill="#eff6ff" stroke="#3b82f6" strokeWidth="3" />
+            <rect x={x} y="108" width="36" height="48" rx="0" fill="#93c5fd" />
+            {index < 3 ? <line x1={x + 36} y1="104" x2={x + 76} y2="104" stroke="#94a3b8" strokeWidth="2" /> : null}
+            <text x={x - 2} y="176" fontSize="12" fill="#334155">{label}</text>
+          </g>
+        );
+      })}
+      <text x="338" y="34" fontSize="14" fontWeight="bold" fill="#1f2937">Boites obtenues</text>
+      {[{ x: 352, c: 'Trop chargee', dots: 14 }, { x: 420, c: 'Exploitable', dots: 7 }, { x: 488, c: 'Trop pauvre', dots: 3 }].map((item, idx) => (
+        <g key={item.c}>
+          <circle cx={item.x} cy="108" r="28" fill="#f8fafc" stroke="#94a3b8" strokeWidth="3" />
+          {Array.from({ length: item.dots }).map((_, i) => {
+            const dx = [-10, -2, 8, 14, -14, 4, -6, 12, -12, 0, 10, -8, 6, -4][i];
+            const dy = [-10, -6, -4, 4, 6, 10, 12, -12, 0, -14, 8, 2, -8, 14][i];
+            return <circle key={i} cx={item.x + dx} cy={108 + dy} r="2.8" fill={idx === 1 ? '#0ea5e9' : '#475569'} />;
+          })}
+          <text x={item.x - 30} y="154" fontSize="11" fill="#334155">{item.c}</text>
+        </g>
+      ))}
+      <text x="122" y="236" fontSize="12" fill="#334155">Choisir la boite qui permet un comptage net et interpretable</text>
+    </svg>
+  );
+}
+
+function SolutionPreparationDiagram() {
+  return (
+    <svg viewBox="0 0 520 280" className="w-full" role="img" aria-label="Preparation d une solution par dissolution et dilution">
+      <rect x="30" y="38" width="206" height="194" rx="20" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="3" />
+      <text x="60" y="62" fontSize="14" fontWeight="bold" fill="#1f2937">Dissolution</text>
+      <rect x="62" y="146" width="52" height="46" rx="10" fill="#dbeafe" stroke="#60a5fa" strokeWidth="3" />
+      <rect x="142" y="96" width="44" height="96" rx="12" fill="#eff6ff" stroke="#3b82f6" strokeWidth="3" />
+      <rect x="150" y="138" width="28" height="54" fill="#93c5fd" />
+      <line x1="114" y1="170" x2="142" y2="146" stroke="#94a3b8" strokeWidth="3" />
+      <text x="56" y="214" fontSize="11" fill="#334155">Solide pese</text>
+      <text x="136" y="214" fontSize="11" fill="#334155">Fiole jaugee</text>
+
+      <rect x="284" y="38" width="206" height="194" rx="20" fill="#eff6ff" stroke="#60a5fa" strokeWidth="3" />
+      <text x="320" y="62" fontSize="14" fontWeight="bold" fill="#1f2937">Dilution</text>
+      <rect x="314" y="98" width="36" height="94" rx="12" fill="#e0f2fe" stroke="#0ea5e9" strokeWidth="3" />
+      <rect x="322" y="126" width="20" height="66" fill="#7dd3fc" />
+      <rect x="390" y="92" width="44" height="100" rx="12" fill="#eff6ff" stroke="#3b82f6" strokeWidth="3" />
+      <rect x="398" y="144" width="28" height="48" fill="#93c5fd" />
+      <line x1="350" y1="128" x2="390" y2="128" stroke="#94a3b8" strokeWidth="3" />
+      <text x="292" y="214" fontSize="11" fill="#334155">Solution mere</text>
+      <text x="388" y="214" fontSize="11" fill="#334155">Solution fille</text>
+      <text x="112" y="258" fontSize="12" fill="#334155">Masse precise puis volume final precise</text>
+      <text x="344" y="258" fontSize="12" fill="#334155">Prelever puis completer au trait</text>
+    </svg>
+  );
+}
+
+function BiomoleculeTestsDiagram() {
+  return (
+    <svg viewBox="0 0 520 260" className="w-full" role="img" aria-label="Exemples de tests de reconnaissance des biomolecules">
+      {[
+        { x: 56, fill: '#facc15', label: 'Amidon', sub: 'Lugol' },
+        { x: 168, fill: '#c084fc', label: 'Proteines', sub: 'Biuret' },
+        { x: 280, fill: '#fb923c', label: 'Sucres red.', sub: 'Benedict' },
+        { x: 392, fill: '#f472b6', label: 'Lipides', sub: 'Sudan' },
+      ].map((item) => (
+        <g key={item.label}>
+          <rect x={item.x} y="54" width="48" height="118" rx="16" fill="#f8fafc" stroke="#94a3b8" strokeWidth="3" />
+          <rect x={item.x + 8} y="106" width="32" height="66" rx="6" fill={item.fill} opacity="0.85" />
+          <text x={item.x - 4} y="198" fontSize="12" fill="#1f2937">{item.label}</text>
+          <text x={item.x + 2} y="216" fontSize="11" fill="#475569">{item.sub}</text>
+        </g>
+      ))}
+      <text x="112" y="30" fontSize="14" fontWeight="bold" fill="#1f2937">Choisir un test selon la biomolecule recherchee</text>
+      <text x="126" y="240" fontSize="12" fill="#334155">Le resultat se compare toujours a des temoins</text>
+    </svg>
+  );
+}
+
+function SeparationTechniquesDiagram() {
+  return (
+    <svg viewBox="0 0 540 280" className="w-full" role="img" aria-label="Techniques simples de separation">
+      <rect x="24" y="34" width="150" height="196" rx="20" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="3" />
+      <text x="62" y="58" fontSize="14" fontWeight="bold" fill="#1f2937">Filtration</text>
+      <path d="M78 86 L120 86 L98 126 Z" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="3" />
+      <rect x="90" y="126" width="16" height="34" fill="#cbd5e1" />
+      <rect x="74" y="160" width="48" height="34" rx="8" fill="#dbeafe" stroke="#60a5fa" strokeWidth="3" />
+
+      <rect x="196" y="34" width="150" height="196" rx="20" fill="#eff6ff" stroke="#60a5fa" strokeWidth="3" />
+      <text x="222" y="58" fontSize="14" fontWeight="bold" fill="#1f2937">Centrifugation</text>
+      <rect x="258" y="82" width="28" height="110" rx="12" fill="#e0f2fe" stroke="#0ea5e9" strokeWidth="3" />
+      <rect x="264" y="138" width="16" height="46" fill="#7dd3fc" />
+      <path d="M250 202 Q272 222 294 202" fill="#dcfce7" stroke="#65a30d" strokeWidth="3" />
+      <text x="222" y="216" fontSize="11" fill="#334155">Pellet + surnageant</text>
+
+      <rect x="368" y="34" width="150" height="196" rx="20" fill="#ecfeff" stroke="#14b8a6" strokeWidth="3" />
+      <text x="390" y="58" fontSize="14" fontWeight="bold" fill="#1f2937">Chromatographie</text>
+      <rect x="422" y="82" width="46" height="110" rx="6" fill="#f8fafc" stroke="#94a3b8" strokeWidth="3" />
+      <line x1="430" y1="170" x2="460" y2="170" stroke="#94a3b8" strokeWidth="2" />
+      <circle cx="444" cy="150" r="4" fill="#0ea5e9" />
+      <circle cx="438" cy="122" r="4" fill="#2563eb" />
+      <circle cx="452" cy="98" r="4" fill="#0f766e" />
+      <text x="394" y="216" fontSize="11" fill="#334155">Migration differente</text>
+    </svg>
+  );
+}
+
+function RiskAnalysisDiagram() {
+  return (
+    <svg viewBox="0 0 540 280" className="w-full" role="img" aria-label="Analyse a priori des risques au laboratoire">
+      <rect x="22" y="42" width="116" height="52" rx="14" fill="#eff6ff" stroke="#3b82f6" strokeWidth="3" />
+      <rect x="156" y="42" width="130" height="52" rx="14" fill="#ecfeff" stroke="#14b8a6" strokeWidth="3" />
+      <rect x="304" y="42" width="128" height="52" rx="14" fill="#fef3c7" stroke="#f59e0b" strokeWidth="3" />
+      <rect x="450" y="42" width="68" height="52" rx="14" fill="#fee2e2" stroke="#ef4444" strokeWidth="3" />
+      <text x="38" y="72" fontSize="12" fill="#1f2937">Situation de travail</text>
+      <text x="172" y="72" fontSize="12" fill="#1f2937">Situation exposante</text>
+      <text x="324" y="72" fontSize="12" fill="#1f2937">Evenement dangereux</text>
+      <text x="466" y="72" fontSize="12" fill="#1f2937">Dommage</text>
+      <line x1="138" y1="68" x2="156" y2="68" stroke="#94a3b8" strokeWidth="3" />
+      <line x1="286" y1="68" x2="304" y2="68" stroke="#94a3b8" strokeWidth="3" />
+      <line x1="432" y1="68" x2="450" y2="68" stroke="#94a3b8" strokeWidth="3" />
+
+      {[
+        { x: 54, title: 'Manipulateur' },
+        { x: 162, title: 'Matiere' },
+        { x: 270, title: 'Materiel' },
+        { x: 378, title: 'Methode' },
+        { x: 466, title: 'Milieu' },
+      ].map((item) => (
+        <g key={item.title}>
+          <rect x={item.x} y="164" width="70" height="48" rx="12" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2.5" />
+          <text x={item.x + 8} y="192" fontSize="11" fill="#334155">{item.title}</text>
+        </g>
+      ))}
+      <text x="164" y="244" fontSize="12" fill="#334155">Analyser puis choisir une prevention adaptee</text>
+    </svg>
+  );
+}
+
+function TitrationDiagram() {
+  return (
+    <svg viewBox="0 0 560 300" className="w-full" role="img" aria-label="Montage de dosage volumetrique et courbe d equivalence">
+      <rect x="56" y="30" width="24" height="132" rx="10" fill="#eff6ff" stroke="#3b82f6" strokeWidth="3" />
+      <rect x="60" y="88" width="16" height="74" fill="#93c5fd" />
+      <rect x="64" y="162" width="8" height="26" rx="4" fill="#1d4ed8" />
+      <line x1="72" y1="188" x2="102" y2="210" stroke="#60a5fa" strokeWidth="3" />
+      <path d="M98 210 L138 210 L124 250 L112 250 Z" fill="#dbeafe" stroke="#60a5fa" strokeWidth="3" />
+      <ellipse cx="118" cy="250" rx="24" ry="6" fill="#bfdbfe" />
+      <text x="34" y="20" fontSize="12" fill="#334155">Burette</text>
+      <text x="88" y="272" fontSize="12" fill="#334155">Erlenmeyer</text>
+
+      <rect x="256" y="34" width="246" height="210" rx="20" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="3" />
+      <line x1="286" y1="214" x2="468" y2="214" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="286" y1="68" x2="286" y2="214" stroke="#94a3b8" strokeWidth="2" />
+      <polyline points="298,198 336,190 364,178 386,154 402,126 414,108 432,98 456,92" fill="none" stroke="#0ea5e9" strokeWidth="4" />
+      <line x1="396" y1="74" x2="396" y2="214" stroke="#ef4444" strokeWidth="2" strokeDasharray="6 6" />
+      <text x="382" y="62" fontSize="12" fill="#7f1d1d">Ve</text>
+      <text x="304" y="86" fontSize="12" fill="#334155">Grande variation</text>
+      <text x="314" y="236" fontSize="12" fill="#334155">Volume de titrant verse</text>
+      <text x="230" y="144" fontSize="12" fill="#334155" transform="rotate(-90 230 144)">Grandeur suivie</text>
+    </svg>
+  );
+}
+
+function getDiagramNode(diagramId) {
   const diagrams = {
     microscope: <MicroscopeDiagram />,
     cells: <CellComparisonDiagram />,
     domains: <BiotechDomainsDiagram />,
+    measurement: <MeasurementReliabilityDiagram />,
+    dataflow: <DataVisualizationDiagram />,
+    culture: <CultureConditionsDiagram />,
+    identification: <IdentificationFlowDiagram />,
+    denombrement: <SerialDilutionDiagram />,
+    solutions: <SolutionPreparationDiagram />,
+    biomolecules: <BiomoleculeTestsDiagram />,
+    separation: <SeparationTechniquesDiagram />,
+    risks: <RiskAnalysisDiagram />,
+    titration: <TitrationDiagram />,
   };
 
-  if (!diagrams[diagram.id]) {
+  return diagrams[diagramId] || null;
+}
+
+function DiagramCard({ diagram }) {
+  const node = getDiagramNode(diagram.id);
+
+  if (!node) {
     return null;
   }
 
@@ -120,7 +411,7 @@ function DiagramCard({ diagram }) {
     <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-lg">
       <h3 className="text-lg font-bold text-gray-800">{diagram.title}</h3>
       <div className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-lab-bg p-4">
-        {diagrams[diagram.id]}
+        {node}
       </div>
       <p className="mt-4 text-sm leading-6 text-gray-600">{diagram.caption}</p>
     </article>
@@ -145,37 +436,43 @@ function DocumentCard({ document, onOpenImage }) {
 
       <h3 className="mt-3 text-base font-semibold leading-6 text-gray-800">{document.title}</h3>
 
-      {document.imageSrc ? (
+      {document.imageSrc || document.diagramId ? (
         <div className="mt-4">
           <button
             type="button"
             onClick={() =>
               onOpenImage?.({
                 src: document.imageSrc,
+                diagramId: document.diagramId,
                 alt: document.imageAlt || document.title,
                 title: document.title,
               })
             }
             className="group block w-full overflow-hidden rounded-2xl border border-gray-200 bg-white text-left transition hover:shadow-md"
           >
-            <img
-              src={document.imageSrc}
-              alt={document.imageAlt || document.title}
-              className="h-auto w-full object-contain"
-            />
+            {document.imageSrc ? (
+              <img
+                src={document.imageSrc}
+                alt={document.imageAlt || document.title}
+                className="h-auto w-full object-contain"
+              />
+            ) : (
+              <div className="p-4">{getDiagramNode(document.diagramId)}</div>
+            )}
           </button>
           <button
             type="button"
             onClick={() =>
               onOpenImage?.({
                 src: document.imageSrc,
+                diagramId: document.diagramId,
                 alt: document.imageAlt || document.title,
                 title: document.title,
               })
             }
             className="mt-2 text-sm font-semibold text-lab-blue hover:underline"
           >
-            Agrandir l image
+            {document.diagramId ? 'Agrandir le schema' : 'Agrandir l image'}
           </button>
         </div>
       ) : null}
@@ -223,37 +520,43 @@ function SupportList({ supports, onOpenImage }) {
           {support.detail ? (
             <p className="mt-2 text-sm leading-6 text-gray-600">{support.detail}</p>
           ) : null}
-          {support.imageSrc ? (
+          {support.imageSrc || support.diagramId ? (
             <div className="mt-3">
               <button
                 type="button"
                 onClick={() =>
                   onOpenImage?.({
                     src: support.imageSrc,
+                    diagramId: support.diagramId,
                     alt: support.imageAlt || support.label,
                     title: support.label,
                   })
                 }
                 className="group block overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 transition hover:shadow-md"
               >
-                <img
-                  src={support.imageSrc}
-                  alt={support.imageAlt || support.label}
-                  className="h-auto max-w-[220px] object-contain"
-                />
+                {support.imageSrc ? (
+                  <img
+                    src={support.imageSrc}
+                    alt={support.imageAlt || support.label}
+                    className="h-auto max-w-[220px] object-contain"
+                  />
+                ) : (
+                  <div className="max-w-[260px] p-3">{getDiagramNode(support.diagramId)}</div>
+                )}
               </button>
               <button
                 type="button"
                 onClick={() =>
                   onOpenImage?.({
                     src: support.imageSrc,
+                    diagramId: support.diagramId,
                     alt: support.imageAlt || support.label,
                     title: support.label,
                   })
                 }
                 className="mt-2 text-sm font-semibold text-lab-blue hover:underline"
               >
-                Agrandir le support
+                {support.diagramId ? 'Agrandir le schema' : 'Agrandir le support'}
               </button>
             </div>
           ) : null}
@@ -495,7 +798,13 @@ function ImageLightbox({ image, onClose }) {
           <h3 className="pr-20 text-lg font-bold text-gray-800">{image.title}</h3>
         ) : null}
         <div className="mt-4 max-h-[82vh] overflow-auto rounded-2xl border border-gray-200 bg-gray-50 p-3">
-          <img src={image.src} alt={image.alt || image.title || 'Image'} className="mx-auto h-auto w-full object-contain" />
+          {image.diagramId ? (
+            <div className="mx-auto max-w-5xl bg-white p-4">
+              {getDiagramNode(image.diagramId)}
+            </div>
+          ) : (
+            <img src={image.src} alt={image.alt || image.title || 'Image'} className="mx-auto h-auto w-full object-contain" />
+          )}
         </div>
       </div>
     </div>

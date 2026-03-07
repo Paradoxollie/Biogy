@@ -29,6 +29,7 @@ const createDocument = (title, body, extra = {}) => ({
   label: extra.label || 'Document',
   title,
   source: extra.source,
+  diagramId: extra.diagramId,
   imageSrc: extra.imageSrc,
   imageAlt: extra.imageAlt,
   footer: extra.footer,
@@ -141,6 +142,13 @@ export const PREMIERE_MODULE_C_CONTENT = createBiotechContent({
           'Une eprouvette graduee de 25 mL contient un liquide incolore. Un eleve lit 14 mL en regardant l eprouvette de haut. Un autre lit 13,6 mL en plaçant les yeux a hauteur du menisque.',
           'Le materiel utilise n offre pas la meme precision qu une pipette jaugee ou qu une burette. Le choix de l instrument influence donc la qualite du resultat.',
         ]),
+        createDocument(
+          'Schema - Lecture correcte et comparaison de mesures',
+          [
+            'Le schema oppose une lecture mal placee du menisque a une lecture correcte et rappelle qu une serie de mesures se juge en comparant des valeurs proches ou au contraire aberrantes.',
+          ],
+          { label: 'Schema', diagramId: 'measurement' },
+        ),
       ],
       instruction:
         'Observe la situation et explique ce qui rend l une des lectures plus fiable que l autre.',
@@ -323,6 +331,13 @@ export const PREMIERE_MODULE_D_CONTENT = createBiotechContent({
           'Situation B : suivre l evolution d une absorbance en fonction du temps.',
           'Situation C : etudier le lien entre concentration et absorbance pour une gamme etalon.',
         ]),
+        createDocument(
+          'Schema - Tableau et choix du graphique',
+          [
+            'Ce support montre la difference entre un tableau bien structure et un graphique choisi en fonction de la question posee.',
+          ],
+          { label: 'Graphique', diagramId: 'dataflow' },
+        ),
       ],
       instruction:
         'Associe chaque situation a une representation graphique adaptee et justifie ton choix.',
@@ -603,6 +618,13 @@ export const PREMIERE_MODULE_2_CONTENT = createBiotechContent({
           'Milieu B : milieu enrichi ou selectif, adapte a un contexte particulier.',
           'Selon le contexte, le biologiste ne choisit pas le meme milieu.',
         ]),
+        createDocument(
+          'Schema - Conditions de culture',
+          [
+            'Le schema rassemble les principaux facteurs qui conditionnent la croissance microbienne en laboratoire.',
+          ],
+          { label: 'Schema', diagramId: 'culture' },
+        ),
       ],
       instruction:
         'Appuie-toi sur le document pour expliquer pourquoi le choix du milieu depend de l objectif du laboratoire.',
@@ -776,6 +798,13 @@ export const PREMIERE_MODULE_3_CONTENT = createBiotechContent({
         createDocument('Situation de choix', [
           'Deux hypotheses sont envisagees apres observation : bacterie A ou bacterie B. Les deux poussent sur le milieu utilise, mais elles ne repondent pas de la meme facon a certains tests biochimiques.',
         ]),
+        createDocument(
+          'Schema - Demarche d identification',
+          [
+            'Cette demarche rappelle que l identification se construit par etapes, de l observation vers une conclusion prudente.',
+          ],
+          { label: 'Schema', diagramId: 'identification' },
+        ),
       ],
       instruction:
         'Cherche quel type de test serait le plus utile pour separer les deux hypotheses et justifie ton choix.',
@@ -890,6 +919,13 @@ export const PREMIERE_MODULE_4_CONTENT = createBiotechContent({
         createDocument('Serie de resultats', [
           'Une boite tres peu peuplee peut etre peu representative. Une boite trop chargee n est plus exploitable. Une boite intermediaire permet un comptage plus robuste.',
         ]),
+        createDocument(
+          'Schema - Dilutions et choix d une boite',
+          [
+            'Le schema relie la gamme de dilutions aux boites obtenues et aide a comprendre pourquoi certaines sont inexploitables.',
+          ],
+          { label: 'Schema', diagramId: 'denombrement' },
+        ),
       ],
       instruction:
         'Compare les trois boites et justifie laquelle semble la plus utile pour exprimer le resultat.',
@@ -1041,6 +1077,13 @@ export const PREMIERE_MODULE_5_CONTENT = createBiotechContent({
           'Une solution mere est disponible en grande concentration. On souhaite preparer 50 mL d une solution fille cinq fois moins concentree.',
           'Le protocole fait intervenir une pipette jaugee et une fiole jaugee.',
         ]),
+        createDocument(
+          'Schema - Dissolution et dilution',
+          [
+            'Ce schema oppose les deux demarches de preparation de solution et met en valeur la verrerie employee.',
+          ],
+          { label: 'Schema', diagramId: 'solutions' },
+        ),
       ],
       instruction:
         'Explique la logique de la dilution et justifie le choix de la verrerie.',
@@ -1171,6 +1214,13 @@ export const PREMIERE_MODULE_6_CONTENT = createBiotechContent({
           'Situation C : mettre en evidence un sucre reducteur.',
           'Situation D : rechercher des lipides dans un produit biologique.',
         ]),
+        createDocument(
+          'Schema - Exemples de tests de biomolecules',
+          [
+            'Le document rappelle qu un meme laboratoire peut mobiliser plusieurs reactifs selon la biomolecule recherchee.',
+          ],
+          { label: 'Schema', diagramId: 'biomolecules' },
+        ),
       ],
       instruction:
         'Associe a chaque situation un type de test plausible et justifie ton choix avec une phrase simple.',
@@ -1306,6 +1356,13 @@ export const PREMIERE_MODULE_7_CONTENT = createBiotechContent({
           'Situation B : concentrer des cellules apres culture dans un tube.',
           'Situation C : comparer les constituants colores d un melange.',
         ]),
+        createDocument(
+          'Schema - Techniques de separation',
+          [
+            'Le schema met en parallele filtration, centrifugation et chromatographie simple pour aider au choix de la methode.',
+          ],
+          { label: 'Schema', diagramId: 'separation' },
+        ),
       ],
       instruction:
         'Associe chaque situation a une technique simple de separation et justifie.',
@@ -1456,6 +1513,13 @@ export const PREMIERE_AT7_CONTENT = createBiotechContent({
         createDocument('Moments critiques', [
           'Ouverture d un recipient, transfert de culture, utilisation d une verrerie fragile, contact possible avec un produit de nettoyage, elimination des dechets.',
         ]),
+        createDocument(
+          'Schema - Analyse a priori des risques',
+          [
+            'Le support visuel replace les 5 M et la chaine situation de travail - situation exposante - evenement dangereux - dommage.',
+          ],
+          { label: 'Schema', diagramId: 'risks' },
+        ),
       ],
       instruction:
         'Classe les situations exposantes puis relie-les a un danger possible.',
@@ -1586,6 +1650,13 @@ export const PREMIERE_C8_CONTENT = createBiotechContent({
         createDocument('Observation experimentale', [
           'Lors d un dosage colorimetrique, la teinte change durablement a partir d un certain volume verse. Lors d un dosage suivi par capteur, la courbe presente une variation nette autour d un volume caracteristique.',
         ]),
+        createDocument(
+          'Schema - Montage de dosage et equivalence',
+          [
+            'Le schema associe le montage de dosage a une courbe simplifiee pour visualiser le volume d equivalence.',
+          ],
+          { label: 'Graphique', diagramId: 'titration' },
+        ),
       ],
       instruction:
         'Explique ce que signifie ce volume caracteristique et pourquoi il est important.',
