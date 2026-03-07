@@ -1,3 +1,5 @@
+import { OPEN_COURSE_MEDIA } from './courseMediaLibrary';
+
 const BIOTECH_SOURCES = [
   {
     title: 'Programme de biotechnologies de premiere STL',
@@ -32,6 +34,9 @@ const createDocument = (title, body, extra = {}) => ({
   diagramId: extra.diagramId,
   imageSrc: extra.imageSrc,
   imageAlt: extra.imageAlt,
+  credit: extra.credit,
+  license: extra.license,
+  sourceUrl: extra.sourceUrl,
   footer: extra.footer,
   body: Array.isArray(body) ? body : [body],
 });
@@ -71,6 +76,18 @@ const createCourseSection = ({
   takeaway,
   takeawayTitle,
 });
+
+const createImageDocument = (title, body, media, extra = {}) =>
+  createDocument(title, body, {
+    label: extra.label || 'Illustration',
+    source: extra.source || media.source,
+    imageSrc: media.imageSrc,
+    imageAlt: extra.imageAlt || media.imageAlt,
+    credit: media.credit,
+    license: media.license,
+    sourceUrl: media.sourceUrl,
+    footer: extra.footer,
+  });
 
 const createBiotechContent = ({
   intro,
@@ -1768,3 +1785,113 @@ export const PREMIERE_C8_CONTENT = createBiotechContent({
     },
   ],
 });
+
+const attachReferenceDocument = (content, document) => {
+  if (!content?.questionSets?.length || !document) {
+    return;
+  }
+
+  content.questionSets[0].documents = [
+    ...(content.questionSets[0].documents || []),
+    document,
+  ];
+};
+
+attachReferenceDocument(
+  PREMIERE_MODULE_C_CONTENT,
+  createImageDocument(
+    'Document - Verrerie de precision pour une mesure fiable',
+    [
+      "La fiole jaugee rappelle qu'une mesure fiable depend du choix du bon materiel et d'une lecture soignee.",
+    ],
+    OPEN_COURSE_MEDIA.volumetricFlask,
+  ),
+);
+
+attachReferenceDocument(
+  PREMIERE_MODULE_1_CONTENT,
+  createImageDocument(
+    'Document - Microscope optique de laboratoire',
+    [
+      "Le microscope est l'outil central du chapitre. Le visuel aide a nommer les pieces principales et a relier l'instrument a son usage reel.",
+    ],
+    OPEN_COURSE_MEDIA.laboratoryMicroscope,
+  ),
+);
+
+attachReferenceDocument(
+  PREMIERE_MODULE_2_CONTENT,
+  createImageDocument(
+    'Document - Culture bacterienne sur boite de Petri',
+    [
+      "Observe l'aspect d'une culture en boite de Petri : le support sert a parler de milieu, d'ensemencement et de croissance microbienne.",
+    ],
+    OPEN_COURSE_MEDIA.petriBacteria,
+  ),
+);
+
+attachReferenceDocument(
+  PREMIERE_MODULE_3_CONTENT,
+  createImageDocument(
+    'Document - Bacteries observees apres coloration de Gram',
+    [
+      "Cette micrographie sert de support concret pour discuter l'observation microscopique et l'identification a partir de caracteres discriminants.",
+    ],
+    OPEN_COURSE_MEDIA.gramNegativeBacteria,
+  ),
+);
+
+attachReferenceDocument(
+  PREMIERE_MODULE_4_CONTENT,
+  createImageDocument(
+    'Document - Grille d hemocytometre',
+    [
+      "Le quadrillage de l'hemocytometre permet de relier le comptage observe au raisonnement de denombrement.",
+    ],
+    OPEN_COURSE_MEDIA.hemocytometer,
+  ),
+);
+
+attachReferenceDocument(
+  PREMIERE_MODULE_5_CONTENT,
+  createImageDocument(
+    'Document - Fiole jaugee',
+    [
+      "Le visuel rappelle la forme d'une verrerie de precision utilisee pour preparer une solution de concentration connue.",
+    ],
+    OPEN_COURSE_MEDIA.volumetricFlask,
+  ),
+);
+
+attachReferenceDocument(
+  PREMIERE_MODULE_6_CONTENT,
+  createImageDocument(
+    'Document - Test de Benedict',
+    [
+      "Le gradient de couleur montre comment un test chimique peut etre compare a des temoins pour caracteriser une biomolecule.",
+    ],
+    OPEN_COURSE_MEDIA.benedictTest,
+  ),
+);
+
+attachReferenceDocument(
+  PREMIERE_MODULE_7_CONTENT,
+  createImageDocument(
+    'Document - Montage de chromatographie sur papier',
+    [
+      "La chromatographie sur papier fournit un exemple lisible de separation des composants d'un melange.",
+    ],
+    OPEN_COURSE_MEDIA.paperChromatography,
+  ),
+);
+
+attachReferenceDocument(
+  PREMIERE_C8_CONTENT,
+  createImageDocument(
+    'Document - Montage de dosage acido-basique',
+    [
+      "Le schema rassemble la burette, l'erlenmeyer et le repere de changement de couleur utilises lors d'un dosage volumetrique.",
+    ],
+    OPEN_COURSE_MEDIA.acidBaseTitration,
+  ),
+);

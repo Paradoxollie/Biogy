@@ -598,6 +598,29 @@ function DiagramCard({ diagram }) {
   );
 }
 
+function MediaCredit({ item }) {
+  if (!item?.credit && !item?.license && !item?.sourceUrl) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 rounded-xl border border-white/80 bg-white px-3 py-3 text-xs leading-5 text-gray-500">
+      {item.credit ? <p>Credit visuel : {item.credit}</p> : null}
+      {item.license ? <p>Licence : {item.license}</p> : null}
+      {item.sourceUrl ? (
+        <a
+          href={item.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-flex font-semibold text-lab-blue hover:underline"
+        >
+          Voir la source du visuel
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
 function DocumentCard({ document, onOpenImage }) {
   return (
     <article className="rounded-2xl border border-gray-200 bg-gray-50 p-5 shadow-sm">
@@ -627,6 +650,10 @@ function DocumentCard({ document, onOpenImage }) {
                 diagramSpec: document.diagramSpec,
                 alt: document.imageAlt || document.title,
                 title: document.title,
+                credit: document.credit,
+                license: document.license,
+                sourceUrl: document.sourceUrl,
+                footer: document.footer,
               })
             }
             className="group block w-full overflow-hidden rounded-2xl border border-gray-200 bg-white text-left transition hover:shadow-md"
@@ -652,6 +679,10 @@ function DocumentCard({ document, onOpenImage }) {
                 diagramSpec: document.diagramSpec,
                 alt: document.imageAlt || document.title,
                 title: document.title,
+                credit: document.credit,
+                license: document.license,
+                sourceUrl: document.sourceUrl,
+                footer: document.footer,
               })
             }
             className="mt-2 text-sm font-semibold text-lab-blue hover:underline"
@@ -674,6 +705,8 @@ function DocumentCard({ document, onOpenImage }) {
           {document.footer}
         </p>
       ) : null}
+
+      <MediaCredit item={document} />
 
     </article>
   );
@@ -715,6 +748,10 @@ function SupportList({ supports, onOpenImage }) {
                     diagramSpec: support.diagramSpec,
                     alt: support.imageAlt || support.label,
                     title: support.label,
+                    credit: support.credit,
+                    license: support.license,
+                    sourceUrl: support.sourceUrl,
+                    footer: support.detail,
                   })
                 }
                 className="group block overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 transition hover:shadow-md"
@@ -740,6 +777,10 @@ function SupportList({ supports, onOpenImage }) {
                     diagramSpec: support.diagramSpec,
                     alt: support.imageAlt || support.label,
                     title: support.label,
+                    credit: support.credit,
+                    license: support.license,
+                    sourceUrl: support.sourceUrl,
+                    footer: support.detail,
                   })
                 }
                 className="mt-2 text-sm font-semibold text-lab-blue hover:underline"
@@ -748,6 +789,7 @@ function SupportList({ supports, onOpenImage }) {
               </button>
             </div>
           ) : null}
+          <MediaCredit item={support} />
         </div>
       ))}
     </div>
@@ -994,6 +1036,12 @@ function ImageLightbox({ image, onClose }) {
             <img src={image.src} alt={image.alt || image.title || 'Image'} className="mx-auto h-auto w-full object-contain" />
           )}
         </div>
+        {image.footer ? (
+          <p className="mt-4 rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-sm leading-6 text-gray-600">
+            {image.footer}
+          </p>
+        ) : null}
+        <MediaCredit item={image} />
       </div>
     </div>
   );

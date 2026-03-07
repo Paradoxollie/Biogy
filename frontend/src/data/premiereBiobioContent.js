@@ -1,3 +1,5 @@
+import { OPEN_COURSE_MEDIA } from './courseMediaLibrary';
+
 const PREMIERE_BIOBIO_SOURCES = [
   {
     title: 'Programme de biochimie-biologie de première STL',
@@ -17,7 +19,13 @@ const createDocument = (title, body, extra = {}) => ({
   label: extra.label || 'Document',
   title,
   source: extra.source,
+  imageSrc: extra.imageSrc,
+  imageAlt: extra.imageAlt,
   diagramSpec: extra.diagramSpec,
+  credit: extra.credit,
+  license: extra.license,
+  sourceUrl: extra.sourceUrl,
+  footer: extra.footer,
   body: Array.isArray(body) ? body : [body],
 });
 
@@ -2815,6 +2823,18 @@ const createVisualDocument = (title, body, diagramSpec) =>
     diagramSpec,
   });
 
+const createImageDocument = (title, body, media, extra = {}) =>
+  createDocument(title, body, {
+    label: extra.label || 'Illustration',
+    source: extra.source || media.source,
+    imageSrc: media.imageSrc,
+    imageAlt: extra.imageAlt || media.imageAlt,
+    credit: media.credit,
+    license: media.license,
+    sourceUrl: media.sourceUrl,
+    footer: extra.footer,
+  });
+
 const flowDiagram = (title, footer, nodes) => ({
   kind: 'flow',
   title,
@@ -2852,6 +2872,167 @@ const curveDiagram = (title, footer, xLabel, yLabel, points) => ({
   yLabel,
   points,
 });
+
+const BIOBIO_REFERENCE_IMAGES = {
+  'bb1-1-se-nourrir': createImageDocument(
+    'Document - Appareil digestif humain',
+    [
+      "Ce schema situe les principaux organes mis en jeu dans la digestion. Il sert ici de repere global pour relier l'alimentation aux besoins de l'organisme.",
+    ],
+    OPEN_COURSE_MEDIA.digestiveSystem,
+    {
+      footer:
+        "J'ai retenu ce visuel car il reste lisible a l'ecran, sans watermark, et il permet de nommer rapidement les organes mobilises dans le chapitre.",
+    },
+  ),
+  'bb1-2-aliments-nutriments': createImageDocument(
+    'Document - Appareil digestif et trajet des aliments',
+    [
+      "Observe l'ordre des organes traverses par les aliments avant leur transformation en nutriments absorbables.",
+    ],
+    OPEN_COURSE_MEDIA.digestiveSystem,
+  ),
+  'bb1-3-absorption-devenir': createImageDocument(
+    'Document - Organisation d une villosite intestinale',
+    [
+      "La villosite augmente fortement la surface d'absorption. Repere les capillaires et le vaisseau chylifere qui participent au devenir des nutriments.",
+    ],
+    OPEN_COURSE_MEDIA.intestinalVillus,
+  ),
+  'bb1-4-rein-excretion': createImageDocument(
+    'Document - Nephron et formation de l urine',
+    [
+      "Le nephron est l'unite fonctionnelle du rein. Le visuel permet de suivre filtration, reabsorption et elimination.",
+    ],
+    OPEN_COURSE_MEDIA.nephronUrine,
+  ),
+  'bb1-5-stabilite-milieu-interieur': createImageDocument(
+    'Document - Pancreas, organe de regulation',
+    [
+      "Le pancreas illustre ici le maintien du milieu interieur : certaines de ses cellules liberent des hormones dans le sang pour participer a la regulation de la glycemie.",
+    ],
+    OPEN_COURSE_MEDIA.pancreasOpenstax,
+  ),
+  'bb2-1-genotype-phenotype': createImageDocument(
+    'Document - Caryotype humain',
+    [
+      "Le caryotype constitue un document genetique de reference pour identifier les chromosomes et introduire la notion de patrimoine genetique.",
+    ],
+    OPEN_COURSE_MEDIA.humanKaryotype,
+  ),
+  'bb2-2-organes-amphicrines': createImageDocument(
+    'Document - Pancreas endocrine et exocrine',
+    [
+      "Le schema montre sur le meme organe des zones exocrines, qui debouchent dans un conduit, et des ilots endocrines, qui liberent des hormones dans le sang.",
+    ],
+    OPEN_COURSE_MEDIA.pancreasOpenstax,
+  ),
+  'bb2-3-regulation-hormonale': createImageDocument(
+    'Document - Example d organe impliquant une regulation hormonale',
+    [
+      "Le pancreas fournit un exemple classique de regulation hormonale : la secretion varie en fonction de l'etat physiologique de l'organisme.",
+    ],
+    OPEN_COURSE_MEDIA.pancreasOpenstax,
+  ),
+  'bb2-4-gametogenese-fecondation': createImageDocument(
+    'Document - Schema general de meiose',
+    [
+      "Utilise ce document pour replacer les deux divisions de la meiose et comprendre la reduction du nombre de chromosomes avant la formation des gametes.",
+    ],
+    OPEN_COURSE_MEDIA.meiosis,
+  ),
+  'bb2-5-transmission-caracteres': createImageDocument(
+    'Document - Caryotype humain et chromosomes sexuels',
+    [
+      "Ce support permet de rappeler qu'un caractere hereditaire s'inscrit dans un patrimoine chromosomique transmis par les gametes.",
+    ],
+    OPEN_COURSE_MEDIA.humanKaryotype,
+  ),
+  'bba-1-structures-biomolecules': createImageDocument(
+    'Document - Exemple de nucleotide d ADN',
+    [
+      "Le nucleotide sert ici de repere concret pour distinguer les grands constituants d'une biomolecule : squelette, groupements chimiques et base azotee.",
+    ],
+    OPEN_COURSE_MEDIA.dnaNucleotide,
+  ),
+  'bba-2-diversite-fonctions': createImageDocument(
+    'Document - Une biomolecule et sa fonction dans la cellule',
+    [
+      "Ce document montre qu'une structure moleculaire precise est associee a une fonction biologique determinee. C'est une entree utile pour discuter la diversite des roles du vivant.",
+    ],
+    OPEN_COURSE_MEDIA.dnaNucleotide,
+  ),
+  'bba-3-acides-nucleiques': createImageDocument(
+    'Document - Organisation d un nucleotide',
+    [
+      "Repere la base azotee, le sucre et le phosphate avant de comparer ADN et ARN dans le cours.",
+    ],
+    OPEN_COURSE_MEDIA.dnaNucleotide,
+  ),
+  'bba-4-membranes': createImageDocument(
+    'Document - Membrane plasmique detaillee',
+    [
+      "Le visuel permet d'identifier la bicouche phospholipidique et quelques proteines membranaires sans recourir a un schema trop simplifie.",
+    ],
+    OPEN_COURSE_MEDIA.cellMembrane,
+  ),
+  'bbb-1-observer-vivant': createImageDocument(
+    'Document - Microscope optique de laboratoire',
+    [
+      "Cette photographie sert de repere concret pour nommer l'instrument, rappeler son usage et preparer les observations du chapitre.",
+    ],
+    OPEN_COURSE_MEDIA.laboratoryMicroscope,
+  ),
+  'bbb-2-divisions-cellulaires': createImageDocument(
+    'Document - Cellules en division observees au microscope',
+    [
+      "La micrographie montre des cellules de racine d'oignon a differents stades. Elle sert de support pour reperer une figure de mitose et la comparer aux autres cellules.",
+    ],
+    OPEN_COURSE_MEDIA.mitosisOnionRoot,
+  ),
+  'bbc-1-communication-hormonale': createImageDocument(
+    'Document - Pancreas et secretion hormonale',
+    [
+      "Le visuel fait apparaitre des ilots endocrines capables de secreter des hormones. Il permet de relier organe, message hormonal et organe cible.",
+    ],
+    OPEN_COURSE_MEDIA.pancreasOpenstax,
+  ),
+  'bbc-2-transport-molecules': createImageDocument(
+    'Document - Organisation d une membrane plasmique',
+    [
+      "Observe la membrane comme interface selective : certaines molecules diffusent librement, d'autres necessitent des proteines de transport.",
+    ],
+    OPEN_COURSE_MEDIA.cellMembrane,
+  ),
+  'bbd-1-analyser-document': createImageDocument(
+    'Document - Exemple de document scientifique',
+    [
+      "Le caryotype est un bon document de travail pour s'entrainer a identifier la nature du support, prelever des informations precises et rediger une conclusion courte.",
+    ],
+    OPEN_COURSE_MEDIA.humanKaryotype,
+  ),
+  'bbd-2-organigrammes': createImageDocument(
+    'Document - Observation de culture a classer',
+    [
+      "Une image de culture peut servir de point de depart a un organigramme d'identification. L'important est de partir d'indices observables avant de conclure.",
+    ],
+    OPEN_COURSE_MEDIA.petriBacteria,
+  ),
+  'bbd-4-utiliser-echelle': createImageDocument(
+    'Document - Grille d hemocytometre',
+    [
+      "Le quadrillage de l'hemocytometre constitue un support interessant pour travailler l'echelle, les dimensions et le passage d'une image a une taille reelle.",
+    ],
+    OPEN_COURSE_MEDIA.hemocytometer,
+  ),
+  'bbd-5-representer-observation': createImageDocument(
+    'Document - Observation microscopique a simplifier',
+    [
+      "Cette micrographie offre une base correcte pour s'entrainer a passer d'une observation reelle a un schema scientifique selectionnant l'essentiel.",
+    ],
+    OPEN_COURSE_MEDIA.mitosisOnionRoot,
+  ),
+};
 
 const BIOBIO_VISUAL_SUPPORTS = {
   'bb1-1-se-nourrir': createVisualDocument(
@@ -3159,6 +3340,19 @@ const attachVisualSupport = (lesson) => {
   ];
 };
 
+const attachReferenceImage = (lesson) => {
+  const imageDocument = BIOBIO_REFERENCE_IMAGES[lesson.id];
+
+  if (!imageDocument || !lesson.content?.questionSets?.length) {
+    return;
+  }
+
+  lesson.content.questionSets[0].documents = [
+    ...(lesson.content.questionSets[0].documents || []),
+    imageDocument,
+  ];
+};
+
 [
   ...PREMIERE_BIOBIO_THEME_1_LESSONS,
   ...PREMIERE_BIOBIO_THEME_2_LESSONS,
@@ -3166,4 +3360,7 @@ const attachVisualSupport = (lesson) => {
   ...PREMIERE_BIOBIO_TRANSVERSAL_B_LESSONS,
   ...PREMIERE_BIOBIO_TRANSVERSAL_C_LESSONS,
   ...PREMIERE_BIOBIO_TRANSVERSAL_D_LESSONS,
-].forEach(attachVisualSupport);
+].forEach((lesson) => {
+  attachReferenceImage(lesson);
+  attachVisualSupport(lesson);
+});
