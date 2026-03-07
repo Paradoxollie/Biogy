@@ -10,6 +10,14 @@ import c4BaobabImage from '../assets/courses/premiere/c4/baobab.png';
 import c4DasriImage from '../assets/courses/premiere/c4/dasri.png';
 import c4AcetoneImage from '../assets/courses/premiere/c4/acetone.jpg';
 import c4BioethanolImage from '../assets/courses/premiere/c4/bioethanol.png';
+import {
+  PREMIERE_BIOBIO_THEME_1_LESSONS,
+  PREMIERE_BIOBIO_THEME_2_LESSONS,
+  PREMIERE_BIOBIO_TRANSVERSAL_A_LESSONS,
+  PREMIERE_BIOBIO_TRANSVERSAL_B_LESSONS,
+  PREMIERE_BIOBIO_TRANSVERSAL_C_LESSONS,
+  PREMIERE_BIOBIO_TRANSVERSAL_D_LESSONS,
+} from './premiereBiobioContent';
 
 export const COURSE_REFERENCES = [
   {
@@ -927,185 +935,6 @@ const TERMINALE_S1_CONTENT = {
     },
   ],
 };
-
-const PREMIERE_BIOBIO_THEME_1_LESSONS = [
-  {
-    id: 'bb1-1-se-nourrir',
-    code: '1.1',
-    title: 'Se nourrir pour se construire',
-    summary:
-      'Relier besoins de l organisme, aliments consommes et grandes familles de biomolecules utiles a la construction du corps.',
-  },
-  {
-    id: 'bb1-2-aliments-nutriments',
-    code: '1.2',
-    title: "Des aliments aux nutriments : transformation des aliments par l'appareil digestif",
-    summary:
-      'Comprendre comment les aliments sont transformes en nutriments par la digestion.',
-  },
-  {
-    id: 'bb1-3-absorption-devenir',
-    code: '1.3',
-    title: 'Absorption et devenir des nutriments',
-    summary:
-      'Suivre le passage des nutriments dans l organisme et leur utilisation par les tissus et les organes.',
-  },
-  {
-    id: 'bb1-4-rein-excretion',
-    code: '1.4',
-    title: "Rein et fonction d'excretion",
-    summary:
-      'Expliquer le role du rein dans la formation de l urine et l elimination des dechets.',
-  },
-  {
-    id: 'bb1-5-stabilite-milieu-interieur',
-    code: '1.5',
-    title: 'Stabilite du milieu interieur',
-    summary:
-      'Comprendre les grandes regulations qui maintiennent l equilibre du milieu interieur.',
-  },
-];
-
-const PREMIERE_BIOBIO_THEME_2_LESSONS = [
-  {
-    id: 'bb2-1-genotype-phenotype',
-    code: '2.1',
-    title: 'Du genotype au phenotype',
-    summary:
-      'Relier information genetique, expression des genes et caractere observable.',
-  },
-  {
-    id: 'bb2-2-organes-amphicrines',
-    code: '2.2',
-    title: 'Testicules et ovaires, des organes amphicrines',
-    summary:
-      'Identifier le double role des gonades dans la production de gametes et d hormones.',
-  },
-  {
-    id: 'bb2-3-regulation-hormonale',
-    code: '2.3',
-    title: 'Regulation hormonale de la reproduction',
-    summary:
-      'Comprendre comment les hormones controlent le fonctionnement des organes reproducteurs.',
-  },
-  {
-    id: 'bb2-4-gametogenese-fecondation',
-    code: '2.4',
-    title: 'Gametogenese et fecondation',
-    summary:
-      'Etudier la formation des gametes et les etapes essentielles de la fecondation.',
-  },
-  {
-    id: 'bb2-5-transmission-caracteres',
-    code: '2.5',
-    title: 'Transmission des caracteres hereditaires',
-    summary:
-      'Expliquer comment un caractere se transmet d une generation a l autre a partir de situations simples.',
-  },
-];
-
-const PREMIERE_BIOBIO_TRANSVERSAL_A_LESSONS = [
-  {
-    id: 'bba-1-structures-biomolecules',
-    code: 'A.1',
-    title: 'Glucides, protides, lipides : caracteristiques structurales',
-    summary:
-      'Installer les reperes structuraux indispensables pour identifier les grandes familles de biomolecules.',
-  },
-  {
-    id: 'bba-2-diversite-fonctions',
-    code: 'A.2',
-    title: 'Glucides et proteines : diversite de structures et de fonctions',
-    summary:
-      'Mettre en relation la structure d une biomolecule et la fonction qu elle assure dans l organisme.',
-  },
-  {
-    id: 'bba-3-acides-nucleiques',
-    code: 'A.3',
-    title: 'Les acides nucleiques',
-    summary:
-      'Connaitre l organisation generale des acides nucleiques et leur role dans l information genetique.',
-  },
-  {
-    id: 'bba-4-membranes',
-    code: 'A.4',
-    title: 'Membranes biologiques : structure et fonction',
-    summary:
-      'Comprendre le role des membranes dans les echanges et l organisation cellulaire.',
-  },
-];
-
-const PREMIERE_BIOBIO_TRANSVERSAL_B_LESSONS = [
-  {
-    id: 'bbb-1-observer-vivant',
-    code: 'B.1',
-    title: 'Observer le vivant',
-    summary:
-      'Choisir le bon outil d observation et interpreter ce que l on voit a differentes echelles.',
-  },
-  {
-    id: 'bbb-2-divisions-cellulaires',
-    code: 'B.2',
-    title: 'Les divisions cellulaires',
-    summary:
-      'Comparer les grandes etapes des divisions cellulaires et leur interet biologique.',
-  },
-];
-
-const PREMIERE_BIOBIO_TRANSVERSAL_C_LESSONS = [
-  {
-    id: 'bbc-1-communication-hormonale',
-    code: 'C.1',
-    title: 'Communication hormonale',
-    summary:
-      'Identifier la logique d une communication endocrine et ses effets sur les organes cibles.',
-  },
-  {
-    id: 'bbc-2-transport-molecules',
-    code: 'C.2',
-    title: 'Transport des molecules : organisme, tissu, cellule',
-    summary:
-      'Relier circulation, echanges et transport a differentes echelles du vivant.',
-  },
-];
-
-const PREMIERE_BIOBIO_TRANSVERSAL_D_LESSONS = [
-  {
-    id: 'bbd-1-analyser-document',
-    code: 'D.1',
-    title: 'Analyser et interpreter un document',
-    summary:
-      'Prelever des informations utiles dans un document scientifique sans se perdre dans les details.',
-  },
-  {
-    id: 'bbd-2-organigrammes',
-    code: 'D.2',
-    title: "Comprendre et organiser les organigrammes d'experiences",
-    summary:
-      'Lire une demarche experimentale et distinguer clairement objectifs, etapes et resultats.',
-  },
-  {
-    id: 'bbd-3-analyser-courbe',
-    code: 'D.3',
-    title: 'Analyser une courbe',
-    summary:
-      'Degager une tendance, comparer des valeurs et formuler une conclusion a partir d un graphique.',
-  },
-  {
-    id: 'bbd-4-utiliser-echelle',
-    code: 'D.4',
-    title: 'Utiliser une echelle',
-    summary:
-      'Passer d une image ou d un schema a des ordres de grandeur correctement justifies.',
-  },
-  {
-    id: 'bbd-5-representer-observation',
-    code: 'D.5',
-    title: 'Representer une observation',
-    summary:
-      'Produire un schema ou une legende claire pour communiquer une observation biologique.',
-  },
-];
 
 const COURSE_LEVELS = [
   {
