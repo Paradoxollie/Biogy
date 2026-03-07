@@ -52,7 +52,7 @@ function CourseLevelPage() {
       <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
         <h2 className="text-2xl font-bold text-gray-800">Sommaire</h2>
         <p className="mt-2 text-sm leading-6 text-gray-600">
-          Choisis un chapitre pour ouvrir sa page. Les premiers chapitres rediges sont deja disponibles.
+          Choisis un chapitre officiel pour ouvrir sa page. Certains chapitres contiennent deja plusieurs cours.
         </p>
 
         <div className="mt-6 space-y-6">
@@ -62,29 +62,40 @@ function CourseLevelPage() {
               <h3 className="text-xl font-bold text-gray-800">{section.title}</h3>
 
               <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {section.chapters.map((chapter) => (
-                  <Link
-                    key={chapter.id}
-                    to={`/apprendre/${level.id}/${chapter.id}`}
-                    className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">
-                        {chapter.code}
-                      </span>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                        chapter.content
-                          ? 'border border-lab-teal/20 bg-lab-teal/10 text-lab-teal'
-                          : 'border border-gray-200 bg-gray-50 text-gray-700'
-                      }`}>
-                        {chapter.content ? 'Cours disponible' : 'Structure'}
-                      </span>
-                    </div>
+                {section.chapters.map((chapter) => {
+                  const availableLessons = (chapter.lessons || []).filter((lesson) => lesson.content).length;
+                  const totalLessons = chapter.lessons?.length || 0;
+                  const hasContent = Boolean(chapter.content || availableLessons);
+                  const statusLabel = totalLessons
+                    ? `${availableLessons}/${totalLessons} cours`
+                    : hasContent
+                      ? 'Cours disponible'
+                      : 'Structure';
 
-                    <h4 className="mt-3 text-base font-semibold leading-6 text-gray-800">{chapter.title}</h4>
-                    <p className="mt-2 text-sm leading-6 text-gray-600">{chapter.summary}</p>
-                  </Link>
-                ))}
+                  return (
+                    <Link
+                      key={chapter.id}
+                      to={`/apprendre/${level.id}/${chapter.id}`}
+                      className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">
+                          {chapter.code}
+                        </span>
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          hasContent
+                            ? 'border border-lab-teal/20 bg-lab-teal/10 text-lab-teal'
+                            : 'border border-gray-200 bg-gray-50 text-gray-700'
+                        }`}>
+                          {statusLabel}
+                        </span>
+                      </div>
+
+                      <h4 className="mt-3 text-base font-semibold leading-6 text-gray-800">{chapter.title}</h4>
+                      <p className="mt-2 text-sm leading-6 text-gray-600">{chapter.summary}</p>
+                    </Link>
+                  );
+                })}
               </div>
             </section>
           ))}

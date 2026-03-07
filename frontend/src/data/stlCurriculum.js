@@ -458,159 +458,201 @@ const COURSE_LEVELS = [
     ],
     sections: [
       {
-        id: 'biotechnologies',
-        title: 'Biotechnologies',
+        id: 'biotechnologies-transversal',
+        title:
+          'Specialite biotechnologies - Travailler ensemble au laboratoire de biotechnologies',
         chapters: [
           {
-            id: 'bt1-microscopie',
-            code: 'C1',
-            title: 'Decouverte des biotechnologies',
+            id: 'module-a-projet',
+            code: 'A',
+            title: "S initier a la recherche experimentale et a la demarche de projet en biotechnologies",
             summary:
-              'Comprendre ce que sont les biotechnologies, leurs grands domaines et leurs enjeux.',
+              'Chapitre officiel transversal centre sur la decouverte de la specialite, le questionnement scientifique et la demarche de projet.',
             skills: [
-              'definir les biotechnologies',
-              'reconnaitre les cinq domaines officiels',
-              'relier une application a son domaine',
+              'questionner une situation biotech',
+              'analyser un document scientifique simple',
+              'relier un exemple au domaine biotech correspondant',
             ],
-            content: PREMIERE_BT1_CONTENT,
+            lessons: [
+              {
+                id: 'c1-decouverte-biotechnologies',
+                code: 'C1',
+                title: 'Decouverte des biotechnologies',
+                summary:
+                  'Premier cours d entree dans la specialite : definition, domaines, exemples et enjeux.',
+                content: PREMIERE_BT1_CONTENT,
+              },
+            ],
           },
           {
-            id: 'bt2-cultiver-microorganismes',
-            code: 'BT2',
+            id: 'module-b-risques',
+            code: 'B',
+            title: 'Prevenir les risques au laboratoire de biotechnologies',
+            summary:
+              'Chapitre officiel transversal dedie a la prevention des risques, a la securite et a la gestion des dechets.',
+            skills: [
+              'identifier un danger',
+              'analyser une situation de travail',
+              'choisir une prevention adaptee',
+            ],
+            lessons: [
+              {
+                id: 'c4-risques-securite-laboratoire',
+                code: 'C4',
+                title: 'Risques et securite au laboratoire de biotechnologies',
+                summary:
+                  'Cours centre sur le vocabulaire du risque, la demarche des 5M et les dangers chimiques ou biologiques.',
+              },
+              {
+                id: 'at7-gestion-risques-laboratoire',
+                code: 'AT7',
+                title: 'Gestion des risques au laboratoire',
+                summary:
+                  'Activite technologique sur l analyse a priori des risques, les pictogrammes et la prevention.',
+              },
+            ],
+          },
+          {
+            id: 'module-c-mesures',
+            code: 'C',
+            title: 'Obtenir des resultats de mesure fiables en biotechnologies',
+            summary:
+              'Chapitre officiel transversal sur la qualite des mesures, la rigueur experimentale et la validation des resultats.',
+            skills: [
+              'analyser une mesure',
+              'reperer une source d erreur',
+              'ameliorer la fiabilite d une procedure',
+            ],
+          },
+          {
+            id: 'module-d-numerique',
+            code: 'D',
+            title: 'Utiliser des outils numeriques en biotechnologies',
+            summary:
+              'Chapitre officiel transversal sur l usage du numerique pour traiter, organiser et communiquer des donnees.',
+            skills: [
+              'organiser des donnees',
+              'traiter une information numerique',
+              'presenter un resultat clairement',
+            ],
+          },
+        ],
+      },
+      {
+        id: 'biotechnologies-fondamentaux',
+        title:
+          'Specialite biotechnologies - Acquerir les fondamentaux technologiques et scientifiques des biotechnologies',
+        chapters: [
+          {
+            id: 'module-1-diversite',
+            code: '1',
+            title: 'Observer la diversite du vivant',
+            summary:
+              'Chapitre officiel sur les outils d observation et la comparaison des organisations du vivant.',
+            skills: [
+              'observer au laboratoire',
+              'comparer des organisations biologiques',
+              'decrire avec precision',
+            ],
+          },
+          {
+            id: 'module-2-culture',
+            code: '2',
             title: 'Cultiver des micro-organismes',
             summary:
-              'Comprendre les conditions de culture, la sterilite et la logique des milieux de culture.',
+              'Chapitre officiel sur la culture des micro-organismes et le choix de conditions de croissance adaptees.',
             skills: [
               'respecter l asepsie',
-              'choisir un milieu adapte',
-              'interpreter une croissance simple',
+              'cultiver un micro-organisme',
+              'choisir des conditions de culture',
             ],
           },
           {
-            id: 'bt3-identifier-microorganismes',
-            code: 'BT3',
-            title: 'Identifier des micro-organismes',
+            id: 'module-3-identification',
+            code: '3',
+            title: 'Caracteriser pour identifier les micro-organismes',
             summary:
-              'Utiliser des caracteres morphologiques et des tests simples pour orienter une identification.',
+              'Chapitre officiel sur l observation, les tests et la construction d une identification microbienne.',
             skills: [
-              'observer une colonie',
-              'relier test et information',
+              'observer une culture',
+              'relier un test a une information',
               'construire une conclusion prudente',
             ],
           },
           {
-            id: 'bt4-denombrement',
-            code: 'BT4',
-            title: 'Denombrer une population microbienne',
+            id: 'module-4-denombrement',
+            code: '4',
+            title: 'Realiser un denombrement de micro-organismes presents dans un produit biologique',
             summary:
-              'Passer d une observation experimentale a une estimation quantitative exploitable.',
+              'Chapitre officiel sur les methodes de denombrement et l exploitation quantitative en microbiologie.',
             skills: [
-              'diluer correctement',
-              'compter des colonies',
-              'exprimer un resultat numerique',
+              'choisir une methode de denombrement',
+              'compter et exprimer un resultat',
+              'exploiter un critere microbiologique simple',
             ],
           },
           {
-            id: 'bt5-solutions',
-            code: 'BT5',
-            title: 'Preparer des solutions utiles au laboratoire',
+            id: 'module-5-solutions',
+            code: '5',
+            title: 'Preparer des solutions utilisables au laboratoire',
             summary:
-              'Maitriser concentration, dilution et tracabilite dans un contexte de laboratoire.',
+              'Chapitre officiel sur les solutions, les dilutions et la rigueur de preparation au laboratoire.',
             skills: [
               'calculer une concentration',
               'realiser une dilution',
-              'securiser la preparation',
+              'tracer une preparation',
             ],
           },
           {
-            id: 'bt6-biomolecules',
-            code: 'BT6',
-            title: 'Mettre en evidence des biomolecules',
+            id: 'module-6-biomolecules',
+            code: '6',
+            title: 'Detecter et caracteriser les biomolecules',
             summary:
-              'Identifier quelques grandes familles de biomolecules a l aide de tests simples.',
+              'Chapitre officiel sur les tests de reconnaissance et la caracterisation simple des biomolecules.',
             skills: [
-              'choisir un test pertinent',
-              'decrire un resultat',
-              'relier test et molecule',
+              'choisir un test',
+              'observer un resultat',
+              'relier un test a une biomolecule',
             ],
           },
           {
-            id: 'bt7-separation',
-            code: 'BT7',
-            title: 'Separer des constituants biologiques',
+            id: 'module-7-separation',
+            code: '7',
+            title: 'Separer les composants d un melange',
             summary:
-              'Comprendre les principes de separation utilises au laboratoire.',
+              'Chapitre officiel sur les techniques de separation exploitees en biotechnologies.',
             skills: [
               'choisir une technique de separation',
-              'comparer des resultats',
               'justifier une methode',
+              'interpreter une separation simple',
             ],
           },
           {
-            id: 'bt8-concentration',
-            code: 'BT8',
-            title: 'Concentrer et conserver un echantillon',
+            id: 'module-8-concentration',
+            code: '8',
+            title: 'Determiner la concentration d une biomolecule dans un produit biologique',
             summary:
-              'Relier traitement d un echantillon, qualite du resultat et conservation.',
+              'Chapitre officiel sur les strategies de dosage et l exploitation quantitative de resultats.',
             skills: [
-              'preparer un echantillon',
-              'choisir un mode de conservation',
-              'limiter les pertes',
+              'choisir une methode de dosage',
+              'exploiter une relation quantitative',
+              'conclure sur une concentration',
             ],
-          },
-          {
-            id: 'bta-projet',
-            code: 'BTA',
-            title: 'Conduire un projet technologique',
-            summary:
-              'S organiser, produire, rendre compte et argumenter dans une demarche de projet.',
-            skills: [
-              'planifier le travail',
-              'tracer les decisions',
-              'presenter une demarche',
-            ],
-          },
-          {
-            id: 'btb-risques',
-            code: 'BTB',
-            title: 'Prevenir les risques au laboratoire',
-            summary:
-              'Appliquer les regles de securite, d hygiene et de prevention.',
-            skills: [
-              'identifier un danger',
-              'choisir une protection',
-              'agir de facon responsable',
-            ],
-          },
-          {
-            id: 'btc-mesures',
-            code: 'BTC',
-            title: 'Mesurer avec fiabilite',
-            summary:
-              'Comprendre precision, repetition et limites d une mesure en laboratoire.',
-            skills: [
-              'lire un appareil',
-              'estimer une incertitude simple',
-              'valider une mesure',
-            ],
-          },
-          {
-            id: 'btd-numerique',
-            code: 'BTD',
-            title: 'Utiliser le numerique en biotechnologies',
-            summary:
-              'Saisir, traiter et presenter des donnees scientifiques avec rigueur.',
-            skills: [
-              'organiser des donnees',
-              'traiter un tableau',
-              'communiquer un resultat',
+            lessons: [
+              {
+                id: 'c8-dosage-volumetrique',
+                code: 'C8',
+                title: 'Dosage volumetrique',
+                summary:
+                  'Cours sur le vocabulaire de la volumetrie, les reactions support et le calcul a l equivalence.',
+              },
             ],
           },
         ],
       },
       {
         id: 'biochimie-biologie',
-        title: 'Biochimie-biologie',
+        title: 'Specialite biochimie-biologie',
         chapters: [
           {
             id: 'bb1-nutrition',
@@ -936,6 +978,68 @@ const COURSE_LEVELS = [
   },
 ];
 
+const LEGACY_SELECTIONS = {
+  premiere: {
+    'bt1-microscopie': {
+      chapterId: 'module-a-projet',
+      lessonId: 'c1-decouverte-biotechnologies',
+    },
+    'bt2-cultiver-microorganismes': {
+      chapterId: 'module-2-culture',
+    },
+    'bt3-identifier-microorganismes': {
+      chapterId: 'module-3-identification',
+    },
+    'bt4-denombrement': {
+      chapterId: 'module-4-denombrement',
+    },
+    'bt5-solutions': {
+      chapterId: 'module-5-solutions',
+    },
+    'bt6-biomolecules': {
+      chapterId: 'module-6-biomolecules',
+    },
+    'bt7-separation': {
+      chapterId: 'module-7-separation',
+    },
+    'bt8-concentration': {
+      chapterId: 'module-8-concentration',
+    },
+    'bta-projet': {
+      chapterId: 'module-a-projet',
+    },
+    'btb-risques': {
+      chapterId: 'module-b-risques',
+    },
+    'btc-mesures': {
+      chapterId: 'module-c-mesures',
+    },
+    'btd-numerique': {
+      chapterId: 'module-d-numerique',
+    },
+  },
+};
+
+export const resolveCourseSelection = (levelId, chapterId, lessonId) => {
+  const alias = LEGACY_SELECTIONS[levelId]?.[chapterId];
+
+  if (!alias) {
+    return {
+      levelId,
+      chapterId,
+      lessonId: lessonId || null,
+      redirected: false,
+    };
+  }
+
+  return {
+    levelId,
+    chapterId: alias.chapterId,
+    lessonId: alias.lessonId || lessonId || null,
+    redirected: alias.chapterId !== chapterId || Boolean(alias.lessonId && alias.lessonId !== lessonId),
+  };
+};
+
 export const getCourseLevel = (levelId) =>
   COURSE_LEVELS.find((level) => level.id === levelId) || null;
 
@@ -959,6 +1063,16 @@ export const getCourseChapter = (levelId, chapterId) => {
   }
 
   return null;
+};
+
+export const getCourseLesson = (levelId, chapterId, lessonId) => {
+  const result = getCourseChapter(levelId, chapterId);
+
+  if (!result || !result.chapter.lessons?.length || !lessonId) {
+    return null;
+  }
+
+  return result.chapter.lessons.find((lesson) => lesson.id === lessonId) || null;
 };
 
 export const getCourseReferencesForLevel = (level) =>

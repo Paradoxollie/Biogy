@@ -30,6 +30,7 @@ function App() {
           <Route path="/apprendre" element={<ApprendrePage />} />
           <Route path="/apprendre/:levelId" element={<CourseLevelPage />} />
           <Route path="/apprendre/:levelId/:chapterId" element={<CourseChapterPage />} />
+          <Route path="/apprendre/:levelId/:chapterId/:lessonId" element={<CourseChapterPage />} />
           <Route path="/recherche" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-purple">Section Recherche</h1><p className="mt-4">Cette section est en cours de developpement</p></div>} />
           <Route path="/actualites" element={<ScienceWatchPage />} />
           <Route path="/methodes" element={<div className="container mx-auto p-10 text-center"><h1 className="text-3xl font-bold text-lab-green">Section Methodes</h1><p className="mt-4">Cette section est en cours de developpement</p></div>} />

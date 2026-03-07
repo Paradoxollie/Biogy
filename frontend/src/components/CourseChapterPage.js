@@ -1,6 +1,10 @@
 import React from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { getCourseChapter } from '../data/stlCurriculum';
+import {
+  getCourseChapter,
+  getCourseLesson,
+  resolveCourseSelection,
+} from '../data/stlCurriculum';
 
 const LEVEL_STYLES = {
   premiere: {
@@ -123,7 +127,60 @@ function DiagramCard({ diagram }) {
   );
 }
 
+function ChapterLessons({ level, chapter, activeLessonId, style }) {
+  if (!chapter.lessons?.length) {
+    return null;
+  }
+
+  return (
+    <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
+      <h2 className="text-2xl font-bold text-gray-800">Cours du chapitre</h2>
+      <p className="mt-2 text-sm leading-6 text-gray-600">
+        Ce chapitre officiel contient plusieurs cours. Ouvre celui que tu veux travailler.
+      </p>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        {chapter.lessons.map((lesson) => {
+          const isActive = lesson.id === activeLessonId;
+
+          return (
+            <Link
+              key={lesson.id}
+              to={`/apprendre/${level.id}/${chapter.id}/${lesson.id}`}
+              className={`rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+                isActive
+                  ? `${style.note} border-transparent`
+                  : 'border-gray-200 bg-gray-50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-700">
+                  {lesson.code}
+                </span>
+                {lesson.content ? (
+                  <span className="rounded-full border border-lab-teal/20 bg-lab-teal/10 px-2.5 py-1 text-xs font-semibold text-lab-teal">
+                    Disponible
+                  </span>
+                ) : (
+                  <span className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-600">
+                    A venir
+                  </span>
+                )}
+              </div>
+
+              <h3 className="mt-3 text-base font-semibold leading-6 text-gray-800">{lesson.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-gray-600">{lesson.summary}</p>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function ChapterOutline({ chapter, style }) {
+  const hasLessons = Boolean(chapter.lessons?.length);
+
   return (
     <>
       <section className={`mt-8 rounded-3xl border p-6 shadow-sm ${style.note}`}>
@@ -140,10 +197,13 @@ function ChapterOutline({ chapter, style }) {
       </section>
 
       <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-800">Cours complet</h2>
+        <h2 className="text-2xl font-bold text-gray-800">
+          {hasLessons ? 'Organisation du chapitre' : 'Cours complet'}
+        </h2>
         <p className="mt-3 text-sm leading-7 text-gray-600">
-          Cette page est creee pour garder une structure claire par chapitre. Le cours detaille sera ajoute ensuite
-          dans le meme format que les premiers chapitres deja rediges.
+          {hasLessons
+            ? 'Ce chapitre officiel regroupe plusieurs cours. Ouvre un cours dans la liste ci-dessus pour travailler le contenu detaille.'
+            : 'Cette page est creee pour garder une structure claire par chapitre. Le cours detaille sera ajoute ensuite dans le meme format que les premiers chapitres deja rediges.'}
         </p>
       </section>
     </>
@@ -401,8 +461,18 @@ function ChapterContent({ chapter, style }) {
 }
 
 function CourseChapterPage() {
-  const { levelId, chapterId } = useParams();
-  const result = getCourseChapter(levelId, chapterId);
+  const { levelId, chapterId, lessonId } = useParams();
+  const resolved = resolveCourseSelection(levelId, chapterId, lessonId);
+
+  if (resolved.redirected) {
+    const target = resolved.lessonId
+      ? `/apprendre/${resolved.levelId}/${resolved.chapterId}/${resolved.lessonId}`
+      : `/apprendre/${resolved.levelId}/${resolved.chapterId}`;
+
+    return <Navigate to={target} replace />;
+  }
+
+  const result = getCourseChapter(resolved.levelId, resolved.chapterId);
 
   if (!result) {
     return <Navigate to="/apprendre" replace />;
@@ -410,6 +480,10 @@ function CourseChapterPage() {
 
   const { level, section, chapter } = result;
   const style = LEVEL_STYLES[level.id] || LEVEL_STYLES.premiere;
+  const lesson =
+    getCourseLesson(level.id, chapter.id, resolved.lessonId) ||
+    (!resolved.lessonId && chapter.lessons?.length === 1 ? chapter.lessons[0] : null);
+  const contentItem = lesson || (chapter.content ? chapter : null);
 
   return (
     <div className="container mx-auto max-w-5xl px-4 pb-16 pt-8">
@@ -423,6 +497,12 @@ function CourseChapterPage() {
         </Link>
         <span className="px-2">/</span>
         <span className="font-semibold text-gray-700">{chapter.code}</span>
+        {lesson ? (
+          <>
+            <span className="px-2">/</span>
+            <span className="font-semibold text-gray-700">{lesson.code}</span>
+          </>
+        ) : null}
       </nav>
 
       <section className="rounded-3xl border border-gray-200 bg-white px-6 py-8 shadow-xl lg:px-10">
@@ -434,11 +514,11 @@ function CourseChapterPage() {
             {section.title}
           </span>
           <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-            chapter.content
+            contentItem?.content
               ? 'border border-lab-teal/20 bg-lab-teal/10 text-lab-teal'
               : 'border border-gray-200 bg-gray-50 text-gray-700'
           }`}>
-            {chapter.content ? 'Cours disponible' : 'Structure du chapitre'}
+            {contentItem?.content ? 'Cours disponible' : 'Structure du chapitre'}
           </span>
         </div>
 
@@ -446,6 +526,16 @@ function CourseChapterPage() {
           {chapter.code} - {chapter.title}
         </h1>
         <p className="mt-4 text-base leading-8 text-gray-600">{chapter.summary}</p>
+
+        {lesson ? (
+          <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Cours selectionne</p>
+            <h2 className="mt-2 text-xl font-bold text-gray-800">
+              {lesson.code} - {lesson.title}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-gray-600">{lesson.summary}</p>
+          </div>
+        ) : null}
 
         <div className="mt-6">
           <Link
@@ -457,8 +547,10 @@ function CourseChapterPage() {
         </div>
       </section>
 
-      {chapter.content ? (
-        <ChapterContent chapter={chapter} style={style} />
+      <ChapterLessons level={level} chapter={chapter} activeLessonId={lesson?.id || null} style={style} />
+
+      {contentItem?.content ? (
+        <ChapterContent chapter={contentItem} style={style} />
       ) : (
         <ChapterOutline chapter={chapter} style={style} />
       )}
