@@ -216,9 +216,9 @@ const PREMIERE_BT1_CONTENT = {
           imageSrc: globulesRougesImage,
           imageAlt: 'Schema simplifie de fabrication de globules rouges in vitro',
           body: [
-            'Des chercheurs ont montre la faisabilite de la fabrication de globules rouges hors de l organisme.',
-            'Cette production pourrait aider a constituer des reserves de sang plus importantes tout en limitant certaines complications liees aux transfusions.',
-            'La generalisation de cette technique suppose encore des progres en ingenierie cellulaire.',
+            'La faisabilite de la fabrication de globules rouges hors de l organisme a ete validee par des resultats encourageants.',
+            'Cette piste ouvre l espoir d une reserve de sang plus importante, avec une reduction possible de certaines complications et infections associees aux transfusions traditionnelles.',
+            'La production a grande echelle necessitera toutefois des technologies plus avancees en ingenierie cellulaire.',
           ],
         },
       ],
@@ -240,6 +240,19 @@ const PREMIERE_BT1_CONTENT = {
           label: 'Support de reflexion',
           detail:
             'Prendre comme exemple les OGM ou toute autre application et reflechir aux risques, aux limites et aux derives possibles.',
+        },
+      ],
+      documents: [
+        {
+          label: 'Repere',
+          title: 'Le Haut Conseil des biotechnologies',
+          imageSrc: hcbLogoImage,
+          imageAlt: 'Logo du Haut Conseil des biotechnologies',
+          body: [
+            'En France, les biotechnologies soulevent des questions de sante, d environnement, d agriculture, de recherche et de consommation.',
+            'Le Haut Conseil des biotechnologies a ete cree en 2008 pour eclairer les pouvoirs publics sur ces questions.',
+            'Ses missions portent notamment sur l evaluation des risques pour la sante et l environnement, l analyse des impacts economiques et societaux, ainsi que la reflexion ethique.',
+          ],
         },
       ],
       instruction:
@@ -267,9 +280,9 @@ const PREMIERE_BT1_CONTENT = {
           body: [
             'Des bacteries appelees deinocoques sont etudiees pour identifier de nouvelles molecules antibiotiques et antifongiques.',
             'L objectif est de proposer de nouvelles classes de medicaments, notamment contre certaines resistances aux antibiotiques.',
+            'Le projet repond a un enjeu majeur de sante publique, car certaines infections deviennent de plus en plus difficiles a traiter avec les antibiotiques actuels.',
+            'L idee centrale est d exploiter des bacteries encore peu etudiees pour enrichir l arsenal therapeutique disponible.',
           ],
-          sourceUrl: 'http://deinove.fr/fr/programmes-et-applications/programme-antibiotiques',
-          sourceLabel: 'Source du document DEINOVE',
         },
         {
           label: 'Document 2',
@@ -277,10 +290,9 @@ const PREMIERE_BT1_CONTENT = {
           body: [
             'Des tetards fluorescents et des biomarqueurs sont utilises pour detecter rapidement certaines pollutions de l eau.',
             'L entreprise developpe des outils de surveillance environnementale, notamment pour reperer des perturbateurs endocriniens.',
+            'La reponse peut etre obtenue en quelques jours, pour un cout plus faible que certains tests in vitro.',
+            'Le document montre aussi qu une reflexion ethique accompagne cette application, car elle utilise des organismes vivants pour proteger l environnement.',
           ],
-          sourceUrl:
-            'https://bfmbusiness.bfmtv.com/entreprise/watchfrog-des-tetards-fluorescents-pour-detecter-la-pollution-de-l-eau-858194.html',
-          sourceLabel: 'Source du document Watchfrog',
         },
         {
           label: 'Document 3',
@@ -289,7 +301,9 @@ const PREMIERE_BT1_CONTENT = {
           imageAlt: 'Schema simplifie du procede Futurol de production de bioethanol',
           body: [
             'Des enzymes, des bacteries et des levures sont mobilisees pour transformer une biomasse vegetale en bioethanol.',
-            'Le projet vise une production industrielle d energie et de matieres premieres chimiques.',
+            'Le procede repose sur plusieurs etapes: pretraitement de la biomasse, hydrolyse en sucres simples, fermentation puis distillation.',
+            'Le projet vise une production industrielle d energie et de matieres premieres chimiques en valorisant des ressources vegetales variees.',
+            'Cette application illustre une biotechnologie industrielle qui cherche aussi a reduire l impact environnemental des productions energetiques.',
           ],
         },
       ],
@@ -414,18 +428,6 @@ const PREMIERE_BT1_CONTENT = {
         'Les biotechnologies peuvent apporter des benefices importants en sante, en environnement, en alimentation ou en industrie.',
         'Cependant, la manipulation du vivant peut soulever des risques, des limites techniques, des questions de securite et des enjeux ethiques ou societaux.',
         'Le developpement des biotechnologies doit donc etre encadre et discute avec rigueur.',
-      ],
-      documents: [
-        {
-          label: 'Repere institutionnel',
-          title: 'Haut Conseil des biotechnologies',
-          imageSrc: hcbLogoImage,
-          imageAlt: 'Logo du Haut Conseil des biotechnologies',
-          footer:
-            'Ce repere rappelle que les biotechnologies sont aussi un sujet de reflexion sanitaire, environnementale et ethique.',
-          sourceUrl: 'https://www.hautconseildesbiotechnologies.fr/fr',
-          sourceLabel: 'Site du Haut Conseil des biotechnologies',
-        },
       ],
       takeawayTitle: 'A retenir',
       takeaway:

@@ -194,16 +194,6 @@ function DocumentCard({ document, onOpenImage }) {
         </p>
       ) : null}
 
-      {document.sourceUrl ? (
-        <a
-          href={document.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex text-sm font-semibold text-lab-blue hover:underline"
-        >
-          {document.sourceLabel || 'Ouvrir la source'}
-        </a>
-      ) : null}
     </article>
   );
 }
