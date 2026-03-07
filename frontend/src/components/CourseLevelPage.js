@@ -52,7 +52,8 @@ function CourseLevelPage() {
       <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
         <h2 className="text-2xl font-bold text-gray-800">Sommaire</h2>
         <p className="mt-2 text-sm leading-6 text-gray-600">
-          Choisis un chapitre officiel pour ouvrir sa page. Certains chapitres contiennent deja plusieurs cours.
+          Choisis un module, un theme ou un chapitre pour ouvrir sa page. Certains chapitres regroupent plusieurs
+          sous-parties de cours.
         </p>
 
         <div className="mt-6 space-y-6">
@@ -67,7 +68,9 @@ function CourseLevelPage() {
                   const totalLessons = chapter.lessons?.length || 0;
                   const hasContent = Boolean(chapter.content || availableLessons);
                   const statusLabel = totalLessons
-                    ? `${availableLessons}/${totalLessons} cours`
+                    ? availableLessons
+                      ? `${availableLessons}/${totalLessons} cours`
+                      : `${totalLessons} sous-parties`
                     : hasContent
                       ? 'Cours disponible'
                       : 'Structure';

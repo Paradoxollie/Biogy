@@ -391,9 +391,9 @@ function ChapterLessons({ level, chapter, activeLessonId, style }) {
 
   return (
     <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-      <h2 className="text-2xl font-bold text-gray-800">Cours du chapitre</h2>
+      <h2 className="text-2xl font-bold text-gray-800">Sous-parties du chapitre</h2>
       <p className="mt-2 text-sm leading-6 text-gray-600">
-        Ce chapitre officiel contient plusieurs cours. Ouvre celui que tu veux travailler.
+        Ce chapitre officiel contient plusieurs sous-parties. Ouvre celle que tu veux travailler.
       </p>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -420,7 +420,7 @@ function ChapterLessons({ level, chapter, activeLessonId, style }) {
                   </span>
                 ) : (
                   <span className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-600">
-                    A venir
+                    Structure prete
                   </span>
                 )}
               </div>
@@ -459,7 +459,7 @@ function ChapterOutline({ chapter, style }) {
         </h2>
         <p className="mt-3 text-sm leading-7 text-gray-600">
           {hasLessons
-            ? 'Ce chapitre officiel regroupe plusieurs cours. Ouvre un cours dans la liste ci-dessus pour travailler le contenu detaille.'
+            ? 'Ce chapitre officiel regroupe plusieurs sous-parties. Ouvre celle qui t interesse dans la liste ci-dessus pour travailler le contenu detaille.'
             : 'Cette page est creee pour garder une structure claire par chapitre. Le cours detaille sera ajoute ensuite dans le meme format que les premiers chapitres deja rediges.'}
         </p>
       </section>

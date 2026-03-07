@@ -928,13 +928,192 @@ const TERMINALE_S1_CONTENT = {
   ],
 };
 
+const PREMIERE_BIOBIO_THEME_1_LESSONS = [
+  {
+    id: 'bb1-1-se-nourrir',
+    code: '1.1',
+    title: 'Se nourrir pour se construire',
+    summary:
+      'Relier besoins de l organisme, aliments consommes et grandes familles de biomolecules utiles a la construction du corps.',
+  },
+  {
+    id: 'bb1-2-aliments-nutriments',
+    code: '1.2',
+    title: "Des aliments aux nutriments : transformation des aliments par l'appareil digestif",
+    summary:
+      'Comprendre comment les aliments sont transformes en nutriments par la digestion.',
+  },
+  {
+    id: 'bb1-3-absorption-devenir',
+    code: '1.3',
+    title: 'Absorption et devenir des nutriments',
+    summary:
+      'Suivre le passage des nutriments dans l organisme et leur utilisation par les tissus et les organes.',
+  },
+  {
+    id: 'bb1-4-rein-excretion',
+    code: '1.4',
+    title: "Rein et fonction d'excretion",
+    summary:
+      'Expliquer le role du rein dans la formation de l urine et l elimination des dechets.',
+  },
+  {
+    id: 'bb1-5-stabilite-milieu-interieur',
+    code: '1.5',
+    title: 'Stabilite du milieu interieur',
+    summary:
+      'Comprendre les grandes regulations qui maintiennent l equilibre du milieu interieur.',
+  },
+];
+
+const PREMIERE_BIOBIO_THEME_2_LESSONS = [
+  {
+    id: 'bb2-1-genotype-phenotype',
+    code: '2.1',
+    title: 'Du genotype au phenotype',
+    summary:
+      'Relier information genetique, expression des genes et caractere observable.',
+  },
+  {
+    id: 'bb2-2-organes-amphicrines',
+    code: '2.2',
+    title: 'Testicules et ovaires, des organes amphicrines',
+    summary:
+      'Identifier le double role des gonades dans la production de gametes et d hormones.',
+  },
+  {
+    id: 'bb2-3-regulation-hormonale',
+    code: '2.3',
+    title: 'Regulation hormonale de la reproduction',
+    summary:
+      'Comprendre comment les hormones controlent le fonctionnement des organes reproducteurs.',
+  },
+  {
+    id: 'bb2-4-gametogenese-fecondation',
+    code: '2.4',
+    title: 'Gametogenese et fecondation',
+    summary:
+      'Etudier la formation des gametes et les etapes essentielles de la fecondation.',
+  },
+  {
+    id: 'bb2-5-transmission-caracteres',
+    code: '2.5',
+    title: 'Transmission des caracteres hereditaires',
+    summary:
+      'Expliquer comment un caractere se transmet d une generation a l autre a partir de situations simples.',
+  },
+];
+
+const PREMIERE_BIOBIO_TRANSVERSAL_A_LESSONS = [
+  {
+    id: 'bba-1-structures-biomolecules',
+    code: 'A.1',
+    title: 'Glucides, protides, lipides : caracteristiques structurales',
+    summary:
+      'Installer les reperes structuraux indispensables pour identifier les grandes familles de biomolecules.',
+  },
+  {
+    id: 'bba-2-diversite-fonctions',
+    code: 'A.2',
+    title: 'Glucides et proteines : diversite de structures et de fonctions',
+    summary:
+      'Mettre en relation la structure d une biomolecule et la fonction qu elle assure dans l organisme.',
+  },
+  {
+    id: 'bba-3-acides-nucleiques',
+    code: 'A.3',
+    title: 'Les acides nucleiques',
+    summary:
+      'Connaitre l organisation generale des acides nucleiques et leur role dans l information genetique.',
+  },
+  {
+    id: 'bba-4-membranes',
+    code: 'A.4',
+    title: 'Membranes biologiques : structure et fonction',
+    summary:
+      'Comprendre le role des membranes dans les echanges et l organisation cellulaire.',
+  },
+];
+
+const PREMIERE_BIOBIO_TRANSVERSAL_B_LESSONS = [
+  {
+    id: 'bbb-1-observer-vivant',
+    code: 'B.1',
+    title: 'Observer le vivant',
+    summary:
+      'Choisir le bon outil d observation et interpreter ce que l on voit a differentes echelles.',
+  },
+  {
+    id: 'bbb-2-divisions-cellulaires',
+    code: 'B.2',
+    title: 'Les divisions cellulaires',
+    summary:
+      'Comparer les grandes etapes des divisions cellulaires et leur interet biologique.',
+  },
+];
+
+const PREMIERE_BIOBIO_TRANSVERSAL_C_LESSONS = [
+  {
+    id: 'bbc-1-communication-hormonale',
+    code: 'C.1',
+    title: 'Communication hormonale',
+    summary:
+      'Identifier la logique d une communication endocrine et ses effets sur les organes cibles.',
+  },
+  {
+    id: 'bbc-2-transport-molecules',
+    code: 'C.2',
+    title: 'Transport des molecules : organisme, tissu, cellule',
+    summary:
+      'Relier circulation, echanges et transport a differentes echelles du vivant.',
+  },
+];
+
+const PREMIERE_BIOBIO_TRANSVERSAL_D_LESSONS = [
+  {
+    id: 'bbd-1-analyser-document',
+    code: 'D.1',
+    title: 'Analyser et interpreter un document',
+    summary:
+      'Prelever des informations utiles dans un document scientifique sans se perdre dans les details.',
+  },
+  {
+    id: 'bbd-2-organigrammes',
+    code: 'D.2',
+    title: "Comprendre et organiser les organigrammes d'experiences",
+    summary:
+      'Lire une demarche experimentale et distinguer clairement objectifs, etapes et resultats.',
+  },
+  {
+    id: 'bbd-3-analyser-courbe',
+    code: 'D.3',
+    title: 'Analyser une courbe',
+    summary:
+      'Degager une tendance, comparer des valeurs et formuler une conclusion a partir d un graphique.',
+  },
+  {
+    id: 'bbd-4-utiliser-echelle',
+    code: 'D.4',
+    title: 'Utiliser une echelle',
+    summary:
+      'Passer d une image ou d un schema a des ordres de grandeur correctement justifies.',
+  },
+  {
+    id: 'bbd-5-representer-observation',
+    code: 'D.5',
+    title: 'Representer une observation',
+    summary:
+      'Produire un schema ou une legende claire pour communiquer une observation biologique.',
+  },
+];
+
 const COURSE_LEVELS = [
   {
     id: 'premiere',
     title: 'Première STL',
     shortTitle: 'Première',
     intro:
-      'En premiere STL, tu poses les bases scientifiques et techniques de toute la serie. Les chapitres sont ranges pour te permettre de travailler par themes, avec une progression claire et utile en classe comme en TP.',
+      'En premiere STL, les cours sont ranges pour retrouver clairement les modules de biotechnologies, les modules thematiques de biochimie-biologie et les reperes transversaux a mobiliser dans les deux specialites.',
     sourceIds: [
       'stl-hub',
       'premiere-biobio',
@@ -1136,81 +1315,93 @@ const COURSE_LEVELS = [
         ],
       },
       {
-        id: 'biochimie-biologie',
-        title: 'Spécialité biochimie-biologie',
+        id: 'biochimie-biologie-thematiques',
+        title: 'Spécialité biochimie-biologie - modules thématiques',
         chapters: [
           {
             id: 'bb1-nutrition',
-            code: 'BB1',
-            title: 'Mecanismes moleculaires et physiologiques de la nutrition',
+            code: '01',
+            title: 'Mécanismes moléculaires et physiologiques de la nutrition',
             summary:
-              'Comprendre comment l organisme transforme, absorbe et elimine la matiere.',
+              'Theme officiel 01. Il va des besoins nutritionnels a la digestion, puis a l absorption, l excretion et l homeostasie.',
             skills: [
               'expliquer digestion et absorption',
               'relier organes, tissus et molecules',
-              'utiliser un schema fonctionnel',
+              'mettre en relation nutrition et milieu interieur',
             ],
+            lessons: PREMIERE_BIOBIO_THEME_1_LESSONS,
           },
           {
             id: 'bb2-reproduction-genetique',
-            code: 'BB2',
+            code: '02',
             title:
-              'Mecanismes physiologiques et moleculaires de la reproduction et de la transmission des caracteres hereditaires',
+              'Mécanismes physiologiques et moléculaires de la reproduction et de la transmission des caractères héréditaires',
             summary:
-              'Relier reproduction, information genetique et transmission des caracteres.',
+              'Theme officiel 02. Il relie genotype, organes reproducteurs, regulation hormonale, gametogenese et heredite.',
             skills: [
               'decrire la reproduction',
               'relier gene et caractere',
               'argumenter a partir de documents',
             ],
+            lessons: PREMIERE_BIOBIO_THEME_2_LESSONS,
           },
+        ],
+      },
+      {
+        id: 'biochimie-biologie-transversaux',
+        title: 'Spécialité biochimie-biologie - modules transversaux',
+        chapters: [
           {
             id: 'bba-biomolecules',
-            code: 'BBA',
-            title: 'Relations structures et proprietes des biomolecules',
+            code: 'A',
+            title: 'Relations structures et propriétés des biomolécules',
             summary:
-              'Installer les bases de biochimie utiles a toute la suite du programme.',
+              'Module transversal officiel A. Il rassemble les bases structurales a mobiliser dans tous les themes de biochimie-biologie.',
             skills: [
               'identifier les grandes familles de biomolecules',
               'relier structure et propriete',
               'reutiliser ces notions dans un contexte biologique',
             ],
+            lessons: PREMIERE_BIOBIO_TRANSVERSAL_A_LESSONS,
           },
           {
             id: 'bbb-structures-fonctions',
-            code: 'BBB',
+            code: 'B',
             title: 'Relations structures et fonctions physiologiques',
             summary:
-              'Mettre en relation organisation du vivant et fonction biologique.',
+              'Module transversal officiel B. Il aide a relier observation, organisation du vivant et fonction biologique.',
             skills: [
               'decrire un niveau d organisation',
               'relier structure et fonction',
               'justifier une fonction par une observation',
             ],
+            lessons: PREMIERE_BIOBIO_TRANSVERSAL_B_LESSONS,
           },
           {
             id: 'bbc-homeostasie',
-            code: 'BBC',
+            code: 'C',
             title: 'Milieu interieur et homeostasie',
             summary:
-              'Comprendre les grandes regulations qui maintiennent l equilibre du milieu interieur.',
+              'Module transversal officiel C. Il apporte les reperes utiles pour comprendre les echanges et les grandes regulations.',
             skills: [
               'definir homeostasie',
               'reperer une regulation',
               'analyser une perturbation simple',
             ],
+            lessons: PREMIERE_BIOBIO_TRANSVERSAL_C_LESSONS,
           },
           {
             id: 'bbd-information-communication',
-            code: 'BBD',
+            code: 'D',
             title: 'Information et communication',
             summary:
-              'Savoir expliquer clairement un resultat, une observation ou un raisonnement scientifique.',
+              'Module transversal officiel D. Il regroupe les methodes utiles pour lire, traiter et presenter un resultat scientifique.',
             skills: [
               'lire un document scientifique',
               'faire un schema utile',
               'rediger une explication precise',
             ],
+            lessons: PREMIERE_BIOBIO_TRANSVERSAL_D_LESSONS,
           },
         ],
       },
