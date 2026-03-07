@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import {
   getCourseChapter,
@@ -127,7 +127,7 @@ function DiagramCard({ diagram }) {
   );
 }
 
-function DocumentCard({ document }) {
+function DocumentCard({ document, onOpenImage }) {
   return (
     <article className="rounded-2xl border border-gray-200 bg-gray-50 p-5 shadow-sm">
       <div className="flex flex-wrap items-center gap-2">
@@ -146,12 +146,37 @@ function DocumentCard({ document }) {
       <h3 className="mt-3 text-base font-semibold leading-6 text-gray-800">{document.title}</h3>
 
       {document.imageSrc ? (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white">
-          <img
-            src={document.imageSrc}
-            alt={document.imageAlt || document.title}
-            className="h-auto w-full object-contain"
-          />
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() =>
+              onOpenImage?.({
+                src: document.imageSrc,
+                alt: document.imageAlt || document.title,
+                title: document.title,
+              })
+            }
+            className="group block w-full overflow-hidden rounded-2xl border border-gray-200 bg-white text-left transition hover:shadow-md"
+          >
+            <img
+              src={document.imageSrc}
+              alt={document.imageAlt || document.title}
+              className="h-auto w-full object-contain"
+            />
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              onOpenImage?.({
+                src: document.imageSrc,
+                alt: document.imageAlt || document.title,
+                title: document.title,
+              })
+            }
+            className="mt-2 text-sm font-semibold text-lab-blue hover:underline"
+          >
+            Agrandir l image
+          </button>
         </div>
       ) : null}
 
@@ -168,11 +193,22 @@ function DocumentCard({ document }) {
           {document.footer}
         </p>
       ) : null}
+
+      {document.sourceUrl ? (
+        <a
+          href={document.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex text-sm font-semibold text-lab-blue hover:underline"
+        >
+          {document.sourceLabel || 'Ouvrir la source'}
+        </a>
+      ) : null}
     </article>
   );
 }
 
-function SupportList({ supports }) {
+function SupportList({ supports, onOpenImage }) {
   if (!supports?.length) {
     return null;
   }
@@ -197,13 +233,47 @@ function SupportList({ supports }) {
           {support.detail ? (
             <p className="mt-2 text-sm leading-6 text-gray-600">{support.detail}</p>
           ) : null}
+          {support.imageSrc ? (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() =>
+                  onOpenImage?.({
+                    src: support.imageSrc,
+                    alt: support.imageAlt || support.label,
+                    title: support.label,
+                  })
+                }
+                className="group block overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 transition hover:shadow-md"
+              >
+                <img
+                  src={support.imageSrc}
+                  alt={support.imageAlt || support.label}
+                  className="h-auto max-w-[220px] object-contain"
+                />
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  onOpenImage?.({
+                    src: support.imageSrc,
+                    alt: support.imageAlt || support.label,
+                    title: support.label,
+                  })
+                }
+                className="mt-2 text-sm font-semibold text-lab-blue hover:underline"
+              >
+                Agrandir le support
+              </button>
+            </div>
+          ) : null}
         </div>
       ))}
     </div>
   );
 }
 
-function QuestionSetCard({ item, style }) {
+function QuestionSetCard({ item, style, onOpenImage }) {
   return (
     <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
       <div className={`mb-4 h-1.5 w-14 rounded-full ${style.line}`} />
@@ -217,7 +287,7 @@ function QuestionSetCard({ item, style }) {
         <p className="mt-4 text-[15px] leading-8 text-gray-700">{item.intro}</p>
       ) : null}
 
-      <SupportList supports={item.supports} />
+      <SupportList supports={item.supports} onOpenImage={onOpenImage} />
 
       {item.documents?.length ? (
         <div
@@ -230,7 +300,11 @@ function QuestionSetCard({ item, style }) {
           }`}
         >
           {item.documents.map((document) => (
-            <DocumentCard key={`${item.title}-${document.title}`} document={document} />
+            <DocumentCard
+              key={`${item.title}-${document.title}`}
+              document={document}
+              onOpenImage={onOpenImage}
+            />
           ))}
         </div>
       ) : null}
@@ -258,7 +332,7 @@ function QuestionSetCard({ item, style }) {
   );
 }
 
-function CourseSectionCard({ item, style }) {
+function CourseSectionCard({ item, style, onOpenImage }) {
   return (
     <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
       <div className={`mb-4 h-1.5 w-14 rounded-full ${style.line}`} />
@@ -283,7 +357,11 @@ function CourseSectionCard({ item, style }) {
           }`}
         >
           {item.documents.map((document) => (
-            <DocumentCard key={`${item.title}-${document.title}`} document={document} />
+            <DocumentCard
+              key={`${item.title}-${document.title}`}
+              document={document}
+              onOpenImage={onOpenImage}
+            />
           ))}
         </div>
       ) : null}
@@ -399,7 +477,42 @@ function ChapterOutline({ chapter, style }) {
   );
 }
 
-function ChapterContent({ chapter, style }) {
+function ImageLightbox({ image, onClose }) {
+  if (!image) {
+    return null;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-950/80 p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={image.title || image.alt || 'Image agrandie'}
+    >
+      <div
+        className="relative max-h-[95vh] w-full max-w-6xl rounded-3xl bg-white p-4 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+        >
+          Fermer
+        </button>
+        {image.title ? (
+          <h3 className="pr-20 text-lg font-bold text-gray-800">{image.title}</h3>
+        ) : null}
+        <div className="mt-4 max-h-[82vh] overflow-auto rounded-2xl border border-gray-200 bg-gray-50 p-3">
+          <img src={image.src} alt={image.alt || image.title || 'Image'} className="mx-auto h-auto w-full object-contain" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChapterContent({ chapter, style, onOpenImage }) {
   const content = chapter.content;
 
   return (
@@ -461,7 +574,12 @@ function ChapterContent({ chapter, style }) {
 
           <div className="mt-5 space-y-5">
             {content.questionSets.map((item) => (
-              <QuestionSetCard key={item.title} item={item} style={style} />
+              <QuestionSetCard
+                key={item.title}
+                item={item}
+                style={style}
+                onOpenImage={onOpenImage}
+              />
             ))}
           </div>
         </section>
@@ -480,7 +598,12 @@ function ChapterContent({ chapter, style }) {
 
           <div className="mt-5 space-y-5">
             {content.courseSections.map((item) => (
-              <CourseSectionCard key={item.title} item={item} style={style} />
+              <CourseSectionCard
+                key={item.title}
+                item={item}
+                style={style}
+                onOpenImage={onOpenImage}
+              />
             ))}
           </div>
         </section>
@@ -707,6 +830,7 @@ function ChapterContent({ chapter, style }) {
 
 function CourseChapterPage() {
   const { levelId, chapterId, lessonId } = useParams();
+  const [activeImage, setActiveImage] = useState(null);
   const resolved = resolveCourseSelection(levelId, chapterId, lessonId);
 
   if (resolved.redirected) {
@@ -795,10 +919,12 @@ function CourseChapterPage() {
       <ChapterLessons level={level} chapter={chapter} activeLessonId={lesson?.id || null} style={style} />
 
       {contentItem?.content ? (
-        <ChapterContent chapter={contentItem} style={style} />
+        <ChapterContent chapter={contentItem} style={style} onOpenImage={setActiveImage} />
       ) : (
         <ChapterOutline chapter={chapter} style={style} />
       )}
+
+      <ImageLightbox image={activeImage} onClose={() => setActiveImage(null)} />
     </div>
   );
 }

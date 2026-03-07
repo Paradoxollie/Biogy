@@ -2,6 +2,7 @@ import biotechDomainsImage from '../assets/courses/premiere/c1/biotech-domains.p
 import globulesRougesImage from '../assets/courses/premiere/c1/globules-rouges.png';
 import hcbLogoImage from '../assets/courses/premiere/c1/hcb-logo.png';
 import futurolSchemaImage from '../assets/courses/premiere/c1/futurol-schema.jpg';
+import videoQrImage from '../assets/courses/premiere/c1/video-qr.png';
 
 export const COURSE_REFERENCES = [
   {
@@ -108,6 +109,8 @@ const PREMIERE_BT1_CONTENT = {
           label: 'Video : La biotechnologie dans notre vie',
           url: 'https://www.youtube.com/watch?v=x7O9ErPWTmw',
           detail: 'Passage a etudier : de 0 min 00 a 1 min 29.',
+          imageSrc: videoQrImage,
+          imageAlt: 'QR code menant a la video de decouverte des biotechnologies',
         },
       ],
       instruction:
@@ -265,6 +268,8 @@ const PREMIERE_BT1_CONTENT = {
             'Des bacteries appelees deinocoques sont etudiees pour identifier de nouvelles molecules antibiotiques et antifongiques.',
             'L objectif est de proposer de nouvelles classes de medicaments, notamment contre certaines resistances aux antibiotiques.',
           ],
+          sourceUrl: 'http://deinove.fr/fr/programmes-et-applications/programme-antibiotiques',
+          sourceLabel: 'Source du document DEINOVE',
         },
         {
           label: 'Document 2',
@@ -273,6 +278,9 @@ const PREMIERE_BT1_CONTENT = {
             'Des tetards fluorescents et des biomarqueurs sont utilises pour detecter rapidement certaines pollutions de l eau.',
             'L entreprise developpe des outils de surveillance environnementale, notamment pour reperer des perturbateurs endocriniens.',
           ],
+          sourceUrl:
+            'https://bfmbusiness.bfmtv.com/entreprise/watchfrog-des-tetards-fluorescents-pour-detecter-la-pollution-de-l-eau-858194.html',
+          sourceLabel: 'Source du document Watchfrog',
         },
         {
           label: 'Document 3',
@@ -415,6 +423,8 @@ const PREMIERE_BT1_CONTENT = {
           imageAlt: 'Logo du Haut Conseil des biotechnologies',
           footer:
             'Ce repere rappelle que les biotechnologies sont aussi un sujet de reflexion sanitaire, environnementale et ethique.',
+          sourceUrl: 'https://www.hautconseildesbiotechnologies.fr/fr',
+          sourceLabel: 'Site du Haut Conseil des biotechnologies',
         },
       ],
       takeawayTitle: 'A retenir',
