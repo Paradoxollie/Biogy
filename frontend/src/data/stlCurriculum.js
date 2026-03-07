@@ -75,307 +75,287 @@ export const COURSE_REFERENCES = [
 
 const PREMIERE_BT1_CONTENT = {
   intro:
-    'Dans ce chapitre, tu vas decouvrir ce que sont les biotechnologies. Tu verras qu elles existent depuis longtemps, qu elles utilisent le vivant pour rendre un service a l etre humain, et qu elles se retrouvent dans cinq grands domaines qu il faut savoir reconnaitre en STL.',
+    'Dans ce cours, tu decouvres ce que recouvre le mot "biotechnologies". L objectif est de comprendre comment le vivant est utilise pour rendre un service utile a l etre humain, puis de reconnaitre les grands domaines d application attendus en premiere STL.',
   objectives: [
     'Definir les biotechnologies.',
-    'Identifier et definir les cinq domaines officiels des biotechnologies.',
-    'Relier une application concrete au bon domaine.',
-    'Reflechir aux enjeux et aux limites de ces techniques.',
+    'Identifier et definir les cinq domaines des biotechnologies.',
+    'Associer une application concrete a son domaine.',
+    'S interroger sur les enjeux ethiques des biotechnologies.',
   ],
-  chapterQuestionsTitle: 'Questions du chapitre',
+  chapterQuestionsTitle: 'Questions du cours',
   chapterQuestions: [
-    'Que sont exactement les biotechnologies ?',
-    'Dans quels grands domaines les retrouve-t-on ?',
-    'Pourquoi parle-t-on aussi d enjeux, de limites et d ethique ?',
-  ],
-  vocabulary: [
-    {
-      term: 'Biotechnologies',
-      definition:
-        'Utilisation du vivant, ou de ses proprietes, avec des connaissances scientifiques et techniques pour produire un bien ou un service utile.',
-    },
-    {
-      term: 'Fermentation',
-      definition:
-        'Transformation realisee par des micro-organismes. Elle est utilisee depuis longtemps pour fabriquer des aliments ou des boissons.',
-    },
-    {
-      term: 'Domaine d application',
-      definition:
-        'Grand secteur dans lequel on classe une biotechnologie, par exemple la sante ou l environnement.',
-    },
-    {
-      term: 'Micro-organisme',
-      definition:
-        'Etre vivant microscopique, comme une bacterie ou une levure, souvent utilise en biotechnologies.',
-    },
-    {
-      term: 'Ethique',
-      definition:
-        'Reflexion sur ce qu il est juste, responsable ou acceptable de faire avec une technique.',
-    },
-    {
-      term: 'Application',
-      definition:
-        'Exemple concret d utilisation d une biotechnologie dans la vie reelle.',
-    },
+    'Qu appelle-t-on exactement biotechnologies ?',
+    'Pourquoi dit-on que les biotechnologies sont a la fois anciennes et tres actuelles ?',
+    'Quels sont les cinq domaines a connaitre en STL ?',
+    'Pourquoi l usage du vivant doit-il etre encadre ?',
   ],
   diagrams: [
     {
       id: 'domains',
-      title: 'Schema 1 - Les cinq domaines des biotechnologies',
+      title: 'Schema - Les cinq domaines des biotechnologies',
       caption:
-        'En STL, on distingue cinq grandes familles de biotechnologies. Elles sont souvent reperees par une couleur.',
+        'Les cinq domaines a connaitre sont identifies par une couleur. Tu dois savoir les nommer et donner un exemple pour chacun.',
     },
   ],
   sections: [
     {
-      tag: 'Activite 1',
+      tag: 'Sequence 1',
       title: 'Presentation des biotechnologies',
       supports: [
-        { label: 'Support : video ou document de decouverte' },
-        { label: 'Trace eleve : questions guidees' },
+        {
+          label: 'Video : La biotechnologie dans notre vie',
+          url: 'https://www.youtube.com/watch?v=x7O9ErPWTmw',
+        },
       ],
       body: [
-        'Les biotechnologies ne sont pas seulement des techniques recentes. Des procedes anciens, comme la fabrication du pain, de la biere, du vin ou du yaourt, reposent deja sur l utilisation du vivant.',
-        'Aujourd hui, les biotechnologies vont beaucoup plus loin. Elles s appuient sur la biologie, la microbiologie, la genetique, la biochimie et la biologie moleculaire pour repondre a des besoins en sante, en alimentation, en industrie et en environnement.',
-        'L idee essentielle a retenir est simple : une biotechnologie mobilise le vivant ou les proprietes du vivant pour produire quelque chose d utile.',
+        'Le cours commence par une idee simple : les biotechnologies utilisent le vivant, ou les proprietes du vivant, pour produire un bien ou un service utile a l etre humain.',
+        'Dans la video d introduction, plusieurs situations sont presentees. Elles montrent que les biotechnologies peuvent concerner des domaines tres differents, par exemple la sante humaine ou la depollution.',
+        'Le point commun est toujours le meme : un etre vivant, une cellule, un micro-organisme ou une propriete du vivant est mis a profit pour repondre a un besoin precis.',
       ],
       questionsTitle: 'Questions de travail',
       questions: [
-        'Quelles grandes questions de societe les biotechnologies cherchent-elles a resoudre ?',
-        'Pourquoi peut-on dire que les biotechnologies sont a la fois anciennes et modernes ?',
-        'Quels exemples de produits ou de services issus des biotechnologies peux-tu citer ?',
-        'Pourquoi la connaissance de l ADN a-t-elle fait progresser les biotechnologies ?',
-        'Quel interet y a-t-il a modifier genetiquement un micro-organisme ?',
-        'Propose une definition simple des biotechnologies.',
+        'Q1. Enonce les deux problematiques soulevees au debut du support.',
+        'Q2. Identifie le point commun entre ces deux problematiques.',
+        'Q3. Explique en quoi les biotechnologies permettent de repondre a ces questions.',
+        'Q4. Cite trois exemples de substances ou de produits obtenus grace aux biotechnologies.',
       ],
+      takeawayTitle: 'Bilan',
       takeaway:
-        'Les biotechnologies utilisent le vivant, ou ses proprietes, pour produire des biens ou des services utiles a l etre humain. Elles sont anciennes par leurs usages, mais modernes par les connaissances scientifiques qu elles mobilisent.',
+        'Une biotechnologie mobilise le vivant, ou ses proprietes, pour produire quelque chose d utile a l etre humain.',
     },
     {
-      tag: 'Activite 2',
-      title: 'Les disciplines mobilisees en biotechnologies',
-      supports: [{ label: 'Support : vocabulaire scientifique' }],
+      tag: 'Sequence 2',
+      title: 'Histoire des biotechnologies',
       body: [
-        'Les biotechnologies ne forment pas une discipline isolee. Elles croisent plusieurs sciences qui se completent au laboratoire.',
-        'En premiere STL, il faut savoir reconnaitre ces disciplines et comprendre ce qu elles apportent dans l etude ou l utilisation du vivant.',
+        'Les biotechnologies ne sont pas apparues avec les laboratoires modernes. Depuis des millenaires, l etre humain utilise deja des micro-organismes sans toujours savoir comment ils agissent.',
+        'La fermentation est un bon exemple : elle permet de fabriquer des aliments et des boissons comme le pain, le yaourt, le fromage, le vin ou la biere.',
+        'On peut donc dire que les biotechnologies sont anciennes par leurs usages, mais qu elles se sont transformees avec les progres des connaissances scientifiques.',
+      ],
+      questionsTitle: 'Questions de travail',
+      questions: [
+        'Q5. Argumente l affirmation suivante : "Les biotechnologies sont une science ancienne."',
+        'Q6. Cite plusieurs produits obtenus grace aux biotechnologies.',
+      ],
+      takeawayTitle: 'Bilan',
+      takeaway:
+        'Des pratiques anciennes comme la fermentation relevent deja des biotechnologies, meme si les micro-organismes n etaient pas encore identifies a l epoque.',
+    },
+    {
+      tag: 'Sequence 3',
+      title: 'Les progres des biotechnologies',
+      body: [
+        'Les biotechnologies ont beaucoup progresse quand les scientifiques ont mieux compris le fonctionnement du vivant a l echelle moleculaire.',
+        'La decouverte de la structure de l ADN en 1953 a joue un role majeur. Elle a permis de mieux comprendre le support de l heredite, le role des genes et les possibilites de modification genetique.',
+        'Grace a ces progres, il est devenu possible de faire produire a certains micro-organismes des molecules d interet, par exemple des medicaments.',
+      ],
+      questionsTitle: 'Questions de travail',
+      questions: [
+        'Q7. Cite la decouverte qui a permis aux biotechnologies de progresser et explique pourquoi.',
+        'Q8. Rappelle l interet de modifier genetiquement des micro-organismes.',
+      ],
+      takeawayTitle: 'Bilan',
+      takeaway:
+        'Les biotechnologies modernes s appuient sur des connaissances en genetique, en biologie moleculaire, en microbiologie et en biochimie.',
+    },
+    {
+      tag: 'Sequence 4',
+      title: 'Les perspectives des biotechnologies',
+      body: [
+        'Les biotechnologies cherchent aussi a repondre a des problemes actuels : soigner, produire autrement, limiter certaines pollutions ou imaginer de nouvelles solutions therapeutiques.',
+        'Le poisson zebre est souvent cite comme modele d etude, car il possede des capacites de regeneration qui interessent la recherche medicale.',
+        'L enjeu n est pas seulement de decrire le vivant, mais de comprendre ses mecanismes pour imaginer de nouvelles applications utiles.',
+      ],
+      questionsTitle: 'Questions de travail',
+      questions: [
+        'Q9. Explique en quoi le poisson zebre peut constituer un outil de biotechnologies.',
+        'Q10. A l aide des reponses precedentes, propose une definition des biotechnologies.',
+      ],
+      takeawayTitle: 'Bilan',
+      takeaway:
+        'Les biotechnologies utilisent les connaissances scientifiques sur le vivant pour produire des biens et des services utiles a l etre humain.',
+    },
+    {
+      title: 'Les disciplines impliquees dans les biotechnologies',
+      body: [
+        'Les biotechnologies ne correspondent pas a une seule discipline. Elles croisent plusieurs domaines scientifiques qui se completent.',
+        'Pour bien suivre la suite du programme, il faut reconnaitre ces disciplines et comprendre ce qu elles apportent dans l etude du vivant.',
       ],
       cards: [
         {
           title: 'Biologie',
-          text: 'Etude du vivant, de son organisation et de son fonctionnement.',
-        },
-        {
-          title: 'Microbiologie',
-          text: 'Etude des micro-organismes comme les bacteries, les levures ou certains champignons.',
-        },
-        {
-          title: 'Biochimie',
-          text: 'Etude des molecules du vivant et des reactions chimiques qui les concernent.',
+          text: 'Science des etres vivants.',
         },
         {
           title: 'Genetique',
-          text: 'Etude de l heredite, des genes et de la transmission des caracteres.',
+          text: 'Etude des lois de l heredite.',
+        },
+        {
+          title: 'Microbiologie',
+          text: 'Etude des micro-organismes.',
+        },
+        {
+          title: 'Biochimie',
+          text: 'Etude des molecules chimiques du vivant.',
         },
         {
           title: 'Biologie moleculaire',
-          text: 'Etude de l ADN, de l ARN et des mecanismes moleculaires de la cellule.',
+          text: 'Etude des molecules porteuses du materiel hereditaire, en particulier l ADN et l ARN.',
         },
         {
           title: 'Bioinformatique',
-          text: 'Utilisation des outils numeriques pour traiter et exploiter des donnees biologiques.',
+          text: 'Utilisation d outils informatiques pour etudier et exploiter des donnees biologiques.',
         },
       ],
-      questionsTitle: 'Questions de travail',
+      questionsTitle: 'Question de travail',
       questions: [
-        'Associe chaque discipline a sa definition.',
-        'Pourquoi les biotechnologies mobilisent-elles plusieurs disciplines en meme temps ?',
-        'Quelle difference peux-tu faire entre genetique, biologie moleculaire et microbiologie ?',
+        'Q11. Associe chaque discipline a sa definition, puis explique en une phrase pourquoi les biotechnologies mobilisent plusieurs sciences a la fois.',
       ],
+      takeawayTitle: 'Bilan',
       takeaway:
-        'Les biotechnologies sont une demarche interdisciplinaire. Pour comprendre un meme probleme, il faut souvent mobiliser plusieurs regards scientifiques.',
+        'Les biotechnologies sont interdisciplinaires : elles mobilisent plusieurs sciences pour comprendre, analyser ou exploiter le vivant.',
     },
     {
-      tag: 'Activite 3',
-      title: 'Les cinq domaines d application des biotechnologies',
+      title: 'Les domaines d application des biotechnologies',
       supports: [
-        { label: 'Document : exemple medical de fabrication in vitro' },
-        { label: 'Repere : classification par couleurs' },
+        {
+          label: 'Document d etude : fabrication de globules rouges in vitro',
+        },
       ],
       body: [
-        'Pour mieux se reperer, on classe les biotechnologies en cinq grands domaines. Chacun est associe a une couleur. Cette classification est tres importante en STL.',
-        'Par exemple, la production de globules rouges in vitro releve du domaine de la sante : on utilise des connaissances sur les cellules pour produire un element utile a la medecine.',
-        'Une meme application peut parfois faire intervenir plusieurs domaines, mais il faut savoir identifier le domaine principal.',
+        'Les biotechnologies sont classees en cinq grands domaines. Cette classification par couleurs est un repere important en premiere STL.',
+        'Le document ci-dessous montre un exemple concret : la fabrication de globules rouges in vitro. Des chercheurs cherchent a produire hors de l organisme des cellules utiles en medecine transfusionnelle.',
+      ],
+      documents: [
+        {
+          label: 'Document',
+          title: 'Fabrication de globules rouges in vitro',
+          source: 'Etude menee a l hopital Saint-Antoine, Paris',
+          body: [
+            'La fabrication de globules rouges hors de l organisme ouvre la perspective d une reserve de sang plus importante et plus securisee.',
+            'Cette application repose sur la connaissance du vivant, en particulier sur la maturation de cellules souches en globules rouges.',
+            'La production a grande echelle suppose toutefois des progres en ingenierie cellulaire.',
+          ],
+        },
       ],
       cards: [
         {
-          title: 'Rouges',
-          text: 'Sante humaine et animale. Exemples : diagnostic, production de medicaments, fabrication de globules rouges, insuline.',
+          title: 'Rouge',
+          text: 'Sante. Exemples : insuline, globules rouges, diagnostic, vaccins.',
           tone: 'border-red-200 bg-red-50',
         },
         {
-          title: 'Bleues',
+          title: 'Bleue',
           text: 'Milieux marins. Exemples : aquaculture, ressources marines, molecules d interet issues de la mer.',
           tone: 'border-blue-200 bg-blue-50',
         },
         {
-          title: 'Vertes',
-          text: 'Agriculture et agroalimentaire. Exemples : cultures, alimentation, OGM, aliments fermentes.',
+          title: 'Verte',
+          text: 'Agroalimentaire et agriculture. Exemples : OGM, fermentation alimentaire, ameliorement des cultures.',
           tone: 'border-green-200 bg-green-50',
         },
         {
-          title: 'Jaunes',
-          text: 'Environnement. Exemples : depollution de l eau, traitement des dechets, surveillance des pollutions.',
+          title: 'Jaune',
+          text: 'Environnement. Exemples : depollution des eaux, bioremediation, surveillance de pollutions.',
           tone: 'border-amber-200 bg-amber-50',
         },
         {
-          title: 'Blanches',
-          text: 'Industrie. Exemples : enzymes industrielles, biocarburants, lait sans lactose, pigments, bioethanol.',
+          title: 'Blanche',
+          text: 'Industrie. Exemples : bioethanol, enzymes industrielles, pigments, lait sans lactose.',
           tone: 'border-slate-300 bg-slate-50',
         },
       ],
       questionsTitle: 'Questions de travail',
       questions: [
-        'Explique pourquoi la fabrication de globules rouges in vitro est bien une biotechnologie.',
-        'Quels avantages peut-on attendre d une production de globules rouges hors de l organisme ?',
-        'Relie chaque couleur a son domaine principal.',
-        'Donne au moins un exemple d application pour chacun des cinq domaines.',
+        'Q12. A partir de la definition proposee a la question Q10, montre que la fabrication de globules rouges in vitro est bien une application des biotechnologies.',
+        'Q13. Cite les avantages majeurs de l utilisation de globules rouges fabriques in vitro.',
+        'Q14. Relie chaque couleur a son domaine puis donne au moins un exemple d application.',
       ],
+      takeawayTitle: 'Bilan',
       takeaway:
-        'Les cinq domaines a connaitre sont : rouge pour la sante, bleu pour le milieu marin, vert pour l agriculture et l agroalimentaire, jaune pour l environnement, blanc pour l industrie.',
+        'Les cinq domaines a connaitre sont : sante (rouge), milieux marins (bleu), agroalimentaire et agriculture (vert), environnement (jaune) et industrie (blanc).',
     },
     {
-      tag: 'Activite 4',
-      title: 'Les enjeux, les limites et les questions ethiques',
-      supports: [{ label: 'Debat : usages et limites des biotechnologies' }],
+      title: 'Les enjeux des biotechnologies',
       body: [
-        'Les biotechnologies peuvent apporter des solutions reelles : mieux soigner, produire autrement, depolluer ou limiter certaines penuries.',
-        'Mais elles posent aussi des questions. Il faut toujours se demander quels sont les risques, qui beneficie de la technique, quelles limites il faut poser et quels effets peuvent apparaitre sur l environnement ou la societe.',
-        'En STL, on attend de toi un raisonnement argumente. Il faut savoir citer des avantages, mais aussi des risques et des limites.',
+        'La manipulation du vivant n est pas sans consequence. Une utilisation raisonnee des biotechnologies est indispensable.',
+        'En France, les questions liees aux biotechnologies touchent a la sante, a l environnement, a l agriculture, a la recherche, mais aussi a des dimensions economiques et societales.',
+        'Les biotechnologies peuvent apporter des benefices importants, mais elles peuvent aussi soulever des risques, des derives ou des interrogations ethiques.',
       ],
-      questionsTitle: 'Questions de travail',
+      questionsTitle: 'Question de travail',
       questions: [
-        'Quels benefices les biotechnologies peuvent-elles apporter a la societe ?',
-        'Quelles derives ou quels risques peuvent accompagner certaines applications ?',
-        'Pourquoi ne peut-on pas juger une biotechnologie uniquement parce qu elle est efficace ?',
-        'Pourquoi les questions ethiques ont-elles toute leur place dans ce chapitre ?',
+        'Q15. A partir de tes connaissances, cite une ou plusieurs derives possibles de l utilisation des biotechnologies dans nos societes.',
       ],
+      takeawayTitle: 'Bilan',
       takeaway:
-        'Une biotechnologie ne se juge pas seulement sur son efficacite. Il faut aussi prendre en compte la securite, l environnement, la societe et les questions ethiques.',
+        'Une biotechnologie ne se juge pas seulement sur son efficacite. Il faut aussi reflechir a ses effets sur la sante, l environnement et la societe.',
     },
     {
       tag: 'Application',
-      title: 'Etudier des exemples d entreprises ou de projets biotechnologiques',
-      supports: [{ label: 'Travail guide : documents a analyser' }],
+      title: 'Etudier des exemples d entreprises de biotechnologies',
       body: [
-        'Pour verifier que tu as compris le chapitre, il faut etre capable d analyser un exemple concret.',
-        'La bonne methode consiste a reperer le vivant utilise, le service rendu a l etre humain, puis le domaine de biotechnologies correspondant.',
+        'Chaque document presente rapidement l activite d une entreprise. L objectif est d identifier l organisme ou la propriete du vivant mobilisee, le benefice pour l etre humain, puis le domaine correspondant.',
+        'Cette application te permet de verifier que tu sais reconnaitre une situation biotechnologique dans un document concret.',
       ],
-      cards: [
+      documents: [
         {
+          label: 'Document 1',
           title: 'DEINOVE',
-          text: 'Des bacteries sont etudiees pour produire de nouveaux antibiotiques et lutter contre les resistances.',
+          body: [
+            'Des bacteries, les deinocoques, sont etudiees pour identifier de nouvelles molecules antibiotiques et antifongiques.',
+            'L objectif est de proposer de nouvelles classes de medicaments, capables notamment d agir contre certaines resistances aux antibiotiques.',
+          ],
         },
         {
+          label: 'Document 2',
           title: 'Watchfrog',
-          text: 'Des tetards et des biomarqueurs servent a detecter rapidement certaines pollutions de l eau.',
+          body: [
+            'Des tetards fluorescents et des biomarqueurs sont utilises pour detecter rapidement certaines pollutions de l eau.',
+            'L entreprise cherche a fournir une reponse rapide et peu couteuse pour reperer des substances polluantes, notamment des perturbateurs endocriniens.',
+          ],
         },
         {
+          label: 'Document 3',
           title: 'Futurol',
-          text: 'Des enzymes, des levures et une biomasse vegetale sont utilises pour produire du bioethanol.',
+          body: [
+            'Des enzymes, des bacteries et des levures sont mobilisees pour transformer une biomasse vegetale en bioethanol.',
+            'Le projet vise une production industrielle d energie et de matieres premieres chimiques en limitant les emissions de gaz a effet de serre.',
+          ],
         },
       ],
-      questionsTitle: 'Questions de travail',
+      questionsTitle: 'Travail demande',
       questions: [
-        'Retrouve dans chaque exemple l organisme vivant utilise ou la propriete du vivant mobilisee.',
-        'Indique pour chaque exemple le benefice attendu pour l etre humain.',
-        'Associe chaque exemple a un domaine de biotechnologies et a sa couleur.',
-        'Justifie ton choix avec une phrase precise.',
+        'A. Retrouve dans le texte les elements permettant d affirmer qu il s agit d une entreprise de biotechnologies.',
+        'B. Identifie, pour chaque entreprise, l organisme utilise ou la propriete du vivant mobilisee ainsi que le benefice pour l etre humain.',
+        'C. Deduis le domaine des biotechnologies correspondant et la couleur associee.',
       ],
+      takeawayTitle: 'Aide',
       takeaway:
-        'Pour reconnaitre une biotechnologie dans un document, il faut toujours chercher trois choses : le vivant mobilise, l utilite du projet et le domaine auquel il appartient.',
+        'Surligne les informations importantes, repere les mots scientifiques que tu ne connais pas encore, puis formule une reponse simple : vivant utilise + utilite + domaine.',
     },
   ],
   method: {
     title: 'Methode - Analyser un document de biotechnologies',
     steps: [
-      'Repere le probleme ou le besoin auquel le document cherche a repondre.',
-      'Identifie le vivant utilise ou la propriete du vivant mobilisee.',
-      'Cherche le benefice attendu pour l etre humain, la sante, l environnement ou l industrie.',
-      'Associe ensuite le bon domaine de biotechnologies et la bonne couleur.',
-      'Ajoute, si besoin, une limite, un risque ou une question ethique.',
-      'Conclue par une phrase claire : vivant utilise + service rendu + domaine.',
+      'Repere le besoin ou le probleme auquel le document cherche a repondre.',
+      'Identifie l organisme vivant utilise ou la propriete du vivant mobilisee.',
+      'Cherche le benefice attendu pour l etre humain.',
+      'Associe ensuite le document au bon domaine des biotechnologies.',
+      'Justifie ta reponse avec une phrase claire et precise.',
     ],
   },
-  commonMistakes: [
-    'Donner une couleur sans expliquer le domaine.',
-    'Confondre biotechnologies et simple innovation technique sans vivant.',
-    'Apprendre la liste des couleurs sans savoir donner d exemples.',
-    'Citer seulement les avantages sans parler des limites ou des risques.',
-  ],
   keyPointsTitle: 'Conclusion',
   keyPoints: [
-    'Les biotechnologies utilisent le vivant ou les proprietes du vivant pour produire des biens ou des services utiles.',
-    'Elles mobilisent plusieurs disciplines scientifiques : biologie, microbiologie, biochimie, genetique, biologie moleculaire et bioinformatique.',
-    'On distingue cinq grands domaines : rouge, bleu, vert, jaune et blanc.',
-    'Leur utilisation apporte des benefices reels, mais elle doit aussi etre pensee avec prudence et responsabilite.',
+    'Les biotechnologies sont des methodes qui utilisent des organismes vivants, ou les potentialites du vivant, pour produire des biens ou des services utiles a l etre humain.',
+    'Elles s appuient sur plusieurs disciplines scientifiques comme la biologie, la microbiologie, la genetique, la biologie moleculaire, la biochimie et la bioinformatique.',
+    'On distingue cinq grands domaines : sante, milieux marins, agroalimentaire et agriculture, environnement et industrie.',
+    'Leur utilisation doit etre encadree pour limiter les risques, les derives et les questions ethiques qu elles peuvent soulever.',
   ],
   selfCheckTitle: 'Je verifie que j ai compris',
   selfCheck: [
-    'Je sais definir les biotechnologies avec une phrase simple et correcte.',
-    'Je sais citer les cinq domaines et donner un exemple pour chacun.',
-    'Je sais expliquer pourquoi certaines biotechnologies sont anciennes et d autres tres recentes.',
-    'Je sais montrer qu une application biotech a des avantages, mais aussi des limites.',
-  ],
-  practiceTitle: 'Petit entrainement',
-  practiceIntro:
-    'Pour chacun des cas suivants, indique le vivant mobilise, le domaine principal et une phrase de justification.',
-  practice: [
-    {
-      question:
-        'Une levure est utilisee pour fabriquer une molecule medicamenteuse.',
-      expected:
-        'C est une biotechnologie rouge, car un organisme vivant est utilise pour un objectif de sante.',
-    },
-    {
-      question:
-        'Des bacteries sont utilisees pour depolluer un milieu aquatique.',
-      expected:
-        'C est une biotechnologie jaune, car il s agit d une application environnementale.',
-    },
-    {
-      question:
-        'Une biomasse vegetale est transformee en bioethanol grace a des levures et des enzymes.',
-      expected:
-        'C est une biotechnologie blanche, car le vivant est mobilise pour une production industrielle.',
-    },
-  ],
-  sources: [
-    {
-      title: 'Programme de biotechnologies de premiere STL',
-      url: 'https://eduscol.education.fr/document/23092/download',
-    },
-    {
-      title: 'Explications pour la lecture du programme de premiere STL biotechnologies',
-      url: 'https://pedagogie.ac-lyon.fr/biotechnologies/stl/',
-    },
-    {
-      title: 'Biotechnologies 1re STL - manuel numerique eleve',
-      url: 'https://www.editions-delagrave.fr/site/302881',
-    },
-    {
-      title: 'A la decouverte des biotechnologies - Elea',
-      url: 'https://edubase.eduscol.education.fr/fiche/22146',
-    },
-    {
-      title: 'Dossier : decouverte des biotechnologies',
-      url: 'https://sms-bse-bgb.ac-normandie.fr/Dossier-decouverte-des-biotechnologies',
-    },
-    {
-      title: 'Accompagnement des techniques de biotechnologies',
-      url: 'https://edubase.eduscol.education.fr/fiche/21971',
-    },
+    'Je sais proposer une definition simple et correcte des biotechnologies.',
+    'Je sais expliquer pourquoi les biotechnologies sont a la fois anciennes et modernes.',
+    'Je sais nommer les cinq domaines des biotechnologies et donner un exemple pour chacun.',
+    'Je sais montrer qu une application biotechnologique peut soulever des enjeux ethiques.',
   ],
 };
 

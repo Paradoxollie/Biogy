@@ -127,6 +127,41 @@ function DiagramCard({ diagram }) {
   );
 }
 
+function DocumentCard({ document }) {
+  return (
+    <article className="rounded-2xl border border-gray-200 bg-gray-50 p-5 shadow-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        {document.label ? (
+          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-700">
+            {document.label}
+          </span>
+        ) : null}
+        {document.source ? (
+          <span className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-600">
+            {document.source}
+          </span>
+        ) : null}
+      </div>
+
+      <h3 className="mt-3 text-base font-semibold leading-6 text-gray-800">{document.title}</h3>
+
+      {document.body?.length ? (
+        <div className="mt-3 space-y-3 text-sm leading-6 text-gray-700">
+          {document.body.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
+      ) : null}
+
+      {document.footer ? (
+        <p className="mt-4 rounded-xl border border-white/80 bg-white px-3 py-3 text-sm leading-6 text-gray-600">
+          {document.footer}
+        </p>
+      ) : null}
+    </article>
+  );
+}
+
 function ChapterLessons({ level, chapter, activeLessonId, style }) {
   if (!chapter.lessons?.length) {
     return null;
@@ -322,6 +357,22 @@ function ChapterContent({ chapter, style }) {
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
+
+            {section.documents?.length ? (
+              <div
+                className={`mt-5 grid gap-4 ${
+                  section.documents.length > 2
+                    ? 'md:grid-cols-2 xl:grid-cols-3'
+                    : section.documents.length > 1
+                      ? 'xl:grid-cols-2'
+                      : ''
+                }`}
+              >
+                {section.documents.map((document) => (
+                  <DocumentCard key={`${section.title}-${document.title}`} document={document} />
+                ))}
+              </div>
+            ) : null}
 
             {section.cards?.length ? (
               <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
