@@ -1112,28 +1112,46 @@ function ImageLightbox({ image, onClose }) {
 
 function ChapterContent({ chapter, style, onOpenImage }) {
   const content = chapter.content;
+  const [activeTab, setActiveTab] = useState('activites'); 
 
-  return (
+  const tabs = [];
+  if (content.questionSets?.length) {
+    tabs.push({ id: 'activites', label: 'Travail Guidé', icon: FaVial });
+  }
+  if (content.courseSections?.length || content.diagrams?.length || content.method?.steps?.length || content.vocabulary?.length) {
+    tabs.push({ id: 'cours', label: 'Le Cours', icon: FaGraduationCap });
+  }
+  if (content.keyPoints?.length || content.selfCheck?.length || content.practice?.length || content.commonMistakes?.length || content.sources?.length) {
+    tabs.push({ id: 'bilan', label: 'Bilan & Entraînement', icon: FaCheckCircle });
+  }
+
+  if (tabs.length > 0 && !tabs.find(t => t.id === activeTab)) {
+    setActiveTab(tabs[0].id);
+  }
+
+  const renderContext = () => (
     <motion.div 
       variants={staggerContainer} 
       initial="hidden" 
       whileInView="visible" 
       viewport={{ once: true, margin: "-50px" }}
-      className="space-y-12"
+      className="space-y-12 mt-8 lg:mt-12"
     >
-      <motion.section variants={fadeInUp} className="mt-12 rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
-        <div className="flex items-center gap-3">
-          <FaBookOpen className="text-xl text-gray-400" />
-          <h2 className="text-2xl font-bold text-gray-800">Introduction</h2>
-        </div>
-        <p className="mt-6 text-[16px] leading-8 text-gray-600">{content.intro}</p>
-      </motion.section>
+      {content.intro && (
+        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+          <div className="flex items-center gap-3">
+            <FaBookOpen className="text-xl text-gray-400" />
+            <h2 className="text-2xl font-bold text-gray-800">Introduction</h2>
+          </div>
+          <p className="mt-6 text-[16px] leading-8 text-gray-600">{content.intro}</p>
+        </motion.section>
+      )}
 
       {content.prerequisites?.length ? (
         <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
           <div className="flex items-center gap-3">
             <FaListUl className="text-xl text-gray-400" />
-            <h2 className="text-2xl font-bold text-gray-800">A connaitre avant de commencer</h2>
+            <h2 className="text-2xl font-bold text-gray-800">À connaitre avant de commencer</h2>
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {content.prerequisites.map((item) => (
@@ -1146,20 +1164,22 @@ function ChapterContent({ chapter, style, onOpenImage }) {
         </motion.section>
       ) : null}
 
-      <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
-        <div className="flex items-center gap-3">
-          <FaBullseye className="text-xl text-gray-400" />
-          <h2 className="text-2xl font-bold text-gray-800">Objectifs</h2>
-        </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {content.objectives.map((objective) => (
-            <div key={objective} className="flex gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4 text-[15px] leading-relaxed text-gray-700">
-               <span className={`block h-2 w-2 mt-2 shrink-0 rounded-full ${style.line.split(' ')[0]}`} />
-               <span>{objective}</span>
-            </div>
-          ))}
-        </div>
-      </motion.section>
+      {content.objectives?.length ? (
+        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+          <div className="flex items-center gap-3">
+            <FaBullseye className="text-xl text-gray-400" />
+            <h2 className="text-2xl font-bold text-gray-800">Objectifs</h2>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {content.objectives.map((objective) => (
+              <div key={objective} className="flex gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4 text-[15px] leading-relaxed text-gray-700">
+                 <span className={`block h-2 w-2 mt-2 shrink-0 rounded-full ${style.line.split(' ')[0]}`} />
+                 <span>{objective}</span>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+      ) : null}
 
       {content.chapterQuestions?.length ? (
         <motion.section variants={fadeInUp} className={`overflow-hidden relative rounded-[2rem] border p-8 shadow-sm lg:p-10 ${style.note}`}>
@@ -1178,12 +1198,23 @@ function ChapterContent({ chapter, style, onOpenImage }) {
           </ul>
         </motion.section>
       ) : null}
+    </motion.div>
+  );
 
+  const renderActivites = () => (
+    <motion.div
+      key="activites"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-12"
+    >
       {content.questionSets?.length ? (
-        <motion.section variants={fadeInUp} className="pt-4">
+        <section>
           <div className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10 mb-8">
             <div className="flex items-center gap-3">
-              <FaVial className="text-2xl text-gray-400" />
+              <FaVial className={`text-3xl ${style.iconBase}`} />
               <h2 className="text-3xl font-bold text-gray-800">
                 {content.questionSetsTitle || 'Questions et supports'}
               </h2>
@@ -1203,14 +1234,25 @@ function ChapterContent({ chapter, style, onOpenImage }) {
               />
             ))}
           </div>
-        </motion.section>
+        </section>
       ) : null}
+    </motion.div>
+  );
 
+  const renderCours = () => (
+    <motion.div
+      key="cours"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-12"
+    >
       {content.courseSections?.length ? (
-        <motion.section variants={fadeInUp} className="pt-4">
+        <section>
           <div className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10 mb-8">
             <div className="flex items-center gap-3">
-              <FaGraduationCap className="text-3xl text-gray-400" />
+              <FaGraduationCap className={`text-3xl ${style.iconBase}`} />
               <h2 className="text-3xl font-bold text-gray-800">
                 {content.courseSectionsTitle || 'Cours'}
               </h2>
@@ -1230,19 +1272,19 @@ function ChapterContent({ chapter, style, onOpenImage }) {
               />
             ))}
           </div>
-        </motion.section>
+        </section>
       ) : null}
 
       {content.diagrams?.length ? (
-        <motion.section variants={fadeInUp} className="grid gap-8 xl:grid-cols-2">
+        <section className="grid gap-8 xl:grid-cols-2">
           {content.diagrams.map((diagram) => (
-            <DiagramCard key={diagram.id} diagram={diagram} />
+             <DiagramCard key={diagram.id} diagram={diagram} />
           ))}
-        </motion.section>
+        </section>
       ) : null}
 
       {content.method?.steps?.length ? (
-        <motion.section variants={fadeInUp} className={`rounded-[2rem] border p-8 shadow-sm lg:p-10 ${style.note}`}>
+        <section className={`rounded-[2rem] border p-8 shadow-sm lg:p-10 ${style.note}`}>
            <h2 className="text-2xl font-bold text-gray-800">{content.method.title}</h2>
           <ol className="mt-6 space-y-4 text-[15px] leading-relaxed text-gray-700">
             {content.method.steps.map((step, index) => (
@@ -1252,11 +1294,22 @@ function ChapterContent({ chapter, style, onOpenImage }) {
               </li>
             ))}
           </ol>
-        </motion.section>
+        </section>
       ) : null}
+    </motion.div>
+  );
 
+  const renderBilan = () => (
+    <motion.div
+      key="bilan"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-12"
+    >
       {content.commonMistakes?.length ? (
-        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+        <section className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
           <div className="flex items-center gap-3">
             <FaExclamationTriangle className="text-xl text-amber-500" />
             <h2 className="text-2xl font-bold text-gray-800">Erreurs a eviter</h2>
@@ -1269,39 +1322,43 @@ function ChapterContent({ chapter, style, onOpenImage }) {
               </li>
             ))}
           </ul>
-        </motion.section>
+        </section>
       ) : null}
 
       <div className="grid gap-8 xl:grid-cols-2">
-        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
-          <h2 className="text-2xl font-bold text-gray-800">{content.keyPointsTitle || 'A retenir'}</h2>
-          <ul className="mt-6 space-y-4 text-[15px] leading-relaxed text-gray-700">
-            {content.keyPoints.map((item) => (
-              <li key={item} className="flex gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4">
-                <span className={`mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full ${style.line.split(' ')[0]}`} />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.section>
+        {content.keyPoints?.length ? (
+          <section className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+            <h2 className="text-2xl font-bold text-gray-800">{content.keyPointsTitle || 'A retenir'}</h2>
+            <ul className="mt-6 space-y-4 text-[15px] leading-relaxed text-gray-700">
+              {content.keyPoints.map((item) => (
+                <li key={item} className="flex gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4">
+                  <span className={`mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full ${style.line.split(' ')[0]}`} />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
-        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
-          <h2 className="text-2xl font-bold text-gray-800">
-            {content.selfCheckTitle || 'Questions pour verifier'}
-          </h2>
-          <ul className="mt-6 space-y-4 text-[15px] leading-relaxed text-gray-700">
-            {content.selfCheck.map((item) => (
-              <li key={item} className="group flex gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4 transition-colors hover:bg-white hover:shadow-sm">
-                <FaCheckCircle className="mt-1 shrink-0 text-gray-300 group-hover:text-green-500 transition-colors" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.section>
+        {content.selfCheck?.length ? (
+          <section className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+            <h2 className="text-2xl font-bold text-gray-800">
+              {content.selfCheckTitle || 'Questions pour verifier'}
+            </h2>
+            <ul className="mt-6 space-y-4 text-[15px] leading-relaxed text-gray-700">
+              {content.selfCheck.map((item) => (
+                <li key={item} className="group flex gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4 transition-colors hover:bg-white hover:shadow-sm">
+                  <FaCheckCircle className="mt-1 shrink-0 text-gray-300 group-hover:text-green-500 transition-colors" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </div>
 
       {content.practice?.length ? (
-        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+        <section className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
           <h2 className="text-2xl font-bold text-gray-800">
             {content.practiceTitle || 'Petit entrainement'}
           </h2>
@@ -1322,11 +1379,11 @@ function ChapterContent({ chapter, style, onOpenImage }) {
               </article>
             ))}
           </div>
-        </motion.section>
+        </section>
       ) : null}
 
       {content.sources?.length ? (
-        <motion.section variants={fadeInUp} className="pt-4 pb-8">
+        <section className="pt-4 pb-8">
           <h2 className="text-xl font-bold text-gray-800 uppercase tracking-widest px-2">Pour aller plus loin</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {content.sources.map((source) => (
@@ -1344,12 +1401,55 @@ function ChapterContent({ chapter, style, onOpenImage }) {
               </a>
             ))}
           </div>
-        </motion.section>
+        </section>
       ) : null}
     </motion.div>
   );
-}
 
+  return (
+    <div className="space-y-10 mt-12 pb-12">
+      {renderContext()}
+
+      {tabs.length > 0 && (
+        <div className="mt-16">
+          <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 pb-[1px]">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`group relative flex items-center gap-2.5 px-6 py-4 text-[15px] font-bold transition-colors ${
+                    isActive ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  <Icon className={`text-lg transition-colors ${isActive ? style.iconBase : 'text-gray-300 group-hover:text-gray-400'}`} />
+                  {tab.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTabIndicator"
+                      className={`absolute bottom-0 left-0 right-0 h-0.5 ${style.line.split(' ')[0]}`}
+                      initial={false}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-12">
+            <AnimatePresence mode="wait">
+              {activeTab === 'activites' && renderActivites()}
+              {activeTab === 'cours' && renderCours()}
+              {activeTab === 'bilan' && renderBilan()}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function CourseChapterPage() {
   const { levelId, chapterId, lessonId } = useParams();
