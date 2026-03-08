@@ -820,7 +820,7 @@ function QuestionSetCard({ item, style, onOpenImage }) {
         ) : null}
       </div>
 
-      <h3 className="mt-5 text-2xl font-bold text-gray-800 lg:text-3xl">{item.title}</h3>
+      <h3 className="mt-6 text-3xl font-extrabold tracking-tight text-gray-900 lg:text-4xl">{item.title}</h3>
       {item.intro ? (
         <p className="mt-4 text-base leading-8 text-gray-600">{item.intro}</p>
       ) : null}
@@ -887,7 +887,7 @@ function CourseSectionCard({ item, style, onOpenImage }) {
     >
       <div className={`absolute top-0 left-0 w-1.5 h-full ${style.line}`} />
       
-      <h3 className="text-2xl font-bold text-gray-800 lg:text-3xl">{item.title}</h3>
+      <h3 className="text-3xl font-extrabold tracking-tight text-gray-900 lg:text-4xl">{item.title}</h3>
 
       {item.body?.length ? (
         <div className="mt-6 flex flex-col gap-4 text-base leading-8 text-gray-600">
@@ -1038,7 +1038,7 @@ function ChapterOutline({ chapter, style }) {
         </div>
       </motion.section>
 
-      <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+      <motion.section variants={fadeInUp} className="rounded-[2rem] bg-gray-50/50 p-8 border border-gray-100/50 lg:p-10">
         <h2 className="text-2xl font-bold text-gray-800">
           {hasLessons ? 'Organisation du chapitre' : 'Cours complet'}
         </h2>
@@ -1138,7 +1138,7 @@ function ChapterContent({ chapter, style, onOpenImage }) {
       className="space-y-12 mt-8 lg:mt-12"
     >
       {content.intro && (
-        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+        <motion.section variants={fadeInUp} className="rounded-[2rem] bg-gray-50/50 p-8 border border-gray-100/50 lg:p-10">
           <div className="flex items-center gap-3">
             <FaBookOpen className="text-xl text-gray-400" />
             <h2 className="text-2xl font-bold text-gray-800">Introduction</h2>
@@ -1148,7 +1148,7 @@ function ChapterContent({ chapter, style, onOpenImage }) {
       )}
 
       {content.prerequisites?.length ? (
-        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+        <motion.section variants={fadeInUp} className="rounded-[2rem] bg-gray-50/50 p-8 border border-gray-100/50 lg:p-10">
           <div className="flex items-center gap-3">
             <FaListUl className="text-xl text-gray-400" />
             <h2 className="text-2xl font-bold text-gray-800">À connaitre avant de commencer</h2>
@@ -1165,7 +1165,7 @@ function ChapterContent({ chapter, style, onOpenImage }) {
       ) : null}
 
       {content.objectives?.length ? (
-        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+        <motion.section variants={fadeInUp} className="rounded-[2rem] bg-gray-50/50 p-8 border border-gray-100/50 lg:p-10">
           <div className="flex items-center gap-3">
             <FaBullseye className="text-xl text-gray-400" />
             <h2 className="text-2xl font-bold text-gray-800">Objectifs</h2>
@@ -1182,7 +1182,7 @@ function ChapterContent({ chapter, style, onOpenImage }) {
       ) : null}
 
       {content.chapterQuestions?.length ? (
-        <motion.section variants={fadeInUp} className={`overflow-hidden relative rounded-[2rem] border p-8 shadow-sm lg:p-10 ${style.note}`}>
+        <motion.section variants={fadeInUp} className={`overflow-hidden relative rounded-[2rem] border border-gray-100/50 p-8 shadow-sm lg:p-10 ${style.note}`}>
           <div className="flex items-center gap-3">
             <FaLightbulb className={`text-2xl ${style.iconBase}`} />
             <h2 className="text-2xl font-bold text-gray-800">
@@ -1212,10 +1212,10 @@ function ChapterContent({ chapter, style, onOpenImage }) {
     >
       {content.questionSets?.length ? (
         <section>
-          <div className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10 mb-8">
+          <div className="rounded-[2rem] bg-gray-50/50 p-8 border border-gray-100/50 lg:p-10 mb-8">
             <div className="flex items-center gap-3">
-              <FaVial className={`text-3xl ${style.iconBase}`} />
-              <h2 className="text-3xl font-bold text-gray-800">
+              <FaVial className={`text-xl ${style.iconBase}`} />
+              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-800/60">
                 {content.questionSetsTitle || 'Questions et supports'}
               </h2>
             </div>
@@ -1250,10 +1250,10 @@ function ChapterContent({ chapter, style, onOpenImage }) {
     >
       {content.courseSections?.length ? (
         <section>
-          <div className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10 mb-8">
+          <div className="rounded-[2rem] bg-gray-50/50 p-8 border border-gray-100/50 lg:p-10 mb-8">
             <div className="flex items-center gap-3">
-              <FaGraduationCap className={`text-3xl ${style.iconBase}`} />
-              <h2 className="text-3xl font-bold text-gray-800">
+              <FaGraduationCap className={`text-xl ${style.iconBase}`} />
+              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-800/60">
                 {content.courseSectionsTitle || 'Cours'}
               </h2>
             </div>
@@ -1309,7 +1309,7 @@ function ChapterContent({ chapter, style, onOpenImage }) {
       className="space-y-12"
     >
       {content.commonMistakes?.length ? (
-        <section className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+        <section className="rounded-[2rem] bg-gray-50/50 p-8 border border-gray-100/50 lg:p-10">
           <div className="flex items-center gap-3">
             <FaExclamationTriangle className="text-xl text-amber-500" />
             <h2 className="text-2xl font-bold text-gray-800">Erreurs a eviter</h2>
@@ -1327,7 +1327,7 @@ function ChapterContent({ chapter, style, onOpenImage }) {
 
       <div className="grid gap-8 xl:grid-cols-2">
         {content.keyPoints?.length ? (
-          <section className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+          <section className="rounded-[2rem] bg-gray-50/50 p-8 border border-gray-100/50 lg:p-10">
             <h2 className="text-2xl font-bold text-gray-800">{content.keyPointsTitle || 'A retenir'}</h2>
             <ul className="mt-6 space-y-4 text-[15px] leading-relaxed text-gray-700">
               {content.keyPoints.map((item) => (
@@ -1341,7 +1341,7 @@ function ChapterContent({ chapter, style, onOpenImage }) {
         ) : null}
 
         {content.selfCheck?.length ? (
-          <section className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+          <section className="rounded-[2rem] bg-gray-50/50 p-8 border border-gray-100/50 lg:p-10">
             <h2 className="text-2xl font-bold text-gray-800">
               {content.selfCheckTitle || 'Questions pour verifier'}
             </h2>
@@ -1358,7 +1358,7 @@ function ChapterContent({ chapter, style, onOpenImage }) {
       </div>
 
       {content.practice?.length ? (
-        <section className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+        <section className="rounded-[2rem] bg-gray-50/50 p-8 border border-gray-100/50 lg:p-10">
           <h2 className="text-2xl font-bold text-gray-800">
             {content.practiceTitle || 'Petit entrainement'}
           </h2>
@@ -1412,7 +1412,7 @@ function ChapterContent({ chapter, style, onOpenImage }) {
 
       {tabs.length > 0 && (
         <div className="mt-16">
-          <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 pb-[1px]">
+          <div className="flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-gray-100/80 p-1.5 ring-1 ring-inset ring-gray-200/50">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -1420,19 +1420,22 @@ function ChapterContent({ chapter, style, onOpenImage }) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`group relative flex items-center gap-2.5 px-6 py-4 text-[15px] font-bold transition-colors ${
-                    isActive ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'
+                  className={`group relative flex flex-1 items-center justify-center gap-2.5 px-6 py-3.5 text-[15px] font-bold transition-all sm:flex-none sm:min-w-[200px] ${
+                    isActive ? 'text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50 rounded-xl'
                   }`}
                 >
-                  <Icon className={`text-lg transition-colors ${isActive ? style.iconBase : 'text-gray-300 group-hover:text-gray-400'}`} />
-                  {tab.label}
                   {isActive && (
                     <motion.div
-                      layoutId="activeTabIndicator"
-                      className={`absolute bottom-0 left-0 right-0 h-0.5 ${style.line.split(' ')[0]}`}
+                      layoutId="activeTabBackground"
+                      className="absolute inset-0 rounded-xl bg-white"
                       initial={false}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
+                  <span className="relative z-10 flex items-center gap-2.5">
+                    <Icon className={`text-lg transition-colors ${isActive ? style.iconBase : 'text-gray-400 group-hover:text-gray-500'}`} />
+                    {tab.label}
+                  </span>
                 </button>
               );
             })}
