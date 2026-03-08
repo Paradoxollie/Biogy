@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaLeaf, FaHeartbeat, FaIndustry, FaGlobe, FaWater, FaExclamationTriangle, FaFilter, FaSync, FaExternalLinkAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaLeaf, FaHeartbeat, FaIndustry, FaGlobe, FaWater, FaExclamationTriangle, FaFilter, FaSync, FaExternalLinkAlt, FaChevronLeft, FaChevronRight, FaArrowRight } from 'react-icons/fa';
 import { BiCategory } from 'react-icons/bi';
 
 function ScienceWatchPage() {
