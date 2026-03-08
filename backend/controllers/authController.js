@@ -17,9 +17,10 @@ const buildAuthResponse = (user) => {
 
   return {
     _id: user._id,
-    token: generateToken(user._id, normalizedRole),
+    token: generateToken(user._id, normalizedRole, user.tokenVersion || 0),
     username: user.username,
     role: normalizedRole,
+    mustChangePassword: Boolean(user.mustChangePassword),
   };
 };
 
@@ -122,6 +123,7 @@ const getUserProfile = async (req, res) => {
       username: user.username,
       email: user.email,
       role: normalizeUserRole(user.role),
+      mustChangePassword: Boolean(user.mustChangePassword),
       createdAt: user.createdAt,
     });
   } catch (error) {
@@ -130,8 +132,61 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+// @desc    Changer le mot de passe de l'utilisateur connecte
+// @route   POST /api/auth/change-password
+// @access  Private
+const changePassword = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'Mot de passe actuel et nouveau mot de passe requis' });
+  }
+
+  if (newPassword.length < 8) {
+    return res.status(400).json({ message: 'Le nouveau mot de passe doit contenir au moins 8 caracteres' });
+  }
+
+  if (currentPassword === newPassword) {
+    return res.status(400).json({ message: 'Le nouveau mot de passe doit etre different de l ancien' });
+  }
+
+  try {
+    const user = await User.findById(req.user._id).select('+password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouve' });
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Mot de passe actuel incorrect' });
+    }
+
+    user.password = newPassword;
+    user.mustChangePassword = false;
+    await user.save();
+
+    return res.status(200).json({
+      message: 'Mot de passe mis a jour avec succes',
+      user: buildAuthResponse(user),
+    });
+  } catch (error) {
+    console.error('Error in changePassword:', error);
+    const validationMessage = getValidationMessage(error);
+    if (validationMessage) {
+      return res.status(400).json({ message: validationMessage });
+    }
+    return res.status(500).json({ message: 'Erreur lors de la mise a jour du mot de passe' });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
+  changePassword,
 };

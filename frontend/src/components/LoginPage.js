@@ -15,6 +15,11 @@ function LoginPage() {
   useEffect(() => {
     if (location.state?.sessionExpired) {
       setError('Session expirée ou token invalide. Reconnecte-toi.');
+      return;
+    }
+
+    if (location.state?.passwordReset) {
+      setError('Ton mot de passe a ete reinitialise. Connecte-toi avec le mot de passe temporaire puis choisis-en un nouveau.');
     }
   }, [location.state]);
 
@@ -54,7 +59,12 @@ function LoginPage() {
       
       // Attendre un court instant pour laisser le temps au localStorage d'être mis à jour
       setTimeout(() => {
-        // Rediriger l'utilisateur vers la page d'accueil
+        if (data.mustChangePassword) {
+          navigate('/changer-mot-de-passe', { replace: true });
+          console.log('Redirection vers la page de changement de mot de passe');
+          return;
+        }
+
         navigate('/');
         console.log('Redirection vers la page d\'accueil');
       }, 200);

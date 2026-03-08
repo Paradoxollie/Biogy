@@ -24,6 +24,27 @@ const userSchema = new mongoose.Schema({
     select: false,
     minlength: 8,
   },
+  mustChangePassword: {
+    type: Boolean,
+    default: false,
+  },
+  passwordChangedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  tokenVersion: {
+    type: Number,
+    default: 0,
+  },
+  lastPasswordResetAt: {
+    type: Date,
+    default: null,
+  },
+  lastPasswordResetBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
   role: {
     type: String,
     default: DEFAULT_USER_ROLE,
@@ -48,6 +69,8 @@ userSchema.pre('save', async function savePassword(next) {
   }
 
   this.password = await bcrypt.hash(this.password, 10);
+  this.passwordChangedAt = new Date();
+  this.tokenVersion = this.isNew ? (this.tokenVersion || 0) : ((this.tokenVersion || 0) + 1);
   return next();
 });
 

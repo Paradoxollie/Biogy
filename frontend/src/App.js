@@ -8,6 +8,7 @@ import Layout from './components/Layout';
 import ShareProjectPage from './components/ShareProjectPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
+import ChangePasswordPage from './components/ChangePasswordPage';
 import AdminPage from './components/AdminPage';
 import ProjectsGallery from './components/ProjectsGallery';
 import ScienceWatchPage from './components/ScienceWatchPage';
@@ -39,6 +40,7 @@ function App() {
           <Route path="/projets" element={<ProjectsGallery />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/changer-mot-de-passe" element={<ChangePasswordPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/forum" element={<ForumPage />} />
           <Route path="/forum/:id" element={<TopicPage />} />

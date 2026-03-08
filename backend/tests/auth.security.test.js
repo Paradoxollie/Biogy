@@ -69,3 +69,71 @@ test('register accepts usernames with spaces and accents', async () => {
   assert.equal(loginResponse.statusCode, 200);
   assert.equal(loginResponse.body.username, 'Léa Martin');
 });
+
+test('a temporary password can be changed and invalidates the previous session', async () => {
+  const adminResponse = await request(app)
+    .post('/api/auth/register')
+    .send({
+      username: 'admin-user',
+      password: 'password123',
+    });
+
+  const studentResponse = await request(app)
+    .post('/api/auth/register')
+    .send({
+      username: 'student-user',
+      password: 'password123',
+    });
+
+  await User.findByIdAndUpdate(adminResponse.body._id, { role: 'admin' });
+
+  const resetResponse = await request(app)
+    .post(`/api/admin/users/${studentResponse.body._id}/reset-password`)
+    .set('Authorization', `Bearer ${adminResponse.body.token}`);
+
+  assert.equal(resetResponse.statusCode, 200);
+
+  const temporaryLoginResponse = await request(app)
+    .post('/api/auth/login')
+    .send({
+      username: 'student-user',
+      password: resetResponse.body.temporaryPassword,
+    });
+
+  assert.equal(temporaryLoginResponse.statusCode, 200);
+  assert.equal(temporaryLoginResponse.body.mustChangePassword, true);
+
+  const blockedResponse = await request(app)
+    .get('/api/social/profile')
+    .set('Authorization', `Bearer ${temporaryLoginResponse.body.token}`);
+
+  assert.equal(blockedResponse.statusCode, 403);
+  assert.equal(blockedResponse.body.code, 'PASSWORD_CHANGE_REQUIRED');
+
+  const changePasswordResponse = await request(app)
+    .post('/api/auth/change-password')
+    .set('Authorization', `Bearer ${temporaryLoginResponse.body.token}`)
+    .send({
+      currentPassword: resetResponse.body.temporaryPassword,
+      newPassword: 'new-password123',
+    });
+
+  assert.equal(changePasswordResponse.statusCode, 200);
+  assert.equal(changePasswordResponse.body.user.mustChangePassword, false);
+
+  const staleTokenResponse = await request(app)
+    .get('/api/social/profile')
+    .set('Authorization', `Bearer ${temporaryLoginResponse.body.token}`);
+
+  assert.equal(staleTokenResponse.statusCode, 401);
+
+  const finalLoginResponse = await request(app)
+    .post('/api/auth/login')
+    .send({
+      username: 'student-user',
+      password: 'new-password123',
+    });
+
+  assert.equal(finalLoginResponse.statusCode, 200);
+  assert.equal(finalLoginResponse.body.mustChangePassword, false);
+});

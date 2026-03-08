@@ -95,3 +95,38 @@ test('admin can update a role through the admin API', async () => {
   const storedUser = await User.findById(studentUser._id).select('role');
   assert.equal(storedUser.role, 'admin');
 });
+
+test('admin can reset a password without deleting the account', async () => {
+  const adminUser = await registerUser('admin-user');
+  const studentUser = await registerUser('student-user');
+
+  await promoteToAdmin(adminUser._id);
+
+  const resetResponse = await request(app)
+    .post(`/api/admin/users/${studentUser._id}/reset-password`)
+    .set('Authorization', `Bearer ${adminUser.token}`);
+
+  assert.equal(resetResponse.statusCode, 200);
+  assert.equal(resetResponse.body.user.username, 'student-user');
+  assert.equal(resetResponse.body.user.mustChangePassword, true);
+  assert.ok(resetResponse.body.temporaryPassword);
+
+  const oldLoginResponse = await request(app)
+    .post('/api/auth/login')
+    .send({
+      username: 'student-user',
+      password: 'password123',
+    });
+
+  assert.equal(oldLoginResponse.statusCode, 401);
+
+  const newLoginResponse = await request(app)
+    .post('/api/auth/login')
+    .send({
+      username: 'student-user',
+      password: resetResponse.body.temporaryPassword,
+    });
+
+  assert.equal(newLoginResponse.statusCode, 200);
+  assert.equal(newLoginResponse.body.mustChangePassword, true);
+});

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 function Layout({ children }) {
@@ -34,6 +34,10 @@ function Layout({ children }) {
         <div className="flex-grow"></div>
       </div>
     );
+  }
+
+  if (userInfo?.mustChangePassword && location.pathname !== '/changer-mot-de-passe') {
+    return <Navigate to="/changer-mot-de-passe" replace />;
   }
 
   return (

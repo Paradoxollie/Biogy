@@ -1,4 +1,5 @@
 const Post = require('../models/Post');
+const crypto = require('crypto');
 const { deleteFromCloudinary } = require('../config/cloudinary');
 const User = require('../models/User');
 const { ensureDatabaseAvailable } = require('../utils/database');
@@ -14,6 +15,13 @@ const getValidationMessage = (error) => {
 
   const firstError = Object.values(error.errors || {})[0];
   return firstError?.message || 'Donnees invalides';
+};
+
+const TEMP_PASSWORD_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+
+const generateTemporaryPassword = (length = 12) => {
+  const bytes = crypto.randomBytes(length);
+  return Array.from(bytes, (byte) => TEMP_PASSWORD_ALPHABET[byte % TEMP_PASSWORD_ALPHABET.length]).join('');
 };
 
 /**
@@ -410,6 +418,61 @@ const updateUsername = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Reset a user's password and require a password change on next login
+ * @route   POST /api/admin/users/:id/reset-password
+ * @access  Private/Admin
+ */
+const resetUserPassword = async (req, res) => {
+  if (!ensureDatabaseAvailable(res)) {
+    return;
+  }
+
+  try {
+    const userId = req.params.id;
+
+    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: 'ID utilisateur invalide' });
+    }
+
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouve' });
+    }
+
+    const temporaryPassword = generateTemporaryPassword();
+
+    user.password = temporaryPassword;
+    user.mustChangePassword = true;
+    user.lastPasswordResetAt = new Date();
+    user.lastPasswordResetBy = req.user._id;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Le mot de passe de ${user.username} a ete reinitialise`,
+      temporaryPassword,
+      user: {
+        _id: user._id,
+        username: user.username,
+        role: user.role,
+        mustChangePassword: user.mustChangePassword,
+      }
+    });
+  } catch (error) {
+    console.error('Error in resetUserPassword:', error);
+    const validationMessage = getValidationMessage(error);
+    if (validationMessage) {
+      return res.status(400).json({ message: validationMessage });
+    }
+    return res.status(500).json({
+      message: 'Erreur lors de la reinitialisation du mot de passe',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getPendingPosts,
   getAllPosts,
@@ -420,5 +483,6 @@ module.exports = {
   findUserByUsername,
   getAllUsers,
   deleteUser,
-  updateUsername
+  updateUsername,
+  resetUserPassword
 }; 

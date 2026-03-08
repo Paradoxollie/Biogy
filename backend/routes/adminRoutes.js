@@ -1,5 +1,5 @@
 const express = require('express');
-const { getPendingPosts, getAllPosts, approvePost, rejectPost, deletePostAdmin, updateUserRole, findUserByUsername, getAllUsers, deleteUser, updateUsername } = require('../controllers/adminController');
+const { getPendingPosts, getAllPosts, approvePost, rejectPost, deletePostAdmin, updateUserRole, findUserByUsername, getAllUsers, deleteUser, updateUsername, resetUserPassword } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const { admin } = require('../middleware/adminMiddleware');
 
@@ -37,6 +37,8 @@ router.put('/users/:id/role', updateUserRole);
 
 // Mettre à jour le nom d'utilisateur
 router.put('/users/:id/username', updateUsername);
+
+router.post('/users/:id/reset-password', resetUserPassword);
 
 // Supprimer un utilisateur
 router.delete('/users/:id', deleteUser);
