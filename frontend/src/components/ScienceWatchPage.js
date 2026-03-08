@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaLeaf, FaHeartbeat, FaIndustry, FaGlobe, FaWater, FaSearch, FaExclamationTriangle, FaFilter, FaSync, FaArrowRight, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaLeaf, FaHeartbeat, FaIndustry, FaGlobe, FaWater, FaExclamationTriangle, FaFilter, FaSync, FaExternalLinkAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { BiCategory } from 'react-icons/bi';
 
 function ScienceWatchPage() {
@@ -11,80 +11,82 @@ function ScienceWatchPage() {
   const [forceRefresh, setForceRefresh] = useState(false);
   const [biotechOnly, setBiotechOnly] = useState(true);
   const [articleCount, setArticleCount] = useState({});
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Editorial color palette (subtler backgrounds, strong accents)
+  // Editorial color palette with actual topics instead of "color names" as requested
   const biotechColors = {
-    green: {
-      name: 'Verte',
-      description: 'Agro-alimentaire, production végétale, biomatériaux, énergie',
-      color: 'emerald',
-      bgColor: 'bg-emerald-600',
-      textColor: 'text-emerald-700',
-      bgColorLight: 'bg-emerald-50/50',
-      accentColor: 'text-emerald-600',
-      icon: <FaLeaf className="text-emerald-600 text-2xl" />,
-      keywords: ['agro-alimentaire', 'agro alimentaire', 'agriculture biotechnologie', 'plante transgénique', 'amélioration végétale', 'biomatériau', 'biocarburant', 'énergie verte', 'biomasse', 'bioéthanol', 'OGM', 'céréale génétiquement', 'agroalimentaire biotech', 'biotechnologie végétale', 'fermentation']
-    },
     red: {
-      name: 'Rouge',
-      description: 'Santé, pharmaceutique, médecine',
+      name: 'Santé & Médecine',
+      badgeLabel: 'Santé',
+      description: 'Pharmaceutique, thérapie génique, vaccins',
       color: 'rose',
       bgColor: 'bg-rose-600',
       textColor: 'text-rose-700',
       bgColorLight: 'bg-rose-50/50',
       accentColor: 'text-rose-600',
-      icon: <FaHeartbeat className="text-rose-600 text-2xl" />,
-      keywords: ['biotechnologie médicale', 'médic', 'pharmac', 'thérapie génique', 'médicament biotechnologique', 'vaccin', 'anticorps', 'anticorps monoclonal', 'biopharmaceutique', 'cellule souche', 'génétique', 'crispr', 'ADN', 'ARN', 'génomique', 'biocapteur', 'glycémie', 'diabète', 'biotechnologie santé']
+      icon: <FaHeartbeat className="text-rose-600 text-2xl" />
+    },
+    green: {
+      name: 'Agro & Végétal',
+      badgeLabel: 'Agro',
+      description: 'Production végétale, biomatériaux, énergie verte',
+      color: 'emerald',
+      bgColor: 'bg-emerald-600',
+      textColor: 'text-emerald-700',
+      bgColorLight: 'bg-emerald-50/50',
+      accentColor: 'text-emerald-600',
+      icon: <FaLeaf className="text-emerald-600 text-2xl" />
     },
     white: {
-      name: 'Blanche',
-      description: 'Applications industrielles, procédés biologiques',
+      name: 'Industrie',
+      badgeLabel: 'Industrie',
+      description: 'Procédés biologiques, biocatalyse',
       color: 'slate',
       bgColor: 'bg-slate-700',
       textColor: 'text-slate-800',
       bgColorLight: 'bg-slate-50/50',
       accentColor: 'text-slate-600',
-      icon: <FaIndustry className="text-slate-600 text-2xl" />,
-      keywords: ['biotechnologie industrielle', 'biocatalyse', 'bioproduction', 'biochimie industrielle', 'polymère biosourcé', 'textile biotechnologie', 'procédé biologique', 'fermentation industrielle', 'bioréacteur', 'bioraffinerie', 'solvant biosourcé', 'biosynthèse', 'enzyme industrielle', 'biotech industrielle', 'catalyseur biologique']
+      icon: <FaIndustry className="text-slate-600 text-2xl" />
     },
     yellow: {
-      name: 'Jaune',
-      description: 'Protection de l\'environnement, traitement des pollutions',
+      name: 'Environnement',
+      badgeLabel: 'Environnement',
+      description: 'Traitement des pollutions, bioremédiation',
       color: 'amber',
       bgColor: 'bg-amber-500',
       textColor: 'text-amber-800',
       bgColorLight: 'bg-amber-50/50',
       accentColor: 'text-amber-600',
-      icon: <FaGlobe className="text-amber-600 text-2xl" />,
-      keywords: ['bioremédiation', 'biodépollution', 'traitement biologique', 'déchet biologique', 'biodégradation', 'dépollution', 'écologie industrielle', 'biotechnologie environnementale', 'bioréhabilitation', 'sol pollué', 'eau traitement biologique', 'assainissement', 'développement durable biotech', 'impact environnemental', 'microorganisme dépolluant']
+      icon: <FaGlobe className="text-amber-600 text-2xl" />
     },
     blue: {
-      name: 'Bleue',
-      description: 'Biodiversité marine, aquaculture, cosmétique marine',
+      name: 'Océan',
+      badgeLabel: 'Océan',
+      description: 'Biodiversité marine, aquaculture',
       color: 'blue',
       bgColor: 'bg-blue-600',
       textColor: 'text-blue-700',
       bgColorLight: 'bg-blue-50/50',
       accentColor: 'text-blue-600',
-      icon: <FaWater className="text-blue-600 text-2xl" />,
-      keywords: ['biotechnologie marine', 'aquaculture', 'algue', 'microalgue', 'biotechnologie bleue', 'ressource marine', 'cosmétique marine', 'milieu aquatique biotechnologie', 'bio-océanographie', 'spiruline', 'organisme marin', 'biodiversité marine', 'aquatique biotechnologie', 'phytoplancton']
+      icon: <FaWater className="text-blue-600 text-2xl" />
     },
     multi: {
-      name: 'Général',
+      name: 'Actualités Multiples',
+      badgeLabel: 'Général',
       description: 'Actualités transversales',
       color: 'indigo',
-      bgColor: 'bg-indigo-600',
-      textColor: 'text-indigo-700',
-      bgColorLight: 'bg-indigo-50/50',
-      accentColor: 'text-indigo-600',
-      icon: <BiCategory className="text-indigo-600 text-2xl" />,
-      keywords: []
+      bgColor: 'bg-gray-800', // Changed Multi to dark gray for an elegant default
+      textColor: 'text-gray-800',
+      bgColorLight: 'bg-gray-50/50',
+      accentColor: 'text-gray-600',
+      icon: <BiCategory className="text-gray-600 text-2xl" />
     }
   };
 
   const fetchArticles = async (colorKey) => {
     setLoading(true);
     setError(null);
+    setCurrentSlide(0); // Reset carousel on new fetch
     
     try {
       let url = '/.netlify/functions/biotech-veille';
@@ -92,7 +94,7 @@ function ScienceWatchPage() {
       if (colorKey) params.append('color', colorKey);
       if (forceRefresh) params.append('refresh', 'true');
       params.append('biotechOnly', biotechOnly.toString());
-      params.append('max', '20');
+      params.append('max', '25'); // Fetch slightly more to populate both carousel and list
       
       const fullUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
       
@@ -148,7 +150,7 @@ function ScienceWatchPage() {
   };
 
   useEffect(() => {
-    // We fetch everything initially for the magazine front page feel
+    // Initial fetch for 'À la une'
     fetchArticles(null);
 
     const preloadArticleCounts = async () => {
@@ -163,11 +165,10 @@ function ScienceWatchPage() {
       }
     };
     preloadArticleCounts();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   const handleColorSelect = (color) => {
     if (selectedColor === color) {
-        // Toggle off if clicking the same color
         setSelectedColor(null);
         fetchArticles(null);
     } else {
@@ -211,39 +212,48 @@ function ScienceWatchPage() {
       return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
-  // The Top Navigation / Category Ribbon
+  // Carousel Navigation Functions
+  const nextSlide = (maxSlides) => {
+      setCurrentSlide((prev) => (prev + 1) % maxSlides);
+  };
+
+  const prevSlide = (maxSlides) => {
+      setCurrentSlide((prev) => (prev === 0 ? maxSlides - 1 : prev - 1));
+  };
+
+  // The Top Navigation / Category Ribbon - Refined based on feedback
   const renderCategoryRibbon = () => (
-    <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 py-3 mb-10 overflow-x-auto hide-scrollbar">
-      <div className="max-w-7xl mx-auto px-4 flex items-center space-x-2 md:space-x-6">
+    <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 py-4 mb-10 overflow-x-auto hide-scrollbar shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 flex items-center space-x-2 md:space-x-8">
         <button
             onClick={() => handleColorSelect(null)}
-            className={`flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full transition-all ${
+            className={`flex-shrink-0 px-5 py-2 text-sm font-bold uppercase tracking-wider rounded-lg transition-all ${
                 selectedColor === null 
-                ? 'bg-gray-900 text-white' 
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                ? 'bg-gray-900 text-white shadow-md' 
+                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
             }`}
         >
             À la une
         </button>
         
-        {/* Subtle vertical divider */}
-        <div className="w-px h-6 bg-gray-300 hidden md:block"></div>
+        {/* Divider */}
+        <div className="w-px h-8 bg-gray-200 hidden md:block"></div>
 
-        {Object.entries(biotechColors).map(([key, data]) => (
+        {Object.entries(biotechColors).filter(([key]) => key !== 'multi').map(([key, data]) => (
           <button
             key={key}
             onClick={() => handleColorSelect(key)}
-            className={`flex-shrink-0 group flex items-center px-4 py-2 rounded-full transition-all duration-300 ${
+            className={`flex-shrink-0 group flex flex-col items-center justify-center relative py-1 px-3 transition-all duration-300 ${
               selectedColor === key 
-                ? `${data.bgColor} text-white shadow-sm` 
-                : 'text-gray-600 hover:bg-gray-50'
+                ? `${data.textColor} font-black` 
+                : 'text-gray-500 hover:text-gray-900 font-medium'
             }`}
           >
-            <span className={`w-2 h-2 rounded-full mr-3 ${selectedColor === key ? 'bg-white' : data.bgColor}`}></span>
-            <span className="text-sm font-medium tracking-wide uppercase">{data.name}</span>
-            {articleCount[key] !== undefined && selectedColor !== key && (
-                <span className="ml-2 text-xs text-gray-400 font-normal">({articleCount[key]})</span>
-            )}
+            <span className="text-sm tracking-wide">{data.name}</span>
+            {/* Animated underline indicator */}
+            <span className={`absolute -bottom-4 h-1 rounded-t-lg transition-all duration-300 ${
+                selectedColor === key ? `w-full ${data.bgColor}` : 'w-0 group-hover:w-1/2 bg-gray-300'
+            }`}></span>
           </button>
         ))}
       </div>
@@ -252,18 +262,18 @@ function ScienceWatchPage() {
 
   // Tools Ribbon (Refresh, Filters)
   const renderToolbar = () => (
-      <div className="flex flex-col sm:flex-row justify-between items-center py-4 border-b border-gray-200 mb-10">
-          <div className="text-sm text-gray-500 font-medium mb-4 sm:mb-0">
+      <div className="flex flex-col sm:flex-row justify-between items-center py-4 mb-8">
+          <div className="text-sm text-gray-400 font-medium mb-4 sm:mb-0">
               Mise à jour : {new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
             <button 
                 onClick={handleRefresh}
                 disabled={loading}
                 className="group flex items-center text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50"
             >
                 <FaSync className={`mr-2 w-3.5 h-3.5 ${loading ? 'animate-spin text-gray-800' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
-                {loading ? 'Actualisation...' : 'Actualiser'}
+                {loading ? 'Recherche...' : 'Actualiser'}
             </button>
             <div className="w-px h-4 bg-gray-300"></div>
             <label className="flex items-center cursor-pointer group">
@@ -274,103 +284,173 @@ function ScienceWatchPage() {
                     setTimeout(() => fetchArticles(selectedColor), 50);
                 }
                 }} />
-                <span className={`text-sm font-semibold transition-colors mr-2 ${biotechOnly ? 'text-gray-900' : 'text-gray-500'}`}>100% Biotech</span>
-                <div className={`relative w-8 h-4 rounded-full transition-colors duration-300 ${biotechOnly ? 'bg-gray-800' : 'bg-gray-200'}`}>
-                    <div className={`absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition-transform duration-300 ${biotechOnly ? 'translate-x-4' : ''}`}></div>
+                <span className={`text-sm font-semibold transition-colors mr-3 ${biotechOnly ? 'text-gray-900' : 'text-gray-500'}`}><FaFilter className="inline w-3 h-3 mr-1 -mt-0.5" /> 100% Biotech</span>
+                <div className={`relative w-9 h-5 rounded-full transition-colors duration-300 ${biotechOnly ? 'bg-blue-600' : 'bg-gray-300'}`}>
+                    <div className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform duration-300 shadow-sm ${biotechOnly ? 'translate-x-4' : ''}`}></div>
                 </div>
             </label>
         </div>
       </div>
   );
 
-  // Standard List Article - Minimalist, text heavy
+  // Standard List Article - "Cards" redesigned for extreme clarity and readability
   const renderListItem = (article, colorData, index) => (
       <motion.article 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: index * 0.05 }}
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5, delay: index * 0.05 }}
         key={index}
-        className="group grid grid-cols-1 md:grid-cols-12 gap-6 py-8 border-b border-gray-100 last:border-0"
+        className="group mb-8 bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 flex flex-col md:flex-row"
       >
-          {/* Metadata Sidebar (Source, Date) */}
-          <div className="md:col-span-3 flex flex-col justify-start">
-              <div className="flex items-center space-x-2 mb-2">
-                 <span className={`w-2 h-2 rounded-full ${colorData.bgColor}`}></span>
-                 <span className={`text-xs font-bold uppercase tracking-wider ${colorData.accentColor}`}>{colorData.name}</span>
-              </div>
-              <span className="text-gray-500 text-sm font-medium">{formatDate(article.pubDate)}</span>
-              <span className="text-gray-400 text-xs uppercase tracking-widest mt-1 bg-gray-50 self-start px-2 py-1 rounded inline-block">{article.source || 'Source externe'}</span>
-          </div>
-
-          {/* Core Content */}
-          <div className="md:col-span-6 flex flex-col justify-start">
-              <h3 className="text-xl md:text-2xl font-serif font-bold text-gray-900 mb-3 leading-tight group-hover:underline decoration-2 underline-offset-4 decoration-gray-300">
-                 <a href={article.link} target="_blank" rel="noopener noreferrer" className="focus:outline-none">
-                     {article.title}
-                 </a>
-              </h3>
-              <p className="text-gray-600 text-base leading-relaxed line-clamp-3 font-serif">
-                  {article.description}
-              </p>
-          </div>
-
-          {/* Thumbnail Image (Right aligned) */}
-          <div className="md:col-span-3">
-              <a href={article.link} target="_blank" rel="noopener noreferrer" className="block w-full aspect-[4/3] md:aspect-square overflow-hidden bg-gray-50">
+          {/* Thumbnail Image (Left side on desktop, top on mobile) */}
+          <div className="md:w-1/3 h-56 md:h-auto overflow-hidden relative bg-gray-100 border-r border-gray-100 flex-shrink-0">
+               <a href={article.link} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                   <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 mix-blend-multiply ${colorData.bgColor}`}></div>
                    <img
-                    src={article.imageUrl || `https://placehold.co/400x400/f8fafc/94a3b8?text=${encodeURIComponent(colorData.name)}`}
+                    src={article.imageUrl || `https://placehold.co/600x400/f1f5f9/94a3b8?text=${encodeURIComponent(colorData.badgeLabel)}`}
                     alt={article.title}
-                    className="w-full h-full object-cover filter grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                    className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"
                     loading="lazy"
                     onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = `https://placehold.co/400x400/f8fafc/94a3b8?text=${encodeURIComponent(colorData.name)}`;
+                        e.target.src = `https://placehold.co/600x400/f1f5f9/94a3b8?text=${encodeURIComponent(colorData.badgeLabel)}`;
                     }}
                   />
               </a>
+              {/* Floating Badge on Image */}
+              <div className="absolute top-4 left-4">
+                  <span className={`px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-white shadow-md rounded-md ${colorData.bgColor}`}>
+                     {colorData.badgeLabel}
+                  </span>
+              </div>
+          </div>
+
+          {/* Core Content */}
+          <div className="p-6 md:p-8 flex flex-col justify-between w-full">
+              <div>
+                  <div className="flex items-center space-x-3 mb-3 text-sm">
+                      <span className="font-semibold text-gray-500">{formatDate(article.pubDate)}</span>
+                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                      <span className="font-bold text-gray-800 tracking-wide uppercase">{article.source || 'Source externe'}</span>
+                  </div>
+                  
+                  <h3 className="text-xl md:text-2xl font-serif font-bold text-gray-900 mb-4 leading-snug group-hover:text-blue-700 transition-colors">
+                     <a href={article.link} target="_blank" rel="noopener noreferrer" className="focus:outline-none">
+                         {article.title}
+                     </a>
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed font-serif line-clamp-3 mb-6 relative z-10">
+                      {article.description}
+                  </p>
+              </div>
+
+              <div className="mt-auto">
+                 <a href={article.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest group/btn">
+                     Lire l'article 
+                     <FaArrowRight className="ml-2 w-3 h-3 transition-transform group-hover/btn:translate-x-1" />
+                 </a>
+              </div>
           </div>
       </motion.article>
   );
 
-  // Featured Article layout
-  const renderFeaturedArticle = (article, colorData) => (
-      <motion.article 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="mb-16 group"
-      >
-          <a href={article.link} target="_blank" rel="noopener noreferrer" className="block relative h-[60vh] min-h-[400px] w-full overflow-hidden bg-gray-900 mb-6">
-              <img
-                src={article.imageUrl || `https://placehold.co/1200x800/1e293b/94a3b8?text=${encodeURIComponent(colorData.name)}`}
-                alt={article.title}
-                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 ease-in-out"
-                onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = `https://placehold.co/1200x800/1e293b/94a3b8?text=${encodeURIComponent(colorData.name)}`;
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+  // The Top Carousel for Featured Articles
+  const renderFeaturedCarousel = (featuredArticles) => {
+      if (!featuredArticles || featuredArticles.length === 0) return null;
+      
+      const maxSlides = featuredArticles.length;
+      const currentArticle = featuredArticles[currentSlide];
+      const colorData = biotechColors[currentArticle.colorKey] || biotechColors.multi;
+
+      return (
+          <div className="relative w-full mb-16 group/carousel bg-gray-900 rounded-[2rem] overflow-hidden shadow-2xl h-[65vh] min-h-[500px] max-h-[700px]">
               
-              <div className="absolute bottom-0 left-0 p-6 md:p-12 w-full md:w-3/4">
-                 <div className="flex items-center space-x-3 mb-4">
-                     <span className={`px-3 py-1 bg-white text-xs font-bold uppercase tracking-widest ${colorData.textColor}`}>
-                         {colorData.name}
-                     </span>
-                     <span className="text-white/80 text-sm font-medium drop-shadow-md">
-                         {article.source}
-                     </span>
-                 </div>
-                 <h2 className="text-3xl md:text-5xl font-serif font-bold text-white leading-tight mb-4 drop-shadow-lg group-hover:underline decoration-white/50 underline-offset-8">
-                     {article.title}
-                 </h2>
-                 <p className="text-white/90 text-lg md:text-xl font-serif line-clamp-2 md:line-clamp-3 drop-shadow-md hidden sm:block">
-                     {article.description}
-                 </p>
-              </div>
-          </a>
-      </motion.article>
-  );
+              <AnimatePresence mode="wait">
+                  <motion.div
+                      key={currentSlide}
+                      initial={{ opacity: 0, scale: 1.05 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.7, ease: "easeInOut" }}
+                      className="absolute inset-0"
+                  >
+                      <img
+                          src={currentArticle.imageUrl || `https://placehold.co/1600x900/1e293b/94a3b8?text=${encodeURIComponent(colorData.name)}`}
+                          alt={currentArticle.title}
+                          className="w-full h-full object-cover opacity-60"
+                          onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = `https://placehold.co/1600x900/1e293b/94a3b8?text=${encodeURIComponent(colorData.name)}`;
+                          }}
+                      />
+                      {/* Dual gradient for maximum text legibility */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-transparent to-transparent"></div>
+                      
+                      <div className="absolute bottom-0 left-0 w-full p-8 md:p-16 md:w-4/5 lg:w-2/3">
+                          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3, duration: 0.5 }}>
+                              <div className="flex flex-wrap items-center gap-3 mb-5">
+                                  <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest text-white shadow-lg ${colorData.bgColor}`}>
+                                      {colorData.badgeLabel}
+                                  </span>
+                                  <span className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold uppercase tracking-widest">
+                                      {currentArticle.source}
+                                  </span>
+                                  <span className="text-gray-300 text-sm font-medium">
+                                      {formatDate(currentArticle.pubDate, 'short')}
+                                  </span>
+                              </div>
+                              <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="block focus:outline-none">
+                                  <h2 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-xl hover:text-blue-200 transition-colors">
+                                      {currentArticle.title}
+                                  </h2>
+                              </a>
+                              <p className="text-gray-200 text-lg md:text-xl font-serif line-clamp-2 md:line-clamp-3 mb-8 drop-shadow-md">
+                                  {currentArticle.description}
+                              </p>
+                              <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-8 py-3.5 bg-white text-gray-900 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg group/link">
+                                  Lire l'intégralité 
+                                  <FaExternalLinkAlt className="ml-3 w-3 h-3 opacity-50 transition-opacity group-hover/link:opacity-100" />
+                              </a>
+                          </motion.div>
+                      </div>
+                  </motion.div>
+              </AnimatePresence>
+
+              {/* Carousel Controls */}
+              {maxSlides > 1 && (
+                  <div className="absolute right-6 bottom-8 md:right-12 md:bottom-12 flex space-x-3 z-10">
+                      <button 
+                          onClick={() => prevSlide(maxSlides)}
+                          className="w-12 h-12 rounded-full border border-white/30 bg-black/30 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white hover:text-black transition-all"
+                      >
+                          <FaChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button 
+                          onClick={() => nextSlide(maxSlides)}
+                          className="w-12 h-12 rounded-full border border-white/30 bg-black/30 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white hover:text-black transition-all"
+                      >
+                          <FaChevronRight className="w-4 h-4" />
+                      </button>
+                  </div>
+              )}
+
+              {/* Dots indicator */}
+              {maxSlides > 1 && (
+                  <div className="absolute left-1/2 bottom-6 -translate-x-1/2 flex space-x-2 z-10">
+                      {featuredArticles.map((_, idx) => (
+                          <button 
+                              key={idx}
+                              onClick={() => setCurrentSlide(idx)}
+                              className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === idx ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                          />
+                      ))}
+                  </div>
+              )}
+          </div>
+      );
+  };
 
   // The main rendering logic for the articles
   const renderArticlesContent = () => {
@@ -387,22 +467,35 @@ function ScienceWatchPage() {
                 displayArticles.push({...a, colorKey: colorKey});
             });
         });
-        // Sort them by date to get a true "Une" (assuming pubDate exists and is sortable)
+        // Sort them by date 
         displayArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
     }
 
     if (displayArticles.length === 0) return null;
 
-    const featuredArticle = displayArticles[0];
-    const restArticles = displayArticles.slice(1);
+    // Split into Carousel (Top 4) and List (The rest)
+    const featuredArticles = displayArticles.slice(0, Math.min(4, displayArticles.length));
+    const restArticles = displayArticles.slice(featuredArticles.length);
 
     return (
         <div>
-            {/* The single massive featured article at the top */}
-            {renderFeaturedArticle(featuredArticle, biotechColors[featuredArticle.colorKey] || biotechColors.multi)}
+            {/* Carousel */}
+            {renderFeaturedCarousel(featuredArticles)}
             
-            <div className="max-w-4xl mx-auto">
-                {/* The list of remaining articles */}
+            {/* Section Header for the List */}
+            {restArticles.length > 0 && (
+                <div className="mb-10 flex items-center justify-between border-b 2 border-gray-900 pb-4">
+                    <h2 className="text-3xl font-serif font-black text-gray-900">
+                        {selectedColor ? `Actualités ${biotechColors[selectedColor].name}` : 'Toute l\'actualité'}
+                    </h2>
+                    <span className="text-gray-500 font-medium bg-gray-100 px-3 py-1 rounded-full text-sm">
+                        {restArticles.length} articles
+                    </span>
+                </div>
+            )}
+
+            {/* Structured Card List */}
+            <div className="max-w-5xl mx-auto">
                 {restArticles.map((article, idx) => 
                    renderListItem(article, biotechColors[article.colorKey] || biotechColors.multi, idx)
                 )}
@@ -412,59 +505,66 @@ function ScienceWatchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Magazine Header */}
-      <header className="pt-16 pb-8 px-4 text-center">
-         <h1 className="text-5xl md:text-7xl font-serif font-black text-gray-900 tracking-tight mb-4">
+    <div className="min-h-screen bg-gray-50/30">
+      {/* Editorial Header */}
+      <header className="pt-20 pb-12 px-4 text-center bg-white">
+         <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-black text-gray-900 tracking-tighter mb-6 relative inline-block">
              Science Watch
+             <span className="absolute -top-6 -right-10 text-xl md:text-2xl text-blue-600 font-sans font-bold select-none rotate-12 bg-blue-50 px-2 rounded">
+                Édition Mag'
+             </span>
          </h1>
-         <p className="text-lg text-gray-500 font-serif italic max-w-2xl mx-auto">
-             L'essentiel de l'actualité en Biotechnologies, trié par domaine.
+         <p className="text-xl md:text-2xl text-gray-500 font-serif italic max-w-3xl mx-auto leading-relaxed">
+             Le pouls des innovations en biotechnologie. Décryptage quotidien par secteurs.
          </p>
       </header>
 
-      {/* The sticky ribbon for navigation */}
+      {/* The sticky ribbon for navigation directly matching names */}
       {renderCategoryRibbon()}
 
-      <main className="max-w-7xl mx-auto px-4 pb-20">
+      <main className="max-w-7xl mx-auto px-4 pb-24">
         
-        {/* Tools (Refresh, Biotech Only) */}
+        {/* Tools */}
          {renderToolbar()}
 
         {error && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-50 text-red-800 p-6 shadow-sm mb-10 border-l-4 border-red-600">
-            <h3 className="font-bold flex items-center mb-2"><FaExclamationTriangle className="mr-2"/> Erreur réseau</h3>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-50 text-red-800 p-6 shadow-sm mb-10 border-l-4 border-red-600 rounded-r-xl">
+            <h3 className="font-bold flex items-center mb-2"><FaExclamationTriangle className="mr-2"/> Erreur de chargement</h3>
             <p className="font-serif">{error}</p>
           </motion.div>
         )}
 
         {loading ? (
-           // Minimalist Skeleton Loader
+           // Minimalist Skeleton Loader matching new layout
            <div className="animate-pulse">
-               {/* Hero Skeleton */}
-               <div className="w-full h-[50vh] bg-gray-100 mb-16 relative">
-                   <div className="absolute bottom-10 left-10 w-2/3">
-                      <div className="h-4 bg-gray-200 w-24 mb-4"></div>
-                      <div className="h-10 bg-gray-200 w-full mb-2"></div>
-                      <div className="h-10 bg-gray-200 w-4/5 mb-4"></div>
+               {/* Carousel Skeleton */}
+               <div className="w-full h-[65vh] bg-gray-200 rounded-[2rem] mb-16 relative overflow-hidden">
+                   <div className="absolute bottom-16 left-16 w-2/3">
+                      <div className="flex space-x-3 mb-6">
+                           <div className="h-8 bg-gray-300 rounded-full w-24"></div>
+                           <div className="h-8 bg-gray-300 rounded-full w-32"></div>
+                      </div>
+                      <div className="h-12 bg-gray-300 rounded-xl w-full mb-3"></div>
+                      <div className="h-12 bg-gray-300 rounded-xl w-4/5 mb-6"></div>
+                      <div className="h-6 bg-gray-300 w-3/4 mb-10"></div>
+                      <div className="h-12 bg-gray-300 rounded-xl w-48"></div>
                    </div>
                </div>
                
                {/* List Skeletons */}
-               <div className="max-w-4xl mx-auto space-y-10">
-                   {[1, 2, 3, 4].map(i => (
-                       <div key={i} className="grid grid-cols-12 gap-6 border-b border-gray-100 pb-10">
-                           <div className="col-span-3">
-                               <div className="h-3 bg-gray-100 w-16 mb-2"></div>
-                               <div className="h-3 bg-gray-100 w-24"></div>
+               <div className="max-w-5xl mx-auto space-y-8">
+                   <div className="h-8 w-48 bg-gray-200 mb-10 border-b-2 border-gray-300"></div>
+                   {[1, 2, 3].map(i => (
+                       <div key={i} className="flex flex-col md:flex-row gap-8 bg-white border border-gray-100 rounded-2xl p-6">
+                           <div className="md:w-1/3 h-56 bg-gray-200 rounded-xl flex-shrink-0"></div>
+                           <div className="w-full flex flex-col justify-center">
+                               <div className="h-4 bg-gray-200 w-1/3 mb-4 rounded"></div>
+                               <div className="h-8 bg-gray-200 w-full mb-3 rounded"></div>
+                               <div className="h-8 bg-gray-200 w-5/6 mb-6 rounded"></div>
+                               <div className="h-4 bg-gray-100 w-full mb-2 rounded"></div>
+                               <div className="h-4 bg-gray-100 w-2/3 mb-8 rounded"></div>
+                               <div className="h-5 bg-gray-200 w-32 mt-auto rounded"></div>
                            </div>
-                           <div className="col-span-6">
-                               <div className="h-6 bg-gray-200 w-full mb-3"></div>
-                               <div className="h-6 bg-gray-200 w-5/6 mb-4"></div>
-                               <div className="h-4 bg-gray-100 w-full mb-2"></div>
-                               <div className="h-4 bg-gray-100 w-2/3"></div>
-                           </div>
-                           <div className="col-span-3 h-32 bg-gray-100"></div>
                        </div>
                    ))}
                </div>
@@ -472,8 +572,18 @@ function ScienceWatchPage() {
         ) : (
             <>
                 {articles.length === 0 && !error ? (
-                    <div className="text-center text-gray-500 font-serif italic py-20">
-                        Aucun article trouvé pour cette sélection.
+                    <div className="text-center bg-gray-50 border border-gray-200 rounded-3xl py-32 px-4 shadow-sm">
+                        <FaFilter className="mx-auto text-4xl text-gray-300 mb-6" />
+                        <h3 className="text-2xl font-serif font-black text-gray-800 mb-2">Aucun article disponible</h3>
+                        <p className="text-gray-500 font-serif italic text-lg max-w-md mx-auto">
+                            Nous n'avons pas trouvé de nouvelles récentes pour cette catégorie avec les critères actuels.
+                        </p>
+                        <button 
+                            onClick={() => handleColorSelect(null)}
+                            className="mt-8 px-6 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors"
+                        >
+                            Retour à la une
+                        </button>
                     </div>
                 ) : (
                     renderArticlesContent()
