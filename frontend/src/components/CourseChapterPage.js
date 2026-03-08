@@ -1,5 +1,22 @@
 import React, { useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  FaBookOpen,
+  FaLightbulb,
+  FaVial,
+  FaCommentDots,
+  FaExclamationTriangle,
+  FaCheckCircle,
+  FaExpand,
+  FaListUl,
+  FaBullseye,
+  FaAngleRight,
+  FaExternalLinkAlt,
+  FaGraduationCap,
+  FaFileAlt,
+  FaTimes
+} from 'react-icons/fa';
 import {
   getCourseChapter,
   getCourseLesson,
@@ -9,16 +26,31 @@ import {
 const LEVEL_STYLES = {
   premiere: {
     badge: 'bg-lab-blue/10 text-lab-blue',
-    line: 'bg-lab-blue',
-    note: 'border-lab-blue/20 bg-lab-blue/5',
-    link: 'text-lab-blue',
+    line: 'bg-gradient-to-r from-lab-blue to-blue-400',
+    note: 'bg-gradient-to-br from-lab-blue/5 to-transparent border-t-2 border-lab-blue/30',
+    link: 'text-lab-blue hover:text-blue-700',
+    iconBase: 'text-lab-blue',
   },
   terminale: {
     badge: 'bg-lab-teal/10 text-lab-teal',
-    line: 'bg-lab-teal',
-    note: 'border-lab-teal/20 bg-lab-teal/5',
-    link: 'text-lab-teal',
+    line: 'bg-gradient-to-r from-lab-teal to-teal-400',
+    note: 'bg-gradient-to-br from-lab-teal/5 to-transparent border-t-2 border-lab-teal/30',
+    link: 'text-lab-teal hover:text-teal-700',
+    iconBase: 'text-lab-teal',
   },
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
 };
 
 function MicroscopeDiagram() {
@@ -380,29 +412,33 @@ function TitrationDiagram() {
   );
 }
 
+
 function getToneClasses(tone) {
   const tones = {
-    blue: 'border-blue-200 bg-blue-50',
-    teal: 'border-teal-200 bg-teal-50',
-    green: 'border-green-200 bg-green-50',
-    amber: 'border-amber-200 bg-amber-50',
-    rose: 'border-rose-200 bg-rose-50',
-    slate: 'border-slate-200 bg-slate-50',
-    violet: 'border-violet-200 bg-violet-50',
+    blue: 'border-blue-100 bg-blue-50/50',
+    teal: 'border-teal-100 bg-teal-50/50',
+    green: 'border-green-100 bg-green-50/50',
+    amber: 'border-amber-100 bg-amber-50/50',
+    rose: 'border-rose-100 bg-rose-50/50',
+    slate: 'border-slate-100 bg-slate-50/50',
+    violet: 'border-violet-100 bg-violet-50/50',
   };
 
-  return tones[tone] || 'border-gray-200 bg-gray-50';
+  return tones[tone] || 'border-gray-100 bg-gray-50/50';
 }
 
 function DiagramTextBlock({ item }) {
   return (
     <>
-      <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">{item.title}</h4>
-      {item.text ? <p className="mt-2 text-sm leading-6 text-gray-700">{item.text}</p> : null}
+      <h4 className="text-[13px] font-bold uppercase tracking-widest text-gray-800/80">{item.title}</h4>
+      {item.text ? <p className="mt-3 text-sm leading-relaxed text-gray-700">{item.text}</p> : null}
       {item.bullets?.length ? (
-        <ul className="mt-2 space-y-1 text-sm leading-6 text-gray-700">
+        <ul className="mt-3 flex flex-col gap-2 text-sm leading-relaxed text-gray-700">
           {item.bullets.map((bullet) => (
-            <li key={bullet}>{bullet}</li>
+            <li key={bullet} className="flex gap-2">
+              <span className="mt-1 block h-1.5 w-1.5 shrink-0 rounded-full bg-gray-300" />
+              <span>{bullet}</span>
+            </li>
           ))}
         </ul>
       ) : null}
@@ -417,81 +453,81 @@ function StructuredDiagram({ spec }) {
 
   if (spec.kind === 'flow') {
     return (
-      <div className="space-y-4">
-        {spec.title ? <h4 className="text-base font-bold text-gray-800">{spec.title}</h4> : null}
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="space-y-6">
+        {spec.title ? <h4 className="text-lg font-bold text-gray-800">{spec.title}</h4> : null}
+        <div className="flex flex-wrap items-center gap-4">
           {spec.nodes.map((node, index) => (
             <React.Fragment key={node.title}>
-              <article className={`min-w-[140px] flex-1 rounded-2xl border px-4 py-4 ${getToneClasses(node.tone)}`}>
+              <article className={`min-w-[160px] flex-1 rounded-2xl border px-5 py-5 transition-shadow hover:shadow-md ${getToneClasses(node.tone)}`}>
                 <DiagramTextBlock item={node} />
               </article>
               {index < spec.nodes.length - 1 ? (
-                <div className="px-1 text-xl font-bold text-gray-400">→</div>
+                <div className="px-2 text-2xl font-light text-gray-300">→</div>
               ) : null}
             </React.Fragment>
           ))}
         </div>
-        {spec.footer ? <p className="text-sm leading-6 text-gray-600">{spec.footer}</p> : null}
+        {spec.footer ? <p className="text-sm italic leading-relaxed text-gray-500">{spec.footer}</p> : null}
       </div>
     );
   }
 
   if (spec.kind === 'comparison') {
     return (
-      <div className="space-y-4">
-        {spec.title ? <h4 className="text-base font-bold text-gray-800">{spec.title}</h4> : null}
-        <div className={`grid gap-4 ${spec.columns.length > 2 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+      <div className="space-y-6">
+        {spec.title ? <h4 className="text-lg font-bold text-gray-800">{spec.title}</h4> : null}
+        <div className={`grid gap-6 ${spec.columns.length > 2 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
           {spec.columns.map((column) => (
-            <article key={column.title} className={`rounded-2xl border px-4 py-4 ${getToneClasses(column.tone)}`}>
+            <article key={column.title} className={`rounded-2xl border px-5 py-5 transition-shadow hover:shadow-md ${getToneClasses(column.tone)}`}>
               <DiagramTextBlock item={column} />
             </article>
           ))}
         </div>
-        {spec.footer ? <p className="text-sm leading-6 text-gray-600">{spec.footer}</p> : null}
+        {spec.footer ? <p className="text-sm italic leading-relaxed text-gray-500">{spec.footer}</p> : null}
       </div>
     );
   }
 
   if (spec.kind === 'cycle') {
     return (
-      <div className="space-y-4">
-        {spec.title ? <h4 className="text-base font-bold text-gray-800">{spec.title}</h4> : null}
-        <div className="rounded-3xl border border-gray-200 bg-white p-4">
-          <div className="mx-auto max-w-sm rounded-3xl border border-lab-blue/20 bg-lab-blue/5 px-5 py-4 text-center">
-            <h5 className="text-base font-bold text-gray-800">{spec.center.title}</h5>
-            {spec.center.text ? <p className="mt-2 text-sm leading-6 text-gray-700">{spec.center.text}</p> : null}
+      <div className="space-y-6">
+        {spec.title ? <h4 className="text-lg font-bold text-gray-800">{spec.title}</h4> : null}
+        <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div className="mx-auto max-w-sm rounded-[2rem] border border-lab-blue/10 bg-lab-blue/5 px-6 py-5 text-center transition-shadow hover:shadow-md">
+            <h5 className="text-[15px] font-bold text-gray-800">{spec.center.title}</h5>
+            {spec.center.text ? <p className="mt-3 text-sm leading-relaxed text-gray-700">{spec.center.text}</p> : null}
           </div>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
             {spec.nodes.map((node) => (
-              <article key={node.title} className={`rounded-2xl border px-4 py-4 ${getToneClasses(node.tone)}`}>
+              <article key={node.title} className={`rounded-2xl border px-5 py-5 transition-shadow hover:shadow-md ${getToneClasses(node.tone)}`}>
                 <DiagramTextBlock item={node} />
               </article>
             ))}
           </div>
         </div>
-        {spec.footer ? <p className="text-sm leading-6 text-gray-600">{spec.footer}</p> : null}
+        {spec.footer ? <p className="text-sm italic leading-relaxed text-gray-500">{spec.footer}</p> : null}
       </div>
     );
   }
 
   if (spec.kind === 'bars') {
     return (
-      <div className="space-y-4">
-        {spec.title ? <h4 className="text-base font-bold text-gray-800">{spec.title}</h4> : null}
-        <div className="rounded-3xl border border-gray-200 bg-white p-4">
-          <div className="flex h-52 items-end justify-between gap-3">
+      <div className="space-y-6">
+        {spec.title ? <h4 className="text-lg font-bold text-gray-800">{spec.title}</h4> : null}
+        <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div className="flex h-64 items-end justify-between gap-4">
             {spec.bars.map((bar) => (
-              <div key={bar.label} className="flex flex-1 flex-col items-center gap-3">
-                <div className="text-xs font-semibold text-gray-500">{bar.valueLabel || bar.value}</div>
+              <div key={bar.label} className="group flex flex-1 flex-col items-center gap-3">
+                <div className="text-[13px] font-semibold text-gray-400 group-hover:text-gray-600 transition-colors">{bar.valueLabel || bar.value}</div>
                 <div
-                  className={`w-full rounded-t-2xl ${bar.colorClass || 'bg-lab-blue'}`}
-                  style={{ height: `${Math.max(16, Math.min(100, bar.value))}%` }}
+                  className={`w-full rounded-t-xl opacity-90 transition-opacity group-hover:opacity-100 ${bar.colorClass || 'bg-lab-blue'}`}
+                  style={{ height: `${Math.max(12, Math.min(100, bar.value))}%` }}
                 />
-                <div className="text-center text-xs font-semibold text-gray-700">{bar.label}</div>
+                <div className="text-center text-[13px] font-medium text-gray-600">{bar.label}</div>
               </div>
             ))}
           </div>
-          {spec.footer ? <p className="mt-4 text-sm leading-6 text-gray-600">{spec.footer}</p> : null}
+          {spec.footer ? <p className="mt-6 text-sm italic leading-relaxed text-gray-500">{spec.footer}</p> : null}
         </div>
       </div>
     );
@@ -516,34 +552,34 @@ function StructuredDiagram({ spec }) {
       .join(' ');
 
     return (
-      <div className="space-y-4">
-        {spec.title ? <h4 className="text-base font-bold text-gray-800">{spec.title}</h4> : null}
-        <div className="rounded-3xl border border-gray-200 bg-white p-4">
+      <div className="space-y-6">
+        {spec.title ? <h4 className="text-lg font-bold text-gray-800">{spec.title}</h4> : null}
+        <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
           <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label={spec.title || 'Graphique'}>
-            <line x1={startX} y1={startY} x2={startX + graphWidth + 20} y2={startY} stroke="#94a3b8" strokeWidth="2" />
-            <line x1={startX} y1={24} x2={startX} y2={startY} stroke="#94a3b8" strokeWidth="2" />
-            <polyline points={polyline} fill="none" stroke="#0ea5e9" strokeWidth="4" />
+            <line x1={startX} y1={startY} x2={startX + graphWidth + 20} y2={startY} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
+            <line x1={startX} y1={24} x2={startX} y2={startY} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
+            <polyline points={polyline} fill="none" stroke="#0ea5e9" strokeWidth="3" strokeLinejoin="round" />
             {points.map((point, index) => {
               const x = startX + index * stepX;
               const y = startY - (point.y / maxY) * graphHeight;
 
               return (
                 <g key={point.label}>
-                  <circle cx={x} cy={y} r="4" fill="#0284c7" />
-                  <text x={x - 8} y={startY + 18} fontSize="10" fill="#475569">
+                  <circle cx={x} cy={y} r="5" fill="#fff" stroke="#0284c7" strokeWidth="2" />
+                  <text x={x - 8} y={startY + 20} fontSize="11" fill="#64748b" fontWeight="500">
                     {point.label}
                   </text>
                 </g>
               );
             })}
-            <text x={width / 2 - 40} y={height - 4} fontSize="11" fill="#475569">
+            <text x={width / 2 - 40} y={height - 2} fontSize="12" fill="#64748b" fontWeight="500">
               {spec.xLabel || 'Abscisses'}
             </text>
-            <text x="10" y={height / 2} fontSize="11" fill="#475569" transform={`rotate(-90 10 ${height / 2})`}>
+            <text x="10" y={height / 2} fontSize="12" fill="#64748b" fontWeight="500" transform={`rotate(-90 10 ${height / 2})`}>
               {spec.yLabel || 'Ordonnees'}
             </text>
           </svg>
-          {spec.footer ? <p className="mt-4 text-sm leading-6 text-gray-600">{spec.footer}</p> : null}
+          {spec.footer ? <p className="mt-6 text-sm italic leading-relaxed text-gray-500">{spec.footer}</p> : null}
         </div>
       </div>
     );
@@ -588,12 +624,12 @@ function DiagramCard({ diagram }) {
   }
 
   return (
-    <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-lg">
-      <h3 className="text-lg font-bold text-gray-800">{diagram.title}</h3>
-      <div className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-lab-bg p-4">
+    <article className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+      <h3 className="text-xl font-bold text-gray-800">{diagram.title}</h3>
+      <div className="mt-5 overflow-hidden rounded-[2rem] border border-gray-100 bg-gray-50/50 p-6">
         {node}
       </div>
-      <p className="mt-4 text-sm leading-6 text-gray-600">{diagram.caption}</p>
+      <p className="mt-5 text-[15px] leading-relaxed text-gray-600">{diagram.caption}</p>
     </article>
   );
 }
@@ -604,43 +640,45 @@ function MediaCredit({ item }) {
   }
 
   return (
-    <div className="mt-4 rounded-xl border border-white/80 bg-white px-3 py-3 text-xs leading-5 text-gray-500">
-      {item.credit ? <p>Credit visuel : {item.credit}</p> : null}
-      {item.license ? <p>Licence : {item.license}</p> : null}
+    <div className="mt-5 rounded-2xl bg-gray-50/80 px-4 py-4 text-[13px] leading-relaxed text-gray-500">
+      {item.credit ? <p>Credit visuel : <span className="font-medium text-gray-700">{item.credit}</span></p> : null}
+      {item.license ? <p>Licence : <span className="font-medium text-gray-700">{item.license}</span></p> : null}
       {item.sourceUrl ? (
         <a
           href={item.sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 inline-flex font-semibold text-lab-blue hover:underline"
+          className="mt-2 inline-flex items-center gap-1.5 font-semibold text-lab-blue hover:text-blue-700 transition-colors"
         >
-          Voir la source du visuel
+          Voir la source <FaExternalLinkAlt className="text-[10px]" />
         </a>
       ) : null}
     </div>
   );
 }
 
+
 function DocumentCard({ document, onOpenImage }) {
   return (
-    <article className="rounded-2xl border border-gray-200 bg-gray-50 p-5 shadow-sm">
+    <article className="group relative overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+      <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-gray-200 to-transparent group-hover:from-lab-blue transition-colors" />
       <div className="flex flex-wrap items-center gap-2">
         {document.label ? (
-          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-700">
+          <span className="rounded-full bg-gray-100/80 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gray-500">
             {document.label}
           </span>
         ) : null}
         {document.source ? (
-          <span className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-600">
+          <span className="rounded-full border border-gray-100 bg-white px-3 py-1 text-[11px] font-semibold text-gray-400">
             {document.source}
           </span>
         ) : null}
       </div>
 
-      <h3 className="mt-3 text-base font-semibold leading-6 text-gray-800">{document.title}</h3>
+      <h3 className="mt-4 text-lg font-bold leading-snug text-gray-800">{document.title}</h3>
 
       {document.imageSrc || document.diagramId || document.diagramSpec ? (
-        <div className="mt-4">
+        <div className="mt-5">
           <button
             type="button"
             onClick={() =>
@@ -656,7 +694,7 @@ function DocumentCard({ document, onOpenImage }) {
                 footer: document.footer,
               })
             }
-            className="group block w-full overflow-hidden rounded-2xl border border-gray-200 bg-white text-left transition hover:shadow-md"
+            className="block w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/50 text-left transition-colors hover:bg-gray-50"
           >
             {document.imageSrc ? (
               <img
@@ -665,35 +703,20 @@ function DocumentCard({ document, onOpenImage }) {
                 className="h-auto w-full object-contain"
               />
             ) : document.diagramSpec ? (
-              <div className="p-4">{renderDiagramContent({ diagramSpec: document.diagramSpec })}</div>
+              <div className="p-5">{renderDiagramContent({ diagramSpec: document.diagramSpec })}</div>
             ) : (
-              <div className="p-4">{getDiagramNode(document.diagramId)}</div>
+              <div className="p-5">{getDiagramNode(document.diagramId)}</div>
             )}
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              onOpenImage?.({
-                src: document.imageSrc,
-                diagramId: document.diagramId,
-                diagramSpec: document.diagramSpec,
-                alt: document.imageAlt || document.title,
-                title: document.title,
-                credit: document.credit,
-                license: document.license,
-                sourceUrl: document.sourceUrl,
-                footer: document.footer,
-              })
-            }
-            className="mt-2 text-sm font-semibold text-lab-blue hover:underline"
-          >
-            {document.diagramId || document.diagramSpec ? 'Agrandir le schema' : 'Agrandir l image'}
+            <div className="flex items-center justify-between border-t border-gray-100 bg-white px-4 py-3 text-[13px] font-semibold text-gray-400 group-hover:text-lab-blue transition-colors">
+              <span>{document.diagramId || document.diagramSpec ? 'Agrandir le schéma' : "Agrandir l'image"}</span>
+              <FaExpand />
+            </div>
           </button>
         </div>
       ) : null}
 
       {document.body?.length ? (
-        <div className="mt-3 space-y-3 text-sm leading-6 text-gray-700">
+        <div className="mt-5 space-y-4 text-[15px] leading-relaxed text-gray-600">
           {document.body.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
@@ -701,13 +724,12 @@ function DocumentCard({ document, onOpenImage }) {
       ) : null}
 
       {document.footer ? (
-        <p className="mt-4 rounded-xl border border-white/80 bg-white px-3 py-3 text-sm leading-6 text-gray-600">
+        <p className="mt-5 rounded-2xl bg-gray-50/50 px-4 py-4 text-sm italic leading-relaxed text-gray-500">
           {document.footer}
         </p>
       ) : null}
 
       <MediaCredit item={document} />
-
     </article>
   );
 }
@@ -718,27 +740,32 @@ function SupportList({ supports, onOpenImage }) {
   }
 
   return (
-    <div className="mt-4 space-y-3">
+    <div className="mt-6 flex flex-col gap-4">
       {supports.map((support) => (
-        <div key={`${support.label}-${support.detail || ''}`} className="rounded-2xl border border-gray-200 bg-white px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Support</p>
+        <div key={`${support.label}-${support.detail || ''}`} className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div className="absolute left-0 top-0 h-full w-1 bg-gray-100 group-hover:bg-lab-teal transition-colors" />
+          <div className="flex items-center gap-2">
+            <FaFileAlt className="text-gray-300 group-hover:text-lab-teal transition-colors" />
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Support</p>
+          </div>
           {support.url ? (
             <a
               href={support.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 inline-flex text-sm font-semibold text-lab-blue hover:underline"
+              className="mt-3 inline-flex items-center gap-2 text-base font-bold text-gray-800 hover:text-lab-teal transition-colors"
             >
               {support.label}
+              <FaExternalLinkAlt className="text-xs text-gray-400" />
             </a>
           ) : (
-            <p className="mt-2 text-sm font-semibold text-gray-800">{support.label}</p>
+            <p className="mt-3 text-base font-bold text-gray-800">{support.label}</p>
           )}
           {support.detail ? (
-            <p className="mt-2 text-sm leading-6 text-gray-600">{support.detail}</p>
+            <p className="mt-2 text-sm leading-relaxed text-gray-600">{support.detail}</p>
           ) : null}
           {support.imageSrc || support.diagramId || support.diagramSpec ? (
-            <div className="mt-3">
+            <div className="mt-5">
               <button
                 type="button"
                 onClick={() =>
@@ -754,38 +781,19 @@ function SupportList({ supports, onOpenImage }) {
                     footer: support.detail,
                   })
                 }
-                className="group block overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 transition hover:shadow-md"
+                className="overflow-hidden rounded-xl border border-gray-100 bg-gray-50 transition-colors hover:bg-gray-100 block"
               >
                 {support.imageSrc ? (
                   <img
                     src={support.imageSrc}
                     alt={support.imageAlt || support.label}
-                    className="h-auto max-w-[220px] object-contain"
+                    className="h-auto max-w-[240px] object-contain p-2"
                   />
                 ) : support.diagramSpec ? (
-                  <div className="max-w-[320px] p-3">{renderDiagramContent({ diagramSpec: support.diagramSpec })}</div>
+                  <div className="max-w-[340px] p-4">{renderDiagramContent({ diagramSpec: support.diagramSpec })}</div>
                 ) : (
-                  <div className="max-w-[260px] p-3">{getDiagramNode(support.diagramId)}</div>
+                  <div className="max-w-[280px] p-4">{getDiagramNode(support.diagramId)}</div>
                 )}
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  onOpenImage?.({
-                    src: support.imageSrc,
-                    diagramId: support.diagramId,
-                    diagramSpec: support.diagramSpec,
-                    alt: support.imageAlt || support.label,
-                    title: support.label,
-                    credit: support.credit,
-                    license: support.license,
-                    sourceUrl: support.sourceUrl,
-                    footer: support.detail,
-                  })
-                }
-                className="mt-2 text-sm font-semibold text-lab-blue hover:underline"
-              >
-                {support.diagramId || support.diagramSpec ? 'Agrandir le schema' : 'Agrandir le support'}
               </button>
             </div>
           ) : null}
@@ -798,23 +806,30 @@ function SupportList({ supports, onOpenImage }) {
 
 function QuestionSetCard({ item, style, onOpenImage }) {
   return (
-    <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-      <div className={`mb-4 h-1.5 w-14 rounded-full ${style.line}`} />
-      {item.tag ? (
-        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${style.badge}`}>
-          {item.tag}
-        </span>
-      ) : null}
-      <h3 className="mt-3 text-2xl font-bold text-gray-800">{item.title}</h3>
+    <motion.article 
+      variants={fadeInUp}
+      className="relative overflow-hidden rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-lg lg:p-10"
+    >
+      <div className={`absolute top-0 left-0 w-full h-1.5 ${style.line}`} />
+      
+      <div className="flex items-center justify-between">
+        {item.tag ? (
+          <span className={`inline-flex rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider ${style.badge}`}>
+            {item.tag}
+          </span>
+        ) : null}
+      </div>
+
+      <h3 className="mt-5 text-2xl font-bold text-gray-800 lg:text-3xl">{item.title}</h3>
       {item.intro ? (
-        <p className="mt-4 text-[15px] leading-8 text-gray-700">{item.intro}</p>
+        <p className="mt-4 text-base leading-8 text-gray-600">{item.intro}</p>
       ) : null}
 
       <SupportList supports={item.supports} onOpenImage={onOpenImage} />
 
       {item.documents?.length ? (
         <div
-          className={`mt-5 grid gap-4 ${
+          className={`mt-8 grid gap-6 ${
             item.documents.length > 2
               ? 'md:grid-cols-2 xl:grid-cols-3'
               : item.documents.length > 1
@@ -833,36 +848,49 @@ function QuestionSetCard({ item, style, onOpenImage }) {
       ) : null}
 
       {item.instruction ? (
-        <div className={`mt-5 rounded-2xl border p-4 ${style.note}`}>
-          <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">Consigne</h4>
-          <p className="mt-2 text-sm leading-6 text-gray-700">{item.instruction}</p>
+        <div className={`mt-8 rounded-2xl border p-6 ${style.note}`}>
+          <div className="flex items-center gap-3">
+            <FaBullseye className={style.iconBase} />
+            <h4 className="text-sm font-bold uppercase tracking-widest text-gray-800">Consigne</h4>
+          </div>
+          <p className="mt-3 text-[15px] leading-relaxed text-gray-700">{item.instruction}</p>
         </div>
       ) : null}
 
       {item.questions?.length ? (
-        <div className="mt-5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
-          <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
-            {item.questionsTitle || 'Questions'}
-          </h4>
-          <ul className="mt-3 space-y-2 text-sm leading-6 text-gray-700">
+        <div className="mt-8 rounded-2xl border border-gray-100 bg-gray-50/80 p-6">
+          <div className="flex items-center gap-3">
+            <FaCommentDots className="text-gray-400" />
+            <h4 className="text-sm font-bold uppercase tracking-widest text-gray-600">
+              {item.questionsTitle || 'Questions'}
+            </h4>
+          </div>
+          <ul className="mt-5 space-y-4">
             {item.questions.map((question) => (
-              <li key={question}>{question}</li>
+              <li key={question} className="flex gap-3 text-[15px] leading-relaxed text-gray-700">
+                <span className={`mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full ${style.line.split(' ')[0]}`} />
+                <span>{question}</span>
+              </li>
             ))}
           </ul>
         </div>
       ) : null}
-    </article>
+    </motion.article>
   );
 }
 
 function CourseSectionCard({ item, style, onOpenImage }) {
   return (
-    <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-      <div className={`mb-4 h-1.5 w-14 rounded-full ${style.line}`} />
-      <h3 className="text-2xl font-bold text-gray-800">{item.title}</h3>
+    <motion.article 
+      variants={fadeInUp}
+      className="relative overflow-hidden rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-lg lg:p-10"
+    >
+      <div className={`absolute top-0 left-0 w-1.5 h-full ${style.line}`} />
+      
+      <h3 className="text-2xl font-bold text-gray-800 lg:text-3xl">{item.title}</h3>
 
       {item.body?.length ? (
-        <div className="mt-4 space-y-4 text-[15px] leading-8 text-gray-700">
+        <div className="mt-6 flex flex-col gap-4 text-base leading-8 text-gray-600">
           {item.body.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
@@ -870,15 +898,7 @@ function CourseSectionCard({ item, style, onOpenImage }) {
       ) : null}
 
       {item.documents?.length ? (
-        <div
-          className={`mt-5 grid gap-4 ${
-            item.documents.length > 2
-              ? 'md:grid-cols-2 xl:grid-cols-3'
-              : item.documents.length > 1
-                ? 'xl:grid-cols-2'
-                : ''
-          }`}
-        >
+        <div className="mt-8 grid gap-6 xl:grid-cols-2">
           {item.documents.map((document) => (
             <DocumentCard
               key={`${item.title}-${document.title}`}
@@ -890,32 +910,36 @@ function CourseSectionCard({ item, style, onOpenImage }) {
       ) : null}
 
       {item.cards?.length ? (
-        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {item.cards.map((card) => (
             <article
               key={card.title}
-              className={`rounded-2xl border px-4 py-4 shadow-sm ${
-                card.tone || 'border-gray-200 bg-gray-50'
+              className={`rounded-2xl border px-6 py-6 shadow-sm transition-shadow hover:shadow-md ${
+                card.tone ? getToneClasses(card.tone.split('-')[1]) : 'border-gray-100 bg-gray-50/50'
               }`}
             >
-              <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">{card.title}</h4>
-              <p className="mt-2 text-sm leading-6 text-gray-700">{card.text}</p>
+              <h4 className="text-[13px] font-bold uppercase tracking-widest text-gray-800/80">{card.title}</h4>
+              <p className="mt-3 text-[15px] leading-relaxed text-gray-700">{card.text}</p>
             </article>
           ))}
         </div>
       ) : null}
 
       {item.takeaway ? (
-        <div className={`mt-5 rounded-2xl border p-4 ${style.note}`}>
-          <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
-            {item.takeawayTitle || 'A retenir'}
-          </h4>
-          <p className="mt-2 text-sm leading-6 text-gray-700">{item.takeaway}</p>
+        <div className={`mt-8 rounded-2xl border p-6 ${style.note}`}>
+          <div className="flex items-center gap-3">
+            <FaCheckCircle className={style.iconBase} />
+            <h4 className="text-sm font-bold uppercase tracking-widest text-gray-800">
+              {item.takeawayTitle || 'A retenir'}
+            </h4>
+          </div>
+          <p className="mt-3 text-[15px] leading-relaxed text-gray-700">{item.takeaway}</p>
         </div>
       ) : null}
-    </article>
+    </motion.article>
   );
 }
+
 
 function ChapterLessons({ level, chapter, activeLessonId, style }) {
   if (!chapter.lessons?.length) {
@@ -923,13 +947,26 @@ function ChapterLessons({ level, chapter, activeLessonId, style }) {
   }
 
   return (
-    <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-      <h2 className="text-2xl font-bold text-gray-800">Sous-parties du chapitre</h2>
-      <p className="mt-2 text-sm leading-6 text-gray-600">
-        Ce chapitre officiel contient plusieurs sous-parties. Ouvre celle que tu veux travailler.
-      </p>
+    <motion.section 
+      variants={fadeInUp}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      className="mt-12 rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10"
+    >
+      <div className="flex items-center gap-4">
+        <div className={`p-3 rounded-xl ${style.badge.replace('text-', 'bg-').replace('/10', '/20')} text-opacity-100`}>
+          <FaBookOpen className="text-xl" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Sous-parties du chapitre</h2>
+          <p className="mt-1 text-[15px] text-gray-500">
+            Ce chapitre officiel contient plusieurs parties. Ouvre celle que tu veux travailler.
+          </p>
+        </div>
+      </div>
 
-      <div className="mt-5 grid gap-4 md:grid-cols-2">
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
         {chapter.lessons.map((lesson) => {
           const isActive = lesson.id === activeLessonId;
 
@@ -937,34 +974,44 @@ function ChapterLessons({ level, chapter, activeLessonId, style }) {
             <Link
               key={lesson.id}
               to={`/apprendre/${level.id}/${chapter.id}/${lesson.id}`}
-              className={`rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+              className={`group flex items-center justify-between rounded-2xl border p-5 transition-all duration-300 ${
                 isActive
-                  ? `${style.note} border-transparent`
-                  : 'border-gray-200 bg-gray-50'
+                  ? `${style.note} shadow-md scale-[1.02] border-transparent ring-2 ring-white/50 ring-offset-2 ring-offset-gray-50`
+                  : 'border-gray-100 bg-white hover:-translate-y-1 hover:shadow-lg'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-700">
-                  {lesson.code}
-                </span>
-                {lesson.content ? (
-                  <span className="rounded-full border border-lab-teal/20 bg-lab-teal/10 px-2.5 py-1 text-xs font-semibold text-lab-teal">
-                    Disponible
+              <div className="pr-4">
+                <div className="flex items-center gap-3">
+                  <span className={`rounded-md px-2.5 py-1 text-[11px] font-bold tracking-wider ${isActive ? 'bg-white/80 text-gray-800' : 'bg-gray-100/80 text-gray-600'}`}>
+                    {lesson.code}
                   </span>
-                ) : (
-                  <span className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-600">
-                    Structure prete
-                  </span>
-                )}
-              </div>
+                  {lesson.content ? (
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold text-lab-teal uppercase tracking-wider">
+                      <FaCheckCircle className="text-xs" />
+                      Disponible
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                      Structure prete
+                    </span>
+                  )}
+                </div>
 
-              <h3 className="mt-3 text-base font-semibold leading-6 text-gray-800">{lesson.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-gray-600">{lesson.summary}</p>
+                <h3 className={`mt-3 text-lg font-bold ${isActive ? 'text-gray-900' : 'text-gray-800 group-hover:text-lab-blue transition-colors'}`}>
+                  {lesson.title}
+                </h3>
+                <p className={`mt-2 text-sm leading-relaxed ${isActive ? 'text-gray-700' : 'text-gray-500'}`}>
+                  {lesson.summary}
+                </p>
+              </div>
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${isActive ? 'bg-white shadow-sm text-gray-800' : 'bg-gray-50 text-gray-300 group-hover:bg-lab-blue/10 group-hover:text-lab-blue'}`}>
+                <FaAngleRight />
+              </div>
             </Link>
           );
         })}
       </div>
-    </section>
+    </motion.section>
   );
 }
 
@@ -972,78 +1019,94 @@ function ChapterOutline({ chapter, style }) {
   const hasLessons = Boolean(chapter.lessons?.length);
 
   return (
-    <>
-      <section className={`mt-8 rounded-3xl border p-6 shadow-sm ${style.note}`}>
-        <h2 className="text-2xl font-bold text-gray-800">Structure du chapitre</h2>
-        <p className="mt-3 text-sm leading-7 text-gray-700">{chapter.summary}</p>
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-12">
+      <motion.section variants={fadeInUp} className={`mt-12 overflow-hidden relative rounded-[2rem] border p-8 shadow-sm lg:p-10 ${style.note}`}>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3">
+            <FaBullseye className={`text-2xl ${style.iconBase}`} />
+            <h2 className="text-2xl font-bold text-gray-800">Structure du chapitre</h2>
+          </div>
+          <p className="mt-4 text-[15px] leading-8 text-gray-700 max-w-3xl">{chapter.summary}</p>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
-          {chapter.skills.map((skill) => (
-            <div key={skill} className="rounded-2xl border border-white/80 bg-white/80 px-4 py-3 text-sm leading-6 text-gray-700">
-              {skill}
-            </div>
-          ))}
+          <div className="mt-8 flex flex-wrap gap-3">
+            {chapter.skills.map((skill) => (
+              <div key={skill} className="rounded-full border border-white/60 bg-white/60 backdrop-blur-sm px-5 py-2 text-sm font-medium text-gray-700 shadow-sm">
+                {skill}
+              </div>
+            ))}
+          </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
+      <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
         <h2 className="text-2xl font-bold text-gray-800">
           {hasLessons ? 'Organisation du chapitre' : 'Cours complet'}
         </h2>
-        <p className="mt-3 text-sm leading-7 text-gray-600">
+        <p className="mt-4 text-[15px] leading-8 text-gray-600 max-w-3xl">
           {hasLessons
-            ? 'Ce chapitre officiel regroupe plusieurs sous-parties. Ouvre celle qui t interesse dans la liste ci-dessus pour travailler le contenu detaille.'
-            : 'Cette page est creee pour garder une structure claire par chapitre. Le cours detaille sera ajoute ensuite dans le meme format que les premiers chapitres deja rediges.'}
+            ? "Ce chapitre officiel regroupe plusieurs sous-parties. Ouvre celle qui t'interesse dans la liste ci-dessus pour travailler le contenu detaille."
+            : "Cette page est creee pour garder une structure claire par chapitre. Le cours detaille sera ajoute ensuite dans le meme format que les premiers chapitres deja rediges."}
         </p>
-      </section>
-    </>
+      </motion.section>
+    </motion.div>
   );
 }
 
 function ImageLightbox({ image, onClose }) {
-  if (!image) {
-    return null;
-  }
+  if (!image) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-950/80 p-4"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={image.title || image.alt || 'Image agrandie'}
-    >
-      <div
-        className="relative max-h-[95vh] w-full max-w-6xl rounded-3xl bg-white p-4 shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/90 p-4 backdrop-blur-sm"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          className="relative max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-[2rem] bg-white p-6 shadow-2xl"
+          onClick={(event) => event.stopPropagation()}
         >
-          Fermer
-        </button>
-        {image.title ? (
-          <h3 className="pr-20 text-lg font-bold text-gray-800">{image.title}</h3>
-        ) : null}
-        <div className="mt-4 max-h-[82vh] overflow-auto rounded-2xl border border-gray-200 bg-gray-50 p-3">
-          {image.diagramId || image.diagramSpec ? (
-            <div className="mx-auto max-w-5xl bg-white p-4">
-              {renderDiagramContent({ diagramId: image.diagramId, diagramSpec: image.diagramSpec })}
-            </div>
-          ) : (
-            <img src={image.src} alt={image.alt || image.title || 'Image'} className="mx-auto h-auto w-full object-contain" />
-          )}
-        </div>
-        {image.footer ? (
-          <p className="mt-4 rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-sm leading-6 text-gray-600">
-            {image.footer}
-          </p>
-        ) : null}
-        <MediaCredit item={image} />
-      </div>
-    </div>
+          <div className="flex items-center justify-between mb-4">
+            {image.title ? (
+              <h3 className="text-xl font-bold text-gray-800">{image.title}</h3>
+            ) : <div />}
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-800"
+            >
+              <FaTimes />
+            </button>
+          </div>
+          
+          <div className="max-h-[75vh] overflow-auto rounded-xl bg-gray-50 p-4">
+            {image.diagramId || image.diagramSpec ? (
+              <div className="mx-auto max-w-5xl rounded-2xl bg-white p-6 shadow-sm">
+                {renderDiagramContent({ diagramId: image.diagramId, diagramSpec: image.diagramSpec })}
+              </div>
+            ) : (
+              <img src={image.src} alt={image.alt || image.title || 'Image'} className="mx-auto h-auto w-full object-contain" />
+            )}
+          </div>
+
+          {image.footer ? (
+            <p className="mt-6 rounded-2xl bg-gray-50/80 px-5 py-4 text-[15px] italic leading-relaxed text-gray-600">
+              {image.footer}
+            </p>
+          ) : null}
+          <div className="mt-2">
+            <MediaCredit item={image} />
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
@@ -1051,63 +1114,86 @@ function ChapterContent({ chapter, style, onOpenImage }) {
   const content = chapter.content;
 
   return (
-    <>
-      <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-800">Introduction</h2>
-        <p className="mt-4 text-[15px] leading-8 text-gray-700">{content.intro}</p>
-      </section>
+    <motion.div 
+      variants={staggerContainer} 
+      initial="hidden" 
+      whileInView="visible" 
+      viewport={{ once: true, margin: "-50px" }}
+      className="space-y-12"
+    >
+      <motion.section variants={fadeInUp} className="mt-12 rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+        <div className="flex items-center gap-3">
+          <FaBookOpen className="text-xl text-gray-400" />
+          <h2 className="text-2xl font-bold text-gray-800">Introduction</h2>
+        </div>
+        <p className="mt-6 text-[16px] leading-8 text-gray-600">{content.intro}</p>
+      </motion.section>
 
       {content.prerequisites?.length ? (
-        <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800">A connaitre avant de commencer</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+          <div className="flex items-center gap-3">
+            <FaListUl className="text-xl text-gray-400" />
+            <h2 className="text-2xl font-bold text-gray-800">A connaitre avant de commencer</h2>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
             {content.prerequisites.map((item) => (
-              <div key={item} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm leading-6 text-gray-700">
-                {item}
+              <div key={item} className="flex gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4 text-[15px] leading-relaxed text-gray-600">
+                <FaCheckCircle className="mt-1 shrink-0 text-gray-300" />
+                <span>{item}</span>
               </div>
             ))}
           </div>
-        </section>
+        </motion.section>
       ) : null}
 
-      <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-800">Objectifs</h2>
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
+      <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+        <div className="flex items-center gap-3">
+          <FaBullseye className="text-xl text-gray-400" />
+          <h2 className="text-2xl font-bold text-gray-800">Objectifs</h2>
+        </div>
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
           {content.objectives.map((objective) => (
-            <div key={objective} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm leading-6 text-gray-700">
-              {objective}
+            <div key={objective} className="flex gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4 text-[15px] leading-relaxed text-gray-700">
+               <span className={`block h-2 w-2 mt-2 shrink-0 rounded-full ${style.line.split(' ')[0]}`} />
+               <span>{objective}</span>
             </div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {content.chapterQuestions?.length ? (
-        <section className={`mt-8 rounded-3xl border p-6 shadow-lg ${style.note}`}>
-          <h2 className="text-2xl font-bold text-gray-800">
-            {content.chapterQuestionsTitle || 'Questions du chapitre'}
-          </h2>
-          <ul className="mt-5 space-y-3 text-sm leading-6 text-gray-700">
+        <motion.section variants={fadeInUp} className={`overflow-hidden relative rounded-[2rem] border p-8 shadow-sm lg:p-10 ${style.note}`}>
+          <div className="flex items-center gap-3">
+            <FaLightbulb className={`text-2xl ${style.iconBase}`} />
+            <h2 className="text-2xl font-bold text-gray-800">
+              {content.chapterQuestionsTitle || 'Questions du chapitre'}
+            </h2>
+          </div>
+          <ul className="mt-6 space-y-4 text-[15px] leading-relaxed text-gray-700">
             {content.chapterQuestions.map((item) => (
-              <li key={item} className="rounded-2xl border border-white/80 bg-white/80 px-4 py-3">
+              <li key={item} className="rounded-2xl border border-white/60 bg-white/60 backdrop-blur-sm px-6 py-4 shadow-sm">
                 {item}
               </li>
             ))}
           </ul>
-        </section>
+        </motion.section>
       ) : null}
 
       {content.questionSets?.length ? (
-        <section className="mt-8">
-          <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-800">
-              {content.questionSetsTitle || 'Questions et supports'}
-            </h2>
+        <motion.section variants={fadeInUp} className="pt-4">
+          <div className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10 mb-8">
+            <div className="flex items-center gap-3">
+              <FaVial className="text-2xl text-gray-400" />
+              <h2 className="text-3xl font-bold text-gray-800">
+                {content.questionSetsTitle || 'Questions et supports'}
+              </h2>
+            </div>
             {content.questionSetsIntro ? (
-              <p className="mt-3 text-sm leading-7 text-gray-600">{content.questionSetsIntro}</p>
+              <p className="mt-4 text-[16px] leading-8 text-gray-500 max-w-4xl">{content.questionSetsIntro}</p>
             ) : null}
           </div>
 
-          <div className="mt-5 space-y-5">
+          <div className="space-y-8">
             {content.questionSets.map((item) => (
               <QuestionSetCard
                 key={item.title}
@@ -1117,21 +1203,24 @@ function ChapterContent({ chapter, style, onOpenImage }) {
               />
             ))}
           </div>
-        </section>
+        </motion.section>
       ) : null}
 
       {content.courseSections?.length ? (
-        <section className="mt-8">
-          <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-800">
-              {content.courseSectionsTitle || 'Cours'}
-            </h2>
+        <motion.section variants={fadeInUp} className="pt-4">
+          <div className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10 mb-8">
+            <div className="flex items-center gap-3">
+              <FaGraduationCap className="text-3xl text-gray-400" />
+              <h2 className="text-3xl font-bold text-gray-800">
+                {content.courseSectionsTitle || 'Cours'}
+              </h2>
+            </div>
             {content.courseSectionsIntro ? (
-              <p className="mt-3 text-sm leading-7 text-gray-600">{content.courseSectionsIntro}</p>
+              <p className="mt-4 text-[16px] leading-8 text-gray-500 max-w-4xl">{content.courseSectionsIntro}</p>
             ) : null}
           </div>
 
-          <div className="mt-5 space-y-5">
+          <div className="space-y-8">
             {content.courseSections.map((item) => (
               <CourseSectionCard
                 key={item.title}
@@ -1141,227 +1230,126 @@ function ChapterContent({ chapter, style, onOpenImage }) {
               />
             ))}
           </div>
-        </section>
-      ) : null}
-
-      {content.vocabulary?.length ? (
-        <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800">Vocabulaire essentiel</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {content.vocabulary.map((item) => (
-              <article key={item.term} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">{item.term}</h3>
-                <p className="mt-2 text-sm leading-6 text-gray-700">{item.definition}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+        </motion.section>
       ) : null}
 
       {content.diagrams?.length ? (
-        <section className="mt-8 grid gap-6 xl:grid-cols-2">
+        <motion.section variants={fadeInUp} className="grid gap-8 xl:grid-cols-2">
           {content.diagrams.map((diagram) => (
             <DiagramCard key={diagram.id} diagram={diagram} />
           ))}
-        </section>
-      ) : null}
-
-      {content.sections?.length ? (
-        <section className="mt-8 space-y-5">
-          {content.sections.map((section) => (
-            <article key={section.title} className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-              <div className={`mb-4 h-1.5 w-14 rounded-full ${style.line}`} />
-              {section.tag ? (
-                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${style.badge}`}>
-                  {section.tag}
-                </span>
-              ) : null}
-              <h2 className="text-2xl font-bold text-gray-800">{section.title}</h2>
-
-              {section.supports?.length ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {section.supports.map((support) =>
-                    support.url ? (
-                      <a
-                        key={support.label}
-                        href={support.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600 transition hover:bg-white"
-                      >
-                        {support.label}
-                      </a>
-                    ) : (
-                      <span
-                        key={support.label}
-                        className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600"
-                      >
-                        {support.label}
-                      </span>
-                    ),
-                  )}
-                </div>
-              ) : null}
-
-              <div className="mt-4 space-y-4 text-[15px] leading-8 text-gray-700">
-                {section.body.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
-
-              {section.documents?.length ? (
-                <div
-                  className={`mt-5 grid gap-4 ${
-                    section.documents.length > 2
-                      ? 'md:grid-cols-2 xl:grid-cols-3'
-                      : section.documents.length > 1
-                        ? 'xl:grid-cols-2'
-                        : ''
-                  }`}
-                >
-                  {section.documents.map((document) => (
-                    <DocumentCard key={`${section.title}-${document.title}`} document={document} />
-                  ))}
-                </div>
-              ) : null}
-
-              {section.cards?.length ? (
-                <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {section.cards.map((card) => (
-                    <article
-                      key={card.title}
-                      className={`rounded-2xl border px-4 py-4 shadow-sm ${
-                        card.tone || 'border-gray-200 bg-gray-50'
-                      }`}
-                    >
-                      <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
-                        {card.title}
-                      </h3>
-                      <p className="mt-2 text-sm leading-6 text-gray-700">{card.text}</p>
-                    </article>
-                  ))}
-                </div>
-              ) : null}
-
-              {section.questions?.length ? (
-                <div className="mt-5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                  <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
-                    {section.questionsTitle || 'Questions'}
-                  </h3>
-                  <ul className="mt-3 space-y-2 text-sm leading-6 text-gray-700">
-                    {section.questions.map((question) => (
-                      <li key={question}>{question}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              {section.takeaway ? (
-                <div className={`mt-5 rounded-2xl border p-4 ${style.note}`}>
-                  <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
-                    {section.takeawayTitle || 'Ce qu il faut retenir'}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-gray-700">{section.takeaway}</p>
-                </div>
-              ) : null}
-            </article>
-          ))}
-        </section>
+        </motion.section>
       ) : null}
 
       {content.method?.steps?.length ? (
-        <section className={`mt-8 rounded-3xl border p-6 shadow-lg ${style.note}`}>
-          <h2 className="text-2xl font-bold text-gray-800">{content.method.title}</h2>
-          <ol className="mt-5 space-y-3 text-sm leading-6 text-gray-700">
-            {content.method.steps.map((step) => (
-              <li key={step} className="rounded-2xl border border-white/80 bg-white/80 px-4 py-3">
-                {step}
+        <motion.section variants={fadeInUp} className={`rounded-[2rem] border p-8 shadow-sm lg:p-10 ${style.note}`}>
+           <h2 className="text-2xl font-bold text-gray-800">{content.method.title}</h2>
+          <ol className="mt-6 space-y-4 text-[15px] leading-relaxed text-gray-700">
+            {content.method.steps.map((step, index) => (
+              <li key={step} className="flex gap-4 rounded-2xl border border-white/60 bg-white/60 backdrop-blur-sm px-6 py-4 shadow-sm">
+                <span className={`font-bold ${style.iconBase}`}>{index + 1}.</span>
+                <span>{step}</span>
               </li>
             ))}
           </ol>
-        </section>
+        </motion.section>
       ) : null}
 
       {content.commonMistakes?.length ? (
-        <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800">Erreurs a eviter</h2>
-          <ul className="mt-5 space-y-3 text-sm leading-6 text-gray-700">
+        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
+          <div className="flex items-center gap-3">
+            <FaExclamationTriangle className="text-xl text-amber-500" />
+            <h2 className="text-2xl font-bold text-gray-800">Erreurs a eviter</h2>
+          </div>
+          <ul className="mt-6 grid gap-4 md:grid-cols-2">
             {content.commonMistakes.map((item) => (
-              <li key={item} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
-                {item}
+              <li key={item} className="flex gap-3 rounded-2xl border border-amber-100 bg-amber-50/30 px-5 py-4 text-[15px] leading-relaxed text-gray-700">
+                <FaTimes className="mt-1 shrink-0 text-amber-400" />
+                <span>{item}</span>
               </li>
             ))}
           </ul>
-        </section>
+        </motion.section>
       ) : null}
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-2">
-        <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
+      <div className="grid gap-8 xl:grid-cols-2">
+        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
           <h2 className="text-2xl font-bold text-gray-800">{content.keyPointsTitle || 'A retenir'}</h2>
-          <ul className="mt-5 space-y-3 text-sm leading-6 text-gray-700">
+          <ul className="mt-6 space-y-4 text-[15px] leading-relaxed text-gray-700">
             {content.keyPoints.map((item) => (
-              <li key={item} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
-                {item}
+              <li key={item} className="flex gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4">
+                <span className={`mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full ${style.line.split(' ')[0]}`} />
+                <span>{item}</span>
               </li>
             ))}
           </ul>
-        </section>
+        </motion.section>
 
-        <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
+        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
           <h2 className="text-2xl font-bold text-gray-800">
             {content.selfCheckTitle || 'Questions pour verifier'}
           </h2>
-          <ul className="mt-5 space-y-3 text-sm leading-6 text-gray-700">
+          <ul className="mt-6 space-y-4 text-[15px] leading-relaxed text-gray-700">
             {content.selfCheck.map((item) => (
-              <li key={item} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
-                {item}
+              <li key={item} className="group flex gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4 transition-colors hover:bg-white hover:shadow-sm">
+                <FaCheckCircle className="mt-1 shrink-0 text-gray-300 group-hover:text-green-500 transition-colors" />
+                <span>{item}</span>
               </li>
             ))}
           </ul>
-        </section>
+        </motion.section>
       </div>
 
       {content.practice?.length ? (
-        <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
+        <motion.section variants={fadeInUp} className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm lg:p-10">
           <h2 className="text-2xl font-bold text-gray-800">
             {content.practiceTitle || 'Petit entrainement'}
           </h2>
           {content.practiceIntro ? (
-            <p className="mt-3 text-sm leading-7 text-gray-600">{content.practiceIntro}</p>
+            <p className="mt-4 text-[15px] leading-relaxed text-gray-600 max-w-3xl">{content.practiceIntro}</p>
           ) : null}
-          <div className="mt-5 space-y-4">
-            {content.practice.map((item) => (
-              <article key={item.question} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                <h3 className="text-sm font-semibold text-gray-800">{item.question}</h3>
-                <p className="mt-2 text-sm leading-6 text-gray-700">{item.expected}</p>
+          <div className="mt-8 space-y-6">
+            {content.practice.map((item, idx) => (
+              <article key={item.question} className="rounded-2xl border border-gray-100 bg-gray-50/50 p-6">
+                <div className="flex gap-3">
+                  <span className="font-bold text-gray-400">Q{idx+1}.</span>
+                  <h3 className="text-[15px] font-bold leading-relaxed text-gray-800">{item.question}</h3>
+                </div>
+                <div className="mt-4 flex gap-3 rounded-xl bg-white p-4 shadow-sm">
+                  <span className="font-bold text-lab-teal">R.</span>
+                  <p className="text-[15px] leading-relaxed text-gray-600">{item.expected}</p>
+                </div>
               </article>
             ))}
           </div>
-        </section>
+        </motion.section>
       ) : null}
 
       {content.sources?.length ? (
-        <section className="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800">Pour aller plus loin</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <motion.section variants={fadeInUp} className="pt-4 pb-8">
+          <h2 className="text-xl font-bold text-gray-800 uppercase tracking-widest px-2">Pour aller plus loin</h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
             {content.sources.map((source) => (
               <a
                 key={source.url}
                 href={source.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="group flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-5 py-4 text-[14px] text-gray-700 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
               >
-                <span>{source.title}</span>
-                <span className={`font-semibold ${style.link}`}>Ouvrir</span>
+                <span className="font-medium">{source.title}</span>
+                <span className={`flex items-center gap-2 font-bold ${style.link}`}>
+                  Ouvrir <FaExternalLinkAlt className="text-[10px]" />
+                </span>
               </a>
             ))}
           </div>
-        </section>
+        </motion.section>
       ) : null}
-    </>
+    </motion.div>
   );
 }
+
 
 function CourseChapterPage() {
   const { levelId, chapterId, lessonId } = useParams();
@@ -1390,76 +1378,87 @@ function CourseChapterPage() {
   const contentItem = lesson || (chapter.content ? chapter : null);
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 pb-16 pt-8">
-      <nav className="mb-6 text-sm text-gray-500">
-        <Link to="/apprendre" className="hover:underline">
-          Apprendre
-        </Link>
-        <span className="px-2">/</span>
-        <Link to={`/apprendre/${level.id}`} className="hover:underline">
-          {level.title}
-        </Link>
-        <span className="px-2">/</span>
-        <span className="font-semibold text-gray-700">{chapter.code}</span>
-        {lesson ? (
-          <>
-            <span className="px-2">/</span>
-            <span className="font-semibold text-gray-700">{lesson.code}</span>
-          </>
-        ) : null}
-      </nav>
-
-      <section className="rounded-3xl border border-gray-200 bg-white px-6 py-8 shadow-xl lg:px-10">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${style.badge}`}>
-            {level.title}
-          </span>
-          <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700">
-            {section.title}
-          </span>
-          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-            contentItem?.content
-              ? 'border border-lab-teal/20 bg-lab-teal/10 text-lab-teal'
-              : 'border border-gray-200 bg-gray-50 text-gray-700'
-          }`}>
-            {contentItem?.content ? 'Cours disponible' : 'Structure du chapitre'}
-          </span>
-        </div>
-
-        <h1 className="mt-5 text-3xl font-bold text-gray-800 lg:text-4xl">
-          {chapter.code} - {chapter.title}
-        </h1>
-        <p className="mt-4 text-base leading-8 text-gray-600">{chapter.summary}</p>
-
-        {lesson ? (
-          <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Cours selectionne</p>
-            <h2 className="mt-2 text-xl font-bold text-gray-800">
-              {lesson.code} - {lesson.title}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-gray-600">{lesson.summary}</p>
-          </div>
-        ) : null}
-
-        <div className="mt-6">
-          <Link
-            to={`/apprendre/${level.id}`}
-            className={`text-sm font-semibold hover:underline ${style.link}`}
-          >
-            Retour au sommaire de {level.title}
+    <div className="min-h-screen bg-gray-50/30">
+      <div className="container mx-auto max-w-5xl px-4 pb-20 pt-8 lg:pt-12">
+        <nav className="mb-8 flex items-center gap-2 text-[13px] font-semibold tracking-wide text-gray-400 uppercase">
+          <Link to="/apprendre" className="hover:text-gray-800 transition-colors">
+            Apprendre
           </Link>
-        </div>
-      </section>
+          <span>/</span>
+          <Link to={`/apprendre/${level.id}`} className="hover:text-gray-800 transition-colors">
+            {level.title}
+          </Link>
+          <span>/</span>
+          <span className="text-gray-800">{chapter.code}</span>
+          {lesson ? (
+            <>
+              <span>/</span>
+              <span className="text-gray-800">{lesson.code}</span>
+            </>
+          ) : null}
+        </nav>
 
-      <ChapterLessons level={level} chapter={chapter} activeLessonId={lesson?.id || null} style={style} />
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="relative overflow-hidden rounded-[2.5rem] bg-white px-8 py-10 shadow-lg shadow-gray-200/50 lg:p-12"
+        >
+          <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-gradient-to-br from-gray-50 to-gray-100/50 blur-3xl" />
+          
+          <div className="relative z-10">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className={`inline-flex rounded-full px-4 py-1.5 text-[11px] font-bold tracking-wider uppercase ${style.badge}`}>
+                {level.title}
+              </span>
+              <span className="rounded-full border border-gray-100 bg-gray-50/80 px-4 py-1.5 text-[11px] font-bold tracking-wider uppercase text-gray-600">
+                {section.title}
+              </span>
+            </div>
 
-      {contentItem?.content ? (
-        <ChapterContent chapter={contentItem} style={style} onOpenImage={setActiveImage} />
-      ) : (
-        <ChapterOutline chapter={chapter} style={style} />
-      )}
+            <h1 className="mt-8 text-4xl font-extrabold tracking-tight text-gray-900 lg:text-5xl lg:leading-tight">
+              <span className="block text-xl font-bold tracking-widest text-gray-400 uppercase drop-shadow-sm mb-2">{chapter.code}</span>
+              {chapter.title}
+            </h1>
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-gray-600">{chapter.summary}</p>
 
-      <ImageLightbox image={activeImage} onClose={() => setActiveImage(null)} />
+            {lesson ? (
+              <div className="mt-10 max-w-2xl rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
+                <div className="flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-widest text-gray-400">
+                  <FaBookOpen /> Cours selectionne
+                </div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  <span className="mr-2 text-gray-400">{lesson.code}</span> 
+                  {lesson.title}
+                </h2>
+                <p className="mt-3 text-[15px] leading-relaxed text-gray-600">{lesson.summary}</p>
+              </div>
+            ) : null}
+
+            <div className="mt-10">
+              <Link
+                to={`/apprendre/${level.id}`}
+                className={`group inline-flex items-center gap-2 text-sm font-bold tracking-wide transition-colors ${style.link}`}
+              >
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-inset ring-gray-100 transition-transform group-hover:-translate-x-1`}>
+                  <FaAngleRight className="rotate-180" />
+                </div>
+                Retour au sommaire
+              </Link>
+            </div>
+          </div>
+        </motion.section>
+
+        <ChapterLessons level={level} chapter={chapter} activeLessonId={lesson?.id || null} style={style} />
+
+        {contentItem?.content ? (
+          <ChapterContent chapter={contentItem} style={style} onOpenImage={setActiveImage} />
+        ) : (
+          <ChapterOutline chapter={chapter} style={style} />
+        )}
+
+        <ImageLightbox image={activeImage} onClose={() => setActiveImage(null)} />
+      </div>
     </div>
   );
 }
