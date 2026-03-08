@@ -5,7 +5,7 @@ import { BROWSER_API_URL } from '../config';
 import AvatarSelector from './AvatarSelector';
 
 function ProfileEditPage() {
-  const { userInfo } = useAuth();
+  const { userInfo, logout, loadingAuth } = useAuth();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -44,8 +44,12 @@ function ProfileEditPage() {
   // Charger les données du profil
   useEffect(() => {
     const fetchProfile = async () => {
+      if (loadingAuth) {
+        return;
+      }
+
       if (!userInfo) {
-        navigate('/login', { state: { from: '/profile/edit' } });
+        navigate('/login', { state: { from: '/profile/edit', sessionExpired: true } });
         return;
       }
 
@@ -59,6 +63,11 @@ function ProfileEditPage() {
         });
 
         if (!response.ok) {
+          if (response.status === 401) {
+            logout();
+            navigate('/login', { state: { from: '/profile/edit', sessionExpired: true } });
+            return;
+          }
           throw new Error('Erreur lors de la récupération du profil');
         }
 
@@ -98,7 +107,7 @@ function ProfileEditPage() {
     };
 
     fetchProfile();
-  }, [userInfo, navigate]);
+  }, [userInfo, navigate, loadingAuth, logout]);
 
   // Gérer les changements dans le formulaire
   const handleChange = (e) => {

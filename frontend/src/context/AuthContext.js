@@ -1,96 +1,147 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { BROWSER_API_URL } from '../config';
 
-// Création du contexte
 const AuthContext = createContext();
 
-// Hook personnalisé pour accéder facilement au contexte
+const STORAGE_KEY = 'userInfo';
+
 export const useAuth = () => useContext(AuthContext);
 
-// Composant Provider qui va envelopper l'application
+const persistUserInfo = (data) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+};
+
+const clearStoredUserInfo = () => {
+  localStorage.removeItem(STORAGE_KEY);
+};
+
 export const AuthProvider = ({ children }) => {
-  // État pour stocker les informations de l'utilisateur
   const [userInfo, setUserInfo] = useState(null);
-  // État pour suivre si les données sont en cours de chargement
   const [loadingAuth, setLoadingAuth] = useState(true);
 
-  // Fonction pour connecter l'utilisateur
   const login = (data) => {
-    console.log('Login appelé avec les données:', data);
-    
-    // S'assurer que data contient toutes les informations nécessaires
-    if (!data || !data.token) {
-      console.error('Données de connexion incomplètes:', data);
+    if (!data?.token) {
       return;
     }
-    
+
     try {
-      // Stocker les données utilisateur dans localStorage
-      localStorage.setItem('userInfo', JSON.stringify(data));
-      // Mettre à jour l'état
+      persistUserInfo(data);
       setUserInfo(data);
-      console.log('Utilisateur connecté:', data);
     } catch (error) {
       console.error('Erreur lors de la connexion:', error);
     }
   };
 
-  // Fonction pour déconnecter l'utilisateur
   const logout = () => {
-    console.log('Déconnexion appelée');
     try {
-      // Supprimer les données du localStorage
-      localStorage.removeItem('userInfo');
-      // Réinitialiser l'état
+      clearStoredUserInfo();
       setUserInfo(null);
-      console.log('Utilisateur déconnecté');
     } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
+      console.error('Erreur lors de la deconnexion:', error);
     }
   };
 
-  // Charger les données utilisateur depuis localStorage au démarrage
   useEffect(() => {
-    console.log('useEffect de AuthContext exécuté');
-    setLoadingAuth(true);
-    
-    try {
-      // Récupérer les données utilisateur du localStorage
-      const storedUserInfo = localStorage.getItem('userInfo');
-      console.log('Données utilisateur récupérées du localStorage:', storedUserInfo);
-      
-      if (storedUserInfo) {
-        // Parser les données JSON
+    let cancelled = false;
+
+    const restoreAuth = async () => {
+      setLoadingAuth(true);
+
+      try {
+        const storedUserInfo = localStorage.getItem(STORAGE_KEY);
+
+        if (!storedUserInfo) {
+          if (!cancelled) {
+            setUserInfo(null);
+          }
+          return;
+        }
+
         const parsedInfo = JSON.parse(storedUserInfo);
-        console.log('Données utilisateur parsées:', parsedInfo);
-        
-        // Vérifier que les données contiennent un token
-        if (parsedInfo && parsedInfo.token) {
-          console.log('Token trouvé, définition de userInfo');
+
+        if (!parsedInfo?.token) {
+          clearStoredUserInfo();
+          if (!cancelled) {
+            setUserInfo(null);
+          }
+          return;
+        }
+
+        const response = await fetch(`${BROWSER_API_URL}/auth/profile`, {
+          headers: {
+            Authorization: `Bearer ${parsedInfo.token}`,
+          },
+        });
+
+        if (response.ok) {
+          const profile = await response.json();
+          const nextUserInfo = {
+            ...parsedInfo,
+            _id: profile._id || parsedInfo._id,
+            username: profile.username || parsedInfo.username,
+            role: profile.role || parsedInfo.role,
+          };
+
+          persistUserInfo(nextUserInfo);
+
+          if (!cancelled) {
+            setUserInfo(nextUserInfo);
+          }
+          return;
+        }
+
+        if (response.status === 401) {
+          clearStoredUserInfo();
+          if (!cancelled) {
+            setUserInfo(null);
+          }
+          return;
+        }
+
+        if (!cancelled) {
           setUserInfo(parsedInfo);
-        } else {
-          console.log('Aucun token trouvé, réinitialisation de userInfo');
-          localStorage.removeItem('userInfo'); // Supprimer les données invalides
-          setUserInfo(null);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement de l'authentification:", error);
+
+        try {
+          const storedUserInfo = localStorage.getItem(STORAGE_KEY);
+          if (!cancelled && storedUserInfo) {
+            setUserInfo(JSON.parse(storedUserInfo));
+          }
+        } catch (storageError) {
+          console.error('Erreur lors de la lecture du stockage local:', storageError);
+          clearStoredUserInfo();
+          if (!cancelled) {
+            setUserInfo(null);
+          }
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingAuth(false);
         }
       }
-    } catch (error) {
-      console.error('Erreur lors du chargement des données utilisateur:', error);
-      localStorage.removeItem('userInfo'); // Supprimer les données invalides
-      setUserInfo(null);
-    } finally {
-      setLoadingAuth(false);
-    }
+    };
+
+    restoreAuth();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Valeurs exposées par le contexte
-  const value = {
-    userInfo,
-    loadingAuth,
-    login,
-    logout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        userInfo,
+        loadingAuth,
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-export default AuthContext; 
+export default AuthContext;

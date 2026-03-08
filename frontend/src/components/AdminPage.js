@@ -104,7 +104,7 @@ const PendingPostCard = ({ post, onApprove, onReject, onDelete }) => {
 };
 
 // Composant pour la gestion des utilisateurs
-const UserManagement = ({ userInfo }) => {
+const UserManagement = ({ userInfo, onUnauthorized }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -134,6 +134,10 @@ const UserManagement = ({ userInfo }) => {
       const data = await response.json();
       
       if (!response.ok) {
+        if (response.status === 401) {
+          onUnauthorized();
+          return;
+        }
         throw new Error(data.message || 'Erreur lors de la récupération des utilisateurs');
       }
       
@@ -144,7 +148,7 @@ const UserManagement = ({ userInfo }) => {
     } finally {
       setLoading(false);
     }
-  }, [userInfo, apiUrl]);
+  }, [userInfo, apiUrl, onUnauthorized]);
   
   // Charger les utilisateurs au chargement du composant
   useEffect(() => {
@@ -169,6 +173,10 @@ const UserManagement = ({ userInfo }) => {
       const data = await response.json();
       
       if (!response.ok) {
+        if (response.status === 401) {
+          onUnauthorized();
+          return;
+        }
         throw new Error(data.message || 'Erreur lors de la modification du rôle');
       }
       
@@ -211,6 +219,10 @@ const UserManagement = ({ userInfo }) => {
       const data = await response.json();
       
       if (!response.ok) {
+        if (response.status === 401) {
+          onUnauthorized();
+          return;
+        }
         throw new Error(data.message || 'Erreur lors de la modification du nom d\'utilisateur');
       }
       
@@ -251,6 +263,10 @@ const UserManagement = ({ userInfo }) => {
       const data = await response.json();
       
       if (!response.ok) {
+        if (response.status === 401) {
+          onUnauthorized();
+          return;
+        }
         throw new Error(data.message || 'Erreur lors de la suppression de l\'utilisateur');
       }
       
@@ -425,8 +441,13 @@ function AdminPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('posts'); // 'posts' ou 'users'
-  const { userInfo } = useAuth();
+  const { userInfo, logout, loadingAuth } = useAuth();
   const navigate = useNavigate();
+
+  const handleUnauthorized = useCallback(() => {
+    logout();
+    navigate('/login', { state: { from: '/admin', sessionExpired: true } });
+  }, [logout, navigate]);
 
   // Récupérer les posts en attente - mémorisé avec useCallback
   const fetchPendingPosts = useCallback(async () => {
@@ -448,6 +469,10 @@ function AdminPage() {
       const data = await response.json();
       
       if (!response.ok) {
+        if (response.status === 401) {
+          handleUnauthorized();
+          return;
+        }
         throw new Error(data.message || 'Erreur lors de la récupération des posts en attente');
       }
       
@@ -458,7 +483,7 @@ function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [userInfo]);
+  }, [userInfo, handleUnauthorized]);
 
   // Approuver un post
   const approvePost = useCallback(async (postId) => {
@@ -478,6 +503,10 @@ function AdminPage() {
       const data = await response.json();
       
       if (!response.ok) {
+        if (response.status === 401) {
+          handleUnauthorized();
+          return Promise.reject(new Error('Session expirée'));
+        }
         throw new Error(data.message || 'Erreur lors de l\'approbation du post');
       }
       
@@ -489,7 +518,7 @@ function AdminPage() {
       setError(err.message || 'Une erreur est survenue');
       return Promise.reject(err);
     }
-  }, [userInfo, pendingPosts]);
+  }, [userInfo, pendingPosts, handleUnauthorized]);
 
   // Rejeter un post
   const rejectPost = useCallback(async (postId) => {
@@ -509,6 +538,10 @@ function AdminPage() {
       const data = await response.json();
       
       if (!response.ok) {
+        if (response.status === 401) {
+          handleUnauthorized();
+          return Promise.reject(new Error('Session expirée'));
+        }
         throw new Error(data.message || 'Erreur lors du rejet du post');
       }
       
@@ -520,7 +553,7 @@ function AdminPage() {
       setError(err.message || 'Une erreur est survenue');
       return Promise.reject(err);
     }
-  }, [userInfo, pendingPosts]);
+  }, [userInfo, pendingPosts, handleUnauthorized]);
 
   // Supprimer un post
   const deletePost = useCallback(async (postId) => {
@@ -539,6 +572,10 @@ function AdminPage() {
       const data = await response.json();
       
       if (!response.ok) {
+        if (response.status === 401) {
+          handleUnauthorized();
+          return Promise.reject(new Error('Session expirée'));
+        }
         throw new Error(data.message || 'Erreur lors de la suppression du post');
       }
       
@@ -550,12 +587,16 @@ function AdminPage() {
       setError(err.message || 'Une erreur est survenue');
       return Promise.reject(err);
     }
-  }, [userInfo, pendingPosts]);
+  }, [userInfo, pendingPosts, handleUnauthorized]);
 
   // Vérifier si l'utilisateur est admin au chargement
   useEffect(() => {
+    if (loadingAuth) {
+      return;
+    }
+
     if (!userInfo) {
-      navigate('/login');
+      navigate('/login', { state: { from: '/admin', sessionExpired: true } });
       return;
     }
     
@@ -565,7 +606,7 @@ function AdminPage() {
     }
     
     fetchPendingPosts();
-  }, [userInfo, navigate, fetchPendingPosts]);
+  }, [userInfo, navigate, fetchPendingPosts, loadingAuth]);
 
   // Rafraîchir le statut des messages après quelques secondes
   useEffect(() => {
@@ -619,7 +660,11 @@ function AdminPage() {
       )}
       
       {/* Contenu des onglets */}
-      {activeTab === 'posts' ? (
+      {loadingAuth ? (
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <p className="text-gray-600">Verification de la session en cours...</p>
+        </div>
+      ) : activeTab === 'posts' ? (
         // Contenu de l'onglet "Modération des Posts"
         <div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">Posts en attente de modération</h2>
@@ -648,7 +693,7 @@ function AdminPage() {
         </div>
       ) : (
         // Contenu de l'onglet "Gestion des Utilisateurs"
-        <UserManagement userInfo={userInfo} />
+        <UserManagement userInfo={userInfo} onUnauthorized={handleUnauthorized} />
       )}
     </div>
   );

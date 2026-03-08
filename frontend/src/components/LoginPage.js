@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // Importer useAuth
 import { BROWSER_API_URL } from '../config';
 
@@ -9,7 +9,14 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth(); // Obtenir la fonction login du contexte
+
+  useEffect(() => {
+    if (location.state?.sessionExpired) {
+      setError('Session expirée ou token invalide. Reconnecte-toi.');
+    }
+  }, [location.state]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

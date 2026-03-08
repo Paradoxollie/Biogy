@@ -5,7 +5,7 @@ import { BROWSER_API_URL } from '../config';
 
 function ProfilePage() {
   const { userId } = useParams();
-  const { userInfo } = useAuth();
+  const { userInfo, logout, loadingAuth } = useAuth();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
@@ -38,6 +38,17 @@ function ProfilePage() {
   // Charger le profil
   useEffect(() => {
     const fetchProfile = async () => {
+      if (loadingAuth) {
+        return;
+      }
+
+      if (isOwnProfile && !userInfo) {
+        navigate('/login', {
+          state: { from: userId ? `/profile/${userId}` : '/profile', sessionExpired: true },
+        });
+        return;
+      }
+
       try {
         setLoading(true);
 
@@ -54,6 +65,13 @@ function ProfilePage() {
         const response = await fetch(url, { headers });
 
         if (!response.ok) {
+          if (response.status === 401) {
+            logout();
+            navigate('/login', {
+              state: { from: userId ? `/profile/${userId}` : '/profile', sessionExpired: true },
+            });
+            return;
+          }
           if (response.status === 404) {
             throw new Error('Profil non trouvé');
           } else if (response.status === 403) {
@@ -84,7 +102,7 @@ function ProfilePage() {
     };
 
     fetchProfile();
-  }, [userId, userInfo, isOwnProfile]);
+  }, [userId, userInfo, isOwnProfile, loadingAuth, logout, navigate]);
 
   // Gérer le suivi/désabonnement
   const handleFollow = async () => {
@@ -135,7 +153,7 @@ function ProfilePage() {
     });
   };
 
-  if (loading) {
+  if (loading || loadingAuth) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-lab-purple"></div>
