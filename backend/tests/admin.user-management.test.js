@@ -43,7 +43,7 @@ test.beforeEach(async () => {
   await mongoose.connection.db.dropDatabase();
 });
 
-test('admin can update a username through the admin API', async () => {
+test('admin can update a username through the admin API with a classroom-friendly full name', async () => {
   const adminUser = await registerUser('admin-user');
   const studentUser = await registerUser('student-user');
 
@@ -52,13 +52,13 @@ test('admin can update a username through the admin API', async () => {
   const response = await request(app)
     .put(`/api/admin/users/${studentUser._id}/username`)
     .set('Authorization', `Bearer ${adminUser.token}`)
-    .send({ username: 'student-renamed' });
+    .send({ username: 'Marie Dupont' });
 
   assert.equal(response.statusCode, 200);
-  assert.equal(response.body.user.username, 'student-renamed');
+  assert.equal(response.body.user.username, 'Marie Dupont');
 
   const storedUser = await User.findById(studentUser._id).select('username role');
-  assert.equal(storedUser.username, 'student-renamed');
+  assert.equal(storedUser.username, 'Marie Dupont');
   assert.equal(storedUser.role, 'student');
 });
 

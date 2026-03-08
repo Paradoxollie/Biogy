@@ -21,8 +21,8 @@ function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères.');
+    if (password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.');
       return;
     }
 
@@ -93,9 +93,9 @@ function RegisterPage() {
             id="password"
             name="password"
             required
-            minLength="6"
+            minLength="8"
             className="text-lg shadow-inner focus:ring-cyan-500 focus:border-cyan-500 block w-full border border-gray-300/80 rounded-md p-3 bg-white/50 backdrop-blur-sm placeholder:text-gray-400"
-            placeholder="Minimum 6 caractères"
+            placeholder="Minimum 8 caractères"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -110,7 +110,7 @@ function RegisterPage() {
             id="confirmPassword"
             name="confirmPassword"
             required
-            minLength="6"
+            minLength="8"
             className="text-lg shadow-inner focus:ring-cyan-500 focus:border-cyan-500 block w-full border border-gray-300/80 rounded-md p-3 bg-white/50 backdrop-blur-sm placeholder:text-gray-400"
             placeholder="Retapez votre mot de passe"
             value={confirmPassword}

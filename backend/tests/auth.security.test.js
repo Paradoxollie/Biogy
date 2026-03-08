@@ -47,3 +47,25 @@ test('register ignores any requested admin role and returns a stable auth payloa
   assert.ok(storedUser);
   assert.equal(storedUser.role, 'student');
 });
+
+test('register accepts usernames with spaces and accents', async () => {
+  const response = await request(app)
+    .post('/api/auth/register')
+    .send({
+      username: 'Léa Martin',
+      password: 'password123',
+    });
+
+  assert.equal(response.statusCode, 201);
+  assert.equal(response.body.username, 'Léa Martin');
+
+  const loginResponse = await request(app)
+    .post('/api/auth/login')
+    .send({
+      username: '  Léa Martin  ',
+      password: 'password123',
+    });
+
+  assert.equal(loginResponse.statusCode, 200);
+  assert.equal(loginResponse.body.username, 'Léa Martin');
+});

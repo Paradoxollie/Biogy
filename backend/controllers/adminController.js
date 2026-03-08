@@ -3,6 +3,19 @@ const { deleteFromCloudinary } = require('../config/cloudinary');
 const User = require('../models/User');
 const { ensureDatabaseAvailable } = require('../utils/database');
 
+const getValidationMessage = (error) => {
+  if (error?.code === 11000) {
+    return 'Ce nom d\'utilisateur est deja pris';
+  }
+
+  if (error?.name !== 'ValidationError') {
+    return null;
+  }
+
+  const firstError = Object.values(error.errors || {})[0];
+  return firstError?.message || 'Donnees invalides';
+};
+
 /**
  * @desc    Get all pending posts awaiting moderation
  * @route   GET /api/admin/posts/pending
@@ -211,6 +224,10 @@ const updateUserRole = async (req, res) => {
     
   } catch (error) {
     console.error('Error in updateUserRole:', error);
+    const validationMessage = getValidationMessage(error);
+    if (validationMessage) {
+      return res.status(400).json({ message: validationMessage });
+    }
     res.status(500).json({
       message: 'Erreur lors de la mise à jour du rôle utilisateur',
       error: error.message
@@ -382,6 +399,10 @@ const updateUsername = async (req, res) => {
     
   } catch (error) {
     console.error('Error in updateUsername:', error);
+    const validationMessage = getValidationMessage(error);
+    if (validationMessage) {
+      return res.status(400).json({ message: validationMessage });
+    }
     res.status(500).json({
       message: 'Erreur lors de la mise a jour du nom d\'utilisateur',
       error: error.message

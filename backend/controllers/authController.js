@@ -3,6 +3,15 @@ const generateToken = require('../utils/generateToken');
 const { ensureDatabaseAvailable } = require('../utils/database');
 const { DEFAULT_USER_ROLE, normalizeUserRole } = require('../utils/roles');
 
+const getValidationMessage = (error) => {
+  if (error?.name !== 'ValidationError') {
+    return null;
+  }
+
+  const firstError = Object.values(error.errors || {})[0];
+  return firstError?.message || 'Donnees invalides';
+};
+
 const buildAuthResponse = (user) => {
   const normalizedRole = normalizeUserRole(user.role);
 
@@ -18,13 +27,14 @@ const buildAuthResponse = (user) => {
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
-  const { username, password } = req.body;
+  const normalizedUsername = req.body.username?.trim();
+  const { password } = req.body;
 
   if (!ensureDatabaseAvailable(res)) {
     return;
   }
 
-  if (!username || !password) {
+  if (!normalizedUsername || !password) {
     return res.status(400).json({ message: 'Champs manquants' });
   }
 
@@ -33,13 +43,13 @@ const registerUser = async (req, res) => {
   }
 
   try {
-    const exists = await User.findOne({ username });
+    const exists = await User.findOne({ username: normalizedUsername });
     if (exists) {
       return res.status(409).json({ message: 'Nom d utilisateur deja pris' });
     }
 
     const user = await User.create({
-      username,
+      username: normalizedUsername,
       password,
       role: DEFAULT_USER_ROLE,
     });
@@ -47,6 +57,10 @@ const registerUser = async (req, res) => {
     return res.status(201).json(buildAuthResponse(user));
   } catch (error) {
     console.error('Error in registerUser:', error);
+    const validationMessage = getValidationMessage(error);
+    if (validationMessage) {
+      return res.status(400).json({ message: validationMessage });
+    }
     return res.status(500).json({ message: 'Erreur lors de la creation du compte' });
   }
 };
@@ -55,18 +69,19 @@ const registerUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
-  const { username, password } = req.body;
+  const normalizedUsername = req.body.username?.trim();
+  const { password } = req.body;
 
   if (!ensureDatabaseAvailable(res)) {
     return;
   }
 
-  if (!username || !password) {
+  if (!normalizedUsername || !password) {
     return res.status(400).json({ message: 'Champs manquants' });
   }
 
   try {
-    const user = await User.findOne({ username }).select('+password');
+    const user = await User.findOne({ username: normalizedUsername }).select('+password');
     if (!user) {
       return res.status(401).json({ message: 'Identifiants invalides' });
     }
