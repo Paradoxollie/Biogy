@@ -1,669 +1,486 @@
-import React, { startTransition, useDeferredValue, useEffect, useState } from 'react';
-
-const CATEGORY_STYLES = {
-  red: {
-    softBadge: 'border border-rose-200 bg-rose-50 text-rose-700',
-    solidBadge: 'bg-rose-500 text-white',
-    button: 'border border-rose-200 bg-white text-rose-700 hover:bg-rose-50',
-    line: 'bg-rose-400',
-    placeholder: 'from-rose-50 via-white to-rose-100',
-    note: 'border-rose-200 bg-rose-50/70',
-  },
-  white: {
-    softBadge: 'border border-slate-200 bg-slate-50 text-slate-700',
-    solidBadge: 'bg-slate-700 text-white',
-    button: 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
-    line: 'bg-slate-400',
-    placeholder: 'from-slate-50 via-white to-slate-100',
-    note: 'border-slate-200 bg-slate-50/80',
-  },
-  green: {
-    softBadge: 'border border-emerald-200 bg-emerald-50 text-emerald-700',
-    solidBadge: 'bg-emerald-500 text-white',
-    button: 'border border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50',
-    line: 'bg-emerald-400',
-    placeholder: 'from-emerald-50 via-white to-emerald-100',
-    note: 'border-emerald-200 bg-emerald-50/70',
-  },
-  yellow: {
-    softBadge: 'border border-amber-200 bg-amber-50 text-amber-800',
-    solidBadge: 'bg-amber-400 text-slate-900',
-    button: 'border border-amber-200 bg-white text-amber-800 hover:bg-amber-50',
-    line: 'bg-amber-400',
-    placeholder: 'from-amber-50 via-white to-amber-100',
-    note: 'border-amber-200 bg-amber-50/80',
-  },
-  blue: {
-    softBadge: 'border border-sky-200 bg-sky-50 text-sky-700',
-    solidBadge: 'bg-sky-500 text-white',
-    button: 'border border-sky-200 bg-white text-sky-700 hover:bg-sky-50',
-    line: 'bg-sky-400',
-    placeholder: 'from-sky-50 via-white to-sky-100',
-    note: 'border-sky-200 bg-sky-50/80',
-  },
-  multi: {
-    softBadge: 'border border-lab-teal/20 bg-lab-teal/10 text-lab-teal',
-    solidBadge: 'bg-lab-teal text-white',
-    button: 'border border-lab-teal/20 bg-white text-lab-teal hover:bg-lab-teal/5',
-    line: 'bg-lab-teal',
-    placeholder: 'from-lab-blue/10 via-white to-lab-teal/10',
-    note: 'border-lab-teal/20 bg-lab-teal/5',
-  },
-};
-
-const PAGE_PILLARS = [
-  {
-    title: 'Relier l actualite au cours',
-    description:
-      'Chaque sujet selectionne peut servir a ouvrir un chapitre, enrichir une notion ou illustrer une application concrete du programme.',
-    badge: 'bg-lab-blue/10 text-lab-blue',
-    line: 'bg-lab-blue',
-  },
-  {
-    title: 'Preparer le projet et l oral',
-    description:
-      'La veille aide a trouver des exemples serieux pour le projet technologique, le Grand oral et les prises de parole en classe.',
-    badge: 'bg-lab-purple/10 text-lab-purple',
-    line: 'bg-lab-purple',
-  },
-  {
-    title: 'Mieux comprendre le laboratoire',
-    description:
-      'Les articles retenus montrent des techniques, des protocoles, des mesures et des pratiques de laboratoire utiles en STL.',
-    badge: 'bg-lab-teal/10 text-lab-teal',
-    line: 'bg-lab-teal',
-  },
-  {
-    title: 'Prendre du recul',
-    description:
-      'Sante, environnement, alimentation et bioethique : la veille sert aussi a comprendre les grands enjeux scientifiques et citoyens.',
-    badge: 'bg-lab-green/10 text-lab-green',
-    line: 'bg-lab-green',
-  },
-];
-
-const formatDate = (value) => {
-  if (!value) {
-    return 'Date inconnue';
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return 'Date inconnue';
-  }
-
-  return date.toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-};
-
-const formatDateTime = (value) => {
-  if (!value) {
-    return '';
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  return date.toLocaleString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-const matchesSearch = (article, query) => {
-  if (!query) {
-    return true;
-  }
-
-  const haystack = [article.title, article.description, article.source, article.whyItMatters]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  return haystack.includes(query);
-};
-
-const getCategoryLabel = (categoryKey, categories) => {
-  const category = (categories || []).find((item) => item.key === categoryKey);
-  return category ? category.shortTitle : 'Transversale';
-};
-
-const ArticleVisual = ({ article, fallbackLabel, style, featured = false }) => {
-  if (article.imageUrl) {
-    return (
-      <img
-        src={article.imageUrl}
-        alt={article.title}
-        className="h-full w-full object-cover"
-        loading="lazy"
-      />
-    );
-  }
-
-  return (
-    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${style.placeholder} px-6 text-center`}>
-      <div>
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white/80 shadow-sm">
-          <span className="text-lg font-bold text-lab-purple">STL</span>
-        </div>
-        <p className={`text-sm font-semibold ${featured ? 'text-gray-700' : 'text-gray-600'}`}>{fallbackLabel}</p>
-      </div>
-    </div>
-  );
-};
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaLeaf, FaHeartbeat, FaIndustry, FaGlobe, FaWater, FaSearch, FaExclamationTriangle, FaFilter, FaSync, FaArrowRight, FaExternalLinkAlt } from 'react-icons/fa';
+import { BiCategory } from 'react-icons/bi';
 
 function ScienceWatchPage() {
-  const [digest, setDigest] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const deferredSearchTerm = useDeferredValue(searchTerm.trim().toLowerCase());
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
+  const [forceRefresh, setForceRefresh] = useState(false);
+  const [biotechOnly, setBiotechOnly] = useState(true);
+  const [articleCount, setArticleCount] = useState({});
 
-  const fetchDigest = async (forceRefresh = false) => {
-    if (!digest) {
-      setLoading(true);
-    } else {
-      setRefreshing(true);
+  // Editorial color palette (subtler backgrounds, strong accents)
+  const biotechColors = {
+    green: {
+      name: 'Verte',
+      description: 'Agro-alimentaire, production végétale, biomatériaux, énergie',
+      color: 'emerald',
+      bgColor: 'bg-emerald-600',
+      textColor: 'text-emerald-700',
+      bgColorLight: 'bg-emerald-50/50',
+      accentColor: 'text-emerald-600',
+      icon: <FaLeaf className="text-emerald-600 text-2xl" />,
+      keywords: ['agro-alimentaire', 'agro alimentaire', 'agriculture biotechnologie', 'plante transgénique', 'amélioration végétale', 'biomatériau', 'biocarburant', 'énergie verte', 'biomasse', 'bioéthanol', 'OGM', 'céréale génétiquement', 'agroalimentaire biotech', 'biotechnologie végétale', 'fermentation']
+    },
+    red: {
+      name: 'Rouge',
+      description: 'Santé, pharmaceutique, médecine',
+      color: 'rose',
+      bgColor: 'bg-rose-600',
+      textColor: 'text-rose-700',
+      bgColorLight: 'bg-rose-50/50',
+      accentColor: 'text-rose-600',
+      icon: <FaHeartbeat className="text-rose-600 text-2xl" />,
+      keywords: ['biotechnologie médicale', 'médic', 'pharmac', 'thérapie génique', 'médicament biotechnologique', 'vaccin', 'anticorps', 'anticorps monoclonal', 'biopharmaceutique', 'cellule souche', 'génétique', 'crispr', 'ADN', 'ARN', 'génomique', 'biocapteur', 'glycémie', 'diabète', 'biotechnologie santé']
+    },
+    white: {
+      name: 'Blanche',
+      description: 'Applications industrielles, procédés biologiques',
+      color: 'slate',
+      bgColor: 'bg-slate-700',
+      textColor: 'text-slate-800',
+      bgColorLight: 'bg-slate-50/50',
+      accentColor: 'text-slate-600',
+      icon: <FaIndustry className="text-slate-600 text-2xl" />,
+      keywords: ['biotechnologie industrielle', 'biocatalyse', 'bioproduction', 'biochimie industrielle', 'polymère biosourcé', 'textile biotechnologie', 'procédé biologique', 'fermentation industrielle', 'bioréacteur', 'bioraffinerie', 'solvant biosourcé', 'biosynthèse', 'enzyme industrielle', 'biotech industrielle', 'catalyseur biologique']
+    },
+    yellow: {
+      name: 'Jaune',
+      description: 'Protection de l\'environnement, traitement des pollutions',
+      color: 'amber',
+      bgColor: 'bg-amber-500',
+      textColor: 'text-amber-800',
+      bgColorLight: 'bg-amber-50/50',
+      accentColor: 'text-amber-600',
+      icon: <FaGlobe className="text-amber-600 text-2xl" />,
+      keywords: ['bioremédiation', 'biodépollution', 'traitement biologique', 'déchet biologique', 'biodégradation', 'dépollution', 'écologie industrielle', 'biotechnologie environnementale', 'bioréhabilitation', 'sol pollué', 'eau traitement biologique', 'assainissement', 'développement durable biotech', 'impact environnemental', 'microorganisme dépolluant']
+    },
+    blue: {
+      name: 'Bleue',
+      description: 'Biodiversité marine, aquaculture, cosmétique marine',
+      color: 'blue',
+      bgColor: 'bg-blue-600',
+      textColor: 'text-blue-700',
+      bgColorLight: 'bg-blue-50/50',
+      accentColor: 'text-blue-600',
+      icon: <FaWater className="text-blue-600 text-2xl" />,
+      keywords: ['biotechnologie marine', 'aquaculture', 'algue', 'microalgue', 'biotechnologie bleue', 'ressource marine', 'cosmétique marine', 'milieu aquatique biotechnologie', 'bio-océanographie', 'spiruline', 'organisme marin', 'biodiversité marine', 'aquatique biotechnologie', 'phytoplancton']
+    },
+    multi: {
+      name: 'Général',
+      description: 'Actualités transversales',
+      color: 'indigo',
+      bgColor: 'bg-indigo-600',
+      textColor: 'text-indigo-700',
+      bgColorLight: 'bg-indigo-50/50',
+      accentColor: 'text-indigo-600',
+      icon: <BiCategory className="text-indigo-600 text-2xl" />,
+      keywords: []
     }
+  };
 
-    setError('');
-
+  const fetchArticles = async (colorKey) => {
+    setLoading(true);
+    setError(null);
+    
     try {
+      let url = '/.netlify/functions/biotech-veille';
       const params = new URLSearchParams();
-      if (forceRefresh) {
-        params.set('refresh', 'true');
+      if (colorKey) params.append('color', colorKey);
+      if (forceRefresh) params.append('refresh', 'true');
+      params.append('biotechOnly', biotechOnly.toString());
+      params.append('max', '20');
+      
+      const fullUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      
+      try {
+        const response = await fetch(fullUrl, {
+          signal: controller.signal,
+          cache: 'no-cache',
+          headers: {
+            'pragma': 'no-cache',
+            'cache-control': 'no-cache'
+          }
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          if (response.status === 502 || response.status === 504) {
+             throw new Error(`La passerelle Netlify a renvoyé une erreur ${response.status}. Veuillez réessayer plus tard.`);
+          }
+          throw new Error(`Erreur réseau: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) throw new Error(data.error);
+        
+        if (data.articles && Array.isArray(data.articles)) {
+          setArticles(data.articles);
+          
+          const countByColor = data.articles.reduce((acc, article) => {
+            const color = article.biotechColor || 'unclassified';
+            acc[color] = (acc[color] || 0) + 1;
+            return acc;
+          }, {});
+          
+          setArticleCount(countByColor);
+        } else {
+          throw new Error("Format de données incorrect");
+        }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') throw new Error("La requête a pris trop de temps. Veuillez réessayer plus tard.");
+        throw fetchError;
       }
-
-      const response = await fetch(`/.netlify/functions/biotech-veille${params.toString() ? `?${params.toString()}` : ''}`, {
-        cache: 'no-store',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erreur reseau ${response.status}`);
-      }
-
-      const payload = await response.json();
-      if (!payload || !payload.sections || !payload.categories) {
-        throw new Error('Format de veille invalide');
-      }
-
-      setDigest(payload);
-    } catch (requestError) {
-      console.error('ScienceWatchPage fetch error:', requestError);
-      setError("La veille STL n'a pas pu etre chargee.");
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchDigest(false);
-  }, []);
+    // We fetch everything initially for the magazine front page feel
+    fetchArticles(null);
 
-  const categories = digest?.categories || [];
-  const officialCategories = categories.filter((category) => category.key !== 'multi');
-  const transversalCategory = categories.find((category) => category.key === 'multi') || null;
-  const categoryKeys = selectedCategory === 'all'
-    ? categories.map((category) => category.key)
-    : [selectedCategory];
+    const preloadArticleCounts = async () => {
+      try {
+        const response = await fetch('/.netlify/functions/biotech-veille?counts=true');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.counts) setArticleCount(data.counts);
+        }
+      } catch (error) {
+        console.error("Erreur préchargement compteurs:", error);
+      }
+    };
+    preloadArticleCounts();
+  }, []); // Empty dependency array means this runs once on mount
 
-  const filteredSections = categoryKeys.reduce((accumulator, categoryKey) => {
-    const sectionArticles = (digest?.sections?.[categoryKey] || []).filter((article) =>
-      matchesSearch(article, deferredSearchTerm),
-    );
+  const handleColorSelect = (color) => {
+    if (selectedColor === color) {
+        // Toggle off if clicking the same color
+        setSelectedColor(null);
+        fetchArticles(null);
+    } else {
+        setSelectedColor(color);
+        setArticles([]);
+        fetchArticles(color);
+    }
+  };
 
-    if (sectionArticles.length > 0) {
-      accumulator[categoryKey] = sectionArticles;
+  const organizeArticlesByColor = (articleList) => {
+    const organizedByColor = Object.keys(biotechColors).reduce((acc, color) => {
+        acc[color] = [];
+        return acc;
+    }, { unclassified: [] });
+    
+    articleList.forEach(article => {
+      const color = article.biotechColor && biotechColors[article.biotechColor] ? article.biotechColor : 'unclassified';
+      if (organizedByColor[color]) {
+        organizedByColor[color].push(article);
+      } else {
+        organizedByColor.unclassified.push(article);
+      }
+    });
+    return organizedByColor;
+  };
+
+  const articlesByBiotechColor = organizeArticlesByColor(articles);
+
+  const handleRefresh = () => {
+    setArticles([]);
+    fetchArticles(selectedColor);
+  };
+
+  // Format date helper
+  const formatDate = (dateString, format = 'long') => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      if (format === 'short') {
+          return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+      }
+      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  // The Top Navigation / Category Ribbon
+  const renderCategoryRibbon = () => (
+    <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 py-3 mb-10 overflow-x-auto hide-scrollbar">
+      <div className="max-w-7xl mx-auto px-4 flex items-center space-x-2 md:space-x-6">
+        <button
+            onClick={() => handleColorSelect(null)}
+            className={`flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full transition-all ${
+                selectedColor === null 
+                ? 'bg-gray-900 text-white' 
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+        >
+            À la une
+        </button>
+        
+        {/* Subtle vertical divider */}
+        <div className="w-px h-6 bg-gray-300 hidden md:block"></div>
+
+        {Object.entries(biotechColors).map(([key, data]) => (
+          <button
+            key={key}
+            onClick={() => handleColorSelect(key)}
+            className={`flex-shrink-0 group flex items-center px-4 py-2 rounded-full transition-all duration-300 ${
+              selectedColor === key 
+                ? `${data.bgColor} text-white shadow-sm` 
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full mr-3 ${selectedColor === key ? 'bg-white' : data.bgColor}`}></span>
+            <span className="text-sm font-medium tracking-wide uppercase">{data.name}</span>
+            {articleCount[key] !== undefined && selectedColor !== key && (
+                <span className="ml-2 text-xs text-gray-400 font-normal">({articleCount[key]})</span>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Tools Ribbon (Refresh, Filters)
+  const renderToolbar = () => (
+      <div className="flex flex-col sm:flex-row justify-between items-center py-4 border-b border-gray-200 mb-10">
+          <div className="text-sm text-gray-500 font-medium mb-4 sm:mb-0">
+              Mise à jour : {new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}
+          </div>
+          <div className="flex items-center gap-6">
+            <button 
+                onClick={handleRefresh}
+                disabled={loading}
+                className="group flex items-center text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50"
+            >
+                <FaSync className={`mr-2 w-3.5 h-3.5 ${loading ? 'animate-spin text-gray-800' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                {loading ? 'Actualisation...' : 'Actualiser'}
+            </button>
+            <div className="w-px h-4 bg-gray-300"></div>
+            <label className="flex items-center cursor-pointer group">
+                <input type="checkbox" className="sr-only" checked={biotechOnly} onChange={() => {
+                setBiotechOnly(!biotechOnly);
+                if (articles.length > 0) {
+                    setArticles([]);
+                    setTimeout(() => fetchArticles(selectedColor), 50);
+                }
+                }} />
+                <span className={`text-sm font-semibold transition-colors mr-2 ${biotechOnly ? 'text-gray-900' : 'text-gray-500'}`}>100% Biotech</span>
+                <div className={`relative w-8 h-4 rounded-full transition-colors duration-300 ${biotechOnly ? 'bg-gray-800' : 'bg-gray-200'}`}>
+                    <div className={`absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition-transform duration-300 ${biotechOnly ? 'translate-x-4' : ''}`}></div>
+                </div>
+            </label>
+        </div>
+      </div>
+  );
+
+  // Standard List Article - Minimalist, text heavy
+  const renderListItem = (article, colorData, index) => (
+      <motion.article 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: index * 0.05 }}
+        key={index}
+        className="group grid grid-cols-1 md:grid-cols-12 gap-6 py-8 border-b border-gray-100 last:border-0"
+      >
+          {/* Metadata Sidebar (Source, Date) */}
+          <div className="md:col-span-3 flex flex-col justify-start">
+              <div className="flex items-center space-x-2 mb-2">
+                 <span className={`w-2 h-2 rounded-full ${colorData.bgColor}`}></span>
+                 <span className={`text-xs font-bold uppercase tracking-wider ${colorData.accentColor}`}>{colorData.name}</span>
+              </div>
+              <span className="text-gray-500 text-sm font-medium">{formatDate(article.pubDate)}</span>
+              <span className="text-gray-400 text-xs uppercase tracking-widest mt-1 bg-gray-50 self-start px-2 py-1 rounded inline-block">{article.source || 'Source externe'}</span>
+          </div>
+
+          {/* Core Content */}
+          <div className="md:col-span-6 flex flex-col justify-start">
+              <h3 className="text-xl md:text-2xl font-serif font-bold text-gray-900 mb-3 leading-tight group-hover:underline decoration-2 underline-offset-4 decoration-gray-300">
+                 <a href={article.link} target="_blank" rel="noopener noreferrer" className="focus:outline-none">
+                     {article.title}
+                 </a>
+              </h3>
+              <p className="text-gray-600 text-base leading-relaxed line-clamp-3 font-serif">
+                  {article.description}
+              </p>
+          </div>
+
+          {/* Thumbnail Image (Right aligned) */}
+          <div className="md:col-span-3">
+              <a href={article.link} target="_blank" rel="noopener noreferrer" className="block w-full aspect-[4/3] md:aspect-square overflow-hidden bg-gray-50">
+                   <img
+                    src={article.imageUrl || `https://placehold.co/400x400/f8fafc/94a3b8?text=${encodeURIComponent(colorData.name)}`}
+                    alt={article.title}
+                    className="w-full h-full object-cover filter grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                    loading="lazy"
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://placehold.co/400x400/f8fafc/94a3b8?text=${encodeURIComponent(colorData.name)}`;
+                    }}
+                  />
+              </a>
+          </div>
+      </motion.article>
+  );
+
+  // Featured Article layout
+  const renderFeaturedArticle = (article, colorData) => (
+      <motion.article 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="mb-16 group"
+      >
+          <a href={article.link} target="_blank" rel="noopener noreferrer" className="block relative h-[60vh] min-h-[400px] w-full overflow-hidden bg-gray-900 mb-6">
+              <img
+                src={article.imageUrl || `https://placehold.co/1200x800/1e293b/94a3b8?text=${encodeURIComponent(colorData.name)}`}
+                alt={article.title}
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 ease-in-out"
+                onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://placehold.co/1200x800/1e293b/94a3b8?text=${encodeURIComponent(colorData.name)}`;
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+              
+              <div className="absolute bottom-0 left-0 p-6 md:p-12 w-full md:w-3/4">
+                 <div className="flex items-center space-x-3 mb-4">
+                     <span className={`px-3 py-1 bg-white text-xs font-bold uppercase tracking-widest ${colorData.textColor}`}>
+                         {colorData.name}
+                     </span>
+                     <span className="text-white/80 text-sm font-medium drop-shadow-md">
+                         {article.source}
+                     </span>
+                 </div>
+                 <h2 className="text-3xl md:text-5xl font-serif font-bold text-white leading-tight mb-4 drop-shadow-lg group-hover:underline decoration-white/50 underline-offset-8">
+                     {article.title}
+                 </h2>
+                 <p className="text-white/90 text-lg md:text-xl font-serif line-clamp-2 md:line-clamp-3 drop-shadow-md hidden sm:block">
+                     {article.description}
+                 </p>
+              </div>
+          </a>
+      </motion.article>
+  );
+
+  // The main rendering logic for the articles
+  const renderArticlesContent = () => {
+    // Collect all articles we want to display into a flat array first for easy indexing
+    let displayArticles = [];
+    
+    if (selectedColor && articlesByBiotechColor[selectedColor]) {
+        // Just the selected color
+        displayArticles = articlesByBiotechColor[selectedColor].map(a => ({ ...a, colorKey: selectedColor }));
+    } else {
+        // All articles (À la une), flat map them
+        Object.entries(articlesByBiotechColor).forEach(([colorKey, colorArticles]) => {
+            colorArticles.forEach(a => {
+                displayArticles.push({...a, colorKey: colorKey});
+            });
+        });
+        // Sort them by date to get a true "Une" (assuming pubDate exists and is sortable)
+        displayArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
     }
 
-    return accumulator;
-  }, {});
+    if (displayArticles.length === 0) return null;
 
-  const filteredHighlights = (digest?.highlights || []).filter((article) => {
-    const categoryMatches = selectedCategory === 'all' || article.categoryKey === selectedCategory;
-    return categoryMatches && matchesSearch(article, deferredSearchTerm);
-  });
+    const featuredArticle = displayArticles[0];
+    const restArticles = displayArticles.slice(1);
 
-  const featuredArticle = filteredHighlights[0] || null;
-  const secondaryHighlights = filteredHighlights.slice(1, 4);
-  const hasResults = Object.keys(filteredSections).length > 0;
-  const sourcesCount = new Set((digest?.articles || []).map((article) => article.source)).size;
-  const metricCards = [
-    {
-      label: 'Domaines officiels',
-      value: officialCategories.length || 5,
-      tone: 'bg-lab-blue/10 text-lab-blue',
-    },
-    {
-      label: 'Sujets selectionnes',
-      value: digest?.articles?.length || 0,
-      tone: 'bg-lab-purple/10 text-lab-purple',
-    },
-    {
-      label: 'Sources suivies',
-      value: sourcesCount,
-      tone: 'bg-lab-teal/10 text-lab-teal',
-    },
-  ];
+    return (
+        <div>
+            {/* The single massive featured article at the top */}
+            {renderFeaturedArticle(featuredArticle, biotechColors[featuredArticle.colorKey] || biotechColors.multi)}
+            
+            <div className="max-w-4xl mx-auto">
+                {/* The list of remaining articles */}
+                {restArticles.map((article, idx) => 
+                   renderListItem(article, biotechColors[article.colorKey] || biotechColors.multi, idx)
+                )}
+            </div>
+        </div>
+    );
+  };
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 pb-16 pt-8">
-      <section className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-xl">
-        <div className="absolute -left-16 top-16 h-40 w-40 rounded-full bg-lab-blue/10 blur-3xl" />
-        <div className="absolute -right-12 top-0 h-44 w-44 rounded-full bg-lab-purple/10 blur-3xl" />
-        <div className="absolute bottom-0 right-20 h-36 w-36 rounded-full bg-lab-teal/10 blur-3xl" />
+    <div className="min-h-screen bg-white">
+      {/* Magazine Header */}
+      <header className="pt-16 pb-8 px-4 text-center">
+         <h1 className="text-5xl md:text-7xl font-serif font-black text-gray-900 tracking-tight mb-4">
+             Science Watch
+         </h1>
+         <p className="text-lg text-gray-500 font-serif italic max-w-2xl mx-auto">
+             L'essentiel de l'actualité en Biotechnologies, trié par domaine.
+         </p>
+      </header>
 
-        <div className="absolute left-6 right-6 top-4 hidden justify-between md:flex">
-          <div className="h-1 w-20 rounded-full bg-lab-blue/20" />
-          <div className="h-1 w-32 rounded-full bg-lab-purple/20" />
-          <div className="h-1 w-20 rounded-full bg-lab-teal/20" />
-        </div>
+      {/* The sticky ribbon for navigation */}
+      {renderCategoryRibbon()}
 
-        <div className="relative px-6 py-8 lg:px-10 lg:py-10">
-          <div className="grid gap-8 lg:grid-cols-[1.25fr_0.95fr]">
-            <div>
-              <p className="inline-flex items-center rounded-full border border-lab-teal/20 bg-lab-teal/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-lab-teal">
-                Veille scientifique STL
-              </p>
-              <h1 className="mt-5 text-3xl font-bold leading-tight text-gray-800 lg:text-4xl">
-                Comprendre l actualite scientifique pour mieux apprendre en STL
-              </h1>
-              <p className="mt-3 text-3xl font-bold leading-tight text-transparent bg-clip-text bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal lg:text-4xl">
-                Une veille guidee pour relier les informations recentes aux chapitres, aux TP et au projet technologique
-              </p>
-              <p className="mt-5 max-w-3xl text-base leading-7 text-gray-600">
-                Tu peux utiliser cette page pour enrichir un cours, preparer un oral, trouver un exemple precis ou mieux
-                comprendre une technique rencontree en classe.
-              </p>
+      <main className="max-w-7xl mx-auto px-4 pb-20">
+        
+        {/* Tools (Refresh, Biotech Only) */}
+         {renderToolbar()}
 
-              <div className="mt-7 grid gap-4 sm:grid-cols-3">
-                {metricCards.map((metric) => (
-                  <article key={metric.label} className="rounded-xl border border-gray-200 bg-white/80 p-4 shadow-sm">
-                    <div className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${metric.tone}`}>
-                      {metric.label}
+        {error && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-50 text-red-800 p-6 shadow-sm mb-10 border-l-4 border-red-600">
+            <h3 className="font-bold flex items-center mb-2"><FaExclamationTriangle className="mr-2"/> Erreur réseau</h3>
+            <p className="font-serif">{error}</p>
+          </motion.div>
+        )}
+
+        {loading ? (
+           // Minimalist Skeleton Loader
+           <div className="animate-pulse">
+               {/* Hero Skeleton */}
+               <div className="w-full h-[50vh] bg-gray-100 mb-16 relative">
+                   <div className="absolute bottom-10 left-10 w-2/3">
+                      <div className="h-4 bg-gray-200 w-24 mb-4"></div>
+                      <div className="h-10 bg-gray-200 w-full mb-2"></div>
+                      <div className="h-10 bg-gray-200 w-4/5 mb-4"></div>
+                   </div>
+               </div>
+               
+               {/* List Skeletons */}
+               <div className="max-w-4xl mx-auto space-y-10">
+                   {[1, 2, 3, 4].map(i => (
+                       <div key={i} className="grid grid-cols-12 gap-6 border-b border-gray-100 pb-10">
+                           <div className="col-span-3">
+                               <div className="h-3 bg-gray-100 w-16 mb-2"></div>
+                               <div className="h-3 bg-gray-100 w-24"></div>
+                           </div>
+                           <div className="col-span-6">
+                               <div className="h-6 bg-gray-200 w-full mb-3"></div>
+                               <div className="h-6 bg-gray-200 w-5/6 mb-4"></div>
+                               <div className="h-4 bg-gray-100 w-full mb-2"></div>
+                               <div className="h-4 bg-gray-100 w-2/3"></div>
+                           </div>
+                           <div className="col-span-3 h-32 bg-gray-100"></div>
+                       </div>
+                   ))}
+               </div>
+           </div>
+        ) : (
+            <>
+                {articles.length === 0 && !error ? (
+                    <div className="text-center text-gray-500 font-serif italic py-20">
+                        Aucun article trouvé pour cette sélection.
                     </div>
-                    <p className="mt-4 text-3xl font-bold text-gray-800">{metric.value}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
-
-            <aside className="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-lab-bg p-6 shadow-lg">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-lab-purple">Cadre officiel</p>
-              <h2 className="mt-2 text-2xl font-bold text-gray-800">Une veille utile pour les eleves de STL</h2>
-              <p className="mt-3 text-sm leading-7 text-gray-600">
-                Les sujets sont tries pour rester lisibles, fiables et directement exploitables en cours, en TP, pour le projet
-                technologique ou pour le Grand oral.
-              </p>
-
-              <div className="mt-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <p className="text-sm font-semibold text-gray-800">Derniere actualisation</p>
-                <p className="mt-1 text-sm text-gray-600">{formatDateTime(digest?.generatedAt) || 'En attente'}</p>
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {(digest?.officialReferences || []).map((reference) => (
-                  <a
-                    key={reference.url}
-                    href={reference.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <span>{reference.title}</span>
-                    <span className="font-semibold text-lab-teal">Ouvrir</span>
-                  </a>
-                ))}
-              </div>
-            </aside>
-          </div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {PAGE_PILLARS.map((pillar) => (
-              <article key={pillar.title} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                <div className={`mb-4 h-1.5 w-14 rounded-full ${pillar.line}`} />
-                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${pillar.badge}`}>
-                  STL
-                </span>
-                <h3 className="mt-4 text-lg font-bold text-gray-800">{pillar.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-gray-600">{pillar.description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lab-teal">Navigation</p>
-            <h2 className="mt-2 text-2xl font-bold text-gray-800">Choisir une categorie de veille</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-600">
-              Selectionne une categorie, recherche un theme, puis ouvre la source si tu veux aller plus loin.
-            </p>
-          </div>
-
-          <div className="w-full lg:max-w-3xl">
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => startTransition(() => setSelectedCategory('all'))}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  selectedCategory === 'all'
-                    ? 'bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal text-white shadow-md'
-                    : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                Toute la veille
-              </button>
-
-              {officialCategories.map((category) => {
-                const style = CATEGORY_STYLES[category.key];
-                return (
-                  <button
-                    key={category.key}
-                    type="button"
-                    onClick={() => startTransition(() => setSelectedCategory(category.key))}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      selectedCategory === category.key
-                        ? style.solidBadge
-                        : style.button
-                    }`}
-                  >
-                    {category.name}
-                    <span className="ml-2 rounded-full bg-black/10 px-2 py-0.5 text-xs">{category.count}</span>
-                  </button>
-                );
-              })}
-
-              {transversalCategory ? (
-                <button
-                  type="button"
-                  onClick={() => startTransition(() => setSelectedCategory(transversalCategory.key))}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    selectedCategory === transversalCategory.key
-                      ? CATEGORY_STYLES.multi.solidBadge
-                      : CATEGORY_STYLES.multi.button
-                  }`}
-                >
-                  {transversalCategory.shortTitle}
-                  <span className="ml-2 rounded-full bg-black/10 px-2 py-0.5 text-xs">{transversalCategory.count}</span>
-                </button>
-              ) : null}
-            </div>
-
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-              <label className="flex-1">
-                <span className="sr-only">Rechercher dans la veille STL</span>
-                <input
-                  type="search"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Rechercher un theme, une technique, une source..."
-                  className="w-full rounded-xl border border-gray-200 bg-lab-bg px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-lab-teal focus:bg-white focus:ring-2 focus:ring-lab-teal/10"
-                />
-              </label>
-
-              <button
-                type="button"
-                onClick={() => fetchDigest(true)}
-                disabled={loading || refreshing}
-                className="rounded-xl bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {refreshing ? 'Actualisation...' : 'Actualiser la veille'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {error ? (
-        <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-red-700 shadow-sm">
-          <p className="font-semibold">Impossible de charger la veille STL.</p>
-          <p className="mt-1 text-sm">{error}</p>
-        </div>
-      ) : null}
-
-      {loading ? (
-        <div className="mt-8 rounded-2xl border border-gray-200 bg-white px-6 py-14 text-center shadow-lg">
-          <div className="mx-auto h-14 w-14 rounded-full border-4 border-lab-blue/20 border-t-lab-purple animate-spin" />
-          <p className="mt-5 text-lg font-semibold text-gray-800">Chargement de la veille STL...</p>
-          <p className="mt-2 text-sm text-gray-500">
-            Selection des sujets, classement par categorie et preparation d&apos;un affichage adapte au site.
-          </p>
-        </div>
-      ) : null}
-
-      {!loading && featuredArticle ? (
-        <section className="mt-10">
-          <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lab-purple">A la une</p>
-              <h2 className="mt-2 text-3xl font-bold text-gray-800">Des sujets utiles pour le cours et pour la culture scientifique</h2>
-            </div>
-            <p className="max-w-xl text-sm leading-6 text-gray-600">
-              Chaque carte te donne la categorie, l interet du sujet et des pistes d usage en classe, en TP ou a l oral.
-            </p>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-[1.25fr_0.95fr]">
-            <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
-              <div className="h-1 w-full bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal" />
-              <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-                <div className="min-h-[22rem] bg-gray-100">
-                  <ArticleVisual
-                    article={featuredArticle}
-                    fallbackLabel="Veille STL"
-                    style={CATEGORY_STYLES[featuredArticle.categoryKey || 'multi']}
-                    featured
-                  />
-                </div>
-
-                <div className="flex flex-col p-6">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${CATEGORY_STYLES[featuredArticle.categoryKey || 'multi'].softBadge}`}>
-                      {getCategoryLabel(featuredArticle.categoryKey, categories)}
-                    </span>
-                    <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600">
-                      {featuredArticle.kind === 'background' ? 'Repere de fond' : 'Actualite'}
-                    </span>
-                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">{featuredArticle.source}</span>
-                  </div>
-
-                  <h3 className="mt-4 text-3xl font-bold leading-tight text-gray-800">{featuredArticle.title}</h3>
-                  <p className="mt-4 text-sm leading-7 text-gray-600">{featuredArticle.description}</p>
-
-                  <div className={`mt-5 rounded-xl border p-4 text-sm leading-6 text-gray-700 ${CATEGORY_STYLES[featuredArticle.categoryKey || 'multi'].note}`}>
-                    <span className="font-semibold text-gray-800">Pourquoi c&apos;est STL :</span> {featuredArticle.whyItMatters}
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {(featuredArticle.usages || []).map((usage) => (
-                      <span key={usage} className="rounded-full border border-lab-teal/20 bg-lab-teal/10 px-3 py-1 text-xs font-semibold text-lab-teal">
-                        {usage}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-auto flex items-center justify-between pt-6">
-                    <span className="text-sm text-gray-500">{formatDate(featuredArticle.pubDate)}</span>
-                    <a
-                      href={featuredArticle.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-xl bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-md"
-                    >
-                      Lire la source
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <div className="grid gap-4">
-              {secondaryHighlights.map((article) => {
-                const style = CATEGORY_STYLES[article.categoryKey || 'multi'];
-                return (
-                  <article key={`${article.link || article.title}`} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg">
-                    <div className={`h-1.5 w-full ${style.line}`} />
-                    <div className="p-5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${style.softBadge}`}>
-                          {getCategoryLabel(article.categoryKey, categories)}
-                        </span>
-                        <span className="text-xs uppercase tracking-[0.16em] text-gray-500">{article.source}</span>
-                      </div>
-
-                      <h3 className="mt-4 text-xl font-bold leading-tight text-gray-800">{article.title}</h3>
-                      <p className="mt-3 text-sm leading-6 text-gray-600">{article.description}</p>
-
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {(article.usages || []).map((usage) => (
-                          <span key={usage} className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700">
-                            {usage}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="mt-5 flex items-center justify-between">
-                        <span className="text-sm text-gray-500">{formatDate(article.pubDate)}</span>
-                        <a
-                          href={article.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm font-semibold text-lab-teal hover:underline"
-                        >
-                          Ouvrir
-                        </a>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {!loading && !hasResults ? (
-        <div className="mt-8 rounded-2xl border border-gray-200 bg-white px-6 py-14 text-center shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800">Aucun resultat pour cette recherche</h2>
-          <p className="mt-3 text-sm leading-6 text-gray-600">
-            Essaie une autre categorie ou retire quelques mots dans le champ de recherche.
-          </p>
-        </div>
-      ) : null}
-
-      {!loading && hasResults ? (
-        <section className="mt-10 space-y-10">
-          {Object.entries(filteredSections).map(([categoryKey, articles]) => {
-            const category = categories.find((item) => item.key === categoryKey);
-            const style = CATEGORY_STYLES[categoryKey] || CATEGORY_STYLES.multi;
-            const liveCount = articles.filter((article) => article.kind === 'news').length;
-
-            return (
-              <section key={categoryKey}>
-                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
-                  <div className={`h-1.5 w-full ${style.line}`} />
-                  <div className="p-5 lg:p-6">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div>
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${style.softBadge}`}>
-                            {category?.name || 'Transversale'}
-                          </span>
-                          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-                            {articles.length} sujet{articles.length > 1 ? 's' : ''}
-                          </span>
-                          {category?.usedBackground ? (
-                            <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600">
-                              {liveCount} actualite{liveCount > 1 ? 's' : ''} + repere de fond
-                            </span>
-                          ) : null}
-                        </div>
-
-                        <h2 className="mt-4 text-3xl font-bold text-gray-800">{category?.title || 'Culture scientifique STL'}</h2>
-                        <p className="mt-3 max-w-4xl text-sm leading-7 text-gray-600">{category?.description}</p>
-                        <p className="mt-2 max-w-4xl text-sm leading-7 text-gray-500">{category?.lens}</p>
-                      </div>
-
-                      <div className={`rounded-xl border px-4 py-3 text-sm leading-6 text-gray-600 ${style.note}`}>
-                        <p className="font-semibold text-gray-800">Domaine STL</p>
-                        <p>{category?.domain || 'Culture scientifique'}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {articles.map((article) => {
-                    const articleStyle = CATEGORY_STYLES[article.categoryKey || categoryKey] || CATEGORY_STYLES.multi;
-                    return (
-                      <article key={`${article.link || article.title}`} className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md transition hover:-translate-y-0.5 hover:shadow-xl">
-                        <div className="relative h-48 bg-gray-100">
-                          <ArticleVisual
-                            article={article}
-                            fallbackLabel={article.kind === 'background' ? 'Repere de fond STL' : category?.shortTitle || 'Veille STL'}
-                            style={articleStyle}
-                          />
-
-                          <div className="absolute left-4 top-4 flex gap-2">
-                            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${articleStyle.softBadge}`}>
-                              {article.kind === 'background' ? 'Repere de fond' : 'Actualite'}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-1 flex-col p-5">
-                          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">{article.source}</div>
-
-                          <h3 className="mt-3 text-xl font-bold leading-tight text-gray-800">{article.title}</h3>
-                          <p className="mt-3 text-sm leading-6 text-gray-600">{article.description}</p>
-
-                          <div className={`mt-4 rounded-xl border p-4 text-sm leading-6 text-gray-700 ${articleStyle.note}`}>
-                            <span className="font-semibold text-gray-800">Interet STL :</span> {article.whyItMatters}
-                          </div>
-
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            {(article.usages || []).map((usage) => (
-                              <span key={usage} className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700">
-                                {usage}
-                              </span>
-                            ))}
-                          </div>
-
-                          <div className="mt-auto flex items-center justify-between pt-6">
-                            <span className="text-sm text-gray-500">{formatDate(article.pubDate)}</span>
-                            <a
-                              href={article.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-semibold text-lab-purple hover:underline"
-                            >
-                              Lire la source
-                            </a>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
-        </section>
-      ) : null}
+                ) : (
+                    renderArticlesContent()
+                )}
+            </>
+        )}
+      </main>
     </div>
   );
 }
