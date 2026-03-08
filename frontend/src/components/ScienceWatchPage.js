@@ -24,7 +24,9 @@ function ScienceWatchPage() {
       textColor: 'text-rose-700',
       bgColorLight: 'bg-rose-50/50',
       accentColor: 'text-rose-600',
-      icon: <FaHeartbeat className="text-rose-600 text-2xl" />
+      gradientFallback: 'bg-gradient-to-br from-rose-800 to-rose-600',
+      icon: <FaHeartbeat className="text-rose-600 text-2xl" />,
+      whiteIcon: <FaHeartbeat className="text-white opacity-20 text-6xl" />
     },
     green: {
       name: 'Agro & Végétal',
@@ -35,7 +37,9 @@ function ScienceWatchPage() {
       textColor: 'text-emerald-700',
       bgColorLight: 'bg-emerald-50/50',
       accentColor: 'text-emerald-600',
-      icon: <FaLeaf className="text-emerald-600 text-2xl" />
+      gradientFallback: 'bg-gradient-to-br from-emerald-800 to-emerald-600',
+      icon: <FaLeaf className="text-emerald-600 text-2xl" />,
+      whiteIcon: <FaLeaf className="text-white opacity-20 text-6xl" />
     },
     white: {
       name: 'Industrie',
@@ -46,7 +50,9 @@ function ScienceWatchPage() {
       textColor: 'text-slate-800',
       bgColorLight: 'bg-slate-50/50',
       accentColor: 'text-slate-600',
-      icon: <FaIndustry className="text-slate-600 text-2xl" />
+      gradientFallback: 'bg-gradient-to-br from-slate-800 to-slate-600',
+      icon: <FaIndustry className="text-slate-600 text-2xl" />,
+      whiteIcon: <FaIndustry className="text-white opacity-20 text-6xl" />
     },
     yellow: {
       name: 'Environnement',
@@ -57,7 +63,9 @@ function ScienceWatchPage() {
       textColor: 'text-amber-800',
       bgColorLight: 'bg-amber-50/50',
       accentColor: 'text-amber-600',
-      icon: <FaGlobe className="text-amber-600 text-2xl" />
+      gradientFallback: 'bg-gradient-to-br from-amber-600 to-yellow-500',
+      icon: <FaGlobe className="text-amber-600 text-2xl" />,
+      whiteIcon: <FaGlobe className="text-white opacity-20 text-6xl" />
     },
     blue: {
       name: 'Océan',
@@ -68,18 +76,22 @@ function ScienceWatchPage() {
       textColor: 'text-blue-700',
       bgColorLight: 'bg-blue-50/50',
       accentColor: 'text-blue-600',
-      icon: <FaWater className="text-blue-600 text-2xl" />
+      gradientFallback: 'bg-gradient-to-br from-blue-800 to-blue-600',
+      icon: <FaWater className="text-blue-600 text-2xl" />,
+      whiteIcon: <FaWater className="text-white opacity-20 text-6xl" />
     },
     multi: {
       name: 'Actualités Multiples',
       badgeLabel: 'Général',
       description: 'Actualités transversales',
       color: 'indigo',
-      bgColor: 'bg-gray-800', // Changed Multi to dark gray for an elegant default
+      bgColor: 'bg-gray-800', 
       textColor: 'text-gray-800',
       bgColorLight: 'bg-gray-50/50',
       accentColor: 'text-gray-600',
-      icon: <BiCategory className="text-gray-600 text-2xl" />
+      gradientFallback: 'bg-gradient-to-br from-gray-900 to-gray-700',
+      icon: <BiCategory className="text-gray-600 text-2xl" />,
+      whiteIcon: <BiCategory className="text-white opacity-20 text-6xl" />
     }
   };
 
@@ -92,9 +104,9 @@ function ScienceWatchPage() {
       let url = '/.netlify/functions/biotech-veille';
       const params = new URLSearchParams();
       if (colorKey) params.append('color', colorKey);
-      if (forceRefresh) params.append('refresh', 'true');
+      // Removed forceRefresh mapping to URL to simplify, the user rarely needs it dynamically
       params.append('biotechOnly', biotechOnly.toString());
-      params.append('max', '25'); // Fetch slightly more to populate both carousel and list
+      params.append('max', '25'); 
       
       const fullUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
       
@@ -220,8 +232,32 @@ function ScienceWatchPage() {
   const prevSlide = (maxSlides) => {
       setCurrentSlide((prev) => (prev === 0 ? maxSlides - 1 : prev - 1));
   };
+  
+  // Custom smart image handler for clean fallbacks
+  const SmartImage = ({ src, alt, colorData, className }) => {
+    const [imgError, setImgError] = useState(false);
+    
+    // Treat no src exactly like an error immediately
+    if (!src || imgError) {
+        return (
+            <div className={`w-full h-full flex items-center justify-center ${colorData.gradientFallback} ${className}`}>
+                 {colorData.whiteIcon}
+            </div>
+        );
+    }
+    
+    return (
+        <img
+            src={src}
+            alt={alt}
+            className={className}
+            loading="lazy"
+            onError={() => setImgError(true)}
+        />
+    );
+  };
 
-  // The Top Navigation / Category Ribbon - Refined based on feedback
+  // The Top Navigation / Category Ribbon
   const renderCategoryRibbon = () => (
     <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 py-4 mb-10 overflow-x-auto hide-scrollbar shadow-sm">
       <div className="max-w-7xl mx-auto px-4 flex items-center space-x-2 md:space-x-8">
@@ -250,7 +286,7 @@ function ScienceWatchPage() {
             }`}
           >
             <span className="text-sm tracking-wide">{data.name}</span>
-            {/* Animated underline indicator */}
+            {/* Animated highlight indicator */}
             <span className={`absolute -bottom-4 h-1 rounded-t-lg transition-all duration-300 ${
                 selectedColor === key ? `w-full ${data.bgColor}` : 'w-0 group-hover:w-1/2 bg-gray-300'
             }`}></span>
@@ -293,7 +329,7 @@ function ScienceWatchPage() {
       </div>
   );
 
-  // Standard List Article - "Cards" redesigned for extreme clarity and readability
+  // Standard List Article - "Cards" - removed heavy underlines, fixed fallbacks
   const renderListItem = (article, colorData, index) => (
       <motion.article 
         initial={{ opacity: 0, y: 15 }}
@@ -307,16 +343,12 @@ function ScienceWatchPage() {
           <div className="md:w-1/3 h-56 md:h-auto overflow-hidden relative bg-gray-100 border-r border-gray-100 flex-shrink-0">
                <a href={article.link} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
                    <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 mix-blend-multiply ${colorData.bgColor}`}></div>
-                   <img
-                    src={article.imageUrl || `https://placehold.co/600x400/f1f5f9/94a3b8?text=${encodeURIComponent(colorData.badgeLabel)}`}
-                    alt={article.title}
-                    className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"
-                    loading="lazy"
-                    onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = `https://placehold.co/600x400/f1f5f9/94a3b8?text=${encodeURIComponent(colorData.badgeLabel)}`;
-                    }}
-                  />
+                   <SmartImage 
+                      src={article.imageUrl} 
+                      alt={article.title} 
+                      colorData={colorData}
+                      className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700 ease-out" 
+                   />
               </a>
               {/* Floating Badge on Image */}
               <div className="absolute top-4 left-4">
@@ -335,8 +367,9 @@ function ScienceWatchPage() {
                       <span className="font-bold text-gray-800 tracking-wide uppercase">{article.source || 'Source externe'}</span>
                   </div>
                   
+                  {/* Clean title without underlines */}
                   <h3 className="text-xl md:text-2xl font-serif font-bold text-gray-900 mb-4 leading-snug group-hover:text-blue-700 transition-colors">
-                     <a href={article.link} target="_blank" rel="noopener noreferrer" className="focus:outline-none">
+                     <a href={article.link} target="_blank" rel="noopener noreferrer" className="focus:outline-none block no-underline">
                          {article.title}
                      </a>
                   </h3>
@@ -346,7 +379,7 @@ function ScienceWatchPage() {
               </div>
 
               <div className="mt-auto">
-                 <a href={article.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest group/btn">
+                 <a href={article.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest group/btn no-underline">
                      Lire l'article 
                      <FaArrowRight className="ml-2 w-3 h-3 transition-transform group-hover/btn:translate-x-1" />
                  </a>
@@ -355,7 +388,7 @@ function ScienceWatchPage() {
       </motion.article>
   );
 
-  // The Top Carousel for Featured Articles
+  // The Top Carousel for Featured Articles - clean, no underlines
   const renderFeaturedCarousel = (featuredArticles) => {
       if (!featuredArticles || featuredArticles.length === 0) return null;
       
@@ -375,15 +408,13 @@ function ScienceWatchPage() {
                       transition={{ duration: 0.7, ease: "easeInOut" }}
                       className="absolute inset-0"
                   >
-                      <img
-                          src={currentArticle.imageUrl || `https://placehold.co/1600x900/1e293b/94a3b8?text=${encodeURIComponent(colorData.name)}`}
-                          alt={currentArticle.title}
-                          className="w-full h-full object-cover opacity-60"
-                          onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = `https://placehold.co/1600x900/1e293b/94a3b8?text=${encodeURIComponent(colorData.name)}`;
-                          }}
+                      <SmartImage 
+                          src={currentArticle.imageUrl} 
+                          alt={currentArticle.title} 
+                          colorData={colorData}
+                          className="w-full h-full object-cover opacity-60" 
                       />
+                      
                       {/* Dual gradient for maximum text legibility */}
                       <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
                       <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-transparent to-transparent"></div>
@@ -401,7 +432,8 @@ function ScienceWatchPage() {
                                       {formatDate(currentArticle.pubDate, 'short')}
                                   </span>
                               </div>
-                              <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="block focus:outline-none">
+                              <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="block focus:outline-none no-underline">
+                                  {/* Refined title, no underline just color shift */}
                                   <h2 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-xl hover:text-blue-200 transition-colors">
                                       {currentArticle.title}
                                   </h2>
@@ -409,7 +441,7 @@ function ScienceWatchPage() {
                               <p className="text-gray-200 text-lg md:text-xl font-serif line-clamp-2 md:line-clamp-3 mb-8 drop-shadow-md">
                                   {currentArticle.description}
                               </p>
-                              <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-8 py-3.5 bg-white text-gray-900 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg group/link">
+                              <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-8 py-3.5 bg-white text-gray-900 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg group/link no-underline">
                                   Lire l'intégralité 
                                   <FaExternalLinkAlt className="ml-3 w-3 h-3 opacity-50 transition-opacity group-hover/link:opacity-100" />
                               </a>
@@ -580,7 +612,7 @@ function ScienceWatchPage() {
                         </p>
                         <button 
                             onClick={() => handleColorSelect(null)}
-                            className="mt-8 px-6 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors"
+                            className="mt-8 px-6 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors no-underline"
                         >
                             Retour à la une
                         </button>
