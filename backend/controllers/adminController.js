@@ -182,22 +182,30 @@ const updateUserRole = async (req, res) => {
       return res.status(400).json({ message: 'ID utilisateur invalide' });
     }
     
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('_id username role');
     
     if (!user) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
     
-    user.role = role;
-    await user.save();
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { role },
+      {
+        new: true,
+        runValidators: true,
+        context: 'query',
+        select: '_id username role'
+      }
+    );
     
     res.status(200).json({
       success: true,
-      message: `L'utilisateur ${user.username} a été promu au rôle de ${role}`,
+      message: `L'utilisateur ${updatedUser.username} a ete mis a jour au role de ${role}`,
       user: {
-        _id: user._id,
-        username: user.username,
-        role: user.role
+        _id: updatedUser._id,
+        username: updatedUser.username,
+        role: updatedUser.role
       }
     });
     
@@ -327,47 +335,55 @@ const updateUsername = async (req, res) => {
   }
 
   try {
-    const { username } = req.body;
+    const nextUsername = req.body.username?.trim();
     const userId = req.params.id;
     
-    if (!username || username.trim() === '') {
+    if (!nextUsername) {
       return res.status(400).json({ message: 'Nom d\'utilisateur requis' });
     }
-    
-    // Check if username already exists
-    const existingUser = await User.findOne({ username, _id: { $ne: userId } });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Ce nom d\'utilisateur est déjà pris' });
-    }
-    
+
     if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({ message: 'ID utilisateur invalide' });
     }
     
-    const user = await User.findById(userId);
+    // Check if username already exists
+    const existingUser = await User.findOne({ username: nextUsername, _id: { $ne: userId } });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Ce nom d\'utilisateur est deja pris' });
+    }
+
+    const user = await User.findById(userId).select('_id username role');
     
     if (!user) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
     
     const oldUsername = user.username;
-    user.username = username;
-    await user.save();
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { username: nextUsername },
+      {
+        new: true,
+        runValidators: true,
+        context: 'query',
+        select: '_id username role'
+      }
+    );
     
     res.status(200).json({
       success: true,
-      message: `Le nom d'utilisateur a été modifié de "${oldUsername}" à "${username}"`,
+      message: `Le nom d'utilisateur a ete modifie de "${oldUsername}" a "${nextUsername}"`,
       user: {
-        _id: user._id,
-        username: user.username,
-        role: user.role
+        _id: updatedUser._id,
+        username: updatedUser.username,
+        role: updatedUser.role
       }
     });
     
   } catch (error) {
     console.error('Error in updateUsername:', error);
     res.status(500).json({
-      message: 'Erreur lors de la mise à jour du nom d\'utilisateur',
+      message: 'Erreur lors de la mise a jour du nom d\'utilisateur',
       error: error.message
     });
   }
