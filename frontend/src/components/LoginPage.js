@@ -3,6 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // Importer useAuth
 import { BROWSER_API_URL } from '../config';
 
+const getSafeRedirectTarget = (value) => {
+  if (!value || typeof value !== 'string' || !value.startsWith('/')) {
+    return '/';
+  }
+
+  return value;
+};
+
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -11,15 +19,12 @@ function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth(); // Obtenir la fonction login du contexte
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTarget = getSafeRedirectTarget(searchParams.get('redirect') || location.state?.from || '/');
 
   useEffect(() => {
     if (location.state?.sessionExpired) {
       setError('Session expirée ou token invalide. Reconnecte-toi.');
-      return;
-    }
-
-    if (location.state?.passwordReset) {
-      setError('Ton mot de passe a ete reinitialise. Connecte-toi avec le mot de passe temporaire puis choisis-en un nouveau.');
     }
   }, [location.state]);
 
@@ -59,14 +64,13 @@ function LoginPage() {
       
       // Attendre un court instant pour laisser le temps au localStorage d'être mis à jour
       setTimeout(() => {
-        if (data.mustChangePassword) {
-          navigate('/changer-mot-de-passe', { replace: true });
-          console.log('Redirection vers la page de changement de mot de passe');
+        if (redirectTarget.endsWith('.html')) {
+          window.location.assign(redirectTarget);
           return;
         }
 
-        navigate('/');
-        console.log('Redirection vers la page d\'accueil');
+        navigate(redirectTarget);
+        console.log('Redirection après connexion');
       }, 200);
 
     } catch (err) {
@@ -142,7 +146,10 @@ function LoginPage() {
         <div className="text-center mt-4">
           <p className="text-base text-gray-600">
             Pas encore de compte?{' '}
-            <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-800">
+            <Link
+              to={redirectTarget !== '/' ? `/register?redirect=${encodeURIComponent(redirectTarget)}` : '/register'}
+              className="font-medium text-indigo-600 hover:text-indigo-800"
+            >
               Inscrivez-vous ici
             </Link>
           </p>

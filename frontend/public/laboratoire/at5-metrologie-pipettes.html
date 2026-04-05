@@ -1,0 +1,2252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="16" fill="%231b2e4a"/%3E%3Cpath d="M20 16c6 6 12 9 18 9s12-3 18-9M20 28c6 6 12 9 18 9s12-3 18-9M20 40c6 6 12 8 18 8s12-2 18-8" fill="none" stroke="%231f7a8c" stroke-linecap="round" stroke-width="4"/%3E%3Cpath d="M20 22c6-6 12-9 18-9s12 3 18 9M20 34c6-6 12-9 18-9s12 3 18 9M20 46c6-6 12-8 18-8s12 2 18 8" fill="none" stroke="%235b3e8c" stroke-linecap="round" stroke-width="4"/%3E%3C/svg%3E' type="image/svg+xml">
+<title>AT5 - Métrologie des pipettes | STL Biotechnologies</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./lab-session.css">
+<style>
+:root {
+  --bg: #F5F3EF;
+  --surface: #FFFFFF;
+  --navy: #1B2E4A;
+  --teal: #1F7A8C;
+  --teal-light: #E8F4F7;
+  --amber: #C97B1A;
+  --amber-light: #FEF3DC;
+  --green: #2A6B4A;
+  --green-light: #E6F4EE;
+  --purple: #5B3E8C;
+  --purple-light: #F0EBF9;
+  --red: #B33020;
+  --red-light: #FDEAEA;
+  --text: #1E1E1E;
+  --muted: #6B7280;
+  --border: #DDD8D0;
+  --prof-bg: #FFFBEA;
+  --prof-border: #E8921E;
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(27,46,74,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ===== HEADER ===== */
+.site-header {
+  background: var(--navy);
+  color: white;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+}
+.header-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.header-left { flex: 1; }
+.header-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #94C5D0;
+  margin-bottom: 2px;
+}
+.header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: white;
+}
+.header-subtitle {
+  font-size: 12px;
+  color: #94C5D0;
+  margin-top: 1px;
+}
+
+/* Toggle button */
+.toggle-prof {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 50px;
+  padding: 8px 18px;
+  cursor: pointer;
+  color: white;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+.toggle-prof:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+.toggle-prof.active { background: var(--amber); border-color: var(--amber); color: white; }
+.toggle-icon { font-size: 16px; }
+
+/* Mode badge */
+.mode-banner {
+  background: var(--amber);
+  color: white;
+  text-align: center;
+  padding: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  display: none;
+}
+.mode-banner.visible { display: block; }
+
+/* ===== LAYOUT ===== */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+/* ===== INTRO CARD ===== */
+.intro-card {
+  background: var(--navy);
+  color: white;
+  border-radius: var(--radius);
+  padding: 32px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.intro-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.intro-card::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; left: 30%;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+}
+.intro-meta {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #94C5D0;
+  margin-bottom: 8px;
+}
+.intro-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+.intro-context {
+  color: rgba(255,255,255,0.82);
+  font-size: 14px;
+  line-height: 1.8;
+  position: relative;
+  z-index: 1;
+}
+.context-highlight {
+  background: rgba(255,255,255,0.12);
+  border-left: 3px solid #94C5D0;
+  padding: 12px 16px;
+  border-radius: 0 6px 6px 0;
+  margin-top: 16px;
+  font-style: italic;
+}
+
+/* ===== OBJECTIFS ===== */
+.objectifs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin: 16px 0 28px;
+}
+.objectif-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  box-shadow: var(--shadow);
+}
+.objectif-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.objectif-text {
+  font-size: 13px;
+  color: var(--navy);
+  font-weight: 500;
+}
+
+/* ===== SECTION HEADERS ===== */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 36px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+}
+.section-number {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.sn-teal { background: var(--teal); color: white; }
+.sn-green { background: var(--green); color: white; }
+.sn-purple { background: var(--purple); color: white; }
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--navy);
+}
+.section-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.card-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.tag-manipulation { background: var(--teal-light); color: var(--teal); }
+.tag-question { background: var(--purple-light); color: var(--purple); }
+.tag-annexe { background: var(--green-light); color: var(--green); }
+.tag-bilan { background: var(--amber-light); color: var(--amber); }
+.tag-info { background: #F0F0F0; color: var(--muted); }
+
+.card-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--navy);
+}
+.card-body {
+  padding: 18px;
+}
+.card-body p { margin-bottom: 10px; }
+.card-body p:last-child { margin-bottom: 0; }
+
+/* ===== MANIPULATION BOXES ===== */
+.manip-box {
+  background: var(--teal-light);
+  border: 1px solid #B0D8E0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.manip-icon { font-size: 22px; flex-shrink: 0; }
+.manip-content { flex: 1; }
+.manip-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 3px;
+}
+.manip-text { font-size: 14px; color: var(--navy); }
+
+/* ===== QUESTION BOXES ===== */
+.question-box {
+  background: var(--purple-light);
+  border: 1px solid #C5B0E8;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+.q-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.q-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--purple);
+  background: white;
+  border: 2px solid var(--purple);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.q-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.q-text { font-size: 14px; color: var(--navy); }
+.q-data {
+  background: rgba(255,255,255,0.7);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 13px;
+  border-left: 3px solid var(--purple);
+}
+.q-data strong { color: var(--purple); }
+
+/* ===== ANSWER AREA ===== */
+.answer-area {
+  background: white;
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+  min-height: 80px;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ===== PROF SECTION ===== */
+.prof-block {
+  display: none;
+  background: var(--prof-bg);
+  border: 1.5px solid var(--prof-border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-top: 12px;
+  position: relative;
+}
+.prof-block::before {
+  content: '👨‍🏫 CORRECTION';
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 2px;
+  display: block;
+  margin-bottom: 8px;
+}
+.prof-block p { font-size: 14px; margin-bottom: 8px; }
+.prof-block p:last-child { margin-bottom: 0; }
+.prof-block ul { padding-left: 20px; }
+.prof-block ul li { font-size: 14px; margin-bottom: 4px; }
+.prof-block .formula {
+  background: white;
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  margin: 8px 0;
+  border: 1px solid #F0D090;
+  color: var(--navy);
+}
+.prof-note {
+  display: none;
+  background: #FFF8E6;
+  border-left: 4px solid var(--amber);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin: 10px 0;
+  font-size: 13px;
+  color: #7A5000;
+}
+.prof-note::before {
+  content: '📌 Note pédagogique — ';
+  font-weight: 700;
+}
+
+/* Show when prof mode */
+body.prof-mode .prof-block { display: block; }
+body.prof-mode .prof-note { display: block; }
+
+/* ===== TABLES ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 10px 0;
+}
+th {
+  background: var(--navy);
+  color: white;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 500;
+}
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) td { background: #FAFAF8; }
+.input-cell {
+  background: white !important;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  width: 100%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--navy);
+}
+.input-cell:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 2px rgba(31,122,140,0.15); }
+
+/* ===== ALERT BOX ===== */
+.alert {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 10px 0;
+  font-size: 13px;
+  align-items: flex-start;
+}
+.alert-warning { background: var(--amber-light); border: 1px solid #F0C060; color: #7A4500; }
+.alert-validate { background: var(--green-light); border: 1px solid #90D0A8; color: #1A4A2A; font-weight: 500; }
+.alert-icon { font-size: 18px; flex-shrink: 0; }
+
+/* ===== PROCEDURE STEPS ===== */
+.steps-list {
+  counter-reset: step;
+  list-style: none;
+  padding: 0;
+}
+.steps-list li {
+  counter-increment: step;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.steps-list li:last-child { border-bottom: none; }
+.steps-list li::before {
+  content: counter(step);
+  background: var(--teal);
+  color: white;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ===== PIPETTE SVG CONTAINER ===== */
+.pipette-diagram {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.pipette-parts {
+  flex: 1;
+  min-width: 200px;
+}
+.part-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.part-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  color: var(--teal);
+  font-size: 12px;
+  width: 20px;
+  flex-shrink: 0;
+}
+.part-name { font-weight: 500; color: var(--navy); }
+.part-desc { color: var(--muted); font-size: 12px; }
+
+/* ===== PIPETTE TYPES TABLE ===== */
+.pipette-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+.pipette-table th {
+  background: var(--navy);
+  color: white;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+.pipette-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.pipette-table .highlight {
+  background: var(--teal-light) !important;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+/* ===== CALCULATOR ===== */
+.calc-box {
+  background: #F8F9FA;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.calc-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--navy);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.calc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.calc-row label { font-size: 13px; color: var(--muted); min-width: 200px; }
+.calc-input {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  width: 140px;
+  color: var(--navy);
+  background: white;
+}
+.calc-input:focus { outline: none; border-color: var(--teal); }
+.calc-btn {
+  background: var(--teal);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+  transition: background 0.2s;
+}
+.calc-btn:hover { background: #1A6678; }
+.calc-result {
+  background: var(--teal-light);
+  border: 1px solid #B0D8E0;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-top: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  color: var(--teal);
+  font-weight: 600;
+  display: none;
+}
+.calc-result.visible { display: block; }
+.formula-display {
+  background: white;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--navy);
+  margin: 8px 0;
+  border: 1px solid var(--border);
+  letter-spacing: 0.5px;
+}
+
+/* ===== TARGET / BULLSEYE ===== */
+.target-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.target-svg-wrap {
+  position: relative;
+  cursor: crosshair;
+}
+#target-svg {
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.target-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+.target-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.target-btn {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+  transition: all 0.2s;
+}
+.target-btn:hover { border-color: var(--teal); color: var(--teal); }
+.target-btn.active { background: var(--teal); color: white; border-color: var(--teal); }
+.scale-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.scale-input-group input {
+  width: 90px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+}
+
+/* ===== JUSTESSE / FIDÉLITÉ ===== */
+.jf-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+.jf-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.jf-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+/* ===== ERREURS ===== */
+.erreurs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+.erreur-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.erreur-header {
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  color: white;
+}
+.eh-red { background: var(--red); }
+.eh-amber { background: var(--amber); }
+.eh-teal { background: var(--teal); }
+.eh-muted { background: var(--muted); }
+.erreur-body {
+  padding: 12px 14px;
+  background: white;
+  font-size: 13px;
+  color: var(--text);
+}
+.erreur-body .example {
+  margin-top: 8px;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 12px;
+  background: var(--bg);
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+textarea.student-answer {
+  width: 100%;
+  border: 1.5px dashed var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  min-height: 80px;
+  resize: vertical;
+  color: var(--text);
+  background: white;
+}
+textarea.student-answer:focus { outline: none; border-color: var(--purple); }
+textarea.student-answer::placeholder { color: var(--muted); font-style: italic; }
+
+/* ===== CONFORMITÉ ===== */
+.conformite-calc {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.conf-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.conf-row label { font-size: 13px; color: var(--muted); width: 220px; }
+.conf-input {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  width: 140px;
+  background: white;
+}
+.conf-result {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  display: none;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.conf-result.conforme { background: var(--green-light); color: var(--green); border: 1px solid #90D0A8; }
+.conf-result.non-conforme { background: var(--red-light); color: var(--red); border: 1px solid #F0B0A8; }
+
+/* ===== ANNEXE ACCORDION ===== */
+.annexe-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.annexe-toggle {
+  width: 100%;
+  padding: 14px 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  text-align: left;
+  transition: background 0.2s;
+}
+.annexe-toggle:hover { background: var(--green-light); }
+.annexe-toggle-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--green);
+  color: white;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'IBM Plex Mono', monospace;
+  flex-shrink: 0;
+}
+.annexe-chevron { margin-left: auto; transition: transform 0.3s; font-size: 12px; color: var(--muted); }
+.annexe-toggle.open .annexe-chevron { transform: rotate(180deg); }
+.annexe-content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s;
+}
+.annexe-content.open {
+  max-height: 2000px;
+  padding: 18px;
+}
+
+/* ===== SOUS-LISTES ===== */
+ul.check-list {
+  list-style: none;
+  padding: 0;
+}
+ul.check-list li {
+  padding: 6px 0 6px 26px;
+  position: relative;
+  font-size: 14px;
+}
+ul.check-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--green);
+  font-weight: 700;
+}
+
+/* ===== SOURCES ERREURS ===== */
+.source-table td:first-child {
+  background: var(--teal-light);
+  font-weight: 600;
+  color: var(--teal);
+  white-space: nowrap;
+}
+
+/* ===== BILAN ===== */
+.bilan-def {
+  background: var(--navy);
+  color: white;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+.bilan-def-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bilan-def-text {
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+}
+
+/* ===== REPEAT CONDITIONS ===== */
+.repeat-conditions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.cond-item {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--navy);
+}
+.cond-icon { font-size: 24px; margin-bottom: 6px; }
+.cond-text { font-weight: 500; }
+
+/* ===== FOOTER ===== */
+.site-footer {
+  background: var(--navy);
+  color: rgba(255,255,255,0.6);
+  text-align: center;
+  padding: 20px;
+  font-size: 12px;
+  margin-top: 40px;
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar {
+  height: 3px;
+  background: var(--teal);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  transition: width 0.2s;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .container { padding: 20px 16px 60px; }
+  .header-inner { flex-wrap: wrap; gap: 10px; }
+  .jf-grid { grid-template-columns: repeat(2, 1fr); }
+  .objectifs-grid { grid-template-columns: 1fr; }
+  .calc-row { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body data-activity-id="at5-metrologie-pipettes" data-activity-title="AT5 - Métrologie des pipettes" data-teacher-password="stlat5">
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-badge">STL Biotechnologies &bull; Métrologie</div>
+      <div class="header-title">AT5 &mdash; Qualité métrologique des pipettes</div>
+      <div class="header-subtitle">Vérification et validation d'une pipette à piston P1000</div>
+    </div>
+    <button class="toggle-prof" onclick="toggleProf()" id="profBtn">
+      <span class="toggle-icon">🔒</span>
+      <span id="profBtnText">Mode Professeur</span>
+    </button>
+  </div>
+</header>
+
+<div class="mode-banner" id="modeBanner">
+  ⚠️ MODE PROFESSEUR ACTIVÉ — Les corrections et notes pédagogiques sont visibles
+</div>
+
+<div class="container">
+
+<!-- ===== INTRO ===== -->
+<div class="intro-card">
+  <div class="intro-meta">Activité Technologique N°5</div>
+  <div class="intro-title">Démarche de qualité métrologique d'un matériel</div>
+  <div class="intro-context">
+    <p>Nombreuses sont les étapes de mesure dans un laboratoire, allant de la simple pesée à des analyses menées par des instruments plus ou moins complexes et sophistiqués. Cependant, ces mesures sont-elles toujours « justes » ? Obtiendrait-on deux fois le même résultat en effectuant la mesure deux fois de manière identique ?</p>
+    <div class="context-highlight">
+      Dans tout laboratoire réalisant des analyses, il est devenu obligatoirement nécessaire de valider et de vérifier la qualité des procédures utilisées. Vous travaillez dans une bio-industrie qui utilise des pipettes à piston réglables <strong>P1000</strong> et on vous demande de vérifier la qualité métrologique de ces pipettes.
+    </div>
+  </div>
+</div>
+
+<!-- OBJECTIFS -->
+<div class="section-header">
+  <div class="section-number sn-teal">🎯</div>
+  <div>
+    <div class="section-title">Objectifs de l'activité</div>
+    <div class="section-subtitle">Compétences visées — Programme STL Biotechnologies</div>
+  </div>
+</div>
+
+<div class="objectifs-grid">
+  <div class="objectif-item">
+    <div class="objectif-icon">📖</div>
+    <div class="objectif-text">Appréhender le vocabulaire de métrologie</div>
+  </div>
+  <div class="objectif-item">
+    <div class="objectif-icon">🔬</div>
+    <div class="objectif-text">Utiliser une pipette à piston et une balance de précision</div>
+  </div>
+  <div class="objectif-item">
+    <div class="objectif-icon">📊</div>
+    <div class="objectif-text">Comparer des résultats expérimentaux</div>
+  </div>
+  <div class="objectif-item">
+    <div class="objectif-icon">⚖️</div>
+    <div class="objectif-text">Découvrir les notions d'erreurs et d'incertitude de mesure</div>
+  </div>
+</div>
+
+<div class="prof-note">
+  Compétences STL (programme officiel 2019) : Réaliser une mesure (RA), Exploiter des résultats (EX), Raisonner (RAI). Cette activité s'inscrit dans le module transversal "Fondamentaux de la métrologie" — indispensable dès la classe de Première pour toutes les manipulations de l'année. Prévoir 2h de TP. La notation peut s'appuyer sur le cahier de labo.
+</div>
+
+<!-- ===== PARTIE 1 : CONTRÔLE DE L'ÉTAT ===== -->
+<div class="section-header">
+  <div class="section-number sn-teal">1</div>
+  <div>
+    <div class="section-title">Contrôle de l'état d'une pipette à piston</div>
+    <div class="section-subtitle">Vérification visuelle et test de fuite</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-manipulation">M1 — Manipulation</div>
+    <div class="card-title">Procéder à la vérification de la pipette P1000</div>
+  </div>
+  <div class="card-body">
+    <div class="manip-box">
+      <div class="manip-icon">🔍</div>
+      <div class="manip-content">
+        <div class="manip-label">Consigne</div>
+        <div class="manip-text">À l'aide des données de l'<strong>Annexe 1</strong>, procéder à la vérification d'une pipette à piston P1000. Ouvrir l'annexe ci-dessous pour consulter le protocole.</div>
+      </div>
+    </div>
+    <div class="alert alert-warning">
+      <div class="alert-icon">⚠️</div>
+      <div>Notez bien la <strong>référence de la pipette</strong> utilisée dans votre laboratoire avant de commencer.</div>
+    </div>
+    <div class="alert alert-validate">
+      <div class="alert-icon">✋</div>
+      <div>Faire valider votre protocole de vérification par l'enseignant avant de commencer le test de fuite.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTION 1 -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q1 — Question</div>
+    <div class="card-title">Consigner vos observations dans le tableau</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">1</div>
+        <div class="q-label">Observer &amp; Consigner</div>
+      </div>
+      <div class="q-text">Notez vos observations sous une forme appropriée dans le cahier de laboratoire. Complétez le tableau de contrôle ci-dessous pour la pipette utilisée.</div>
+    </div>
+
+    <div style="overflow-x:auto; margin-top:12px;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40%">Élément contrôlé</th>
+          <th style="width:20%">✔ / ✘</th>
+          <th>Observations / Remarques</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Réglage du volume (affichage)</td>
+          <td><input class="input-cell" placeholder="✔ / ✘" style="width:60px; text-align:center;"></td>
+          <td><input class="input-cell" placeholder="Remarques..."></td>
+        </tr>
+        <tr>
+          <td>Régularité des mouvements du piston</td>
+          <td><input class="input-cell" placeholder="✔ / ✘" style="width:60px; text-align:center;"></td>
+          <td><input class="input-cell" placeholder="Remarques..."></td>
+        </tr>
+        <tr>
+          <td>Efficacité de l'éjecteur de cônes</td>
+          <td><input class="input-cell" placeholder="✔ / ✘" style="width:60px; text-align:center;"></td>
+          <td><input class="input-cell" placeholder="Remarques..."></td>
+        </tr>
+        <tr>
+          <td>Test de fuite (20 secondes)</td>
+          <td><input class="input-cell" placeholder="✔ / ✘" style="width:60px; text-align:center;"></td>
+          <td><input class="input-cell" placeholder="Absence de goutte ?"></td>
+        </tr>
+        <tr>
+          <td><strong>Conformité globale de la pipette</strong></td>
+          <td><input class="input-cell" placeholder="✔ / ✘" style="width:60px; text-align:center;"></td>
+          <td><input class="input-cell" placeholder="Pipette utilisable ?"></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="prof-block">
+      <p><strong>Réponses attendues :</strong></p>
+      <ul>
+        <li>Le réglage du volume doit être fluide — l'affichage visible dans la fenêtre doit correspondre au volume souhaité.</li>
+        <li>Le piston doit descendre et remonter sans à-coups ni résistance anormale.</li>
+        <li>L'éjecteur doit permettre de retirer le cône d'une simple pression sans manipulation manuelle.</li>
+        <li>Test de fuite : aucune goutte ne doit apparaître à l'extrémité du cône après 20 secondes en position verticale. Si une goutte apparaît, la pipette est défaillante et doit être signalée.</li>
+      </ul>
+      <p style="margin-top:8px;"><strong>En cas de défaut :</strong> faire remplir le fichier de suivi des pipettes. Une technicienne formée prendra en charge la réparation.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PARTIE 2 : UTILISATION ET MÉTROLOGIE ===== -->
+<div class="section-header">
+  <div class="section-number sn-purple">2</div>
+  <div>
+    <div class="section-title">Utilisation et vérification métrologique</div>
+    <div class="section-subtitle">Vérification du volume délivré par gravimétrie</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-manipulation">M2 — Manipulation</div>
+    <div class="card-title">Pratiquer le pipetage selon le protocole</div>
+  </div>
+  <div class="card-body">
+    <p>Un peu d'histoire : la première pipette à piston a été inventée en <strong>1957</strong> par Heinrich Schnitger pour optimiser le pipetage répétitif de petits volumes. En <strong>1972</strong>, Warren Gilson et Henry Lardy inventèrent la pipette réglable. Depuis, elle est devenue un instrument de laboratoire incontournable.</p>
+    <div class="manip-box">
+      <div class="manip-icon">🧪</div>
+      <div class="manip-content">
+        <div class="manip-label">Consigne</div>
+        <div class="manip-text">Après lecture des données de l'<strong>Annexe 2</strong>, procéder au pipetage de différents volumes à l'aide des pipettes du laboratoire. Une fiche expérimentale plastifiée vous sera fournie.</div>
+      </div>
+    </div>
+    <div class="alert alert-validate">
+      <div class="alert-icon">✋</div>
+      <div>Faire valider le <strong>premier pipetage</strong> à l'enseignant avant de poursuivre.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Q2 ===== -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q2 — Question</div>
+    <div class="card-title">Calculer la masse de référence théorique</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">2</div>
+        <div class="q-label">Calculer</div>
+      </div>
+      <div class="q-text">Après lecture de la procédure opératoire, calculer la masse de référence à obtenir théoriquement pour 1 mL d'eau distillée à 20°C.</div>
+      <div class="q-data">
+        <strong>Donnée :</strong> Concentration en masse de l'eau à 20°C : ρ<sub>(eau ; 20°C)</sub> = 998,205 g·L<sup>-1</sup><br>
+        <strong>Volume à pipeter :</strong> V = 1 mL = 0,001 L
+      </div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">🧮 Aide au calcul</div>
+      <div class="formula-display">m = ρ × V &nbsp;&nbsp;→&nbsp;&nbsp; {g} = {g·L⁻¹} × {L}</div>
+      <div class="calc-row">
+        <label>ρ (eau, 20°C) en g·L⁻¹ :</label>
+        <input class="calc-input" id="rho" value="998.205" type="number" step="0.001">
+      </div>
+      <div class="calc-row">
+        <label>V (à peser) en L :</label>
+        <input class="calc-input" id="vol" value="0.001" type="number" step="0.0001">
+      </div>
+      <button class="calc-btn" onclick="calcMasse()">Calculer m référence</button>
+      <div class="calc-result" id="calc-result-q2"></div>
+    </div>
+
+    <div class="answer-area" id="answer-q2-area" style="display:none;">
+      <textarea class="student-answer" placeholder="Écrivez votre raisonnement complet ici (EG, EU, EVN)..." rows="4" style="min-height:100px;"></textarea>
+    </div>
+    <button class="target-btn" onclick="document.getElementById('answer-q2-area').style.display='block'; this.style.display='none';" style="margin-top:8px; font-size:12px;">+ Ajouter mon raisonnement détaillé</button>
+
+    <div class="prof-block">
+      <p><strong>Correction complète attendue (format EG/EU/EVN) :</strong></p>
+      <div class="formula">
+        EG : m(eau ; référence) = ρ(eau ; 20°C) × V(eau ; à peser)<br><br>
+        EU : {g} = {g·L⁻¹} × {L} ✓<br><br>
+        EVN : m(eau ; référence) = 998,205 × 0,001 = <strong>0,998205 g</strong>
+      </div>
+      <p>Cette valeur est la <strong>valeur cible</strong>. Les mesures réalisées à la balance devront être comparées à cette valeur de référence. Insister sur l'importance de la vérification des unités (EU).</p>
+    </div>
+  </div>
+</div>
+
+<!-- M3 : Procédure -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-manipulation">M3 — Manipulation</div>
+    <div class="card-title">Réaliser la procédure de vérification métrologique</div>
+  </div>
+  <div class="card-body">
+    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:16px;">
+      <div style="flex:1; min-width:200px;">
+        <strong style="font-size:13px; color:var(--navy);">Matériel à disposition :</strong>
+        <ul class="check-list" style="margin-top:8px;">
+          <li>1 bécher ou pot de yaourt</li>
+          <li>Eau distillée</li>
+          <li>1 coupelle de pesée (fond de boîte de Petri)</li>
+          <li>1 pipette à piston P1000</li>
+          <li>1 balance électronique de précision</li>
+        </ul>
+      </div>
+      <div style="flex:1; min-width:200px;">
+        <div class="alert alert-warning" style="margin:0;">
+          <div class="alert-icon">⚠️</div>
+          <div style="font-size:12px;">Les consignes de fonctionnement de la balance seront rappelées par l'enseignant avant de commencer.</div>
+        </div>
+      </div>
+    </div>
+
+    <strong style="font-size:13px; color:var(--navy); display:block; margin-bottom:12px;">Procédure opératoire — Vérification métrologique de la P1000</strong>
+    <ol class="steps-list">
+      <li>Placer la <strong>coupelle de pesée</strong> au centre du plateau de la balance et ajuster le <strong>zéro</strong> de la balance.</li>
+      <li>Ouvrir les <strong>volets</strong> de la balance.</li>
+      <li>Rincer le <strong>cône</strong> de la P1000 avec de l'eau distillée.</li>
+      <li>Introduire <strong>doucement</strong> dans la coupelle de pesée un volume d'<strong>1 mL</strong> à l'aide de la P1000 (selon la technique décrite en Annexe 2).</li>
+      <li>Fermer les volets.</li>
+      <li>Noter la masse <em>m(eau ; essai 1)</em> obtenue.</li>
+      <li>Effectuer de nouveau l'ajustage du zéro et <strong>recommencer quatre fois</strong> la manipulation (total = 5 essais).</li>
+    </ol>
+
+    <div class="prof-note">
+      Insister sur la <strong>répétabilité</strong> : même opérateur, même pipette, même balance, même pièce, courte durée. Demander à tous les groupes d'utiliser la même balance si possible pour comparer. Chaque élève doit réaliser ses 5 pesées personnellement. La remise à zéro entre chaque pesée est essentielle pour éviter l'accumulation d'erreurs.
+    </div>
+  </div>
+</div>
+
+<!-- Q3 : Tableau des valeurs -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q3 — Question</div>
+    <div class="card-title">Consigner les valeurs mesurées</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">3</div>
+        <div class="q-label">Consigner</div>
+      </div>
+      <div class="q-text">Sous une forme appropriée, consigner les valeurs mesurées obtenues. Complétez le tableau ci-dessous.</div>
+    </div>
+
+    <div style="overflow-x:auto; margin-top:12px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Essai n°</th>
+          <th>Masse mesurée m (g)</th>
+          <th>Écart à la référence (g) <br><span style="font-weight:300; font-size:11px;">(Q6 — à compléter plus tard)</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Essai 1</td>
+          <td><input class="input-cell" id="m1" type="number" step="0.0001" placeholder="0,000 g" oninput="updateMean()"></td>
+          <td><input class="input-cell" id="e1" placeholder="(à calculer)"></td></tr>
+        <tr><td>Essai 2</td>
+          <td><input class="input-cell" id="m2" type="number" step="0.0001" placeholder="0,000 g" oninput="updateMean()"></td>
+          <td><input class="input-cell" id="e2" placeholder="(à calculer)"></td></tr>
+        <tr><td>Essai 3</td>
+          <td><input class="input-cell" id="m3" type="number" step="0.0001" placeholder="0,000 g" oninput="updateMean()"></td>
+          <td><input class="input-cell" id="e3" placeholder="(à calculer)"></td></tr>
+        <tr><td>Essai 4</td>
+          <td><input class="input-cell" id="m4" type="number" step="0.0001" placeholder="0,000 g" oninput="updateMean()"></td>
+          <td><input class="input-cell" id="e4" placeholder="(à calculer)"></td></tr>
+        <tr><td>Essai 5</td>
+          <td><input class="input-cell" id="m5" type="number" step="0.0001" placeholder="0,000 g" oninput="updateMean()"></td>
+          <td><input class="input-cell" id="e5" placeholder="(à calculer)"></td></tr>
+        <tr style="background:var(--teal-light);">
+          <td><strong>Masse moyenne</strong></td>
+          <td><input class="input-cell" id="m_mean_display" placeholder="(calculée en Q4)" readonly style="background:var(--teal-light); font-weight:600;"></td>
+          <td id="ecart-moyen-cell">—</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="alert alert-validate" style="margin-top:12px;">
+      <div class="alert-icon">✋</div>
+      <div>Apporter vos valeurs mesurées à l'enseignant avant de poursuivre les calculs.</div>
+    </div>
+
+    <div class="prof-block">
+      <p><strong>Note :</strong> Les valeurs correctes pour une P1000 correctement calibrée à 20°C doivent se situer autour de <strong>0,998 g ± 0,010 g</strong> (tolérance constructeur de 1%). Des valeurs très dispersées entre elles signalent un problème de fidélité (technique de pipetage défaillante). Un décalage systématique de la valeur moyenne signale un problème de justesse (pipette à recalibrer).</p>
+    </div>
+  </div>
+</div>
+
+<!-- Q4 : Valeur moyenne -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q4 — Question</div>
+    <div class="card-title">Calculer la valeur moyenne</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">4</div>
+        <div class="q-label">Calculer</div>
+      </div>
+      <div class="q-text">Calculer, à partir des valeurs mesurées, la valeur moyenne <em>m</em><sub>moyenne</sub>.</div>
+      <div class="q-data">
+        <strong>Formule :</strong> m<sub>moy</sub> = (m<sub>1</sub> + m<sub>2</sub> + m<sub>3</sub> + m<sub>4</sub> + m<sub>5</sub>) / 5
+      </div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">🧮 Calculatrice de moyenne</div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:10px;">Entrez vos 5 valeurs dans le tableau Q3 pour le calcul automatique, ou saisissez-les ici :</p>
+      <div id="mean-auto" style="font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--teal); padding:10px; background:var(--teal-light); border-radius:6px; display:none;"></div>
+      <button class="calc-btn" onclick="calcMean()" style="margin-top:8px;">Calculer la moyenne</button>
+      <div class="calc-result" id="calc-result-q4"></div>
+    </div>
+
+    <div class="prof-block">
+      <p>La valeur moyenne est calculée sur 5 répétitions. Insister sur le fait qu'une seule mesure n'est jamais suffisante en métrologie — la répétition permet d'estimer la dispersion des résultats et la fidélité de l'opérateur.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Q5 : Cible interactive -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q5 — Question</div>
+    <div class="card-title">Modéliser les résultats sur la cible</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">5</div>
+        <div class="q-label">Modéliser</div>
+      </div>
+      <div class="q-text">Utiliser ce modèle de cible pour représenter vos résultats. Placez la masse de référence au centre, puis les 5 valeurs expérimentales et enfin la masse moyenne.</div>
+      <div class="q-data">
+        <strong>Mode d'emploi :</strong> Sélectionnez le type de point voulu, puis cliquez sur la cible pour le placer.<br>
+        Définissez d'abord l'échelle (ex : 1 anneau = 0,01 g de la valeur de référence).
+      </div>
+    </div>
+
+    <div class="target-container">
+      <div class="scale-input-group">
+        <label style="color:var(--muted); font-size:13px;">Échelle : 1 anneau = </label>
+        <input type="number" id="targetScale" value="0.010" step="0.001" style="width:90px; border:1px solid var(--border); border-radius:4px; padding:5px 8px; font-family:'IBM Plex Mono',monospace; font-size:13px;">
+        <label style="color:var(--muted); font-size:13px;"> g de la référence</label>
+      </div>
+
+      <div class="target-controls">
+        <button class="target-btn active" id="btn-ref" onclick="setMode('ref')">🎯 Référence</button>
+        <button class="target-btn" id="btn-mesure" onclick="setMode('mesure')">🔵 Valeur mesurée</button>
+        <button class="target-btn" id="btn-mean" onclick="setMode('mean')">⭐ Valeur moyenne</button>
+        <button class="target-btn" onclick="clearTarget()" style="color:var(--red);">🗑 Effacer tout</button>
+      </div>
+
+      <div class="target-svg-wrap">
+        <svg id="target-svg" width="260" height="260" viewBox="0 0 260 260" onclick="addPoint(event)">
+          <circle cx="130" cy="130" r="125" fill="#E8E0D0" stroke="#C0B8A0" stroke-width="1"/>
+          <circle cx="130" cy="130" r="100" fill="#D0C8B8" stroke="#C0B8A0" stroke-width="1"/>
+          <circle cx="130" cy="130" r="75" fill="#E04040" stroke="#C02020" stroke-width="1"/>
+          <circle cx="130" cy="130" r="50" fill="#C03030" stroke="#A02020" stroke-width="1"/>
+          <circle cx="130" cy="130" r="25" fill="#902020" stroke="#701010" stroke-width="1"/>
+          <!-- Cross lines -->
+          <line x1="130" y1="5" x2="130" y2="255" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <line x1="5" y1="130" x2="255" y2="130" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <!-- Ring labels -->
+          <text x="134" y="32" fill="rgba(255,255,255,0.5)" font-size="9" font-family="monospace">±4</text>
+          <text x="134" y="57" fill="rgba(255,255,255,0.5)" font-size="9" font-family="monospace">±3</text>
+          <text x="134" y="82" fill="rgba(255,255,255,0.5)" font-size="9" font-family="monospace">±2</text>
+          <text x="134" y="107" fill="rgba(255,255,255,0.5)" font-size="9" font-family="monospace">±1</text>
+          <g id="target-points"></g>
+        </svg>
+      </div>
+
+      <div class="target-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#FFD700; border:2px solid #A08000;"></div>
+          <span>Référence (0,998 g)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#2A7AC0;"></div>
+          <span>Valeurs mesurées</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#20A060; border:2px solid #107040;"></div>
+          <span>Valeur moyenne</span>
+        </div>
+      </div>
+      <div id="target-log" style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); text-align:center; max-width:300px;"></div>
+    </div>
+
+    <div class="prof-block">
+      <p>La cible est un outil pédagogique puissant pour visualiser simultanément justesse et fidélité. Encourager les groupes à comparer leurs cibles : si tous les points sont groupés mais loin du centre → bonne fidélité, mauvaise justesse (probablement pipette déréglée). Si les points sont proches du centre mais dispersés → bonne justesse, mauvaise fidélité (technique à améliorer).</p>
+    </div>
+  </div>
+</div>
+
+<!-- Q6 : Ecarts individuels -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q6 — Question</div>
+    <div class="card-title">Calculer les écarts individuels</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">6</div>
+        <div class="q-label">Calculer</div>
+      </div>
+      <div class="q-text">Calculer l'écart entre <em>chaque</em> valeur mesurée et la masse de référence calculée en Q2. Reporter les résultats dans le tableau de Q3.</div>
+      <div class="q-data">
+        <strong>Formule :</strong> Écart<sub>i</sub> = m<sub>mesurée i</sub> − m<sub>référence</sub><br>
+        m<sub>référence</sub> = 0,998205 g (ou votre valeur calculée en Q2)
+      </div>
+    </div>
+    <button class="calc-btn" onclick="calcEcarts()" style="margin-top:10px;">Calculer les écarts automatiquement</button>
+    <div id="ecarts-result" style="margin-top:10px; display:none;"></div>
+
+    <div class="prof-block">
+      <p>Les écarts individuels permettent de visualiser si les erreurs sont <em>aléatoires</em> (distribution autour de zéro, tantôt positifs, tantôt négatifs) ou <em>systématiques</em> (tous dans le même sens — toujours trop haut ou toujours trop bas).</p>
+    </div>
+  </div>
+</div>
+
+<!-- Q7 : Écart moyen -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q7 — Question</div>
+    <div class="card-title">Calculer l'écart entre la valeur moyenne et la référence</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">7</div>
+        <div class="q-label">Calculer</div>
+      </div>
+      <div class="q-text">Calculer l'écart entre la valeur moyenne calculée et la masse de référence.</div>
+      <div class="q-data">
+        <strong>Formule :</strong> Écart moyen = m<sub>moyenne</sub> − m<sub>référence</sub>
+      </div>
+    </div>
+
+    <div class="conformite-calc">
+      <div class="conf-row">
+        <label>m<sub>moyenne</sub> (g) :</label>
+        <input class="conf-input" id="conf-mmoy" type="number" step="0.0001" placeholder="0,0000">
+      </div>
+      <div class="conf-row">
+        <label>m<sub>référence</sub> (g) :</label>
+        <input class="conf-input" id="conf-mref" type="number" step="0.0001" value="0.998205">
+      </div>
+      <button class="calc-btn" onclick="calcEcartMoyen()">Calculer l'écart moyen</button>
+      <div class="calc-result" id="ecart-moyen-result"></div>
+    </div>
+
+    <div class="prof-block">
+      <p>L'écart moyen est l'indicateur de <strong>justesse</strong> de la pipette. Il représente l'erreur systématique moyenne. C'est cet écart qui sera comparé à la tolérance constructeur (1%) en Q9 pour statuer sur la conformité.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Q8 : Observations -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q8 — Question</div>
+    <div class="card-title">Observer et comparer les résultats</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">8</div>
+        <div class="q-label">Observer &amp; Comparer</div>
+      </div>
+      <div class="q-text">Observer les résultats et comparer les valeurs mesurées obtenues. Décrivez la dispersion observée entre les 5 valeurs.</div>
+    </div>
+    <textarea class="student-answer" placeholder="Décrivez : les valeurs sont-elles proches les unes des autres ? Y a-t-il une valeur aberrante ? Les écarts sont-ils tous du même signe ? Comment se situent les points sur la cible ?..." rows="4"></textarea>
+
+    <div class="prof-block">
+      <p>Guider les élèves vers les notions de :</p>
+      <ul>
+        <li><strong>Dispersion</strong> = écart entre la valeur la plus haute et la plus basse → indicateur de fidélité</li>
+        <li><strong>Valeur aberrante</strong> = valeur très éloignée des autres (erreur grossière probable)</li>
+        <li><strong>Tendance</strong> = toutes les valeurs systématiquement au-dessus ou en dessous de la référence</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Q9 : Conformité -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q9 — Question</div>
+    <div class="card-title">Conclure sur la conformité</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">9</div>
+        <div class="q-label">Conclure</div>
+      </div>
+      <div class="q-text">Conclure sur la conformité de l'utilisation de la pipette à piston P1000.</div>
+      <div class="q-data">
+        <strong>Tolérance constructeur :</strong> pour le volume de contrôle 1000 µL, l'écart moyen acceptable est de <strong>1 %</strong>.<br>
+        Soit : |Écart moyen| / m<sub>référence</sub> × 100 ≤ 1 %
+      </div>
+    </div>
+
+    <div class="conformite-calc">
+      <strong style="font-size:13px; display:block; margin-bottom:10px;">Calcul de l'écart relatif en % :</strong>
+      <div class="conf-row">
+        <label>Écart moyen |Δm| (g) :</label>
+        <input class="conf-input" id="conf-delta" type="number" step="0.00001" placeholder="0,00000">
+      </div>
+      <div class="conf-row">
+        <label>m<sub>référence</sub> (g) :</label>
+        <input class="conf-input" id="conf-mref2" type="number" step="0.0001" value="0.998205">
+      </div>
+      <button class="calc-btn" onclick="calcConformite()">Tester la conformité</button>
+      <div class="conf-result" id="conf-result"></div>
+    </div>
+
+    <textarea class="student-answer" style="margin-top:12px;" placeholder="Rédigez votre conclusion sur la conformité de la pipette P1000 pour ce contrôle métrologique..." rows="3"></textarea>
+
+    <div class="prof-block">
+      <p>La <strong>conclusion attendue</strong> doit mentionner explicitement :</p>
+      <ul>
+        <li>La valeur de l'écart relatif calculé en %</li>
+        <li>La comparaison avec la tolérance constructeur (1%)</li>
+        <li>La conclusion : conforme (pipette utilisable) ou non conforme (pipette à recalibrer/changer)</li>
+      </ul>
+      <p style="margin-top:8px;">Insister : une pipette non conforme ne doit <em>pas</em> être utilisée pour des analyses — les résultats seraient biaisés. Faire le lien avec les normes ISO 8655 pour les pipettes volumétriques.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SOURCES D'ERREURS ===== -->
+<div class="section-header">
+  <div class="section-number sn-purple" style="background:var(--amber); width:auto; border-radius:8px; padding:4px 12px; font-size:13px;">📋</div>
+  <div>
+    <div class="section-title">Sources d'erreurs et types d'erreurs</div>
+    <div class="section-subtitle">Analyse métrologique</div>
+  </div>
+</div>
+
+<!-- Q10 -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q10 — Question</div>
+    <div class="card-title">Lister les sources d'erreurs</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">10</div>
+        <div class="q-label">Lister</div>
+      </div>
+      <div class="q-text">En utilisant la procédure opératoire, lister les sources d'erreurs qui peuvent influencer les valeurs mesurées lors de la vérification.</div>
+    </div>
+
+    <div style="overflow-x:auto; margin-top:12px;">
+    <table class="source-table">
+      <thead>
+        <tr>
+          <th>Étape de la procédure</th>
+          <th>Source d'erreur possible</th>
+          <th>Type d'erreur</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Mise à zéro de la balance</td>
+          <td><textarea class="student-answer" placeholder="..." rows="1" style="min-height:36px;"></textarea></td>
+          <td><input class="input-cell" placeholder="..."></td>
+        </tr>
+        <tr>
+          <td>Rinçage du cône</td>
+          <td><textarea class="student-answer" placeholder="..." rows="1" style="min-height:36px;"></textarea></td>
+          <td><input class="input-cell" placeholder="..."></td>
+        </tr>
+        <tr>
+          <td>Technique de pipetage</td>
+          <td><textarea class="student-answer" placeholder="..." rows="1" style="min-height:36px;"></textarea></td>
+          <td><input class="input-cell" placeholder="..."></td>
+        </tr>
+        <tr>
+          <td>Température de l'eau</td>
+          <td><textarea class="student-answer" placeholder="..." rows="1" style="min-height:36px;"></textarea></td>
+          <td><input class="input-cell" placeholder="..."></td>
+        </tr>
+        <tr>
+          <td>Lecture de la balance</td>
+          <td><textarea class="student-answer" placeholder="..." rows="1" style="min-height:36px;"></textarea></td>
+          <td><input class="input-cell" placeholder="..."></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="prof-block">
+      <p><strong>Exemples de sources d'erreurs attendues :</strong></p>
+      <ul>
+        <li><strong>Zéro balance non ajusté</strong> : erreur systématique — fausse toutes les mesures du même côté</li>
+        <li><strong>Cône non rincé / bulles d'air</strong> : erreur aléatoire ou systématique — volume aspiré incorrect</li>
+        <li><strong>Vitesse du relâchement du piston</strong> : erreur aléatoire — dépend de l'opérateur</li>
+        <li><strong>Angle de pipetage différent de la verticale</strong> : erreur systématique — aspiration incomplète</li>
+        <li><strong>Température de l'eau différente de 20°C</strong> : erreur systématique — ρ utilisée dans le calcul ne correspond plus à la réalité</li>
+        <li><strong>Évaporation entre pesées</strong> : erreur systématique — la masse diminue avec le temps</li>
+        <li><strong>Courants d'air sur la balance</strong> : erreur aléatoire — valeurs fluctuantes</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Types d'erreurs / Q11 -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-bilan">Cours — Les différentes erreurs</div>
+    <div class="card-title">Classification des erreurs en métrologie</div>
+  </div>
+  <div class="card-body">
+    <p style="font-size:14px; color:var(--navy); margin-bottom:14px;">Il existe quatre types d'erreurs en métrologie :</p>
+    <div class="erreurs-grid">
+      <div class="erreur-card">
+        <div class="erreur-header eh-red">⚠️ Erreurs grossières</div>
+        <div class="erreur-body">
+          Résultent d'une erreur évidente : mauvaise lecture, renversement du liquide, distraction...
+          <div class="example">Exemple à trouver : <textarea class="student-answer" placeholder="Décrivez un exemple..." rows="2" style="min-height:50px;"></textarea></div>
+        </div>
+      </div>
+      <div class="erreur-card">
+        <div class="erreur-header eh-amber">➡️ Erreurs systématiques</div>
+        <div class="erreur-body">
+          Affectent toujours les résultats dans le <em>même sens</em>, pour la même cause reproductible (défaut matériel, erreur de méthode).
+          <div class="example">Exemple à trouver : <textarea class="student-answer" placeholder="Décrivez un exemple..." rows="2" style="min-height:50px;"></textarea></div>
+        </div>
+      </div>
+      <div class="erreur-card">
+        <div class="erreur-header eh-teal">🔀 Erreurs aléatoires</div>
+        <div class="erreur-body">
+          Fluctuations imprévisibles autour d'une valeur moyenne, sans cause identifiable. Réduites par la répétition.
+          <div class="example">Exemple à trouver : <textarea class="student-answer" placeholder="Décrivez un exemple..." rows="2" style="min-height:50px;"></textarea></div>
+        </div>
+      </div>
+      <div class="erreur-card">
+        <div class="erreur-header eh-muted">📐 Erreur de mesure</div>
+        <div class="erreur-body">
+          Différence entre la valeur mesurée et la valeur vraie de référence.<br>
+          <strong>Erreur totale = grossière + systématique + aléatoire</strong>
+          <div class="example">C'est ce qu'on a calculé en Q6 et Q7 !</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="prof-block">
+      <p><strong>Exemples attendus :</strong></p>
+      <ul>
+        <li><strong>Grossière :</strong> lire 0,990 g au lieu de 0,900 g (erreur de lecture) ; pipeter dans le mauvais récipient ; oublier de remettre à zéro la balance entre deux pesées.</li>
+        <li><strong>Systématique :</strong> balance mal étalonnée (toujours +0,05 g) ; pipette déréglée (délivre toujours 5% de moins) ; eau à 25°C utilisée avec la densité de 20°C.</li>
+        <li><strong>Aléatoire :</strong> variations de pression exercée sur le piston ; courants d'air perturbant la balance ; vibrations du plan de travail.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PARTIE 3 : BILAN ===== -->
+<div class="section-header">
+  <div class="section-number sn-green">3</div>
+  <div>
+    <div class="section-title">Bilan — Justesse et fidélité</div>
+    <div class="section-subtitle">Évaluation des performances métrologiques</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-bilan">Cours — Concepts clés</div>
+    <div class="card-title">Erreur de mesure, fidélité et justesse</div>
+  </div>
+  <div class="card-body">
+    <div style="background:var(--navy); color:white; border-radius:8px; padding:16px 20px; margin-bottom:12px;">
+      <p style="font-size:14px; margin-bottom:10px;"><strong>L'erreur de mesure</strong> est la différence entre une valeur mesurée d'une grandeur et la valeur de référence.</p>
+      <div style="background:rgba(255,255,255,0.1); border-radius:6px; padding:10px 14px; font-family:'IBM Plex Mono',monospace; font-size:13px; text-align:center;">
+        Erreur de mesure = erreur grossière + erreur systématique + erreur aléatoire
+      </div>
+    </div>
+
+    <p style="font-size:14px; margin-bottom:12px;">Le contrôle de qualité des pipettes à piston a pour but de vérifier que les erreurs aléatoires et systématiques ne sont pas trop importantes. Elles doivent rester dans des <strong>limites acceptables</strong> (tolérances constructeur) pour que la pipette soit utilisable en toute confiance.</p>
+
+    <p style="font-size:14px; font-weight:600; color:var(--navy); margin-bottom:10px;">Pour évaluer une pipette, on détermine deux paramètres :</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+      <div class="bilan-def">
+        <div class="bilan-def-title">🎯 La fidélité</div>
+        <div class="bilan-def-text">C'est l'aptitude d'une pipette à <strong>délivrer toujours le même volume</strong> pour un réglage donné, indépendamment du fait que ce volume soit exact ou non.<br><br>→ Faible dispersion = bonne fidélité</div>
+      </div>
+      <div class="bilan-def">
+        <div class="bilan-def-title">✅ La justesse</div>
+        <div class="bilan-def-text">C'est l'aptitude de la pipette à <strong>délivrer le volume réglé</strong> (= valeur cible).<br><br>→ Écart moyen faible = bonne justesse</div>
+      </div>
+    </div>
+
+    <strong style="font-size:13px; display:block; margin-bottom:10px; color:var(--navy);">Conditions de répétabilité (obligatoires pour comparer les résultats) :</strong>
+    <div class="repeat-conditions">
+      <div class="cond-item"><div class="cond-icon">📋</div><div class="cond-text">Même mode opératoire</div></div>
+      <div class="cond-item"><div class="cond-icon">👤</div><div class="cond-text">Même opérateur</div></div>
+      <div class="cond-item"><div class="cond-icon">⚗️</div><div class="cond-text">Même instrument</div></div>
+      <div class="cond-item"><div class="cond-icon">📍</div><div class="cond-text">Même lieu</div></div>
+      <div class="cond-item"><div class="cond-icon">⏱️</div><div class="cond-text">Courte durée</div></div>
+    </div>
+
+    <div class="prof-note">
+      Les conditions de répétabilité sont à bien distinguer des conditions de <em>reproductibilité</em> (différents opérateurs, différentes balances, différentes périodes). En classe de Première, on se limite à la répétabilité. L'amélioration de ces termes techniques est un passage important vers la culture métrologique professionnelle.
+    </div>
+  </div>
+</div>
+
+<!-- Q12 : Justesse et fidélité avec les cibles -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-tag tag-question">Q12 — Question</div>
+    <div class="card-title">Identifier la justesse et la fidélité à partir des cibles</div>
+  </div>
+  <div class="card-body">
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-num">12</div>
+        <div class="q-label">Identifier</div>
+      </div>
+      <div class="q-text">À partir des cibles présentées ci-dessous, identifier si la justesse et la fidélité sont respectées pour les 4 cas. Analyser également vos propres résultats.</div>
+    </div>
+
+    <!-- SVG Cibles illustratives -->
+    <div class="jf-grid">
+
+      <!-- Cas A : Bonne justesse, bonne fidélité -->
+      <div class="jf-card">
+        <div class="jf-label">Cas A</div>
+        <svg viewBox="0 0 100 100" width="90" height="90" style="display:block; margin:0 auto;">
+          <circle cx="50" cy="50" r="48" fill="#E8E0D0" stroke="#CCC" stroke-width="0.5"/>
+          <circle cx="50" cy="50" r="36" fill="#D8C8B0"/>
+          <circle cx="50" cy="50" r="25" fill="#E04040" stroke="#C02020" stroke-width="0.5"/>
+          <circle cx="50" cy="50" r="14" fill="#C03030"/>
+          <circle cx="50" cy="50" r="5" fill="#802020"/>
+          <circle cx="49" cy="50" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="51" cy="49" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="50" cy="51" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="48" cy="49" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="52" cy="50" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+        </svg>
+        <div style="margin-top:8px;">
+          <select style="width:100%; font-size:11px; border:1px solid var(--border); border-radius:4px; padding:3px;">
+            <option>Justesse ?</option>
+            <option>Bonne ✓</option>
+            <option>Mauvaise ✗</option>
+          </select>
+          <select style="width:100%; font-size:11px; border:1px solid var(--border); border-radius:4px; padding:3px; margin-top:4px;">
+            <option>Fidélité ?</option>
+            <option>Bonne ✓</option>
+            <option>Mauvaise ✗</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Cas B : Mauvaise justesse, bonne fidélité -->
+      <div class="jf-card">
+        <div class="jf-label">Cas B</div>
+        <svg viewBox="0 0 100 100" width="90" height="90" style="display:block; margin:0 auto;">
+          <circle cx="50" cy="50" r="48" fill="#E8E0D0" stroke="#CCC" stroke-width="0.5"/>
+          <circle cx="50" cy="50" r="36" fill="#D8C8B0"/>
+          <circle cx="50" cy="50" r="25" fill="#E04040" stroke="#C02020" stroke-width="0.5"/>
+          <circle cx="50" cy="50" r="14" fill="#C03030"/>
+          <circle cx="50" cy="50" r="5" fill="#802020"/>
+          <circle cx="72" cy="28" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="74" cy="29" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="73" cy="31" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="71" cy="30" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="75" cy="27" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+        </svg>
+        <div style="margin-top:8px;">
+          <select style="width:100%; font-size:11px; border:1px solid var(--border); border-radius:4px; padding:3px;">
+            <option>Justesse ?</option>
+            <option>Bonne ✓</option>
+            <option>Mauvaise ✗</option>
+          </select>
+          <select style="width:100%; font-size:11px; border:1px solid var(--border); border-radius:4px; padding:3px; margin-top:4px;">
+            <option>Fidélité ?</option>
+            <option>Bonne ✓</option>
+            <option>Mauvaise ✗</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Cas C : Bonne justesse, mauvaise fidélité -->
+      <div class="jf-card">
+        <div class="jf-label">Cas C</div>
+        <svg viewBox="0 0 100 100" width="90" height="90" style="display:block; margin:0 auto;">
+          <circle cx="50" cy="50" r="48" fill="#E8E0D0" stroke="#CCC" stroke-width="0.5"/>
+          <circle cx="50" cy="50" r="36" fill="#D8C8B0"/>
+          <circle cx="50" cy="50" r="25" fill="#E04040" stroke="#C02020" stroke-width="0.5"/>
+          <circle cx="50" cy="50" r="14" fill="#C03030"/>
+          <circle cx="50" cy="50" r="5" fill="#802020"/>
+          <circle cx="50" cy="25" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="30" cy="60" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="68" cy="45" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="40" cy="80" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="62" cy="30" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+        </svg>
+        <div style="margin-top:8px;">
+          <select style="width:100%; font-size:11px; border:1px solid var(--border); border-radius:4px; padding:3px;">
+            <option>Justesse ?</option>
+            <option>Bonne ✓</option>
+            <option>Mauvaise ✗</option>
+          </select>
+          <select style="width:100%; font-size:11px; border:1px solid var(--border); border-radius:4px; padding:3px; margin-top:4px;">
+            <option>Fidélité ?</option>
+            <option>Bonne ✓</option>
+            <option>Mauvaise ✗</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Cas D : Mauvaise justesse, mauvaise fidélité -->
+      <div class="jf-card">
+        <div class="jf-label">Cas D</div>
+        <svg viewBox="0 0 100 100" width="90" height="90" style="display:block; margin:0 auto;">
+          <circle cx="50" cy="50" r="48" fill="#E8E0D0" stroke="#CCC" stroke-width="0.5"/>
+          <circle cx="50" cy="50" r="36" fill="#D8C8B0"/>
+          <circle cx="50" cy="50" r="25" fill="#E04040" stroke="#C02020" stroke-width="0.5"/>
+          <circle cx="50" cy="50" r="14" fill="#C03030"/>
+          <circle cx="50" cy="50" r="5" fill="#802020"/>
+          <circle cx="20" cy="30" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="75" cy="20" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="80" cy="70" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="25" cy="78" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+          <circle cx="55" cy="15" r="3" fill="#2A7AC0" stroke="white" stroke-width="0.5"/>
+        </svg>
+        <div style="margin-top:8px;">
+          <select style="width:100%; font-size:11px; border:1px solid var(--border); border-radius:4px; padding:3px;">
+            <option>Justesse ?</option>
+            <option>Bonne ✓</option>
+            <option>Mauvaise ✗</option>
+          </select>
+          <select style="width:100%; font-size:11px; border:1px solid var(--border); border-radius:4px; padding:3px; margin-top:4px;">
+            <option>Fidélité ?</option>
+            <option>Bonne ✓</option>
+            <option>Mauvaise ✗</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <strong style="font-size:13px;">Analysez vos propres résultats :</strong>
+      <textarea class="student-answer" placeholder="En vous basant sur votre cible (Q5) et vos calculs (Q6, Q7, Q9), indiquez si votre pipette présente une bonne justesse, une bonne fidélité, ou les deux..." rows="4" style="margin-top:8px;"></textarea>
+    </div>
+
+    <div class="prof-block">
+      <p><strong>Réponses attendues pour les 4 cibles :</strong></p>
+      <ul>
+        <li><strong>Cas A :</strong> Bonne justesse ✓ (points près du centre) + Bonne fidélité ✓ (points groupés) → Pipette parfaite</li>
+        <li><strong>Cas B :</strong> Mauvaise justesse ✗ (loin du centre) + Bonne fidélité ✓ (bien groupés) → Pipette déréglée mais reproductible — recalibrage possible</li>
+        <li><strong>Cas C :</strong> Bonne justesse ✓ (dispersés autour du centre) + Mauvaise fidélité ✗ (très dispersés) → Technique de l'opérateur à améliorer</li>
+        <li><strong>Cas D :</strong> Mauvaise justesse ✗ + Mauvaise fidélité ✗ → Pipette défaillante ET/OU technique très mauvaise → inutilisable en l'état</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ANNEXES ===== -->
+<div class="section-header" style="margin-top:40px;">
+  <div class="section-number" style="background:var(--green); color:white;">📎</div>
+  <div>
+    <div class="section-title">Annexes</div>
+    <div class="section-subtitle">Protocoles de référence</div>
+  </div>
+</div>
+
+<!-- ANNEXE 1 -->
+<div class="annexe-block">
+  <button class="annexe-toggle" onclick="toggleAnnexe(this, 'annexe1')">
+    <div class="annexe-toggle-icon">A1</div>
+    <span>Annexe 1 — Contrôle de l'état d'une pipette à piston</span>
+    <div class="annexe-chevron">▼</div>
+  </button>
+  <div class="annexe-content" id="annexe1">
+    <p style="font-size:14px; margin-bottom:16px;">L'utilisateur doit contrôler que <strong>l'état apparent</strong> de la pipette permet un fonctionnement normal avant toute utilisation.</p>
+
+    <strong style="color:var(--navy); display:block; margin-bottom:8px;">1. Contrôle des fonctions mécaniques</strong>
+    <ul class="check-list" style="margin-bottom:16px;">
+      <li>Le bon fonctionnement du <strong>système de réglage du volume</strong> (molette fluide, affichage lisible)</li>
+      <li>La <strong>régularité des mouvements du piston</strong> (pas de résistance, pas de à-coups)</li>
+      <li>L'<strong>efficacité de l'éjecteur de cônes</strong> (éjection propre d'une simple pression)</li>
+    </ul>
+
+    <strong style="color:var(--navy); display:block; margin-bottom:8px;">2. Test de fuite</strong>
+    <ol class="steps-list" style="margin-bottom:16px;">
+      <li>Régler la pipette sur le volume <strong>maximum</strong>, adapter un cône et aspirer de l'eau distillée.</li>
+      <li>Tenir la pipette en <strong>position verticale</strong> et attendre <strong>20 secondes</strong>.</li>
+      <li>Si une <strong>goutte d'eau</strong> apparaît à l'extrémité du cône → la pipette à piston fuit.</li>
+    </ol>
+
+    <div style="background:var(--red-light); border:1px solid #F0B0A8; border-radius:8px; padding:14px; font-size:13px; color:var(--red);">
+      <strong>Causes possibles de fuite :</strong> embout du porte-cône abîmé · cône mal ajusté ou de mauvaise qualité · joints défectueux<br>
+      <strong style="display:block; margin-top:6px;">En cas de problème mécanique ou de fuite :</strong> prévenir l'enseignant et remplir le fichier de suivi des pipettes. Une technicienne formée se chargera de la réparation.
+    </div>
+  </div>
+</div>
+
+<!-- ANNEXE 2 -->
+<div class="annexe-block">
+  <button class="annexe-toggle" onclick="toggleAnnexe(this, 'annexe2')">
+    <div class="annexe-toggle-icon">A2</div>
+    <span>Annexe 2 — Utilisation d'une pipette à piston</span>
+    <div class="annexe-chevron">▼</div>
+  </button>
+  <div class="annexe-content" id="annexe2">
+    <p style="font-size:14px; margin-bottom:14px;">Une pipette à piston (ou micropipette) est un instrument de prélèvement de liquide avec une très grande exactitude et ce pour des volumes de <strong>0,01 mL (10 µL) à 1 mL (1000 µL)</strong>.</p>
+
+    <!-- SVG Pipette anatomique -->
+    <div style="text-align:center; margin: 16px 0;">
+      <svg viewBox="0 0 220 420" width="110" height="210" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;">
+        <!-- Corps de la pipette -->
+        <rect x="75" y="20" width="70" height="180" rx="12" fill="#2A7A8A" stroke="#1B5060" stroke-width="2"/>
+        <!-- Bouton poussoir -->
+        <ellipse cx="110" cy="14" rx="16" ry="10" fill="#1B2E4A" stroke="#0A1520" stroke-width="1.5"/>
+        <ellipse cx="110" cy="12" rx="14" ry="8" fill="#2A4060"/>
+        <!-- Fenêtre d'affichage -->
+        <rect x="85" y="55" width="50" height="30" rx="4" fill="#E8F4E8" stroke="#2A5A3A" stroke-width="1.5"/>
+        <text x="110" y="71" text-anchor="middle" font-family="monospace" font-size="10" fill="#1B2E1A" font-weight="bold">1000</text>
+        <!-- Éjecteur -->
+        <rect x="78" y="195" width="64" height="22" rx="4" fill="#E8921E" stroke="#C07010" stroke-width="1.5"/>
+        <text x="110" y="210" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="8" fill="white" font-weight="600">ÉJECTEUR</text>
+        <!-- Corps bas -->
+        <rect x="85" y="215" width="50" height="60" rx="4" fill="#1F6070" stroke="#1B5060" stroke-width="1.5"/>
+        <!-- Porte-cône -->
+        <path d="M90 275 L85 290 L85 295 L135 295 L135 290 L130 275 Z" fill="#1B5060" stroke="#1B4050" stroke-width="1"/>
+        <!-- Cône -->
+        <path d="M89 295 Q89 295 110 380 Q131 295 131 295 Z" fill="#E8E0D0" stroke="#C0B8A0" stroke-width="1"/>
+        <!-- Liquide dans cône -->
+        <path d="M101 320 Q101 320 110 360 Q119 320 119 320 Z" fill="#90D0F0" opacity="0.7"/>
+        <!-- Molette de réglage -->
+        <rect x="140" y="100" width="18" height="30" rx="9" fill="#C97B1A" stroke="#A06010" stroke-width="1.5"/>
+        <!-- Annotations numérotées -->
+        <circle cx="28" cy="14" r="9" fill="#1B2E4A"/>
+        <text x="28" y="18" text-anchor="middle" font-family="monospace" font-size="8" fill="white" font-weight="bold">1</text>
+        <line x1="37" y1="14" x2="73" y2="14" stroke="#1B2E4A" stroke-width="1" stroke-dasharray="3,2"/>
+
+        <circle cx="28" cy="71" r="9" fill="#1B2E4A"/>
+        <text x="28" y="75" text-anchor="middle" font-family="monospace" font-size="8" fill="white" font-weight="bold">2</text>
+        <line x1="37" y1="71" x2="83" y2="71" stroke="#1B2E4A" stroke-width="1" stroke-dasharray="3,2"/>
+
+        <circle cx="192" cy="115" r="9" fill="#C97B1A"/>
+        <text x="192" y="119" text-anchor="middle" font-family="monospace" font-size="8" fill="white" font-weight="bold">3</text>
+        <line x1="183" y1="115" x2="158" y2="115" stroke="#C97B1A" stroke-width="1" stroke-dasharray="3,2"/>
+
+        <circle cx="192" cy="206" r="9" fill="#E8921E"/>
+        <text x="192" y="210" text-anchor="middle" font-family="monospace" font-size="8" fill="white" font-weight="bold">4</text>
+        <line x1="183" y1="206" x2="142" y2="206" stroke="#E8921E" stroke-width="1" stroke-dasharray="3,2"/>
+
+        <circle cx="28" cy="295" r="9" fill="#1F6070"/>
+        <text x="28" y="299" text-anchor="middle" font-family="monospace" font-size="8" fill="white" font-weight="bold">5</text>
+        <line x1="37" y1="295" x2="87" y2="295" stroke="#1F6070" stroke-width="1" stroke-dasharray="3,2"/>
+      </svg>
+      <div class="pipette-parts" style="display:inline-block; text-align:left; vertical-align:top; margin-left:20px; max-width:260px;">
+        <div class="part-item"><div class="part-num">1</div><div><div class="part-name">Bouton poussoir</div><div class="part-desc">2 positions : 1er cran (aspiration), 2e cran (chasse d'air)</div></div></div>
+        <div class="part-item"><div class="part-num">2</div><div><div class="part-name">Fenêtre d'affichage</div><div class="part-desc">Volume réglé, lisible de face</div></div></div>
+        <div class="part-item"><div class="part-num">3</div><div><div class="part-name">Molette de réglage</div><div class="part-desc">Ajustement fin du volume</div></div></div>
+        <div class="part-item"><div class="part-num">4</div><div><div class="part-name">Éjecteur de cônes</div><div class="part-desc">Retrait du cône sans contact manuel</div></div></div>
+        <div class="part-item"><div class="part-num">5</div><div><div class="part-name">Porte-cône</div><div class="part-desc">Maintient le cône de prélèvement</div></div></div>
+      </div>
+    </div>
+
+    <strong style="color:var(--navy); display:block; margin: 16px 0 10px;">2. Choix de la pipette et réglage du volume</strong>
+    <p style="font-size:13px; margin-bottom:10px;">Pour que le volume prélevé soit le plus exact possible, choisir la pipette adaptée. Elle permet de prélever entre son volume maximal et 1/10 de celui-ci :</p>
+    <table class="pipette-table">
+      <thead>
+        <tr><th>Pipette</th><th>Plage de volumes</th><th>Précision</th></tr>
+      </thead>
+      <tbody>
+        <tr class="highlight"><td><strong>P1000</strong></td><td>100 – 1 000 µL</td><td>±1%</td></tr>
+        <tr><td>P200</td><td>20 – 200 µL</td><td>±1%</td></tr>
+        <tr><td>P100</td><td>10 – 100 µL</td><td>±1%</td></tr>
+        <tr><td>P10</td><td>1 – 10 µL</td><td>±1%</td></tr>
+      </tbody>
+    </table>
+    <div class="alert alert-warning" style="margin-top:8px;">
+      <div class="alert-icon">⚠️</div>
+      <div>Ne jamais forcer la pipette au-delà du volume maximal autorisé, au risque de l'endommager définitivement.</div>
+    </div>
+
+    <strong style="color:var(--navy); display:block; margin: 16px 0 10px;">3. Réalisation d'un pipetage — Technique correcte</strong>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div>
+        <div style="background:var(--teal-light); border-radius:8px; padding:14px; margin-bottom:10px;">
+          <strong style="color:var(--teal); font-size:13px; display:block; margin-bottom:8px;">PRÉLÈVEMENT DE LA SOLUTION</strong>
+          <ol style="font-size:13px; padding-left:18px; line-height:1.9;">
+            <li>Appuyer sur le bouton poussoir jusqu'au <strong>1er cran</strong>.</li>
+            <li>Plonger le cône de <strong>quelques millimètres</strong> dans la solution.</li>
+            <li><strong>Relâcher doucement</strong> le bouton poussoir et vérifier la montée du liquide.</li>
+            <li>Sortir le cône en faisant glisser sa pointe sur la paroi inclinée du récipient pour éliminer les gouttes extérieures.</li>
+          </ol>
+        </div>
+      </div>
+      <div>
+        <div style="background:#F0EBF9; border-radius:8px; padding:14px; margin-bottom:10px;">
+          <strong style="color:var(--purple); font-size:13px; display:block; margin-bottom:8px;">DISTRIBUTION DE LA SOLUTION</strong>
+          <ol style="font-size:13px; padding-left:18px; line-height:1.9;" start="5">
+            <li>Poser l'extrémité du cône sur <strong>la paroi inclinée</strong> du récipient receveur.</li>
+            <li>Appuyer <strong>doucement</strong> jusqu'au <strong>1er cran</strong>...</li>
+            <li>...puis jusqu'au <strong>2e cran</strong> sans relâcher.</li>
+            <li>Glisser la pointe du cône sur la paroi pour récupérer les dernières gouttes.</li>
+            <li>Écarter la pointe et relâcher le bouton. Éjecter le cône dans la poubelle appropriée.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer class="site-footer">
+  AT5 — Métrologie des pipettes &bull; STL Biotechnologies &bull; Ressource pédagogique
+</footer>
+
+<script>
+// ===== PROF MODE =====
+function toggleProf() {
+  const body = document.body;
+  const btn = document.getElementById('profBtn');
+  const text = document.getElementById('profBtnText');
+  const icon = btn.querySelector('.toggle-icon');
+  const banner = document.getElementById('modeBanner');
+
+  body.classList.toggle('prof-mode');
+  const isProf = body.classList.contains('prof-mode');
+
+  btn.classList.toggle('active', isProf);
+  text.textContent = isProf ? 'Mode Élève' : 'Mode Professeur';
+  icon.textContent = isProf ? '🔓' : '🔒';
+  banner.classList.toggle('visible', isProf);
+}
+
+// ===== PROGRESS BAR =====
+window.addEventListener('scroll', () => {
+  const total = document.body.scrollHeight - window.innerHeight;
+  const pct = total > 0 ? (window.scrollY / total) * 100 : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+});
+
+// ===== Q2 CALC MASSE =====
+function calcMasse() {
+  const rho = parseFloat(document.getElementById('rho').value);
+  const vol = parseFloat(document.getElementById('vol').value);
+  if (isNaN(rho) || isNaN(vol)) return;
+  const m = rho * vol;
+  const el = document.getElementById('calc-result-q2');
+  el.textContent = `m(eau ; référence) = ${rho} × ${vol} = ${m.toFixed(6)} g`;
+  el.classList.add('visible');
+}
+
+// ===== Q4 CALC MEAN =====
+let meanValue = null;
+function updateMean() {
+  const ids = ['m1','m2','m3','m4','m5'];
+  const vals = ids.map(id => parseFloat(document.getElementById(id).value)).filter(v => !isNaN(v));
+  if (vals.length === 5) {
+    meanValue = vals.reduce((a,b) => a+b, 0) / 5;
+    document.getElementById('m_mean_display').value = meanValue.toFixed(4) + ' g';
+    document.getElementById('mean-auto').style.display = 'block';
+    document.getElementById('mean-auto').textContent = `Moyenne calculée automatiquement : ${meanValue.toFixed(4)} g`;
+    const calcEl = document.getElementById('calc-result-q4');
+    calcEl.textContent = `m moyenne = ${meanValue.toFixed(4)} g`;
+    calcEl.classList.add('visible');
+    document.getElementById('conf-mmoy').value = meanValue.toFixed(4);
+  }
+}
+function calcMean() {
+  const ids = ['m1','m2','m3','m4','m5'];
+  const vals = ids.map(id => parseFloat(document.getElementById(id).value)).filter(v => !isNaN(v));
+  if (vals.length < 2) {
+    alert('Veuillez saisir au moins vos valeurs mesurées dans le tableau Q3.');
+    return;
+  }
+  meanValue = vals.reduce((a,b) => a+b, 0) / vals.length;
+  const el = document.getElementById('calc-result-q4');
+  el.textContent = `m moyenne = (${vals.join(' + ')}) / ${vals.length} = ${meanValue.toFixed(4)} g`;
+  el.classList.add('visible');
+  document.getElementById('m_mean_display').value = meanValue.toFixed(4) + ' g';
+}
+
+// ===== Q6 CALC ECARTS =====
+function calcEcarts() {
+  const mref = 0.998205;
+  const ids = ['m1','m2','m3','m4','m5'];
+  const eids = ['e1','e2','e3','e4','e5'];
+  let html = '<table style="width:100%; border-collapse:collapse; font-size:13px;">';
+  html += '<tr style="background:var(--navy); color:white;"><th style="padding:8px 12px; text-align:left;">Essai</th><th style="padding:8px 12px;">m mesurée (g)</th><th style="padding:8px 12px;">Écart = m − m<sub>ref</sub> (g)</th></tr>';
+  let allOk = true;
+  for (let i = 0; i < 5; i++) {
+    const m = parseFloat(document.getElementById(ids[i]).value);
+    if (isNaN(m)) { allOk = false; continue; }
+    const ecart = m - mref;
+    document.getElementById(eids[i]).value = ecart.toFixed(4);
+    const color = Math.abs(ecart) <= 0.01 ? '#2D7D5F' : '#B33020';
+    html += `<tr><td style="padding:8px 12px; border-bottom:1px solid #EEE;">${i+1}</td><td style="padding:8px 12px; border-bottom:1px solid #EEE; font-family:monospace;">${m.toFixed(4)}</td><td style="padding:8px 12px; border-bottom:1px solid #EEE; font-family:monospace; color:${color}; font-weight:600;">${ecart >= 0 ? '+' : ''}${ecart.toFixed(4)}</td></tr>`;
+  }
+  html += '</table>';
+  const el = document.getElementById('ecarts-result');
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+// ===== Q7 ÉCART MOYEN =====
+function calcEcartMoyen() {
+  const mmoy = parseFloat(document.getElementById('conf-mmoy').value);
+  const mref = parseFloat(document.getElementById('conf-mref').value);
+  if (isNaN(mmoy) || isNaN(mref)) return;
+  const ecart = mmoy - mref;
+  const el = document.getElementById('ecart-moyen-result');
+  el.textContent = `Écart moyen = ${mmoy.toFixed(4)} − ${mref.toFixed(6)} = ${ecart >= 0 ? '+' : ''}${ecart.toFixed(6)} g`;
+  el.classList.add('visible');
+  document.getElementById('conf-delta').value = Math.abs(ecart).toFixed(6);
+  document.getElementById('ecart-moyen-cell').innerHTML = `<span style="font-family:monospace; font-weight:600; color:${Math.abs(ecart)/mref*100 <= 1 ? 'var(--green)' : 'var(--red)'};">${ecart >= 0 ? '+' : ''}${ecart.toFixed(4)} g</span>`;
+}
+
+// ===== Q9 CONFORMITÉ =====
+function calcConformite() {
+  const delta = parseFloat(document.getElementById('conf-delta').value);
+  const mref = parseFloat(document.getElementById('conf-mref2').value);
+  if (isNaN(delta) || isNaN(mref)) return;
+  const pct = (delta / mref) * 100;
+  const el = document.getElementById('conf-result');
+  el.style.display = 'block';
+  if (pct <= 1) {
+    el.className = 'conf-result conforme';
+    el.innerHTML = `✅ CONFORME — Écart relatif = ${pct.toFixed(3)} % ≤ 1 % (tolérance constructeur)<br>La pipette P1000 est utilisable en toute confiance.`;
+  } else {
+    el.className = 'conf-result non-conforme';
+    el.innerHTML = `❌ NON CONFORME — Écart relatif = ${pct.toFixed(3)} % > 1 % (tolérance constructeur)<br>La pipette doit être recalibrée ou remplacée.`;
+  }
+}
+
+// ===== TARGET =====
+let targetMode = 'ref';
+let targetPoints = [];
+
+window.biogyGetTargetPoints = function() {
+  return targetPoints;
+};
+
+window.biogySetTargetPoints = function(points) {
+  targetPoints = Array.isArray(points) ? points : [];
+  renderTarget();
+};
+
+function setMode(mode) {
+  targetMode = mode;
+  ['ref','mesure','mean'].forEach(m => document.getElementById('btn-'+m).classList.remove('active'));
+  document.getElementById('btn-'+mode).classList.add('active');
+}
+
+function addPoint(event) {
+  const svg = document.getElementById('target-svg');
+  const rect = svg.getBoundingClientRect();
+  const scaleX = 260 / rect.width;
+  const scaleY = 260 / rect.height;
+  const x = (event.clientX - rect.left) * scaleX;
+  const y = (event.clientY - rect.top) * scaleY;
+  const scale = parseFloat(document.getElementById('targetScale').value) || 0.01;
+
+  // Calculate distance from center in "rings"
+  const dist = Math.sqrt((x-130)**2 + (y-130)**2);
+  const rings = (dist / 25).toFixed(1);
+  const massOffset = (rings * scale).toFixed(3);
+
+  const colors = { ref: '#FFD700', mesure: '#2A7AC0', mean: '#20A060' };
+  const borders = { ref: '#A08000', mesure: '#1A5090', mean: '#107040' };
+  const labels = { ref: 'Réf.', mesure: `E${targetPoints.filter(p=>p.t==='mesure').length+1}`, mean: 'Moy.' };
+
+  const pt = { x, y, t: targetMode, c: colors[targetMode], b: borders[targetMode], l: labels[targetMode] };
+  targetPoints.push(pt);
+  renderTarget();
+
+  const mref = 0.998205;
+  const approxMass = targetMode === 'ref' ? mref.toFixed(4) :
+    (targetMode === 'mean' ? (parseFloat(document.getElementById('m_mean_display').value) || '?') :
+    '~' + (mref + (x > 130 ? 1 : -1) * massOffset).toFixed(4));
+  document.getElementById('target-log').textContent = `Dernier point : ${pt.l} — ${dist < 5 ? 'Centre ✓' : rings + ' anneaux du centre'}`;
+}
+
+function renderTarget() {
+  const g = document.getElementById('target-points');
+  g.innerHTML = '';
+  targetPoints.forEach(pt => {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', pt.x);
+    circle.setAttribute('cy', pt.y);
+    circle.setAttribute('r', pt.t === 'ref' ? 6 : 5);
+    circle.setAttribute('fill', pt.c);
+    circle.setAttribute('stroke', pt.b);
+    circle.setAttribute('stroke-width', '1.5');
+    circle.style.cursor = 'pointer';
+    g.appendChild(circle);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', pt.x + 8);
+    text.setAttribute('y', pt.y + 4);
+    text.setAttribute('font-size', '9');
+    text.setAttribute('font-family', 'monospace');
+    text.setAttribute('fill', pt.b);
+    text.setAttribute('font-weight', 'bold');
+    text.textContent = pt.l;
+    g.appendChild(text);
+  });
+}
+
+function clearTarget() {
+  targetPoints = [];
+  document.getElementById('target-points').innerHTML = '';
+  document.getElementById('target-log').textContent = '';
+}
+
+// ===== ANNEXE ACCORDION =====
+function toggleAnnexe(btn, id) {
+  const content = document.getElementById(id);
+  const isOpen = content.classList.contains('open');
+  content.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+</script>
+<script src="./lab-session.js" defer></script>
+</body>
+</html>

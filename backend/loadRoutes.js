@@ -42,6 +42,9 @@ const loadRoutes = (app) => {
   // Route de profil pour l'upload d'avatar
   safelyLoadRoute('/api/profile', require('./routes/profile'));
 
+  // Routes de laboratoire
+  safelyLoadRoute('/api/lab', require('./routes/labRoutes'));
+
   console.log('Chargement des routes terminé');
 };
 

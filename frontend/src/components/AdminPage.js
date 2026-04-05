@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BROWSER_API_URL } from '../config';
+import AdminLabSubmissionsPanel from './AdminLabSubmissionsPanel';
 
 // Composant pour afficher un post en attente de modération
 const PendingPostCard = ({ post, onApprove, onReject, onDelete }) => {
@@ -109,7 +110,6 @@ const UserManagement = ({ userInfo, onUnauthorized }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [temporaryPasswordNotice, setTemporaryPasswordNotice] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
   const [newUsername, setNewUsername] = useState('');
   const [newRole, setNewRole] = useState('');
@@ -280,50 +280,6 @@ const UserManagement = ({ userInfo, onUnauthorized }) => {
       setError(err.message || 'Une erreur est survenue');
     }
   };
-
-  const handleResetPassword = async (userId, username) => {
-    if (!window.confirm(`Reinitialiser le mot de passe de ${username} ? Un mot de passe temporaire sera genere et l'utilisateur devra le changer a sa prochaine connexion.`)) {
-      return;
-    }
-
-    setError('');
-    setSuccess('');
-    setTemporaryPasswordNotice(null);
-
-    try {
-      const response = await fetch(`${apiUrl}/admin/users/${userId}/reset-password`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        }
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          onUnauthorized();
-          return;
-        }
-        throw new Error(data.message || 'Erreur lors de la reinitialisation du mot de passe');
-      }
-
-      setSuccess(data.message || 'Mot de passe reinitialise avec succes');
-      setTemporaryPasswordNotice({
-        username: data.user.username,
-        temporaryPassword: data.temporaryPassword,
-      });
-
-      setUsers(users.map((user) =>
-        user._id === userId
-          ? { ...user, mustChangePassword: true }
-          : user
-      ));
-    } catch (err) {
-      console.error('Erreur:', err);
-      setError(err.message || 'Une erreur est survenue');
-    }
-  };
   
   // Filtrer les utilisateurs en fonction du terme de recherche
   const filteredUsers = users.filter(user => 
@@ -343,16 +299,6 @@ const UserManagement = ({ userInfo, onUnauthorized }) => {
       {success && (
         <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
           <p>{success}</p>
-        </div>
-      )}
-
-      {temporaryPasswordNotice && (
-        <div className="bg-amber-50 border-l-4 border-amber-500 text-amber-900 p-4 mb-4 rounded-r-lg">
-          <p className="font-semibold">Mot de passe temporaire pour {temporaryPasswordNotice.username}</p>
-          <p className="mt-2 text-sm">Note-le maintenant et transmets-le a l'utilisateur. Il ne sera plus reaffiche ensuite.</p>
-          <div className="mt-3 inline-flex items-center gap-3 rounded-lg bg-white px-4 py-3 border border-amber-200 shadow-sm">
-            <span className="font-mono text-lg tracking-wide">{temporaryPasswordNotice.temporaryPassword}</span>
-          </div>
         </div>
       )}
       
@@ -405,14 +351,7 @@ const UserManagement = ({ userInfo, onUnauthorized }) => {
                         placeholder={user.username}
                       />
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm font-medium text-gray-900">{user.username}</div>
-                        {user.mustChangePassword ? (
-                          <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
-                            Mdp a changer
-                          </span>
-                        ) : null}
-                      </div>
+                      <div className="text-sm font-medium text-gray-900">{user.username}</div>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -477,12 +416,6 @@ const UserManagement = ({ userInfo, onUnauthorized }) => {
                           Modifier
                         </button>
                         <button
-                          onClick={() => handleResetPassword(user._id, user.username)}
-                          className="text-amber-600 hover:text-amber-900 mr-2"
-                        >
-                          Reinit. mdp
-                        </button>
-                        <button
                           onClick={() => handleDeleteUser(user._id, user.username)}
                           className="text-red-600 hover:text-red-900"
                           disabled={user._id === userInfo._id} // Empêcher la suppression de son propre compte
@@ -508,7 +441,7 @@ function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [activeTab, setActiveTab] = useState('posts'); // 'posts' ou 'users'
+  const [activeTab, setActiveTab] = useState('posts');
   const { userInfo, logout, loadingAuth } = useAuth();
   const navigate = useNavigate();
 
@@ -712,6 +645,16 @@ function AdminPage() {
         >
           Gestion des Utilisateurs
         </button>
+        <button
+          className={`py-2 px-4 font-medium text-sm focus:outline-none ${
+            activeTab === 'lab'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+          onClick={() => setActiveTab('lab')}
+        >
+          Copies de labo
+        </button>
       </div>
       
       {/* Afficher les messages */}
@@ -733,7 +676,6 @@ function AdminPage() {
           <p className="text-gray-600">Verification de la session en cours...</p>
         </div>
       ) : activeTab === 'posts' ? (
-        // Contenu de l'onglet "Modération des Posts"
         <div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">Posts en attente de modération</h2>
           
@@ -759,9 +701,10 @@ function AdminPage() {
             </div>
           )}
         </div>
-      ) : (
-        // Contenu de l'onglet "Gestion des Utilisateurs"
+      ) : activeTab === 'users' ? (
         <UserManagement userInfo={userInfo} onUnauthorized={handleUnauthorized} />
+      ) : (
+        <AdminLabSubmissionsPanel userInfo={userInfo} onUnauthorized={handleUnauthorized} />
       )}
     </div>
   );

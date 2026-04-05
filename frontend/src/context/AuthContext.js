@@ -80,7 +80,6 @@ export const AuthProvider = ({ children }) => {
             _id: profile._id || parsedInfo._id,
             username: profile.username || parsedInfo.username,
             role: profile.role || parsedInfo.role,
-            mustChangePassword: Boolean(profile.mustChangePassword),
           };
 
           persistUserInfo(nextUserInfo);

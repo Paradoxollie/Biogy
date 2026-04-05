@@ -1,5 +1,6 @@
 const express = require('express');
-const { getPendingPosts, getAllPosts, approvePost, rejectPost, deletePostAdmin, updateUserRole, findUserByUsername, getAllUsers, deleteUser, updateUsername, resetUserPassword } = require('../controllers/adminController');
+const { getPendingPosts, getAllPosts, approvePost, rejectPost, deletePostAdmin, updateUserRole, findUserByUsername, getAllUsers, deleteUser, updateUsername } = require('../controllers/adminController');
+const { getLabSubmissions, getLabSubmissionById, reviewLabSubmission } = require('../controllers/labSubmissionController');
 const { protect } = require('../middleware/authMiddleware');
 const { admin } = require('../middleware/adminMiddleware');
 
@@ -25,6 +26,11 @@ router.put('/posts/:id/reject', rejectPost);
 // Delete a post (admin function)
 router.delete('/posts/:id', deletePostAdmin);
 
+// Lab submission management routes
+router.get('/lab-submissions', getLabSubmissions);
+router.get('/lab-submissions/:id', getLabSubmissionById);
+router.put('/lab-submissions/:id/review', reviewLabSubmission);
+
 // User management routes
 // Get all users
 router.get('/users', getAllUsers);
@@ -37,8 +43,6 @@ router.put('/users/:id/role', updateUserRole);
 
 // Mettre à jour le nom d'utilisateur
 router.put('/users/:id/username', updateUsername);
-
-router.post('/users/:id/reset-password', resetUserPassword);
 
 // Supprimer un utilisateur
 router.delete('/users/:id', deleteUser);

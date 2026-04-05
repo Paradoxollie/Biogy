@@ -1,26 +1,15 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
-const { ensureDatabaseAvailable } = require('../utils/database');
 const { DEFAULT_USER_ROLE, normalizeUserRole } = require('../utils/roles');
-
-const getValidationMessage = (error) => {
-  if (error?.name !== 'ValidationError') {
-    return null;
-  }
-
-  const firstError = Object.values(error.errors || {})[0];
-  return firstError?.message || 'Donnees invalides';
-};
 
 const buildAuthResponse = (user) => {
   const normalizedRole = normalizeUserRole(user.role);
 
   return {
     _id: user._id,
-    token: generateToken(user._id, normalizedRole, user.tokenVersion || 0),
+    token: generateToken(user._id, normalizedRole),
     username: user.username,
     role: normalizedRole,
-    mustChangePassword: Boolean(user.mustChangePassword),
   };
 };
 
@@ -28,14 +17,9 @@ const buildAuthResponse = (user) => {
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
-  const normalizedUsername = req.body.username?.trim();
-  const { password } = req.body;
+  const { username, password } = req.body;
 
-  if (!ensureDatabaseAvailable(res)) {
-    return;
-  }
-
-  if (!normalizedUsername || !password) {
+  if (!username || !password) {
     return res.status(400).json({ message: 'Champs manquants' });
   }
 
@@ -44,13 +28,13 @@ const registerUser = async (req, res) => {
   }
 
   try {
-    const exists = await User.findOne({ username: normalizedUsername });
+    const exists = await User.findOne({ username });
     if (exists) {
       return res.status(409).json({ message: 'Nom d utilisateur deja pris' });
     }
 
     const user = await User.create({
-      username: normalizedUsername,
+      username,
       password,
       role: DEFAULT_USER_ROLE,
     });
@@ -58,10 +42,6 @@ const registerUser = async (req, res) => {
     return res.status(201).json(buildAuthResponse(user));
   } catch (error) {
     console.error('Error in registerUser:', error);
-    const validationMessage = getValidationMessage(error);
-    if (validationMessage) {
-      return res.status(400).json({ message: validationMessage });
-    }
     return res.status(500).json({ message: 'Erreur lors de la creation du compte' });
   }
 };
@@ -70,19 +50,14 @@ const registerUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
-  const normalizedUsername = req.body.username?.trim();
-  const { password } = req.body;
+  const { username, password } = req.body;
 
-  if (!ensureDatabaseAvailable(res)) {
-    return;
-  }
-
-  if (!normalizedUsername || !password) {
+  if (!username || !password) {
     return res.status(400).json({ message: 'Champs manquants' });
   }
 
   try {
-    const user = await User.findOne({ username: normalizedUsername }).select('+password');
+    const user = await User.findOne({ username }).select('+password');
     if (!user) {
       return res.status(401).json({ message: 'Identifiants invalides' });
     }
@@ -103,10 +78,6 @@ const loginUser = async (req, res) => {
 // @route   GET /api/auth/profile
 // @access  Private
 const getUserProfile = async (req, res) => {
-  if (!ensureDatabaseAvailable(res)) {
-    return;
-  }
-
   try {
     if (!req.user) {
       return res.status(404).json({ message: 'Utilisateur non trouve' });
@@ -123,7 +94,6 @@ const getUserProfile = async (req, res) => {
       username: user.username,
       email: user.email,
       role: normalizeUserRole(user.role),
-      mustChangePassword: Boolean(user.mustChangePassword),
       createdAt: user.createdAt,
     });
   } catch (error) {
@@ -132,61 +102,8 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-// @desc    Changer le mot de passe de l'utilisateur connecte
-// @route   POST /api/auth/change-password
-// @access  Private
-const changePassword = async (req, res) => {
-  if (!ensureDatabaseAvailable(res)) {
-    return;
-  }
-
-  const { currentPassword, newPassword } = req.body;
-
-  if (!currentPassword || !newPassword) {
-    return res.status(400).json({ message: 'Mot de passe actuel et nouveau mot de passe requis' });
-  }
-
-  if (newPassword.length < 8) {
-    return res.status(400).json({ message: 'Le nouveau mot de passe doit contenir au moins 8 caracteres' });
-  }
-
-  if (currentPassword === newPassword) {
-    return res.status(400).json({ message: 'Le nouveau mot de passe doit etre different de l ancien' });
-  }
-
-  try {
-    const user = await User.findById(req.user._id).select('+password');
-
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur non trouve' });
-    }
-
-    const isMatch = await user.matchPassword(currentPassword);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Mot de passe actuel incorrect' });
-    }
-
-    user.password = newPassword;
-    user.mustChangePassword = false;
-    await user.save();
-
-    return res.status(200).json({
-      message: 'Mot de passe mis a jour avec succes',
-      user: buildAuthResponse(user),
-    });
-  } catch (error) {
-    console.error('Error in changePassword:', error);
-    const validationMessage = getValidationMessage(error);
-    if (validationMessage) {
-      return res.status(400).json({ message: validationMessage });
-    }
-    return res.status(500).json({ message: 'Erreur lors de la mise a jour du mot de passe' });
-  }
-};
-
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
-  changePassword,
 };

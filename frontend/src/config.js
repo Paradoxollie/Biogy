@@ -6,7 +6,23 @@
 export const API_URL = process.env.REACT_APP_API_URL || 'https://biogy.onrender.com';
 
 // URL pour les requêtes directes depuis le navigateur
-export const BROWSER_API_URL = '/api';
+const getBrowserApiUrl = () => {
+  if (process.env.REACT_APP_BROWSER_API_URL) {
+    return process.env.REACT_APP_BROWSER_API_URL;
+  }
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:5000/api';
+    }
+  }
+
+  return '/api';
+};
+
+export const BROWSER_API_URL = getBrowserApiUrl();
 
 // Configuration des proxies CORS
 export const CORS_PROXIES = [

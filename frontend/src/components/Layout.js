@@ -1,6 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+﻿import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
+const NAV_ITEMS = [
+  {
+    name: 'Apprendre',
+    path: '/apprendre',
+    hoverClass: 'hover:text-lab-blue',
+    activeClass: 'text-lab-blue',
+    underlineClass: 'bg-lab-blue',
+    mobileActiveClass: 'text-lab-blue bg-lab-blue/10',
+  },
+  {
+    name: 'Laboratoire',
+    path: '/laboratoire',
+    hoverClass: 'hover:text-lab-teal',
+    activeClass: 'text-lab-teal',
+    underlineClass: 'bg-lab-teal',
+    mobileActiveClass: 'text-lab-teal bg-lab-teal/10',
+  },
+  {
+    name: 'Projets',
+    path: '/projets',
+    hoverClass: 'hover:text-lab-teal',
+    activeClass: 'text-lab-teal',
+    underlineClass: 'bg-lab-teal',
+    mobileActiveClass: 'text-lab-teal bg-lab-teal/10',
+  },
+  {
+    name: 'Actualites',
+    path: '/actualites',
+    hoverClass: 'hover:text-lab-teal',
+    activeClass: 'text-lab-teal',
+    underlineClass: 'bg-lab-teal',
+    mobileActiveClass: 'text-lab-teal bg-lab-teal/10',
+  },
+  {
+    name: 'Forum',
+    path: '/forum',
+    hoverClass: 'hover:text-lab-purple',
+    activeClass: 'text-lab-purple',
+    underlineClass: 'bg-lab-purple',
+    mobileActiveClass: 'text-lab-purple bg-lab-purple/10',
+  },
+];
 
 function Layout({ children }) {
   const [scrolled, setScrolled] = useState(false);
@@ -28,16 +71,14 @@ function Layout({ children }) {
     navigate('/login');
   };
 
+  const isActivePath = (path) => location.pathname === path || location.pathname.startsWith(`${path}/`);
+
   if (loadingAuth) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-lab-bg via-white to-blue-50">
         <div className="flex-grow"></div>
       </div>
     );
-  }
-
-  if (userInfo?.mustChangePassword && location.pathname !== '/changer-mot-de-passe') {
-    return <Navigate to="/changer-mot-de-passe" replace />;
   }
 
   return (
@@ -128,27 +169,24 @@ function Layout({ children }) {
           </div>
 
           <nav className="hidden md:flex items-center space-x-8">
-            {[
-              { name: 'Apprendre', path: '/apprendre', color: 'lab-blue', hoverClass: 'hover:text-lab-blue' },
-              { name: 'Recherche', path: '/recherche', color: 'lab-purple', hoverClass: 'hover:text-lab-purple' },
-              { name: 'Projets', path: '/projets', color: 'lab-teal', hoverClass: 'hover:text-lab-teal' },
-              { name: 'Actualités', path: '/actualites', color: 'lab-teal', hoverClass: 'hover:text-lab-teal' },
-              { name: 'Méthodes', path: '/methodes', color: 'lab-green', hoverClass: 'hover:text-lab-green' },
-              { name: 'Forum', path: '/forum', color: 'lab-purple', hoverClass: 'hover:text-lab-purple' }
-            ].map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`relative font-medium transition-colors duration-300 ${item.hoverClass} no-underline group ${
-                  location.pathname === item.path ? `text-${item.color}` : 'text-gray-600'
-                }`}
-              >
-                {item.name}
-                <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-${item.color} transition-all duration-300 group-hover:w-full ${
-                  location.pathname === item.path ? 'w-full' : 'w-0'
-                }`}></span>
-              </Link>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const isActive = isActivePath(item.path);
+
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`relative font-medium transition-colors duration-300 ${item.hoverClass} no-underline group ${
+                    isActive ? item.activeClass : 'text-gray-600'
+                  }`}
+                >
+                  {item.name}
+                  <span className={`absolute -bottom-1 left-0 h-0.5 transition-all duration-300 group-hover:w-full ${
+                    isActive ? `w-full ${item.underlineClass}` : `w-0 ${item.underlineClass}`
+                  }`}></span>
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -167,7 +205,7 @@ function Layout({ children }) {
                     onClick={handleLogout}
                     className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium transition duration-150 ease-in-out"
                 >
-                    Déconnexion
+                    D茅connexion
                 </button>
                 </>
             ) : (
@@ -201,27 +239,22 @@ function Layout({ children }) {
         {mobileMenuOpen && (
           <div className="md:hidden bg-white shadow-lg rounded-b-lg overflow-hidden">
             <div className="px-4 py-3 space-y-3">
-              {[
-                { name: 'Apprendre', path: '/apprendre', color: 'lab-blue', hoverClass: 'hover:text-lab-blue' },
-                { name: 'Recherche', path: '/recherche', color: 'lab-purple', hoverClass: 'hover:text-lab-purple' },
-                { name: 'Projets', path: '/projets', color: 'lab-teal', hoverClass: 'hover:text-lab-teal' },
-                { name: 'Actualités', path: '/actualites', color: 'lab-teal', hoverClass: 'hover:text-lab-teal' },
-                { name: 'Méthodes', path: '/methodes', color: 'lab-green', hoverClass: 'hover:text-lab-green' },
-                { name: 'Forum', path: '/forum', color: 'lab-purple', hoverClass: 'hover:text-lab-purple' }
-              ].map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`block py-2 px-3 rounded-lg no-underline ${item.hoverClass} ${
-                    location.pathname === item.path
-                      ? `text-${item.color} bg-${item.color}/10`
-                      : 'text-gray-600'
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {NAV_ITEMS.map((item) => {
+                const isActive = isActivePath(item.path);
+
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className={`block py-2 px-3 rounded-lg no-underline ${item.hoverClass} ${
+                      isActive ? item.mobileActiveClass : 'text-gray-600'
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
 
               <div className="border-t border-gray-100 my-3 pt-3">
                 {userInfo ? (
@@ -250,7 +283,7 @@ function Layout({ children }) {
                       }}
                       className="block w-full text-left py-2 px-3 rounded-lg text-red-600 hover:text-red-800 mt-2"
                     >
-                      Déconnexion
+                      D茅connexion
                     </button>
                   </>
                 ) : (
@@ -304,7 +337,7 @@ function Layout({ children }) {
               </Link>
               <p className="mt-3 text-gray-600">
                 Votre portail vers le monde fascinant de la biologie et la biotechnologie.
-                Explorez, apprenez et découvrez les merveilles de la science du vivant.
+                Explorez, apprenez et d茅couvrez les merveilles de la science du vivant.
               </p>
             </div>
 
@@ -312,14 +345,14 @@ function Layout({ children }) {
               <h3 className="font-semibold mb-3 text-gray-700">Navigation</h3>
               <ul className="space-y-2">
                 <li><Link to="/apprendre" className="text-gray-600 hover:text-lab-blue transition duration-300 no-underline">Apprendre</Link></li>
-                <li><Link to="/methodes" className="text-gray-600 hover:text-lab-green transition duration-300 no-underline">Méthodes</Link></li>
-                <li><Link to="/actualites" className="text-gray-600 hover:text-lab-teal transition duration-300 no-underline">Actualités</Link></li>
+                <li><Link to="/laboratoire" className="text-gray-600 hover:text-lab-teal transition duration-300 no-underline">Laboratoire</Link></li>
+                <li><Link to="/actualites" className="text-gray-600 hover:text-lab-teal transition duration-300 no-underline">Actualit茅s</Link></li>
                 <li><Link to="/partager-projet" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Partager un Projet</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-3 text-gray-700">Communauté</h3>
+              <h3 className="font-semibold mb-3 text-gray-700">Communaut茅</h3>
               <ul className="space-y-2">
                   <li><Link to="/projets" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Voir les Projets</Link></li>
                   <li><Link to="/forum" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Forum</Link></li>
@@ -349,7 +382,7 @@ function Layout({ children }) {
                       onClick={handleLogout}
                       className="text-red-600 hover:text-red-800 transition duration-300 text-left w-full"
                     >
-                      Déconnexion
+                      D茅connexion
                     </button>
                   </li>
                 </>
@@ -364,7 +397,7 @@ function Layout({ children }) {
           </div>
 
           <div className="mt-10 pt-5 border-t border-gray-200 text-center text-gray-500 text-sm">
-            <p>© {new Date().getFullYear()} Biogy. Tous droits réservés.</p>
+            <p>漏 {new Date().getFullYear()} Biogy. Tous droits r茅serv茅s.</p>
           </div>
         </div>
       </footer>
@@ -373,3 +406,4 @@ function Layout({ children }) {
 }
 
 export default Layout;
+

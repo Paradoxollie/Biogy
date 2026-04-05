@@ -3,47 +3,21 @@ const bcrypt = require('bcryptjs');
 
 const { DEFAULT_USER_ROLE } = require('../utils/roles');
 
-const USERNAME_PATTERN = /^[\p{L}\p{N} ._'-]+$/u;
-
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: [true, 'Nom d\'utilisateur requis'],
+    required: true,
     unique: true,
     trim: true,
-    minlength: [3, 'Le nom d\'utilisateur doit contenir au moins 3 caracteres'],
-    maxlength: [50, 'Le nom d\'utilisateur doit contenir au maximum 50 caracteres'],
-    match: [
-      USERNAME_PATTERN,
-      'Le nom d\'utilisateur peut contenir des lettres, chiffres, espaces, apostrophes, points, tirets et underscores',
-    ],
+    minlength: 3,
+    maxlength: 30,
+    match: /^[a-zA-Z0-9_.-]+$/,
   },
   password: {
     type: String,
     required: true,
     select: false,
     minlength: 8,
-  },
-  mustChangePassword: {
-    type: Boolean,
-    default: false,
-  },
-  passwordChangedAt: {
-    type: Date,
-    default: Date.now,
-  },
-  tokenVersion: {
-    type: Number,
-    default: 0,
-  },
-  lastPasswordResetAt: {
-    type: Date,
-    default: null,
-  },
-  lastPasswordResetBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null,
   },
   role: {
     type: String,
@@ -69,8 +43,6 @@ userSchema.pre('save', async function savePassword(next) {
   }
 
   this.password = await bcrypt.hash(this.password, 10);
-  this.passwordChangedAt = new Date();
-  this.tokenVersion = this.isNew ? (this.tokenVersion || 0) : ((this.tokenVersion || 0) + 1);
   return next();
 });
 

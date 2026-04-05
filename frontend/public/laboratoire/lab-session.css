@@ -1,0 +1,236 @@
+.biogy-session-toolbar {
+  position: sticky;
+  top: 64px;
+  z-index: 95;
+  padding: 12px 24px 0;
+}
+
+.biogy-session-toolbar__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(27, 46, 74, 0.12);
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(27, 46, 74, 0.12);
+  backdrop-filter: blur(14px);
+  padding: 16px 18px;
+}
+
+.biogy-session-toolbar__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.biogy-session-toolbar__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.biogy-session-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.biogy-session-pill--brand {
+  background: #eef8fa;
+  color: #1f7a8c;
+}
+
+.biogy-session-pill--auth {
+  background: #eef7ff;
+  color: #1b2e4a;
+}
+
+.biogy-session-pill--teacher {
+  background: #fff7dc;
+  color: #8a5a10;
+}
+
+.biogy-session-pill--teacher.is-unlocked,
+body.prof-mode .biogy-session-pill--teacher {
+  background: #fef3dc;
+  color: #a85f00;
+}
+
+.biogy-session-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.biogy-session-button {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.biogy-session-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(27, 46, 74, 0.1);
+}
+
+.biogy-session-button--primary {
+  background: #1f7a8c;
+  color: #fff;
+}
+
+.biogy-session-button--primary:hover {
+  background: #196572;
+}
+
+.biogy-session-button--secondary {
+  background: #fff;
+  border-color: rgba(27, 46, 74, 0.15);
+  color: #1b2e4a;
+}
+
+.biogy-session-button--ghost {
+  background: #f8fafc;
+  border-color: rgba(27, 46, 74, 0.12);
+  color: #425466;
+}
+
+.biogy-session-toolbar__help {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #556274;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.biogy-session-message {
+  margin-top: 14px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 13px;
+  display: none;
+}
+
+.biogy-session-message.is-visible {
+  display: block;
+}
+
+.biogy-session-message--info {
+  background: #eef7ff;
+  color: #24456a;
+  border: 1px solid #c7defa;
+}
+
+.biogy-session-message--success {
+  background: #edf9f2;
+  color: #215b40;
+  border: 1px solid #c7ead7;
+}
+
+.biogy-session-message--error {
+  background: #fff2f2;
+  color: #8d2d2d;
+  border: 1px solid #f3c9c9;
+}
+
+.biogy-session-banner {
+  max-width: 1000px;
+  margin: 0 auto 18px;
+  background: #f8fbff;
+  border: 1px solid rgba(59, 130, 246, 0.12);
+  color: #314e6e;
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 20px rgba(27, 46, 74, 0.06);
+}
+
+.biogy-session-banner strong {
+  color: #1b2e4a;
+}
+
+.biogy-submission-banner {
+  max-width: 960px;
+  margin: 0 auto 20px;
+  padding: 18px 22px;
+  border-radius: 16px;
+  border: 1px solid #d9e9ee;
+  background: #f3fbfd;
+  color: #1f4250;
+  font-family: 'IBM Plex Sans', sans-serif;
+  box-shadow: 0 10px 24px rgba(27, 46, 74, 0.07);
+}
+
+.biogy-submission-banner h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  color: #18323f;
+}
+
+.biogy-submission-banner p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+img,
+svg,
+canvas {
+  max-width: 100%;
+}
+
+@media (max-width: 900px) {
+  .biogy-session-toolbar {
+    top: 0;
+    padding: 10px 14px 0;
+  }
+
+  .biogy-session-toolbar__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .biogy-session-toolbar__actions {
+    justify-content: stretch;
+  }
+
+  .biogy-session-button {
+    flex: 1 1 180px;
+    text-align: center;
+  }
+
+  body table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .biogy-session-toolbar__meta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .biogy-session-pill {
+    justify-content: center;
+  }
+
+  .biogy-session-banner,
+  .biogy-submission-banner {
+    padding: 14px;
+  }
+}

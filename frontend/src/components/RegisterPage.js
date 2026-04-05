@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BROWSER_API_URL } from '../config';
+
+const getSafeRedirectTarget = (value) => {
+  if (!value || typeof value !== 'string' || !value.startsWith('/')) {
+    return '/';
+  }
+
+  return value;
+};
 
 function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -10,6 +18,9 @@ function RegisterPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTarget = getSafeRedirectTarget(searchParams.get('redirect') || '/');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,7 +60,7 @@ function RegisterPage() {
       setSuccess('Inscription réussie ! Vous allez être redirigé vers la page de connexion.');
 
       setTimeout(() => {
-        navigate('/login');
+        navigate(redirectTarget !== '/' ? `/login?redirect=${encodeURIComponent(redirectTarget)}` : '/login');
       }, 2000);
 
     } catch (err) {
@@ -140,7 +151,10 @@ function RegisterPage() {
         <div className="text-center mt-4">
           <p className="text-base text-gray-600">
             Déjà un compte?{' '}
-            <Link to="/login" className="font-medium text-cyan-600 hover:text-cyan-800">
+            <Link
+              to={redirectTarget !== '/' ? `/login?redirect=${encodeURIComponent(redirectTarget)}` : '/login'}
+              className="font-medium text-cyan-600 hover:text-cyan-800"
+            >
               Connectez-vous ici
             </Link>
           </p>
