@@ -450,7 +450,15 @@
 
   const header = document.querySelector('.site-header');
   const container = document.querySelector('.container');
+
+  const updateToolbarOffset = () => {
+    const offset = header ? Math.ceil(header.getBoundingClientRect().height) : 64;
+    document.documentElement.style.setProperty('--biogy-header-offset', `${offset}px`);
+  };
+
   if (header) {
+    updateToolbarOffset();
+    window.addEventListener('resize', updateToolbarOffset);
     header.insertAdjacentElement('afterend', toolbar);
     toolbar.insertAdjacentElement('afterend', messageHost);
   }

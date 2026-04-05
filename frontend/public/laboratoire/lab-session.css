@@ -1,6 +1,6 @@
 .biogy-session-toolbar {
   position: sticky;
-  top: 64px;
+  top: var(--biogy-header-offset, 64px);
   z-index: 95;
   padding: 12px 24px 0;
 }

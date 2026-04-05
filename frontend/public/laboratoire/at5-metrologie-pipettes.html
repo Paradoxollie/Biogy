@@ -53,10 +53,99 @@ body {
   z-index: 100;
   box-shadow: 0 2px 20px rgba(0,0,0,0.2);
 }
+.site-nav-shell {
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  background: rgba(9, 18, 34, 0.18);
+}
+.site-nav {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.site-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.site-brand-mark {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+}
+.site-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.site-brand-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.site-brand-subtitle {
+  font-size: 11px;
+  color: #B7C9DA;
+}
+.site-nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  flex: 1;
+}
+.site-nav-link {
+  color: rgba(255,255,255,0.88);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+.site-nav-link:hover,
+.site-nav-link.is-active {
+  color: white;
+}
+.site-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.site-auth-link {
+  color: rgba(255,255,255,0.86);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+.site-auth-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3B82F6, #5B3E8C 65%, #1F7A8C);
+  color: white;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 10px 20px rgba(10, 25, 50, 0.18);
+}
 .header-inner {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 14px 24px;
+  padding: 16px 24px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -452,6 +541,34 @@ tr:nth-child(even) td { background: #FAFAF8; }
   color: var(--navy);
 }
 .input-cell:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 2px rgba(31,122,140,0.15); }
+.check-choice {
+  min-width: 126px;
+  text-align: center;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+.q1-table th:nth-child(2),
+.q1-table td:nth-child(2) {
+  min-width: 128px;
+}
+.q1-table th:last-child,
+.q1-table td:last-child {
+  min-width: 280px;
+}
+.q1-remarks {
+  min-height: 96px;
+}
+.annexe-link {
+  color: var(--teal);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(31,122,140,0.45);
+}
+.annexe-link:hover {
+  color: #155d6b;
+  border-bottom-color: rgba(21,93,107,0.55);
+}
 
 /* ===== ALERT BOX ===== */
 .alert {
@@ -765,6 +882,13 @@ textarea.student-answer {
 }
 textarea.student-answer:focus { outline: none; border-color: var(--purple); }
 textarea.student-answer::placeholder { color: var(--muted); font-style: italic; }
+.manual-answer-box {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+}
 
 /* ===== CONFORMITÉ ===== */
 .conformite-calc {
@@ -879,7 +1003,18 @@ ul.check-list li::before {
   background: var(--teal-light);
   font-weight: 600;
   color: var(--teal);
-  white-space: nowrap;
+  white-space: normal;
+}
+.source-table th:nth-child(2),
+.source-table td:nth-child(2) {
+  min-width: 280px;
+}
+.source-table th:nth-child(3),
+.source-table td:nth-child(3) {
+  min-width: 180px;
+}
+.source-table textarea.student-answer {
+  min-height: 92px;
 }
 
 /* ===== BILAN ===== */
@@ -944,12 +1079,47 @@ ul.check-list li::before {
 }
 
 /* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .site-nav {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+  }
+  .site-nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 14px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+  .site-nav-links::-webkit-scrollbar {
+    display: none;
+  }
+  .site-auth-button,
+  .site-auth-link {
+    white-space: nowrap;
+  }
+  .header-inner {
+    padding: 16px 16px 18px;
+  }
+}
+
 @media (max-width: 600px) {
   .container { padding: 20px 16px 60px; }
   .header-inner { flex-wrap: wrap; gap: 10px; }
+  .site-brand-subtitle { display: none; }
+  .site-nav-actions { display: none; }
   .jf-grid { grid-template-columns: repeat(2, 1fr); }
   .objectifs-grid { grid-template-columns: 1fr; }
   .calc-row { flex-direction: column; align-items: flex-start; }
+  .toggle-prof {
+    width: 100%;
+    justify-content: center;
+  }
+  .conf-row label {
+    width: 100%;
+  }
 }
 </style>
 </head>
@@ -959,6 +1129,36 @@ ul.check-list li::before {
 
 <!-- HEADER -->
 <header class="site-header">
+  <div class="site-nav-shell">
+    <div class="site-nav">
+      <a class="site-brand" href="/#/">
+        <span class="site-brand-mark" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2V22" stroke="white" stroke-width="0.7" stroke-dasharray="1 2" stroke-opacity="0.55" />
+            <path d="M6 2.5C8 4 10 5 12 5C14 5 16 4 18 2.5M6 6.5C8 8 10 9 12 9C14 9 16 8 18 6.5M6 10.5C8 12 10 13 12 13C14 13 16 12 18 10.5M6 14.5C8 16 10 17 12 17C14 17 16 16 18 14.5M6 18.5C8 20 10 21 12 21C14 21 16 20 18 18.5" stroke="#7DD3FC" stroke-width="1.4" stroke-linecap="round" />
+            <path d="M6 4.5C8 3 10 2 12 2C14 2 16 3 18 4.5M6 8.5C8 7 10 6 12 6C14 6 16 7 18 8.5M6 12.5C8 11 10 10 12 10C14 10 16 11 18 12.5M6 16.5C8 15 10 14 12 14C14 14 16 15 18 16.5M6 20.5C8 19 10 18 12 18C14 18 16 19 18 20.5" stroke="#C4B5FD" stroke-width="1.4" stroke-linecap="round" />
+          </svg>
+        </span>
+        <span class="site-brand-copy">
+          <span class="site-brand-title">Biogy</span>
+          <span class="site-brand-subtitle">Biologie &amp; Biotechnologie</span>
+        </span>
+      </a>
+
+      <nav class="site-nav-links" aria-label="Navigation Biogy">
+        <a class="site-nav-link" href="/#/apprendre">Apprendre</a>
+        <a class="site-nav-link is-active" href="/#/laboratoire">Laboratoire</a>
+        <a class="site-nav-link" href="/#/projets">Projets</a>
+        <a class="site-nav-link" href="/#/actualites">Actualités</a>
+        <a class="site-nav-link" href="/#/forum">Forum</a>
+      </nav>
+
+      <div class="site-nav-actions">
+        <a class="site-auth-link" href="/#/login">Se connecter</a>
+        <a class="site-auth-button" href="/#/register">S'inscrire</a>
+      </div>
+    </div>
+  </div>
   <div class="header-inner">
     <div class="header-left">
       <div class="header-badge">STL Biotechnologies &bull; Métrologie</div>
@@ -1041,7 +1241,7 @@ ul.check-list li::before {
       <div class="manip-icon">🔍</div>
       <div class="manip-content">
         <div class="manip-label">Consigne</div>
-        <div class="manip-text">À l'aide des données de l'<strong>Annexe 1</strong>, procéder à la vérification d'une pipette à piston P1000. Ouvrir l'annexe ci-dessous pour consulter le protocole.</div>
+        <div class="manip-text">À l'aide des données de l'<a href="#annexe1-block" class="annexe-link" onclick="return openAnnexeLink(event, 'annexe1')"><strong>Annexe 1</strong></a>, procéder à la vérification d'une pipette à piston P1000. Cliquez sur l'annexe dans cette page pour ouvrir directement le protocole, puis complétez vos réponses ici.</div>
       </div>
     </div>
     <div class="alert alert-warning">
@@ -1067,43 +1267,73 @@ ul.check-list li::before {
         <div class="q-num">1</div>
         <div class="q-label">Observer &amp; Consigner</div>
       </div>
-      <div class="q-text">Notez vos observations sous une forme appropriée dans le cahier de laboratoire. Complétez le tableau de contrôle ci-dessous pour la pipette utilisée.</div>
+      <div class="q-text">Renseignez directement ici vos observations et vos remarques pour la pipette utilisée. Complétez chaque ligne du tableau de contrôle ci-dessous sur cette page.</div>
     </div>
 
     <div style="overflow-x:auto; margin-top:12px;">
-    <table>
+    <table class="q1-table">
       <thead>
         <tr>
-          <th style="width:40%">Élément contrôlé</th>
-          <th style="width:20%">✔ / ✘</th>
-          <th>Observations / Remarques</th>
+          <th style="width:38%">Élément contrôlé</th>
+          <th style="width:22%">✔ / ✘</th>
+          <th style="width:40%">Observations / Remarques</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>Réglage du volume (affichage)</td>
-          <td><input class="input-cell" placeholder="✔ / ✘" style="width:60px; text-align:center;"></td>
-          <td><input class="input-cell" placeholder="Remarques..."></td>
+          <td>
+            <select class="input-cell check-choice" id="q1-check-volume">
+              <option value="">Choisir</option>
+              <option value="✔">✔ Conforme</option>
+              <option value="✘">✘ Non conforme</option>
+            </select>
+          </td>
+          <td><textarea class="student-answer q1-remarks" id="q1-obs-volume" rows="3" placeholder="Décrivez ici ce que vous observez..."></textarea></td>
         </tr>
         <tr>
           <td>Régularité des mouvements du piston</td>
-          <td><input class="input-cell" placeholder="✔ / ✘" style="width:60px; text-align:center;"></td>
-          <td><input class="input-cell" placeholder="Remarques..."></td>
+          <td>
+            <select class="input-cell check-choice" id="q1-check-piston">
+              <option value="">Choisir</option>
+              <option value="✔">✔ Conforme</option>
+              <option value="✘">✘ Non conforme</option>
+            </select>
+          </td>
+          <td><textarea class="student-answer q1-remarks" id="q1-obs-piston" rows="3" placeholder="Décrivez ici ce que vous observez..."></textarea></td>
         </tr>
         <tr>
           <td>Efficacité de l'éjecteur de cônes</td>
-          <td><input class="input-cell" placeholder="✔ / ✘" style="width:60px; text-align:center;"></td>
-          <td><input class="input-cell" placeholder="Remarques..."></td>
+          <td>
+            <select class="input-cell check-choice" id="q1-check-ejecteur">
+              <option value="">Choisir</option>
+              <option value="✔">✔ Conforme</option>
+              <option value="✘">✘ Non conforme</option>
+            </select>
+          </td>
+          <td><textarea class="student-answer q1-remarks" id="q1-obs-ejecteur" rows="3" placeholder="Décrivez ici ce que vous observez..."></textarea></td>
         </tr>
         <tr>
           <td>Test de fuite (20 secondes)</td>
-          <td><input class="input-cell" placeholder="✔ / ✘" style="width:60px; text-align:center;"></td>
-          <td><input class="input-cell" placeholder="Absence de goutte ?"></td>
+          <td>
+            <select class="input-cell check-choice" id="q1-check-fuite">
+              <option value="">Choisir</option>
+              <option value="✔">✔ Conforme</option>
+              <option value="✘">✘ Non conforme</option>
+            </select>
+          </td>
+          <td><textarea class="student-answer q1-remarks" id="q1-obs-fuite" rows="3" placeholder="Précisez ici ce que vous constatez au test de fuite..."></textarea></td>
         </tr>
         <tr>
           <td><strong>Conformité globale de la pipette</strong></td>
-          <td><input class="input-cell" placeholder="✔ / ✘" style="width:60px; text-align:center;"></td>
-          <td><input class="input-cell" placeholder="Pipette utilisable ?"></td>
+          <td>
+            <select class="input-cell check-choice" id="q1-check-conformite">
+              <option value="">Choisir</option>
+              <option value="✔">✔ Conforme</option>
+              <option value="✘">✘ Non conforme</option>
+            </select>
+          </td>
+          <td><textarea class="student-answer q1-remarks" id="q1-obs-conformite" rows="3" placeholder="Indiquez ici si la pipette vous semble utilisable et pourquoi."></textarea></td>
         </tr>
       </tbody>
     </table>
@@ -1142,7 +1372,7 @@ ul.check-list li::before {
       <div class="manip-icon">🧪</div>
       <div class="manip-content">
         <div class="manip-label">Consigne</div>
-        <div class="manip-text">Après lecture des données de l'<strong>Annexe 2</strong>, procéder au pipetage de différents volumes à l'aide des pipettes du laboratoire. Une fiche expérimentale plastifiée vous sera fournie.</div>
+        <div class="manip-text">Après lecture des données de l'<a href="#annexe2-block" class="annexe-link" onclick="return openAnnexeLink(event, 'annexe2')"><strong>Annexe 2</strong></a>, procédez au pipetage de différents volumes à l'aide des pipettes du laboratoire, puis saisissez directement vos résultats et vos observations sur cette page.</div>
       </div>
     </div>
     <div class="alert alert-validate">
@@ -1164,34 +1394,38 @@ ul.check-list li::before {
         <div class="q-num">2</div>
         <div class="q-label">Calculer</div>
       </div>
-      <div class="q-text">Après lecture de la procédure opératoire, calculer la masse de référence à obtenir théoriquement pour 1 mL d'eau distillée à 20°C.</div>
+      <div class="q-text">Après lecture de la procédure opératoire, calculez la masse de référence à obtenir théoriquement pour 1 mL d'eau distillée à 20°C, puis renseignez ici votre résultat et votre raisonnement.</div>
       <div class="q-data">
         <strong>Donnée :</strong> Concentration en masse de l'eau à 20°C : ρ<sub>(eau ; 20°C)</sub> = 998,205 g·L<sup>-1</sup><br>
-        <strong>Volume à pipeter :</strong> V = 1 mL = 0,001 L
+        <strong>Volume à pipeter :</strong> V = 1 mL = 0,001 L<br>
+        <strong>Relation utile :</strong> m = ρ × V
       </div>
     </div>
 
-    <div class="calc-box">
-      <div class="calc-title">🧮 Aide au calcul</div>
-      <div class="formula-display">m = ρ × V &nbsp;&nbsp;→&nbsp;&nbsp; {g} = {g·L⁻¹} × {L}</div>
-      <div class="calc-row">
-        <label>ρ (eau, 20°C) en g·L⁻¹ :</label>
-        <input class="calc-input" id="rho" value="998.205" type="number" step="0.001">
+    <div class="manual-answer-box">
+      <div class="conf-row">
+        <label>m(eau ; référence) calculée (g) :</label>
+        <input class="conf-input" id="q2-mref-student" type="number" step="0.000001" placeholder="0,998205">
       </div>
-      <div class="calc-row">
-        <label>V (à peser) en L :</label>
-        <input class="calc-input" id="vol" value="0.001" type="number" step="0.0001">
-      </div>
-      <button class="calc-btn" onclick="calcMasse()">Calculer m référence</button>
-      <div class="calc-result" id="calc-result-q2"></div>
     </div>
 
-    <div class="answer-area" id="answer-q2-area" style="display:none;">
-      <textarea class="student-answer" placeholder="Écrivez votre raisonnement complet ici (EG, EU, EVN)..." rows="4" style="min-height:100px;"></textarea>
-    </div>
-    <button class="target-btn" onclick="document.getElementById('answer-q2-area').style.display='block'; this.style.display='none';" style="margin-top:8px; font-size:12px;">+ Ajouter mon raisonnement détaillé</button>
+    <textarea class="student-answer" placeholder="Rédigez ici votre raisonnement complet (relation utilisée, unités, application numérique)..." rows="5" style="min-height:120px;"></textarea>
 
     <div class="prof-block">
+      <div class="calc-box" data-biogy-runtime="ignore">
+        <div class="calc-title">🧮 Aide au calcul</div>
+        <div class="formula-display">m = ρ × V &nbsp;&nbsp;→&nbsp;&nbsp; {g} = {g·L⁻¹} × {L}</div>
+        <div class="calc-row">
+          <label>ρ (eau, 20°C) en g·L⁻¹ :</label>
+          <input class="calc-input" id="rho" value="998.205" type="number" step="0.001">
+        </div>
+        <div class="calc-row">
+          <label>V (à peser) en L :</label>
+          <input class="calc-input" id="vol" value="0.001" type="number" step="0.0001">
+        </div>
+        <button class="calc-btn" onclick="calcMasse()">Calculer m référence</button>
+        <div class="calc-result" id="calc-result-q2"></div>
+      </div>
       <p><strong>Correction complète attendue (format EG/EU/EVN) :</strong></p>
       <div class="formula">
         EG : m(eau ; référence) = ρ(eau ; 20°C) × V(eau ; à peser)<br><br>
@@ -1234,7 +1468,7 @@ ul.check-list li::before {
       <li>Placer la <strong>coupelle de pesée</strong> au centre du plateau de la balance et ajuster le <strong>zéro</strong> de la balance.</li>
       <li>Ouvrir les <strong>volets</strong> de la balance.</li>
       <li>Rincer le <strong>cône</strong> de la P1000 avec de l'eau distillée.</li>
-      <li>Introduire <strong>doucement</strong> dans la coupelle de pesée un volume d'<strong>1 mL</strong> à l'aide de la P1000 (selon la technique décrite en Annexe 2).</li>
+      <li>Introduire <strong>doucement</strong> dans la coupelle de pesée un volume d'<strong>1 mL</strong> à l'aide de la P1000 (selon la technique décrite dans l'<a href="#annexe2-block" class="annexe-link" onclick="return openAnnexeLink(event, 'annexe2')"><strong>Annexe 2</strong></a>).</li>
       <li>Fermer les volets.</li>
       <li>Noter la masse <em>m(eau ; essai 1)</em> obtenue.</li>
       <li>Effectuer de nouveau l'ajustage du zéro et <strong>recommencer quatre fois</strong> la manipulation (total = 5 essais).</li>
@@ -1258,7 +1492,7 @@ ul.check-list li::before {
         <div class="q-num">3</div>
         <div class="q-label">Consigner</div>
       </div>
-      <div class="q-text">Sous une forme appropriée, consigner les valeurs mesurées obtenues. Complétez le tableau ci-dessous.</div>
+      <div class="q-text">Saisissez directement ici les valeurs mesurées obtenues. Complétez le tableau ci-dessous sur cette page.</div>
     </div>
 
     <div style="overflow-x:auto; margin-top:12px;">
@@ -1515,30 +1749,45 @@ ul.check-list li::before {
         <div class="q-num">9</div>
         <div class="q-label">Conclure</div>
       </div>
-      <div class="q-text">Conclure sur la conformité de l'utilisation de la pipette à piston P1000.</div>
+      <div class="q-text">Calculez d'abord l'écart relatif en pourcentage, puis concluez ici sur la conformité de l'utilisation de la pipette à piston P1000.</div>
       <div class="q-data">
         <strong>Tolérance constructeur :</strong> pour le volume de contrôle 1000 µL, l'écart moyen acceptable est de <strong>1 %</strong>.<br>
         Soit : |Écart moyen| / m<sub>référence</sub> × 100 ≤ 1 %
       </div>
     </div>
 
-    <div class="conformite-calc">
-      <strong style="font-size:13px; display:block; margin-bottom:10px;">Calcul de l'écart relatif en % :</strong>
+    <div class="manual-answer-box">
+      <strong style="font-size:13px; display:block; margin-bottom:10px;">Renseignez ici les valeurs de votre calcul :</strong>
       <div class="conf-row">
         <label>Écart moyen |Δm| (g) :</label>
-        <input class="conf-input" id="conf-delta" type="number" step="0.00001" placeholder="0,00000">
+        <input class="conf-input" id="q9-delta-student" type="number" step="0.00001" placeholder="0,00000">
       </div>
       <div class="conf-row">
         <label>m<sub>référence</sub> (g) :</label>
-        <input class="conf-input" id="conf-mref2" type="number" step="0.0001" value="0.998205">
+        <input class="conf-input" id="q9-mref-student" type="number" step="0.000001" value="0.998205">
       </div>
-      <button class="calc-btn" onclick="calcConformite()">Tester la conformité</button>
-      <div class="conf-result" id="conf-result"></div>
+      <div class="conf-row" style="margin-bottom:0;">
+        <label>Écart relatif calculé (%) :</label>
+        <input class="conf-input" id="q9-pct-student" type="number" step="0.001" placeholder="0,000">
+      </div>
     </div>
 
-    <textarea class="student-answer" style="margin-top:12px;" placeholder="Rédigez votre conclusion sur la conformité de la pipette P1000 pour ce contrôle métrologique..." rows="3"></textarea>
+    <textarea class="student-answer" style="margin-top:12px;" placeholder="Rédigez votre conclusion sur la conformité de la pipette P1000 pour ce contrôle métrologique..." rows="4"></textarea>
 
     <div class="prof-block">
+      <div class="conformite-calc" data-biogy-runtime="ignore">
+        <strong style="font-size:13px; display:block; margin-bottom:10px;">Calcul de l'écart relatif en % :</strong>
+        <div class="conf-row">
+          <label>Écart moyen |Δm| (g) :</label>
+          <input class="conf-input" id="prof-conf-delta" type="number" step="0.00001" placeholder="0,00000">
+        </div>
+        <div class="conf-row">
+          <label>m<sub>référence</sub> (g) :</label>
+          <input class="conf-input" id="prof-conf-mref2" type="number" step="0.000001" value="0.998205">
+        </div>
+        <button class="calc-btn" onclick="calcConformite()">Tester la conformité</button>
+        <div class="conf-result" id="prof-conf-result"></div>
+      </div>
       <p>La <strong>conclusion attendue</strong> doit mentionner explicitement :</p>
       <ul>
         <li>La valeur de l'écart relatif calculé en %</li>
@@ -1571,7 +1820,7 @@ ul.check-list li::before {
         <div class="q-num">10</div>
         <div class="q-label">Lister</div>
       </div>
-      <div class="q-text">En utilisant la procédure opératoire, lister les sources d'erreurs qui peuvent influencer les valeurs mesurées lors de la vérification.</div>
+      <div class="q-text">En utilisant la procédure opératoire, listez ici dans le tableau les sources d'erreurs qui peuvent influencer les valeurs mesurées lors de la vérification.</div>
     </div>
 
     <div style="overflow-x:auto; margin-top:12px;">
@@ -1586,27 +1835,27 @@ ul.check-list li::before {
       <tbody>
         <tr>
           <td>Mise à zéro de la balance</td>
-          <td><textarea class="student-answer" placeholder="..." rows="1" style="min-height:36px;"></textarea></td>
+          <td><textarea class="student-answer" placeholder="Décrivez ici la source d'erreur possible..." rows="3" style="min-height:96px;"></textarea></td>
           <td><input class="input-cell" placeholder="..."></td>
         </tr>
         <tr>
           <td>Rinçage du cône</td>
-          <td><textarea class="student-answer" placeholder="..." rows="1" style="min-height:36px;"></textarea></td>
+          <td><textarea class="student-answer" placeholder="Décrivez ici la source d'erreur possible..." rows="3" style="min-height:96px;"></textarea></td>
           <td><input class="input-cell" placeholder="..."></td>
         </tr>
         <tr>
           <td>Technique de pipetage</td>
-          <td><textarea class="student-answer" placeholder="..." rows="1" style="min-height:36px;"></textarea></td>
+          <td><textarea class="student-answer" placeholder="Décrivez ici la source d'erreur possible..." rows="3" style="min-height:96px;"></textarea></td>
           <td><input class="input-cell" placeholder="..."></td>
         </tr>
         <tr>
           <td>Température de l'eau</td>
-          <td><textarea class="student-answer" placeholder="..." rows="1" style="min-height:36px;"></textarea></td>
+          <td><textarea class="student-answer" placeholder="Décrivez ici la source d'erreur possible..." rows="3" style="min-height:96px;"></textarea></td>
           <td><input class="input-cell" placeholder="..."></td>
         </tr>
         <tr>
           <td>Lecture de la balance</td>
-          <td><textarea class="student-answer" placeholder="..." rows="1" style="min-height:36px;"></textarea></td>
+          <td><textarea class="student-answer" placeholder="Décrivez ici la source d'erreur possible..." rows="3" style="min-height:96px;"></textarea></td>
           <td><input class="input-cell" placeholder="..."></td>
         </tr>
       </tbody>
@@ -1893,8 +2142,8 @@ ul.check-list li::before {
 </div>
 
 <!-- ANNEXE 1 -->
-<div class="annexe-block">
-  <button class="annexe-toggle" onclick="toggleAnnexe(this, 'annexe1')">
+<div class="annexe-block" id="annexe1-block">
+  <button class="annexe-toggle" id="annexe1-toggle" onclick="toggleAnnexe(this, 'annexe1')">
     <div class="annexe-toggle-icon">A1</div>
     <span>Annexe 1 — Contrôle de l'état d'une pipette à piston</span>
     <div class="annexe-chevron">▼</div>
@@ -1924,8 +2173,8 @@ ul.check-list li::before {
 </div>
 
 <!-- ANNEXE 2 -->
-<div class="annexe-block">
-  <button class="annexe-toggle" onclick="toggleAnnexe(this, 'annexe2')">
+<div class="annexe-block" id="annexe2-block">
+  <button class="annexe-toggle" id="annexe2-toggle" onclick="toggleAnnexe(this, 'annexe2')">
     <div class="annexe-toggle-icon">A2</div>
     <span>Annexe 2 — Utilisation d'une pipette à piston</span>
     <div class="annexe-chevron">▼</div>
@@ -2138,17 +2387,20 @@ function calcEcartMoyen() {
   const el = document.getElementById('ecart-moyen-result');
   el.textContent = `Écart moyen = ${mmoy.toFixed(4)} − ${mref.toFixed(6)} = ${ecart >= 0 ? '+' : ''}${ecart.toFixed(6)} g`;
   el.classList.add('visible');
-  document.getElementById('conf-delta').value = Math.abs(ecart).toFixed(6);
+  const profDeltaField = document.getElementById('prof-conf-delta');
+  if (profDeltaField) {
+    profDeltaField.value = Math.abs(ecart).toFixed(6);
+  }
   document.getElementById('ecart-moyen-cell').innerHTML = `<span style="font-family:monospace; font-weight:600; color:${Math.abs(ecart)/mref*100 <= 1 ? 'var(--green)' : 'var(--red)'};">${ecart >= 0 ? '+' : ''}${ecart.toFixed(4)} g</span>`;
 }
 
 // ===== Q9 CONFORMITÉ =====
 function calcConformite() {
-  const delta = parseFloat(document.getElementById('conf-delta').value);
-  const mref = parseFloat(document.getElementById('conf-mref2').value);
+  const delta = parseFloat(document.getElementById('prof-conf-delta').value);
+  const mref = parseFloat(document.getElementById('prof-conf-mref2').value);
   if (isNaN(delta) || isNaN(mref)) return;
   const pct = (delta / mref) * 100;
-  const el = document.getElementById('conf-result');
+  const el = document.getElementById('prof-conf-result');
   el.style.display = 'block';
   if (pct <= 1) {
     el.className = 'conf-result conforme';
@@ -2245,6 +2497,37 @@ function toggleAnnexe(btn, id) {
   const isOpen = content.classList.contains('open');
   content.classList.toggle('open');
   btn.classList.toggle('open');
+}
+
+function openAnnexeLink(event, id) {
+  if (event) {
+    event.preventDefault();
+  }
+
+  const block = document.getElementById(`${id}-block`);
+  const toggle = document.getElementById(`${id}-toggle`);
+  const content = document.getElementById(id);
+
+  if (!block || !toggle || !content) {
+    return;
+  }
+
+  if (!content.classList.contains('open')) {
+    content.classList.add('open');
+    toggle.classList.add('open');
+  }
+
+  const header = document.querySelector('.site-header');
+  const toolbar = document.querySelector('.biogy-session-toolbar');
+  const offset = (header ? header.getBoundingClientRect().height : 0)
+    + (toolbar && window.innerWidth > 640 ? toolbar.getBoundingClientRect().height : 0)
+    + 16;
+  const targetTop = block.getBoundingClientRect().top + window.scrollY - offset;
+
+  window.scrollTo({
+    top: Math.max(0, targetTop),
+    behavior: 'smooth',
+  });
 }
 </script>
 <script src="./lab-session.js" defer></script>
