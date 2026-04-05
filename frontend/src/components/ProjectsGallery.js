@@ -14,6 +14,7 @@ function ProjectsGallery() {
   const { userInfo } = useAuth();
 
   const apiUrl = BROWSER_API_URL;
+  const deletedUserLabel = 'Utilisateur indisponible';
 
   // Utiliser useCallback pour éviter les boucles infinies avec useEffect
   const fetchProjects = useCallback(async () => {
@@ -43,6 +44,14 @@ function ProjectsGallery() {
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('fr-FR', options);
+  };
+
+  const getDisplayName = (user) => {
+    if (user && typeof user === 'object' && user.username) {
+      return user.username;
+    }
+
+    return deletedUserLabel;
   };
 
   // Gérer les likes (requête API réelle)
@@ -371,7 +380,11 @@ function ProjectsGallery() {
         </div>
       ) : (
         <div className="space-y-12">
-          {projects.map((project) => (
+          {projects.map((project) => {
+            const projectAuthorName = getDisplayName(project.user);
+            const projectComments = Array.isArray(project.comments) ? project.comments.filter(Boolean) : [];
+
+            return (
             <div key={project._id} className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 sketch-container relative">
               {/* Éléments décoratifs */}
               <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-lab-blue/20"></div>
@@ -383,11 +396,11 @@ function ProjectsGallery() {
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 rounded-full sketch-avatar overflow-hidden flex items-center justify-center text-white font-bold relative">
                     <div className="w-full h-full bg-gradient-to-br from-lab-blue via-lab-purple to-lab-teal flex items-center justify-center">
-                      {project.user.username.charAt(0).toUpperCase()}
+                      {projectAuthorName.charAt(0).toUpperCase()}
                     </div>
                     <div className="absolute inset-0 sketch-overlay"></div>
                   </div>
-                  <span className="font-medium font-scientific">{project.user.username}</span>
+                  <span className="font-medium font-scientific">{projectAuthorName}</span>
                 </div>
                 <div className="flex flex-col items-end">
                   <span className="text-xs text-gray-400 font-scientific">{formatDate(project.createdAt)}</span>
@@ -488,7 +501,7 @@ function ProjectsGallery() {
                 {project.caption && (
                   <div className="mb-4 p-3 bg-yellow-50/30 sketch-note relative">
                     <div className="absolute top-0 left-0 w-full h-0.5 bg-amber-100"></div>
-                    <span className="font-medium mr-2 text-lab-purple">{project.user.username}:</span>
+                    <span className="font-medium mr-2 text-lab-purple">{projectAuthorName}:</span>
                     <span className="text-gray-700 whitespace-pre-wrap break-words font-scientific">
                       {project.caption}
                     </span>
@@ -496,16 +509,16 @@ function ProjectsGallery() {
                 )}
 
                 {/* Affichage des commentaires avec style labo */}
-                {project.comments && project.comments.length > 0 && (
+                {projectComments.length > 0 && (
                   <div className="mt-4 space-y-2 sketch-comments">
                     <h4 className="text-sm font-medium text-gray-500 font-scientific pb-1 border-b border-dashed border-gray-200">
-                      {project.comments.length === 1 ? '1 commentaire' : `${project.comments.length} commentaires`}
+                      {projectComments.length === 1 ? '1 commentaire' : `${projectComments.length} commentaires`}
                     </h4>
                     <div className="max-h-60 overflow-y-auto pr-2 styled-scrollbar">
-                      {project.comments.map(comment => (
+                      {projectComments.map(comment => (
                         <div key={comment._id} className="flex justify-between items-start py-1.5 sketch-comment group">
                           <div className="flex space-x-2">
-                            <span className="font-medium text-lab-blue">{comment.user.username}</span>
+                            <span className="font-medium text-lab-blue">{getDisplayName(comment.user)}</span>
                             <span className="text-gray-700 font-scientific">{comment.text}</span>
                           </div>
 
@@ -560,7 +573,7 @@ function ProjectsGallery() {
                 )}
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
 

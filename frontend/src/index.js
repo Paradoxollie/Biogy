@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import App from './App'
@@ -18,6 +18,17 @@ window.addEventListener('error', (event) => {
 window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
 });
+
+const normalizeLegacyHashUrl = () => {
+  if (typeof window === 'undefined' || !window.location.hash.startsWith('#/')) {
+    return;
+  }
+
+  const nextUrl = `${window.location.hash.slice(1)}${window.location.search}`;
+  window.history.replaceState(null, '', nextUrl);
+};
+
+normalizeLegacyHashUrl();
 
 // Create Redux store
 const store = configureStore({
@@ -39,11 +50,11 @@ root.render(
     <React.StrictMode>
         <ErrorBoundary>
             <Provider store={store}>
-                <HashRouter>
+                <BrowserRouter>
                     <AuthProvider>
                         <App />
                     </AuthProvider>
-                </HashRouter>
+                </BrowserRouter>
             </Provider>
         </ErrorBoundary>
     </React.StrictMode>
