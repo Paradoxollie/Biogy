@@ -13,6 +13,14 @@ const REVIEW_BADGES = {
   'follow-up': 'bg-red-50 text-red-700 border-red-200',
 };
 
+const AUTO_REVIEW_BADGES = {
+  correct: 'bg-green-50 text-green-700 border-green-200',
+  incorrect: 'bg-red-50 text-red-700 border-red-200',
+  missing: 'bg-amber-50 text-amber-700 border-amber-200',
+  detailed: 'bg-green-50 text-green-700 border-green-200',
+  brief: 'bg-amber-50 text-amber-700 border-amber-200',
+};
+
 const formatDate = (value) => new Date(value).toLocaleString('fr-FR', {
   day: '2-digit',
   month: 'long',
@@ -20,6 +28,32 @@ const formatDate = (value) => new Date(value).toLocaleString('fr-FR', {
   hour: '2-digit',
   minute: '2-digit',
 });
+
+const AUTO_REVIEW_LABELS = {
+  correct: 'Correct',
+  incorrect: 'À reprendre',
+  missing: 'Non renseigné',
+  detailed: 'Développé',
+  brief: 'Trop court',
+};
+
+const formatAutoReviewValue = (item, value) => {
+  if (value === null || value === undefined || value === '') {
+    return 'non renseigné';
+  }
+
+  if (item?.type === 'choice') {
+    if (value === 'good') {
+      return 'bonne';
+    }
+
+    if (value === 'bad') {
+      return 'mauvaise';
+    }
+  }
+
+  return value;
+};
 
 function AdminLabSubmissionsPanel({ userInfo, onUnauthorized }) {
   const [submissions, setSubmissions] = useState([]);
@@ -254,6 +288,78 @@ function AdminLabSubmissionsPanel({ userInfo, onUnauthorized }) {
                     </div>
                   </div>
                 </div>
+
+                {selectedSubmission.autoReview ? (
+                  <div className="rounded-[1.75rem] border border-lab-teal/20 bg-lab-teal/5 p-5">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-lab-teal">Pré-correction automatique</p>
+                        <h4 className="mt-2 text-lg font-semibold text-gray-900">
+                          {selectedSubmission.autoReview.score.earned}/{selectedSubmission.autoReview.score.total} vérifications automatiques validées
+                        </h4>
+                        <p className="mt-2 text-sm leading-6 text-gray-600">
+                          {selectedSubmission.autoReview.teacherNote}
+                        </p>
+                      </div>
+
+                      <div className="rounded-2xl bg-white px-4 py-3 text-center shadow-sm">
+                        <div className="text-2xl font-bold text-gray-900">
+                          {selectedSubmission.autoReview.score.ratio ?? 0}%
+                        </div>
+                        <div className="text-xs uppercase tracking-[0.18em] text-gray-500">
+                          score auto
+                        </div>
+                      </div>
+                    </div>
+
+                    {selectedSubmission.autoReview.items?.length ? (
+                      <div className="mt-5 grid gap-3 lg:grid-cols-2">
+                        {selectedSubmission.autoReview.items.map((item) => (
+                          <div key={item.key} className="rounded-2xl border border-white/70 bg-white/90 p-4 shadow-sm">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="text-sm font-semibold text-gray-900">{item.label}</p>
+                              <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${AUTO_REVIEW_BADGES[item.status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+                                {AUTO_REVIEW_LABELS[item.status] || item.status}
+                              </span>
+                            </div>
+                            <div className="mt-3 space-y-1 text-sm text-gray-600">
+                              <p>
+                                Attendu : <span className="font-medium text-gray-900">{formatAutoReviewValue(item, item.expected ?? 'à calculer')}</span>{item.unit && item.expected !== null && item.expected !== undefined ? ` ${item.unit}` : ''}
+                              </p>
+                              <p>
+                                Élève : <span className="font-medium text-gray-900">{formatAutoReviewValue(item, item.actual)}</span>{item.unit && item.actual !== undefined && item.actual !== null ? ` ${item.unit}` : ''}
+                              </p>
+                              {item.hint ? (
+                                <p className="text-xs leading-5 text-gray-500">{item.hint}</p>
+                              ) : null}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    {selectedSubmission.autoReview.writing?.length ? (
+                      <div className="mt-5">
+                        <h5 className="text-sm font-semibold text-gray-900">Repères de rédaction</h5>
+                        <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                          {selectedSubmission.autoReview.writing.map((item) => (
+                            <div key={item.key} className="rounded-2xl border border-white/70 bg-white/90 p-4 shadow-sm">
+                              <div className="flex items-start justify-between gap-3">
+                                <p className="text-sm font-semibold text-gray-900">{item.label}</p>
+                                <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${AUTO_REVIEW_BADGES[item.status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+                                  {AUTO_REVIEW_LABELS[item.status] || item.status}
+                                </span>
+                              </div>
+                              <p className="mt-3 text-sm text-gray-600">
+                                {item.hint}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 <iframe
                   title={`Copie de ${selectedSubmission.usernameSnapshot}`}

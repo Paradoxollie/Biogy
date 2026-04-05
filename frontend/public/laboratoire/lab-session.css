@@ -1,6 +1,5 @@
 .biogy-session-toolbar {
-  position: sticky;
-  top: var(--biogy-header-offset, 64px);
+  position: static;
   z-index: 95;
   padding: 12px 24px 0;
 }
@@ -199,7 +198,6 @@ canvas {
 
 @media (max-width: 900px) {
   .biogy-session-toolbar {
-    top: 0;
     padding: 10px 14px 0;
   }
 
@@ -231,7 +229,6 @@ canvas {
 
 @media (max-width: 640px) {
   .biogy-session-toolbar {
-    position: static;
     padding: 8px 10px 0;
   }
 

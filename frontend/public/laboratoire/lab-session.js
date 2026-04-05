@@ -38,9 +38,95 @@
     }
   };
 
+  const escapeHtml = (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
   const getAuth = () => safeJsonParse(localStorage.getItem(authStorageKey));
+  const persistAuth = (value) => {
+    if (value?.token) {
+      localStorage.setItem(authStorageKey, JSON.stringify(value));
+    }
+  };
+  const clearAuth = () => localStorage.removeItem(authStorageKey);
 
   const isTeacherUnlocked = () => sessionStorage.getItem(teacherKey) === 'unlocked';
+
+  const findQuestionCard = (questionNumber) => Array.from(document.querySelectorAll('.card'))
+    .find((card) => card.querySelector('.q-num')?.textContent.trim() === String(questionNumber));
+
+  const ensureElementId = (element, nextId) => {
+    if (element && !element.id) {
+      element.id = nextId;
+    }
+  };
+
+  const normalizeGoodBadSelect = (select) => {
+    if (!select) {
+      return;
+    }
+
+    const options = Array.from(select.options);
+
+    if (options[0]) {
+      options[0].value = '';
+    }
+    if (options[1]) {
+      options[1].value = 'good';
+    }
+    if (options[2]) {
+      options[2].value = 'bad';
+    }
+  };
+
+  const assignActivityFieldIds = () => {
+    const q2Card = findQuestionCard(2);
+    ensureElementId(q2Card?.querySelector('textarea.student-answer'), 'q2-reasoning');
+
+    const q8Card = findQuestionCard(8);
+    ensureElementId(q8Card?.querySelector('textarea.student-answer'), 'q8-analysis');
+
+    const q9Card = findQuestionCard(9);
+    ensureElementId(q9Card?.querySelector('textarea.student-answer'), 'q9-conclusion');
+
+    const q10Rows = Array.from(document.querySelectorAll('.source-table tbody tr'));
+    const q10Ids = [
+      ['q10-balance-source', 'q10-balance-type'],
+      ['q10-rincage-source', 'q10-rincage-type'],
+      ['q10-pipetage-source', 'q10-pipetage-type'],
+      ['q10-temperature-source', 'q10-temperature-type'],
+      ['q10-lecture-source', 'q10-lecture-type'],
+    ];
+
+    q10Rows.forEach((row, index) => {
+      const [sourceId, typeId] = q10Ids[index] || [];
+      const [sourceField, typeField] = row.querySelectorAll('textarea');
+
+      ensureElementId(sourceField, sourceId);
+      ensureElementId(typeField, typeId);
+    });
+
+    const q12Card = findQuestionCard(12);
+    if (q12Card) {
+      const caseIds = ['a', 'b', 'c', 'd'];
+      const caseCards = Array.from(q12Card.querySelectorAll('.jf-card'));
+
+      caseCards.forEach((caseCard, index) => {
+        const [justesseSelect, fideliteSelect] = caseCard.querySelectorAll('select');
+        const caseId = caseIds[index];
+
+        ensureElementId(justesseSelect, `q12-case-${caseId}-justesse`);
+        ensureElementId(fideliteSelect, `q12-case-${caseId}-fidelite`);
+        normalizeGoodBadSelect(justesseSelect);
+        normalizeGoodBadSelect(fideliteSelect);
+      });
+
+      ensureElementId(q12Card.querySelector('textarea.student-answer'), 'q12-own-analysis');
+    }
+  };
 
   const getFields = () => Array.from(document.querySelectorAll(fieldSelector))
     .filter((field) => !field.closest('[data-biogy-runtime="ignore"]'));
@@ -388,6 +474,14 @@
 
   const authPill = toolbar.querySelector('#biogyAuthPill');
   const teacherPill = toolbar.querySelector('#biogyTeacherPill');
+  const headerAuthDesktop = document.querySelector('#biogyHeaderAuthDesktop');
+  const headerAuthMobile = document.querySelector('#biogyHeaderAuthMobile');
+  const headerMenuToggle = document.querySelector('#biogyNavToggle');
+  const headerMobileMenu = document.querySelector('#biogyNavMobileMenu');
+
+  document.querySelectorAll('.site-nav-link[href="/#/actualites"], .site-mobile-link[href="/#/actualites"]').forEach((link) => {
+    link.textContent = 'Actualités';
+  });
 
   function hideMessage() {
     messageElement.textContent = '';
@@ -448,17 +542,239 @@
     teacherPill.classList.remove('is-unlocked');
   }
 
+  function updateSessionPills(state) {
+    const userInfo = getAuth();
+    const lastSubmission = safeJsonParse(localStorage.getItem(`biogy:lab:${activityId}:last-submission`));
+
+    if (userInfo?.username) {
+      authPill.textContent = `Connecté : ${userInfo.username}`;
+    } else {
+      authPill.textContent = 'Connexion non requise pour travailler';
+    }
+
+    if (state) {
+      const answered = `${state.answerCount}/${state.fieldCount || 0}`;
+      authPill.textContent += ` · ${answered} champs renseignés`;
+    }
+
+    if (lastSubmission?.submittedAt) {
+      authPill.textContent += ` · Dernier envoi ${new Date(lastSubmission.submittedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+    }
+  }
+
+  function setHeaderMenuState(isOpen) {
+    if (!headerMenuToggle || !headerMobileMenu) {
+      return;
+    }
+
+    headerMenuToggle.setAttribute('aria-expanded', String(isOpen));
+    headerMobileMenu.hidden = !isOpen;
+    headerMobileMenu.classList.toggle('is-open', isOpen);
+  }
+
+  function closeHeaderMenu() {
+    setHeaderMenuState(false);
+  }
+
+  window.toggleBiogyLabMenu = (event) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    setHeaderMenuState(headerMenuToggle?.getAttribute('aria-expanded') !== 'true');
+  };
+
+  function handleHeaderLogout(event) {
+    event.preventDefault();
+    saveDraft('Brouillon enregistré avant la déconnexion.');
+    clearAuth();
+    renderHeaderAuth(null);
+    updateSessionPills(collectState());
+    closeHeaderMenu();
+    window.location.assign('/#/login');
+  }
+
+  function bindHeaderActions() {
+    [headerAuthDesktop, headerAuthMobile].forEach((root) => {
+      if (!root) {
+        return;
+      }
+
+      root.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeHeaderMenu);
+      });
+
+      root.querySelectorAll('[data-biogy-action="logout"]').forEach((button) => {
+        button.addEventListener('click', handleHeaderLogout);
+      });
+    });
+  }
+
+  function renderHeaderAuth(userInfo) {
+    if (headerAuthDesktop) {
+      headerAuthDesktop.innerHTML = userInfo?.username
+        ? `
+          <a class="site-profile-link" href="/#/profile">Bonjour, ${escapeHtml(userInfo.username)}!</a>
+          ${userInfo.role === 'admin' ? '<a class="site-admin-button" href="/#/admin">Admin</a>' : ''}
+          <button type="button" class="site-logout-button" data-biogy-action="logout">Déconnexion</button>
+        `
+        : `
+          <a class="site-auth-link" href="/#/login">Se connecter</a>
+          <a class="site-auth-button" href="/#/register">S'inscrire</a>
+        `;
+    }
+
+    if (headerAuthMobile) {
+      headerAuthMobile.innerHTML = userInfo?.username
+        ? `
+          <a class="site-mobile-link" href="/#/profile">Mon profil</a>
+          ${userInfo.role === 'admin' ? '<a class="site-mobile-link site-mobile-link--admin" href="/#/admin">Admin</a>' : ''}
+          <button type="button" class="site-mobile-button" data-biogy-action="logout">Déconnexion</button>
+        `
+        : `
+          <a class="site-mobile-link" href="/#/login">Se connecter</a>
+          <a class="site-mobile-link site-mobile-link--register" href="/#/register">S'inscrire</a>
+        `;
+    }
+
+    bindHeaderActions();
+  }
+
+  async function refreshAuthState(state) {
+    const storedUser = getAuth();
+    renderHeaderAuth(storedUser);
+
+    if (!storedUser?.token) {
+      updateSessionPills(state);
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/auth/profile`, {
+        headers: {
+          Authorization: `Bearer ${storedUser.token}`,
+        },
+      });
+
+      if (response.ok) {
+        const profile = await response.json();
+        const nextUser = {
+          ...storedUser,
+          _id: profile._id || storedUser._id,
+          username: profile.username || storedUser.username,
+          role: profile.role || storedUser.role,
+        };
+
+        persistAuth(nextUser);
+        renderHeaderAuth(nextUser);
+        updateSessionPills(state);
+        return nextUser;
+      }
+
+      if (response.status === 401) {
+        clearAuth();
+        renderHeaderAuth(null);
+        updateSessionPills(state);
+        return null;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la synchronisation du profil:', error);
+    }
+
+    updateSessionPills(state);
+    return storedUser;
+  }
+
+  function getHeaderElements() {
+    return {
+      authDesktop: document.querySelector('#biogyHeaderAuthDesktop'),
+      authMobile: document.querySelector('#biogyHeaderAuthMobile'),
+      menuToggle: document.querySelector('#biogyNavToggle'),
+      mobileMenu: document.querySelector('#biogyNavMobileMenu'),
+    };
+  }
+
+  function setHeaderMenuState(isOpen) {
+    const { menuToggle, mobileMenu } = getHeaderElements();
+
+    if (!menuToggle || !mobileMenu) {
+      return;
+    }
+
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
+    mobileMenu.hidden = !isOpen;
+    mobileMenu.classList.toggle('is-open', isOpen);
+  }
+
+  function closeHeaderMenu() {
+    setHeaderMenuState(false);
+  }
+
+  window.toggleBiogyLabMenu = (event) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    const { menuToggle } = getHeaderElements();
+    setHeaderMenuState(menuToggle?.getAttribute('aria-expanded') !== 'true');
+  };
+
+  function bindHeaderActions() {
+    const { authDesktop, authMobile } = getHeaderElements();
+
+    [authDesktop, authMobile].forEach((root) => {
+      if (!root) {
+        return;
+      }
+
+      root.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeHeaderMenu);
+      });
+
+      root.querySelectorAll('[data-biogy-action="logout"]').forEach((button) => {
+        button.addEventListener('click', handleHeaderLogout);
+      });
+    });
+  }
+
+  function renderHeaderAuth(userInfo) {
+    const { authDesktop, authMobile } = getHeaderElements();
+
+    if (authDesktop) {
+      authDesktop.innerHTML = userInfo?.username
+        ? `
+          <a class="site-profile-link" href="/#/profile">Bonjour, ${escapeHtml(userInfo.username)}!</a>
+          ${userInfo.role === 'admin' ? '<a class="site-admin-button" href="/#/admin">Admin</a>' : ''}
+          <button type="button" class="site-logout-button" data-biogy-action="logout">Déconnexion</button>
+        `
+        : `
+          <a class="site-auth-link" href="/#/login">Se connecter</a>
+          <a class="site-auth-button" href="/#/register">S'inscrire</a>
+        `;
+    }
+
+    if (authMobile) {
+      authMobile.innerHTML = userInfo?.username
+        ? `
+          <a class="site-mobile-link" href="/#/profile">Mon profil</a>
+          ${userInfo.role === 'admin' ? '<a class="site-mobile-link site-mobile-link--admin" href="/#/admin">Admin</a>' : ''}
+          <button type="button" class="site-mobile-button" data-biogy-action="logout">Déconnexion</button>
+        `
+        : `
+          <a class="site-mobile-link" href="/#/login">Se connecter</a>
+          <a class="site-mobile-link site-mobile-link--register" href="/#/register">S'inscrire</a>
+        `;
+    }
+
+    bindHeaderActions();
+  }
+
   const header = document.querySelector('.site-header');
   const container = document.querySelector('.container');
 
-  const updateToolbarOffset = () => {
-    const offset = header ? Math.ceil(header.getBoundingClientRect().height) : 64;
-    document.documentElement.style.setProperty('--biogy-header-offset', `${offset}px`);
-  };
-
   if (header) {
-    updateToolbarOffset();
-    window.addEventListener('resize', updateToolbarOffset);
     header.insertAdjacentElement('afterend', toolbar);
     toolbar.insertAdjacentElement('afterend', messageHost);
   }
@@ -471,7 +787,57 @@
     body.insertAdjacentElement('afterbegin', messageHost);
   }
 
+  assignActivityFieldIds();
   ensureFieldKeys();
+  setHeaderMenuState(false);
+
+  const initialHeaderMenuToggle = document.querySelector('#biogyNavToggle');
+  const initialHeaderMobileMenu = document.querySelector('#biogyNavMobileMenu');
+
+  if (initialHeaderMenuToggle) {
+    initialHeaderMenuToggle.addEventListener('click', (event) => {
+      if (event.defaultPrevented) {
+        return;
+      }
+
+      event.stopPropagation();
+      setHeaderMenuState(initialHeaderMenuToggle.getAttribute('aria-expanded') !== 'true');
+    });
+  }
+
+  if (initialHeaderMobileMenu) {
+    initialHeaderMobileMenu.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    const activeHeaderMenuToggle = document.querySelector('#biogyNavToggle');
+    const activeHeaderMobileMenu = document.querySelector('#biogyNavMobileMenu');
+
+    if (!activeHeaderMobileMenu || activeHeaderMobileMenu.hidden) {
+      return;
+    }
+
+    if (activeHeaderMenuToggle?.contains(event.target) || activeHeaderMobileMenu.contains(event.target)) {
+      return;
+    }
+
+    closeHeaderMenu();
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900) {
+      closeHeaderMenu();
+    }
+  });
+
+  window.addEventListener('storage', (event) => {
+    if (event.key === authStorageKey) {
+      renderHeaderAuth(getAuth());
+      updateSessionPills(collectState());
+    }
+  });
 
   const savedDraft = safeJsonParse(localStorage.getItem(draftKey));
   if (savedDraft) {
@@ -479,7 +845,30 @@
     updateMessage('Brouillon restauré automatiquement.', 'info');
   }
 
-  updateSessionPills(savedDraft || collectState());
+  const initialState = savedDraft || collectState();
+  const initialUser = getAuth();
+  const desktopAuthRoot = document.getElementById('biogyHeaderAuthDesktop');
+  const mobileAuthRoot = document.getElementById('biogyHeaderAuthMobile');
+
+  if (initialUser?.username && desktopAuthRoot) {
+    desktopAuthRoot.innerHTML = `
+      <a class="site-profile-link" href="/#/profile">Bonjour, ${escapeHtml(initialUser.username)}!</a>
+      ${initialUser.role === 'admin' ? '<a class="site-admin-button" href="/#/admin">Admin</a>' : ''}
+      <button type="button" class="site-logout-button" data-biogy-action="logout">Déconnexion</button>
+    `;
+  }
+
+  if (initialUser?.username && mobileAuthRoot) {
+    mobileAuthRoot.innerHTML = `
+      <a class="site-mobile-link" href="/#/profile">Mon profil</a>
+      ${initialUser.role === 'admin' ? '<a class="site-mobile-link site-mobile-link--admin" href="/#/admin">Admin</a>' : ''}
+      <button type="button" class="site-mobile-button" data-biogy-action="logout">Déconnexion</button>
+    `;
+  }
+
+  renderHeaderAuth(initialUser);
+  updateSessionPills(initialState);
+  refreshAuthState(initialState);
   updateTeacherStatus();
   wrapTeacherMode();
 
