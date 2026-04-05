@@ -28,7 +28,7 @@ const NAV_ITEMS = [
     mobileActiveClass: 'text-lab-teal bg-lab-teal/10',
   },
   {
-    name: 'Actualites',
+    name: 'Actualités',
     path: '/actualites',
     hoverClass: 'hover:text-lab-teal',
     activeClass: 'text-lab-teal',
@@ -205,7 +205,7 @@ function Layout({ children }) {
                     onClick={handleLogout}
                     className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium transition duration-150 ease-in-out"
                 >
-                    D茅connexion
+                    Déconnexion
                 </button>
                 </>
             ) : (
@@ -283,7 +283,7 @@ function Layout({ children }) {
                       }}
                       className="block w-full text-left py-2 px-3 rounded-lg text-red-600 hover:text-red-800 mt-2"
                     >
-                      D茅connexion
+                      Déconnexion
                     </button>
                   </>
                 ) : (
@@ -337,7 +337,7 @@ function Layout({ children }) {
               </Link>
               <p className="mt-3 text-gray-600">
                 Votre portail vers le monde fascinant de la biologie et la biotechnologie.
-                Explorez, apprenez et d茅couvrez les merveilles de la science du vivant.
+                Explorez, apprenez et découvrez les merveilles de la science du vivant.
               </p>
             </div>
 
@@ -346,13 +346,13 @@ function Layout({ children }) {
               <ul className="space-y-2">
                 <li><Link to="/apprendre" className="text-gray-600 hover:text-lab-blue transition duration-300 no-underline">Apprendre</Link></li>
                 <li><Link to="/laboratoire" className="text-gray-600 hover:text-lab-teal transition duration-300 no-underline">Laboratoire</Link></li>
-                <li><Link to="/actualites" className="text-gray-600 hover:text-lab-teal transition duration-300 no-underline">Actualit茅s</Link></li>
+                <li><Link to="/actualites" className="text-gray-600 hover:text-lab-teal transition duration-300 no-underline">Actualités</Link></li>
                 <li><Link to="/partager-projet" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Partager un Projet</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-3 text-gray-700">Communaut茅</h3>
+              <h3 className="font-semibold mb-3 text-gray-700">Communauté</h3>
               <ul className="space-y-2">
                   <li><Link to="/projets" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Voir les Projets</Link></li>
                   <li><Link to="/forum" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Forum</Link></li>
@@ -382,7 +382,7 @@ function Layout({ children }) {
                       onClick={handleLogout}
                       className="text-red-600 hover:text-red-800 transition duration-300 text-left w-full"
                     >
-                      D茅connexion
+                      Déconnexion
                     </button>
                   </li>
                 </>
@@ -397,7 +397,7 @@ function Layout({ children }) {
           </div>
 
           <div className="mt-10 pt-5 border-t border-gray-200 text-center text-gray-500 text-sm">
-            <p>漏 {new Date().getFullYear()} Biogy. Tous droits r茅serv茅s.</p>
+            <p>© {new Date().getFullYear()} Biogy. Tous droits réservés.</p>
           </div>
         </div>
       </footer>

@@ -10,7 +10,7 @@ const animatePetriDishes = (canvas, ctx) => {
   const colors = ['#3b82f6', '#8b5cf6', '#14b8a6', '#22c55e'];
   const numCircles = 20;
 
-  // Cr茅ation des cercles initiaux
+  // Cr?ation des cercles initiaux
   for (let i = 0; i < numCircles; i++) {
     circles.push({
       x: Math.random() * canvas.width,
@@ -30,7 +30,7 @@ const animatePetriDishes = (canvas, ctx) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     circles.forEach(circle => {
-      // D茅placement
+      // D?placement
       circle.x += circle.speed.x;
       circle.y += circle.speed.y;
 
@@ -38,7 +38,7 @@ const animatePetriDishes = (canvas, ctx) => {
       if (circle.x < 0 || circle.x > canvas.width) circle.speed.x *= -1;
       if (circle.y < 0 || circle.y > canvas.height) circle.speed.y *= -1;
 
-      // Dessin du cercle (bo卯te de Petri)
+      // Dessin du cercle (bo?te de Petri)
       ctx.beginPath();
       ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
       ctx.strokeStyle = circle.color;
@@ -46,7 +46,7 @@ const animatePetriDishes = (canvas, ctx) => {
       ctx.globalAlpha = circle.alpha;
       ctx.stroke();
 
-      // Petites cellules 脿 l'int茅rieur
+      // Petites cellules ? l'int?rieur
       const cells = Math.floor(Math.random() * 3) + 2;
       for (let j = 0; j < cells; j++) {
         const cellAngle = Math.random() * Math.PI * 2;
@@ -96,20 +96,20 @@ function Homepage() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Canvas d'arri猫re-plan pour l'animation des bo卯tes de Petri */}
+      {/* Canvas d'arri?re-plan pour l'animation des bo?tes de Petri */}
       <canvas
         ref={canvasRef}
         className="absolute top-0 left-0 w-full h-full -z-10 opacity-30"
       ></canvas>
 
-      {/* Section h茅ro avec illustrations de labo */}
+      {/* Section h?ro avec illustrations de labo */}
       <section className="pt-20 pb-24 px-4 md:px-0">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-10">
             {/* Texte principal */}
             <div className="md:w-1/2 space-y-6">
               <div className="w-full max-w-md mx-auto relative">
-                {/* Fond et effets d茅coratifs */}
+                {/* Fond et effets d?coratifs */}
                 <div className="absolute -inset-6 bg-green-900 rounded-xl shadow-xl -z-10"></div>
                 <div className="absolute -inset-6 bg-green-800 rounded-xl opacity-80 -z-10
                   border-2 border-amber-100/20 shadow-inner"></div>
@@ -122,7 +122,7 @@ function Homepage() {
                   <div className="absolute bottom-10 right-6 h-0.5 w-16 bg-white/10 -rotate-2"></div>
                 </div>
 
-                {/* Traces de craie/poussi猫re */}
+                {/* Traces de craie/poussi?re */}
                 <div className="absolute -top-4 -left-6 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
                 <div className="absolute -bottom-4 -right-6 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
 
@@ -136,13 +136,13 @@ function Homepage() {
                   {/* Effet de texture de tableau */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-30 rounded-full"></div>
 
-                  {/* Orbites mol茅culaires */}
+                  {/* Orbites mol?culaires */}
                   <div className="absolute inset-0 rounded-full border border-white/20 animate-spin" style={{ animationDuration: '20s' }}></div>
                   <div className="absolute inset-2 rounded-full border border-white/15 animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
                   <div className="absolute inset-4 rounded-full border border-white/10 animate-spin" style={{ animationDuration: '10s' }}></div>
                   <div className="absolute inset-6 rounded-full border-dashed border border-white/5 animate-spin" style={{ animationDuration: '25s' }}></div>
 
-                  {/* Atomes/mol茅cules en orbite */}
+                  {/* Atomes/mol?cules en orbite */}
                   <div className="absolute w-4 h-4 bg-lab-blue rounded-full shadow-glow animate-orbit-1"
                        style={{ top: '15%', left: '15%' }}></div>
                   <div className="absolute w-3 h-3 bg-lab-purple rounded-full shadow-glow animate-orbit-2"
@@ -163,22 +163,47 @@ function Homepage() {
                   {/* Logo avec animation subtile */}
                   <div className="relative animate-float-gentle transform w-3/4 h-3/4 rounded-full overflow-hidden">
                     <div className="w-full h-full flex items-center justify-center rounded-full overflow-hidden bg-green-900/80">
-                      <img
-                        src="/images/biogy-logo.png"
-                        alt="Biogy Logo"
-                        className="w-[85%] h-[85%] object-contain z-10 relative drop-shadow-lg rounded-full"
-                      />
+                      <svg className="w-[72%] h-[72%] z-10 relative drop-shadow-lg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Logo Biogy">
+                        <path d="M12 2V22" stroke="url(#hero-lab-gradient)" strokeWidth="0.7" strokeDasharray="1 2" strokeOpacity="0.6" />
+                        <path d="M6 2.5C8 4 10 5 12 5C14 5 16 4 18 2.5" stroke="url(#hero-lab-gradient-1)" strokeWidth="1.8" strokeLinecap="round" />
+                        <path d="M6 6.5C8 8 10 9 12 9C14 9 16 8 18 6.5" stroke="url(#hero-lab-gradient-1)" strokeWidth="1.8" strokeLinecap="round" />
+                        <path d="M6 10.5C8 12 10 13 12 13C14 13 16 12 18 10.5" stroke="url(#hero-lab-gradient-1)" strokeWidth="1.8" strokeLinecap="round" />
+                        <path d="M6 14.5C8 16 10 17 12 17C14 17 16 16 18 14.5" stroke="url(#hero-lab-gradient-1)" strokeWidth="1.8" strokeLinecap="round" />
+                        <path d="M6 18.5C8 20 10 21 12 21C14 21 16 20 18 18.5" stroke="url(#hero-lab-gradient-1)" strokeWidth="1.8" strokeLinecap="round" />
+                        <path d="M6 4.5C8 3 10 2 12 2C14 2 16 3 18 4.5" stroke="url(#hero-lab-gradient-2)" strokeWidth="1.8" strokeLinecap="round" />
+                        <path d="M6 8.5C8 7 10 6 12 6C14 6 16 7 18 8.5" stroke="url(#hero-lab-gradient-2)" strokeWidth="1.8" strokeLinecap="round" />
+                        <path d="M6 12.5C8 11 10 10 12 10C14 10 16 11 18 12.5" stroke="url(#hero-lab-gradient-2)" strokeWidth="1.8" strokeLinecap="round" />
+                        <path d="M6 16.5C8 15 10 14 12 14C14 14 16 15 18 16.5" stroke="url(#hero-lab-gradient-2)" strokeWidth="1.8" strokeLinecap="round" />
+                        <path d="M6 20.5C8 19 10 18 12 18C14 18 16 19 18 20.5" stroke="url(#hero-lab-gradient-2)" strokeWidth="1.8" strokeLinecap="round" />
+                        <defs>
+                          <linearGradient id="hero-lab-gradient" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+                            <stop stopColor="#3b82f6" />
+                            <stop offset="0.5" stopColor="#8b5cf6" />
+                            <stop offset="1" stopColor="#14b8a6" />
+                          </linearGradient>
+                          <linearGradient id="hero-lab-gradient-1" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+                            <stop stopColor="#3b82f6" />
+                            <stop offset="0.5" stopColor="#8b5cf6" />
+                            <stop offset="1" stopColor="#14b8a6" />
+                          </linearGradient>
+                          <linearGradient id="hero-lab-gradient-2" x1="21" y1="3" x2="3" y2="21" gradientUnits="userSpaceOnUse">
+                            <stop stopColor="#14b8a6" />
+                            <stop offset="0.5" stopColor="#8b5cf6" />
+                            <stop offset="1" stopColor="#3b82f6" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
                     </div>
                   </div>
                 </div>
               </div>
 
               <h2 className="text-2xl md:text-3xl text-gray-700 font-light leading-snug">
-                Votre <span className="font-semibold">plateforme d茅di茅e</span> 脿 l'excellence en <span className="font-semibold text-lab-purple">Biotechnologie</span>
+                Votre <span className="font-semibold">plateforme dédiée</span> à l'excellence en <span className="font-semibold text-lab-purple">Biotechnologie</span>
               </h2>
               <p className="text-lg text-gray-600">
-                Ressources pedagogiques, seances de laboratoire pretes a l'emploi, actualites scientifiques et outils collaboratifs
-                pour les <span className="font-medium">lyceens, etudiants et enseignants</span> en biotechnologie.
+                Ressources pédagogiques, séances de laboratoire prêtes à l'emploi, actualités scientifiques et outils collaboratifs
+                pour les <span className="font-medium">lycéens, étudiants et enseignants</span> en biotechnologie.
               </p>
 
 
@@ -203,7 +228,7 @@ function Homepage() {
                   {/* Cercle lumineux pour l'effet microscope */}
                   <div className="absolute w-40 h-40 bg-lab-purple/20 rounded-full blur-xl animate-microscope-scan"></div>
 
-                  {/* Illustration style "main lev茅e" d'un microscope */}
+                  {/* Illustration style "main lev?e" d'un microscope */}
                   <svg className="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                     {/* Base du microscope */}
                     <path d="M180 250H280C285 250 290 240 290 235L300 150C300 145 295 140 290 140H170C165 140 160 145 160 150L170 235C170 240 175 250 180 250Z" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="1 3" />
@@ -217,32 +242,32 @@ function Homepage() {
                     <path d="M235 35L205 65" stroke="#333" strokeWidth="2" />
                     <path d="M205 35L235 65" stroke="#333" strokeWidth="2" />
 
-                    {/* Lumi猫re en bas */}
+                    {/* Lumi?re en bas */}
                     <path d="M220 140L220 170" stroke="#333" strokeWidth="2" strokeLinecap="round" />
                     <circle cx="220" cy="180" r="10" stroke="#333" strokeWidth="2" fill="#FFEE77" fillOpacity="0.6" className="animate-pulse-glow" />
 
-                    {/* Plaque d'茅chantillon */}
+                    {/* Plaque d'?chantillon */}
                     <rect x="200" y="120" width="40" height="10" rx="2" stroke="#333" strokeWidth="2" />
 
-                    {/* Molettes de r茅glage */}
+                    {/* Molettes de r?glage */}
                     <circle cx="260" cy="110" r="12" stroke="#333" strokeWidth="2" />
                     <circle cx="180" cy="110" r="12" stroke="#333" strokeWidth="2" />
 
-                    {/* 脡l茅ments d茅coratifs */}
+                    {/* ?l?ments d?coratifs */}
                     <path d="M150 200H170" stroke="#333" strokeWidth="1" strokeDasharray="2 2" />
                     <path d="M280 200H300" stroke="#333" strokeWidth="1" strokeDasharray="2 2" />
 
-                    {/* Formules scientifiques 茅crites 脿 la main */}
-                    <text x="310" y="50" className="text-xs" fill="#666" fontFamily="cursive">H鈧侽</text>
+                    {/* Formules scientifiques ?crites ? la main */}
+                    <text x="310" y="50" className="text-xs" fill="#666" fontFamily="cursive">H2O</text>
                     <text x="330" y="70" className="text-xs" fill="#666" fontFamily="cursive">O2</text>
                     <text x="320" y="90" className="text-xs" fill="#666" fontFamily="cursive">DNA</text>
                     <text x="340" y="110" className="text-xs" fill="#666" fontFamily="cursive">ATP</text>
 
-                    {/* Petite bo卯te de Petri */}
+                    {/* Petite bo?te de Petri */}
                     <ellipse cx="130" cy="100" rx="25" ry="10" stroke="#8b5cf6" strokeWidth="1" strokeDasharray="3 1" />
                     <ellipse cx="130" cy="100" rx="20" ry="8" stroke="#8b5cf6" strokeWidth="1" />
 
-                    {/* Tube 脿 essai */}
+                    {/* Tube ? essai */}
                     <path d="M90,70 L90,120 Q95,130 100,120 L100,70 Z" stroke="#14b8a6" strokeWidth="1" fill="none" />
                     <path d="M90,80 L100,80" stroke="#14b8a6" strokeWidth="1" />
 
@@ -255,22 +280,22 @@ function Homepage() {
                   </svg>
                 </div>
 
-                {/* Notes de laboratoire 茅crites 脿 la main */}
+                {/* Notes de laboratoire ?crites ? la main */}
                 <div className="absolute -right-16 top-10 bg-yellow-50 p-3 w-32 rotate-6 shadow-sm">
                   <div className="text-xs text-gray-600 font-handwriting">
-                    <p className="mb-1 text-lab-purple">脡chantillon 3B:</p>
-                    <p className="text-[10px]">Observer les structures cellulaires 脿 40x</p>
+                    <p className="mb-1 text-lab-purple">Échantillon 3B:</p>
+                    <p className="text-[10px]">Observer les structures cellulaires à 40x</p>
                     <p className="text-[10px] mt-1">pH: 7.2</p>
-                    <p className="text-[10px]">Temp: 23掳C</p>
+                    <p className="text-[10px]">Temp: 23°C</p>
                   </div>
                 </div>
               </div>
 
-              {/* 脡l茅ments d茅coratifs autour de l'image */}
+              {/* ?l?ments d?coratifs autour de l'image */}
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-lab-blue/5 rounded-full blur-xl"></div>
               <div className="absolute -top-5 -right-5 w-20 h-20 bg-lab-purple/5 rounded-full blur-lg"></div>
 
-              {/* Points d茅coratifs */}
+              {/* Points d?coratifs */}
               <div className="absolute top-2 left-2 grid grid-cols-3 gap-4">
                 {[...Array(9)].map((_, i) => (
                   <div key={i} className="w-1 h-1 rounded-full bg-lab-blue/40"></div>
@@ -281,7 +306,7 @@ function Homepage() {
         </div>
       </section>
 
-      {/* Section avec les cartes des cat茅gories */}
+      {/* Section avec les cartes des cat?gories */}
       <section className="py-16 bg-gradient-to-b from-white to-lab-bg/40">
         <div className="container mx-auto max-w-6xl px-4">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
@@ -313,12 +338,12 @@ function Homepage() {
               </div>
 
               <div className="p-6">
-                <h3 className="text-xl font-bold text-lab-blue mb-3">Ma卯triser les Concepts</h3>
+                <h3 className="text-xl font-bold text-lab-blue mb-3">Maîtriser les concepts</h3>
                 <p className="text-gray-600 mb-5">
-                  Cours interactifs, sch茅mas anim茅s et QCM pour <span className="font-medium">assimiler les notions cl茅s</span> en biologie mol茅culaire, cellulaire et g茅nie g茅n茅tique.
+                  Cours interactifs, schémas animés et QCM pour <span className="font-medium">assimiler les notions clés</span> en biologie moléculaire, cellulaire et génie génétique.
                 </p>
                 <Link to="/apprendre" className="inline-block text-lab-blue font-medium group-hover:underline">
-                  Explorer les modules 鈫?
+                  Explorer les modules →
                 </Link>
               </div>
             </div>
@@ -332,7 +357,7 @@ function Homepage() {
                   <path d="M100 50 L 90 50 M 100 70 L 90 70 M 100 90 L 90 90" stroke="white" strokeWidth="0.5" />
                   <path d="M140 160 L 140 80 L 180 80 L 180 160 Q 160 170 140 160" stroke="white" strokeWidth="1" fill="none" />
                   <path d="M140 100 L 180 100" stroke="white" strokeWidth="0.5" strokeDasharray="2 2" />
-                  {/* Lignes d茅coratives */}
+                  {/* Lignes d?coratives */}
                   <line x1="50" y1="60" x2="70" y2="60" stroke="white" strokeWidth="0.5" strokeDasharray="1 1" />
                   <line x1="200" y1="120" x2="220" y2="120" stroke="white" strokeWidth="0.5" strokeDasharray="1 1" />
                 </svg>
@@ -342,17 +367,18 @@ function Homepage() {
               <div className="p-6">
                 <h3 className="text-xl font-bold text-lab-purple mb-3">Laboratoire interactif</h3>
                 <p className="text-gray-600 mb-5">
-                  S茅ances pr锚tes 脿 l'emploi, <span className="font-medium">activit茅s 脿 compl茅ter en classe</span> et remise de copie en ligne pour vos travaux pratiques.
+                  Séances prêtes à l'emploi, <span className="font-medium">activités à compléter en classe</span> et remise de copie en ligne pour vos travaux pratiques.
                 </p>
                 <Link to="/laboratoire" className="inline-block text-lab-purple font-medium group-hover:underline">
-                  Entrer dans le labo 鈫?                </Link>
+                  Entrer dans le labo →
+                </Link>
               </div>
             </div>
 
-            {/* Carte Actualit茅s */}
+            {/* Carte Actualit?s */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
               <div className="h-40 bg-gradient-to-r from-lab-teal/90 to-lab-teal/70 relative overflow-hidden">
-                {/* Illustration actualit茅s scientifiques */}
+                {/* Illustration actualit?s scientifiques */}
                 <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
                   {/* Grille/graphique */}
                   <line x1="40" y1="40" x2="40" y2="160" stroke="white" strokeWidth="1" />
@@ -364,14 +390,14 @@ function Homepage() {
                   <line x1="160" y1="40" x2="160" y2="160" stroke="white" strokeWidth="0.5" strokeDasharray="4 4" />
                   <line x1="220" y1="40" x2="220" y2="160" stroke="white" strokeWidth="0.5" strokeDasharray="4 4" />
 
-                  {/* Courbe de donn茅es */}
+                  {/* Courbe de donn?es */}
                   <path d="M40,140 C70,130 90,150 120,130 C150,110 180,100 220,70" stroke="white" strokeWidth="2" fill="none" />
                   <circle cx="40" cy="140" r="3" fill="white" />
                   <circle cx="120" cy="130" r="3" fill="white" />
                   <circle cx="180" cy="100" r="3" fill="white" />
                   <circle cx="220" cy="70" r="3" fill="white" />
 
-                  {/* 脡tiquette de donn茅es */}
+                  {/* ?tiquette de donn?es */}
                   <rect x="200" y="40" width="30" height="20" rx="2" stroke="white" strokeWidth="0.5" fill="none" />
                   <line x1="205" y1="50" x2="215" y2="50" stroke="white" strokeWidth="1" />
                   <line x1="220" y1="45" x2="220" y2="55" stroke="white" strokeWidth="1" />
@@ -383,10 +409,10 @@ function Homepage() {
               <div className="p-6">
                 <h3 className="text-xl font-bold text-lab-teal mb-3">Veille Scientifique</h3>
                 <p className="text-gray-600 mb-5">
-                  Restez 脿 la pointe avec les <span className="font-medium">derni猫res publications</span>, les innovations technologiques et les d茅bats actuels en biotechnologie.
+                  Restez à la pointe avec les <span className="font-medium">dernières publications</span>, les innovations technologiques et les débats actuels en biotechnologie.
                 </p>
                 <Link to="/actualites" className="inline-block text-lab-teal font-medium group-hover:underline">
-                  Lire les actualit茅s 鈫?
+                  Lire les actualités →
                 </Link>
               </div>
             </div>
@@ -394,9 +420,9 @@ function Homepage() {
         </div>
       </section>
 
-      {/* Section caract茅ristiques avec ic么nes de laboratoire */}
+      {/* Section caract?ristiques avec ic?nes de laboratoire */}
       <section className="py-16 relative overflow-hidden">
-        {/* Formes d茅coratives */}
+        {/* Formes d?coratives */}
         <div className="absolute top-0 left-0 w-full h-full -z-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-lab-blue/5 rounded-full blur-xl"></div>
           <div className="absolute top-1/3 -left-20 w-60 h-60 bg-lab-purple/5 rounded-full blur-xl"></div>
@@ -405,9 +431,9 @@ function Homepage() {
 
         <div className="container mx-auto max-w-6xl px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4 text-gray-800">Des outils pour r茅ussir en Biotechnologie</h2>
+            <h2 className="text-3xl font-bold mb-4 text-gray-800">Des outils pour réussir en Biotechnologie</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Biogy centralise les ressources indispensables aux parcours <span className="font-medium">lyc茅ens et sup茅rieurs</span> en biotechnologie.
+              Biogy centralise les ressources indispensables aux parcours <span className="font-medium">lycéens et supérieurs</span> en biotechnologie.
             </p>
           </div>
 
@@ -420,9 +446,9 @@ function Homepage() {
                   <path d="M9 14l2 2 4-4" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">脡valuation Interactive</h3>
+              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Évaluation Interactive</h3>
               <p className="text-gray-600 text-center">
-                Validez vos acquis avec des <span className="font-medium">QCM auto-corrig茅s</span> et des exercices cibl茅s par chapitre.
+                Validez vos acquis avec des <span className="font-medium">QCM auto-corrigés</span> et des exercices ciblés par chapitre.
               </p>
             </div>
             {/* Seances de laboratoire */}
@@ -432,9 +458,9 @@ function Homepage() {
                   <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Seances de laboratoire</h3>
+                <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Séances de laboratoire</h3>
               <p className="text-gray-600 text-center">
-                Lancez des <span className="font-medium">activites a completer en classe</span>, verrouillez le mode professeur et recuperez les copies a corriger en ligne.
+                Lancez des <span className="font-medium">activités à compléter en classe</span>, verrouillez le mode professeur et récupérez les copies à corriger en ligne.
               </p>
               <div className="mt-4 flex justify-center">
                 <Link to="/laboratoire" className="text-lab-purple font-medium group-hover:underline">
@@ -451,19 +477,19 @@ function Homepage() {
               </div>
               <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Partage de Projets</h3>
               <p className="text-gray-600 text-center">
-                Inspirez-vous et partagez vos <span className="font-medium">r茅alisations exp茅rimentales</span> (photos, vid茅os, rapports).
+                Inspirez-vous et partagez vos <span className="font-medium">réalisations expérimentales</span> (photos, vidéos, rapports).
               </p>
               <div className="flex flex-col gap-2 items-center mt-4">
                 <Link to="/projets" className="text-white bg-lab-teal hover:bg-lab-teal/90 px-4 py-2 rounded-lg transition-colors duration-300 text-sm font-medium w-full text-center">
                   Voir les projets
                 </Link>
                 <Link to="/partager-projet" className="text-lab-teal border border-lab-teal hover:bg-lab-teal/5 px-4 py-2 rounded-lg transition-colors duration-300 text-sm font-medium w-full text-center">
-                  Cr茅er un projet
+                  Créer un projet
                 </Link>
               </div>
             </div>
 
-            {/* Communaut茅 */}
+            {/* Communaut? */}
             <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-300">
               <div className="w-16 h-16 mb-4 rounded-full bg-lab-green/10 flex items-center justify-center mx-auto">
                 <svg className="w-8 h-8 text-lab-green" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -472,11 +498,11 @@ function Homepage() {
               </div>
               <h3 className="text-lg font-semibold text-center mb-2 text-gray-800">Espace Collaboratif</h3>
               <p className="text-gray-600 text-center mb-4">
-                脡changez avec <span className="font-medium">茅tudiants et enseignants</span>, posez vos questions et partagez vos astuces.
+                  Échangez avec <span className="font-medium">étudiants et enseignants</span>, posez vos questions et partagez vos astuces.
               </p>
               <div className="flex flex-col gap-2 items-center">
                 <Link to="/forum" className="text-white bg-gradient-to-r from-lab-purple to-lab-green hover:opacity-90 px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium w-full text-center shadow-sm transform hover:-translate-y-0.5">
-                  Acc茅der au forum
+                  Accéder au forum
                 </Link>
               </div>
             </div>
@@ -486,7 +512,7 @@ function Homepage() {
 
       {/* Section Projets */}
       <section className="py-16 bg-gradient-to-br from-white to-lab-teal/5 relative overflow-hidden">
-        {/* 脡l茅ments d茅coratifs */}
+        {/* ?l?ments d?coratifs */}
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-lab-teal/10 rounded-full blur-xl"></div>
         <div className="absolute bottom-10 right-10 w-60 h-60 bg-lab-purple/5 rounded-full blur-xl"></div>
 
@@ -494,39 +520,39 @@ function Homepage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3 text-gray-800">Galerie de Projets <span className="text-lab-teal">Biogy</span></h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              D茅couvrez les exp茅riences partag茅es par notre communaut茅 et publiez vos propres projets pour inspirer les autres.
+              Découvrez les expériences partagées par notre communauté et publiez vos propres projets pour inspirer les autres.
             </p>
           </div>
 
           <div className="bg-white rounded-xl shadow-xl p-8 relative overflow-hidden">
-            {/* Effet d茅coratif */}
+            {/* Effet d?coratif */}
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-lab-teal/5 rounded-full"></div>
             <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-lab-purple/5 rounded-full"></div>
 
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="md:w-1/2">
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">Partagez vos <span className="text-lab-teal">exp茅riences</span></h3>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">Partagez vos <span className="text-lab-teal">expériences</span></h3>
                 <p className="text-gray-600 mb-6">
-                  Que vous soyez 茅tudiant, enseignant ou chercheur, partagez vos r茅alisations en laboratoire, vos observations microscopiques, ou vos exp茅riences innovantes.
+                  Que vous soyez étudiant, enseignant ou chercheur, partagez vos réalisations en laboratoire, vos observations microscopiques ou vos expériences innovantes.
                 </p>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center">
                     <svg className="w-5 h-5 text-lab-teal mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Partagez des photos et vid茅os de vos cultures cellulaires</span>
+                    <span>Partagez des photos et vidéos de vos cultures cellulaires</span>
                   </li>
                   <li className="flex items-center">
                     <svg className="w-5 h-5 text-lab-teal mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Documentez vos manipulations g茅n茅tiques</span>
+                    <span>Documentez vos manipulations génétiques</span>
                   </li>
                   <li className="flex items-center">
                     <svg className="w-5 h-5 text-lab-teal mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>脡changez sur vos r茅sultats et recevez des retours</span>
+                    <span>Échangez sur vos résultats et recevez des retours</span>
                   </li>
                 </ul>
                 <div className="flex flex-wrap gap-4">
@@ -584,7 +610,7 @@ function Homepage() {
       <section className="py-16 bg-gradient-to-br from-lab-blue/5 to-lab-purple/5 relative">
         <div className="container mx-auto max-w-5xl px-4">
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 relative overflow-hidden">
-            {/* Cercles D茅coratifs */}
+            {/* Cercles D?coratifs */}
             <div className="absolute -top-20 -right-20 w-40 h-40 bg-lab-blue/10 rounded-full"></div>
             <div className="absolute -bottom-10 right-20 w-24 h-24 bg-lab-purple/10 rounded-full"></div>
             <div className="absolute top-1/2 -left-16 w-32 h-32 bg-lab-teal/10 rounded-full"></div>
@@ -593,7 +619,7 @@ function Homepage() {
             <div className="text-center max-w-3xl mx-auto relative z-10">
               <h2 className="text-3xl font-bold mb-6 text-gray-800">Propulsez votre parcours en Biotechnologie</h2>
               <p className="text-gray-600 mb-8">
-                Rejoignez la communaut茅 Biogy pour acc茅der 脿 l'ensemble des ressources, collaborer sur des projets et 茅changer avec vos pairs et enseignants.
+                Rejoignez la communauté Biogy pour accéder à l'ensemble des ressources, collaborer sur des projets et échanger avec vos pairs et enseignants.
               </p>
               <Link to="/contact" className="inline-block px-8 py-4 bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 Nous contacter

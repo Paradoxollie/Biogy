@@ -28,6 +28,7 @@
   const teacherKey = `biogy:lab:${activityId}:teacher`;
 
   let autosaveTimer = null;
+  let messageTimer = null;
 
   const safeJsonParse = (value) => {
     try {
@@ -365,9 +366,17 @@
         <span>La séance reste utilisable sans compte tant que tu ne demandes pas l envoi.</span>
         <span>Le brouillon est conservé automatiquement sur cet appareil.</span>
       </div>
-      <div class="biogy-session-message" id="biogySessionMessage"></div>
     </div>
   `;
+
+  const messageHost = document.createElement('div');
+  messageHost.className = 'biogy-session-message-host';
+  messageHost.dataset.biogyRuntime = 'message-host';
+
+  const messageElement = document.createElement('div');
+  messageElement.className = 'biogy-session-message';
+  messageElement.id = 'biogySessionMessage';
+  messageHost.appendChild(messageElement);
 
   const introBanner = document.createElement('div');
   introBanner.className = 'biogy-session-banner';
@@ -377,13 +386,29 @@
     Les élèves peuvent compléter toute l activité sans connexion, puis s authentifier uniquement au moment de l envoi de la copie.
   `;
 
-  const messageElement = toolbar.querySelector('#biogySessionMessage');
   const authPill = toolbar.querySelector('#biogyAuthPill');
   const teacherPill = toolbar.querySelector('#biogyTeacherPill');
 
-  function updateMessage(message, tone) {
+  function hideMessage() {
+    messageElement.textContent = '';
+    messageElement.className = 'biogy-session-message';
+  }
+
+  function updateMessage(message, tone, options = {}) {
+    const persist = options.persist ?? tone === 'error';
+
+    clearTimeout(messageTimer);
     messageElement.textContent = message;
     messageElement.className = `biogy-session-message biogy-session-message--${tone} is-visible`;
+
+    if (!persist) {
+      const lastMessage = message;
+      messageTimer = window.setTimeout(() => {
+        if (messageElement.textContent === lastMessage) {
+          hideMessage();
+        }
+      }, 4200);
+    }
   }
 
   function updateSessionPills(state) {
@@ -427,9 +452,15 @@
   const container = document.querySelector('.container');
   if (header) {
     header.insertAdjacentElement('afterend', toolbar);
+    toolbar.insertAdjacentElement('afterend', messageHost);
   }
   if (container) {
     container.insertAdjacentElement('afterbegin', introBanner);
+  }
+  if (!header && container) {
+    container.insertAdjacentElement('beforebegin', messageHost);
+  } else if (!header && !container) {
+    body.insertAdjacentElement('afterbegin', messageHost);
   }
 
   ensureFieldKeys();

@@ -116,8 +116,14 @@ body.prof-mode .biogy-session-pill--teacher {
   line-height: 1.6;
 }
 
+.biogy-session-message-host {
+  max-width: 1000px;
+  margin: 14px auto 0;
+  padding: 0 24px;
+}
+
 .biogy-session-message {
-  margin-top: 14px;
+  margin-top: 0;
   border-radius: 14px;
   padding: 12px 14px;
   font-size: 13px;
@@ -211,6 +217,10 @@ canvas {
     text-align: center;
   }
 
+  .biogy-session-message-host {
+    padding: 0 14px;
+  }
+
   body table {
     display: block;
     width: 100%;
@@ -220,17 +230,59 @@ canvas {
 }
 
 @media (max-width: 640px) {
+  .biogy-session-toolbar {
+    position: static;
+    padding: 8px 10px 0;
+  }
+
+  .biogy-session-toolbar__inner {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
   .biogy-session-toolbar__meta {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .biogy-session-toolbar__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .biogy-session-pill {
     justify-content: center;
   }
 
+  .biogy-session-button {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .biogy-session-toolbar__help {
+    display: none;
+  }
+
+  .biogy-session-message-host {
+    margin: 0;
+    padding: 0;
+  }
+
+  .biogy-session-message {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    margin-top: 0;
+    z-index: 120;
+    box-shadow: 0 16px 32px rgba(27, 46, 74, 0.18);
+  }
+
   .biogy-session-banner,
   .biogy-submission-banner {
-    padding: 14px;
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
   }
 }
