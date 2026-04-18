@@ -442,18 +442,33 @@ function filterBiotechArticles(articles, requestedColor, allColors = false) {
 
 // Handler de la fonction Netlify
 exports.handler = async (event, context) => {
+  const params = event.queryStringParameters || {};
+  const requestedColor = params.color || 'all';
+  const maxParam = params.max ? parseInt(params.max, 10) : 20;
+  const max = isNaN(maxParam) ? 20 : Math.min(maxParam, 30);
+  const forceRefresh = params.refresh === 'true';
+
+  // CORS + cache (edge Netlify). Quand refresh=true on court-circuite le cache
+  // via l instruction no-store; sinon on laisse le CDN servir la reponse
+  // pendant 30 minutes (stale-while-revalidate 2h) pour eviter que chaque
+  // eleve declenche un aller-retour vers 15+ flux RSS.
+  const cacheHeader = forceRefresh
+    ? 'no-store'
+    : 'public, s-maxage=1800, stale-while-revalidate=7200';
+
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Cache-Control': cacheHeader,
+    'Netlify-CDN-Cache-Control': cacheHeader,
+    'Content-Type': 'application/json; charset=utf-8',
+    Vary: 'Accept-Encoding',
   };
 
-  // Récupérer le paramètre 'color' de la requête
-  const params = event.queryStringParameters || {};
-  const requestedColor = params.color || 'all';
-  const maxParam = params.max ? parseInt(params.max, 10) : 20; 
-  const max = isNaN(maxParam) ? 20 : Math.min(maxParam, 30); 
-  const forceRefresh = params.refresh === 'true';
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers, body: '' };
+  }
   
   // Mesurer le temps d'exécution pour éviter de dépasser les limites de Netlify
   const startTime = Date.now();
@@ -701,10 +716,17 @@ exports.handler = async (event, context) => {
       }
     }
     
+    // En cas d echec on ne veut pas figer la reponse degradee au CDN
+    const errorHeaders = {
+      ...headers,
+      'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=600',
+      'Netlify-CDN-Cache-Control': 'public, s-maxage=120, stale-while-revalidate=600',
+    };
+
     return {
       statusCode: 200,
-      headers,
-      body: JSON.stringify({ 
+      headers: errorHeaders,
+      body: JSON.stringify({
         articles: emergencyArticles,
         error: errorMessage,
         usesFallback: true
