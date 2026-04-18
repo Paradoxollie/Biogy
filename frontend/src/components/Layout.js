@@ -1,69 +1,49 @@
-﻿import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const NAV_ITEMS = [
-  {
-    name: 'Apprendre',
-    path: '/apprendre',
-    hoverClass: 'hover:text-lab-blue',
-    activeClass: 'text-lab-blue',
-    underlineClass: 'bg-lab-blue',
-    mobileActiveClass: 'text-lab-blue bg-lab-blue/10',
-  },
-  {
-    name: 'Laboratoire',
-    path: '/laboratoire',
-    hoverClass: 'hover:text-lab-teal',
-    activeClass: 'text-lab-teal',
-    underlineClass: 'bg-lab-teal',
-    mobileActiveClass: 'text-lab-teal bg-lab-teal/10',
-  },
-  {
-    name: 'Projets',
-    path: '/projets',
-    hoverClass: 'hover:text-lab-teal',
-    activeClass: 'text-lab-teal',
-    underlineClass: 'bg-lab-teal',
-    mobileActiveClass: 'text-lab-teal bg-lab-teal/10',
-  },
-  {
-    name: 'Actualités',
-    path: '/actualites',
-    hoverClass: 'hover:text-lab-teal',
-    activeClass: 'text-lab-teal',
-    underlineClass: 'bg-lab-teal',
-    mobileActiveClass: 'text-lab-teal bg-lab-teal/10',
-  },
-  {
-    name: 'Forum',
-    path: '/forum',
-    hoverClass: 'hover:text-lab-purple',
-    activeClass: 'text-lab-purple',
-    underlineClass: 'bg-lab-purple',
-    mobileActiveClass: 'text-lab-purple bg-lab-purple/10',
-  },
+  { name: 'Apprendre',   path: '/apprendre'   },
+  { name: 'Laboratoire', path: '/laboratoire' },
+  { name: 'Projets',     path: '/projets'     },
+  { name: 'Actualités',  path: '/actualites'  },
+  { name: 'Forum',       path: '/forum'       },
 ];
+
+function Wordmark({ className = '' }) {
+  return (
+    <span className={`inline-flex items-center gap-2 ${className}`}>
+      <span className="relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-ink-900">
+        <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+          <circle cx="12" cy="12" r="8" fill="none" stroke="#14a676" strokeWidth="1.75" />
+          <circle cx="10" cy="11"   r="1.4" fill="#14a676" />
+          <circle cx="14" cy="10"   r="0.9" fill="#14a676" />
+          <circle cx="13.5" cy="14" r="1.1" fill="#14a676" />
+          <circle cx="9"  cy="14"   r="0.7" fill="#14a676" />
+        </svg>
+      </span>
+      <span className="font-display text-lg font-semibold tracking-tight text-ink-900">
+        Biogy
+      </span>
+    </span>
+  );
+}
 
 function Layout({ children }) {
   const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { userInfo, logout, loadingAuth } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fermer le menu mobile lors d'un changement de page
   useEffect(() => {
-    setMobileMenuOpen(false);
+    setMobileOpen(false);
   }, [location.pathname]);
 
   const handleLogout = () => {
@@ -71,237 +51,128 @@ function Layout({ children }) {
     navigate('/login');
   };
 
-  const isActivePath = (path) => location.pathname === path || location.pathname.startsWith(`${path}/`);
-
   if (loadingAuth) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-lab-bg via-white to-blue-50">
-        <div className="flex-grow"></div>
-      </div>
-    );
+    return <div className="min-h-screen bg-surface-muted" />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-lab-bg via-white to-blue-50">
-      <header className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/80 backdrop-blur-md shadow-md' : 'bg-transparent'
-      }`}>
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Link to="/" className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal flex items-center">
-                <div className="w-8 h-8 mr-2 relative animate-dna-rotate perspective">
-                  <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2V22" stroke="url(#lab-gradient)" strokeWidth="0.5" strokeDasharray="1 2" strokeOpacity="0.6" />
-
-                    <path d="M6 2.5C8 4 10 5 12 5C14 5 16 4 18 2.5"
-                      stroke="url(#lab-gradient-1)" strokeWidth="1.5" strokeLinecap="round" className="animate-dna-pulse" />
-                    <path d="M6 6.5C8 8 10 9 12 9C14 9 16 8 18 6.5"
-                      stroke="url(#lab-gradient-1)" strokeWidth="1.5" strokeLinecap="round" className="animate-dna-pulse" />
-                    <path d="M6 10.5C8 12 10 13 12 13C14 13 16 12 18 10.5"
-                      stroke="url(#lab-gradient-1)" strokeWidth="1.5" strokeLinecap="round" className="animate-dna-pulse" />
-                    <path d="M6 14.5C8 16 10 17 12 17C14 17 16 16 18 14.5"
-                      stroke="url(#lab-gradient-1)" strokeWidth="1.5" strokeLinecap="round" className="animate-dna-pulse" />
-                    <path d="M6 18.5C8 20 10 21 12 21C14 21 16 20 18 18.5"
-                      stroke="url(#lab-gradient-1)" strokeWidth="1.5" strokeLinecap="round" className="animate-dna-pulse" />
-
-                    <circle cx="6" cy="2.5" r="0.8" fill="url(#lab-gradient-1)" />
-                    <circle cx="6" cy="6.5" r="0.8" fill="url(#lab-gradient-1)" />
-                    <circle cx="6" cy="10.5" r="0.8" fill="url(#lab-gradient-1)" />
-                    <circle cx="6" cy="14.5" r="0.8" fill="url(#lab-gradient-1)" />
-                    <circle cx="6" cy="18.5" r="0.8" fill="url(#lab-gradient-1)" />
-
-                    <circle cx="18" cy="2.5" r="0.8" fill="url(#lab-gradient-1)" />
-                    <circle cx="18" cy="6.5" r="0.8" fill="url(#lab-gradient-1)" />
-                    <circle cx="18" cy="10.5" r="0.8" fill="url(#lab-gradient-1)" />
-                    <circle cx="18" cy="14.5" r="0.8" fill="url(#lab-gradient-1)" />
-                    <circle cx="18" cy="18.5" r="0.8" fill="url(#lab-gradient-1)" />
-
-                    <path d="M6 4.5C8 3 10 2 12 2C14 2 16 3 18 4.5"
-                      stroke="url(#lab-gradient-2)" strokeWidth="1.5" strokeLinecap="round" className="animate-dna-pulse" />
-                    <path d="M6 8.5C8 7 10 6 12 6C14 6 16 7 18 8.5"
-                      stroke="url(#lab-gradient-2)" strokeWidth="1.5" strokeLinecap="round" className="animate-dna-pulse" />
-                    <path d="M6 12.5C8 11 10 10 12 10C14 10 16 11 18 12.5"
-                      stroke="url(#lab-gradient-2)" strokeWidth="1.5" strokeLinecap="round" className="animate-dna-pulse" />
-                    <path d="M6 16.5C8 15 10 14 12 14C14 14 16 15 18 16.5"
-                      stroke="url(#lab-gradient-2)" strokeWidth="1.5" strokeLinecap="round" className="animate-dna-pulse" />
-                    <path d="M6 20.5C8 19 10 18 12 18C14 18 16 19 18 20.5"
-                      stroke="url(#lab-gradient-2)" strokeWidth="1.5" strokeLinecap="round" className="animate-dna-pulse" />
-
-                    <circle cx="6" cy="4.5" r="0.8" fill="url(#lab-gradient-2)" />
-                    <circle cx="6" cy="8.5" r="0.8" fill="url(#lab-gradient-2)" />
-                    <circle cx="6" cy="12.5" r="0.8" fill="url(#lab-gradient-2)" />
-                    <circle cx="6" cy="16.5" r="0.8" fill="url(#lab-gradient-2)" />
-                    <circle cx="6" cy="20.5" r="0.8" fill="url(#lab-gradient-2)" />
-
-                    <circle cx="18" cy="4.5" r="0.8" fill="url(#lab-gradient-2)" />
-                    <circle cx="18" cy="8.5" r="0.8" fill="url(#lab-gradient-2)" />
-                    <circle cx="18" cy="12.5" r="0.8" fill="url(#lab-gradient-2)" />
-                    <circle cx="18" cy="16.5" r="0.8" fill="url(#lab-gradient-2)" />
-                    <circle cx="18" cy="20.5" r="0.8" fill="url(#lab-gradient-2)" />
-
-                    <defs>
-                      <linearGradient id="lab-gradient" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#3b82f6" />
-                        <stop offset="0.5" stopColor="#8b5cf6" />
-                        <stop offset="1" stopColor="#14b8a6" />
-                      </linearGradient>
-                      <linearGradient id="lab-gradient-1" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#3b82f6" />
-                        <stop offset="0.5" stopColor="#8b5cf6" />
-                        <stop offset="1" stopColor="#14b8a6" />
-                      </linearGradient>
-                      <linearGradient id="lab-gradient-2" x1="21" y1="3" x2="3" y2="21" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#14b8a6" />
-                        <stop offset="0.5" stopColor="#8b5cf6" />
-                        <stop offset="1" stopColor="#3b82f6" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-                Biogy
-              </Link>
-
-              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-lab-blue/60 animate-bubble1 opacity-0"></div>
-              <div className="absolute -top-2 right-1 w-2 h-2 rounded-full bg-lab-purple/60 animate-bubble2 opacity-0"></div>
-            </div>
-            <span className="hidden md:inline-block text-gray-500 text-sm italic border-l border-lab-lines pl-3 ml-2">Biologie & Biotechnologie</span>
+    <div className="min-h-screen flex flex-col bg-surface-muted text-ink-900">
+      <header
+        className={`sticky top-0 z-40 w-full border-b transition-colors duration-200 ${
+          scrolled
+            ? 'bg-surface/90 backdrop-blur border-surface-line'
+            : 'bg-surface border-transparent'
+        }`}
+      >
+        <div className="page flex h-16 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/" aria-label="Accueil Biogy">
+              <Wordmark />
+            </Link>
+            <span className="hidden md:inline-block h-5 w-px bg-surface-line" aria-hidden="true" />
+            <span className="hidden md:inline-block text-xs font-medium uppercase tracking-[0.18em] text-ink-500">
+              STL Biotechnologie
+            </span>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-8">
-            {NAV_ITEMS.map((item) => {
-              const isActive = isActivePath(item.path);
-
-              return (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`relative font-medium transition-colors duration-300 ${item.hoverClass} no-underline group ${
-                    isActive ? item.activeClass : 'text-gray-600'
-                  }`}
-                >
-                  {item.name}
-                  <span className={`absolute -bottom-1 left-0 h-0.5 transition-all duration-300 group-hover:w-full ${
-                    isActive ? `w-full ${item.underlineClass}` : `w-0 ${item.underlineClass}`
-                  }`}></span>
-                </Link>
-              );
-            })}
+          <nav className="hidden md:flex items-center gap-1" aria-label="Navigation principale">
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.name}
+                to={item.path}
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded-card text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'text-biogy-700 bg-biogy-50'
+                      : 'text-ink-700 hover:text-ink-900 hover:bg-surface-subtle'
+                  }`
+                }
+              >
+                {item.name}
+              </NavLink>
+            ))}
           </nav>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center gap-2">
             {userInfo ? (
-                <>
-                <Link to="/profile" className="text-gray-700 hover:text-lab-purple no-underline">Bonjour, {userInfo.username}!</Link>
-                {userInfo.role === 'admin' && (
-                  <Link
-                    to="/admin"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md text-sm font-medium transition duration-150 ease-in-out no-underline"
-                  >
-                    Admin
-                  </Link>
-                )}
-                <button
-                    onClick={handleLogout}
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+              <>
+                <Link
+                  to="/profile"
+                  className="text-sm font-medium text-ink-700 hover:text-ink-900 px-2.5 py-2 rounded-card hover:bg-surface-subtle"
                 >
-                    Déconnexion
-                </button>
-                </>
-            ) : (
-                <>
-                <Link to="/login" className="text-gray-600 hover:text-lab-blue transition duration-300 font-medium no-underline">Se Connecter</Link>
-                <Link to="/register" className="bg-gradient-to-r from-lab-blue to-lab-purple hover:from-lab-blue/90 hover:to-lab-purple/90 text-white px-4 py-1.5 rounded-md text-sm font-semibold shadow-sm transition duration-150 ease-in-out no-underline">
-                    S'inscrire
+                  {userInfo.username}
                 </Link>
-                </>
+                {userInfo.role === 'admin' && (
+                  <Link to="/admin" className="btn-secondary">Admin</Link>
+                )}
+                <button onClick={handleLogout} className="btn-ghost">Se déconnecter</button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="btn-ghost">Se connecter</Link>
+                <Link to="/register" className="btn-primary">S'inscrire</Link>
+              </>
             )}
           </div>
 
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-gray-700 focus:outline-none"
-            aria-label="Menu principal"
+            onClick={() => setMobileOpen((v) => !v)}
+            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-card text-ink-700 hover:bg-surface-subtle"
+            aria-label="Ouvrir le menu"
+            aria-expanded={mobileOpen}
           >
-            {mobileMenuOpen ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            {mobileOpen ? (
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
               </svg>
             )}
           </button>
         </div>
 
-        {/* Menu mobile */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white shadow-lg rounded-b-lg overflow-hidden">
-            <div className="px-4 py-3 space-y-3">
-              {NAV_ITEMS.map((item) => {
-                const isActive = isActivePath(item.path);
-
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    className={`block py-2 px-3 rounded-lg no-underline ${item.hoverClass} ${
-                      isActive ? item.mobileActiveClass : 'text-gray-600'
-                    }`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                );
-              })}
-
-              <div className="border-t border-gray-100 my-3 pt-3">
+        {mobileOpen && (
+          <div className="md:hidden border-t border-surface-line bg-surface">
+            <div className="page py-3 space-y-1">
+              {NAV_ITEMS.map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `block px-3 py-2.5 rounded-card text-sm font-medium ${
+                      isActive
+                        ? 'bg-biogy-50 text-biogy-700'
+                        : 'text-ink-700 hover:bg-surface-subtle'
+                    }`
+                  }
+                >
+                  {item.name}
+                </NavLink>
+              ))}
+              <div className="pt-3 mt-2 border-t border-surface-line space-y-1">
                 {userInfo ? (
                   <>
-                    <Link
-                      to="/profile"
-                      className="block py-2 px-3 rounded-lg text-gray-700 hover:text-lab-purple no-underline"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Mon profil
+                    <Link to="/profile" className="block px-3 py-2.5 rounded-card text-sm text-ink-700 hover:bg-surface-subtle">
+                      Mon profil — {userInfo.username}
                     </Link>
                     {userInfo.role === 'admin' && (
-                      <Link
-                        to="/admin"
-                        className="block py-2 px-3 rounded-lg bg-indigo-600 text-white no-underline"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Admin
+                      <Link to="/admin" className="block px-3 py-2.5 rounded-card text-sm font-medium bg-ink-900 text-white">
+                        Panneau admin
                       </Link>
                     )}
                     <button
-                      onClick={() => {
-                        logout();
-                        navigate('/login');
-                        setMobileMenuOpen(false);
-                      }}
-                      className="block w-full text-left py-2 px-3 rounded-lg text-red-600 hover:text-red-800 mt-2"
+                      onClick={handleLogout}
+                      className="block w-full text-left px-3 py-2.5 rounded-card text-sm text-biotech-red hover:bg-surface-subtle"
                     >
-                      Déconnexion
+                      Se déconnecter
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link
-                      to="/login"
-                      className="block py-2 px-3 rounded-lg text-gray-600 hover:text-lab-blue no-underline"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Se Connecter
-                    </Link>
-                    <Link
-                      to="/register"
-                      className="block py-2 px-3 rounded-lg bg-gradient-to-r from-lab-blue to-lab-purple text-white mt-2 no-underline"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      S'inscrire
-                    </Link>
+                    <Link to="/login"    className="block px-3 py-2.5 rounded-card text-sm text-ink-700 hover:bg-surface-subtle">Se connecter</Link>
+                    <Link to="/register" className="block px-3 py-2.5 rounded-card text-sm font-semibold bg-biogy-600 text-white">S'inscrire</Link>
                   </>
                 )}
               </div>
@@ -310,94 +181,41 @@ function Layout({ children }) {
         )}
       </header>
 
-      <main className="flex-grow">
-        {children}
-      </main>
+      <main className="flex-grow">{children}</main>
 
-      <footer className="bg-gray-50 border-t border-lab-lines relative overflow-hidden">
-        <div className="absolute -top-16 -left-16 w-32 h-32 opacity-5">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M30 20V40M70 20V40M25 50H75M30 70H70M40 90H60" stroke="#000" strokeWidth="4" strokeLinecap="round" />
-            <path d="M20 40H80L70 80C68 85 60 90 50 90C40 90 32 85 30 80L20 40Z" stroke="#000" strokeWidth="4" fill="none" />
-          </svg>
-        </div>
-        <div className="absolute -bottom-10 -right-10 w-32 h-32 opacity-5 rotate-45">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="30" y="20" width="40" height="60" rx="5" stroke="#000" strokeWidth="4" />
-            <path d="M45 10L45 20M55 10L55 20" stroke="#000" strokeWidth="4" strokeLinecap="round" />
-            <path d="M35 40H65M35 50H65M35 60H65M35 70H65" stroke="#000" strokeWidth="3" strokeLinecap="round" />
-          </svg>
-        </div>
-
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <Link to="/" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-lab-blue via-lab-purple to-lab-teal">
-                Biogy
-              </Link>
-              <p className="mt-3 text-gray-600">
-                Votre portail vers le monde fascinant de la biologie et la biotechnologie.
-                Explorez, apprenez et découvrez les merveilles de la science du vivant.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-3 text-gray-700">Navigation</h3>
-              <ul className="space-y-2">
-                <li><Link to="/apprendre" className="text-gray-600 hover:text-lab-blue transition duration-300 no-underline">Apprendre</Link></li>
-                <li><Link to="/laboratoire" className="text-gray-600 hover:text-lab-teal transition duration-300 no-underline">Laboratoire</Link></li>
-                <li><Link to="/actualites" className="text-gray-600 hover:text-lab-teal transition duration-300 no-underline">Actualités</Link></li>
-                <li><Link to="/partager-projet" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Partager un Projet</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-3 text-gray-700">Communauté</h3>
-              <ul className="space-y-2">
-                  <li><Link to="/projets" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Voir les Projets</Link></li>
-                  <li><Link to="/forum" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">Forum</Link></li>
-                  <li><Link to="/contact" className="text-gray-600 hover:text-lab-blue transition duration-300 no-underline">Contact</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-3 text-gray-700">Mon Compte</h3>
-              <ul className="space-y-2">
-              {userInfo ? (
-                <>
-                  <li>
-                    <Link to="/profile" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">
-                      Mon Profil
-                    </Link>
-                  </li>
-                  {userInfo.role === 'admin' && (
-                    <li>
-                      <Link to="/admin" className="text-indigo-600 hover:text-indigo-800 transition duration-300 no-underline">
-                        Panneau Admin
-                      </Link>
-                    </li>
-                  )}
-                  <li>
-                    <button
-                      onClick={handleLogout}
-                      className="text-red-600 hover:text-red-800 transition duration-300 text-left w-full"
-                    >
-                      Déconnexion
-                    </button>
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li><Link to="/login" className="text-gray-600 hover:text-lab-blue transition duration-300 no-underline">Se Connecter</Link></li>
-                  <li><Link to="/register" className="text-gray-600 hover:text-lab-purple transition duration-300 no-underline">S'inscrire</Link></li>
-                </>
-              )}
-              </ul>
-            </div>
+      <footer className="mt-20 border-t border-surface-line bg-surface">
+        <div className="page py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="md:col-span-2">
+            <Wordmark />
+            <p className="mt-4 max-w-md text-sm leading-6 text-ink-600">
+              Plateforme de cours, de travaux pratiques et de veille scientifique pour les élèves
+              de Sciences et Technologies de Laboratoire, spécialité biotechnologie.
+            </p>
           </div>
 
-          <div className="mt-10 pt-5 border-t border-gray-200 text-center text-gray-500 text-sm">
-            <p>© {new Date().getFullYear()} Biogy. Tous droits réservés.</p>
+          <div>
+            <h3 className="section-eyebrow mb-3">Parcours</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/apprendre"   className="text-ink-700 hover:text-biogy-700">Apprendre</Link></li>
+              <li><Link to="/laboratoire" className="text-ink-700 hover:text-biogy-700">Laboratoire</Link></li>
+              <li><Link to="/actualites"  className="text-ink-700 hover:text-biogy-700">Veille scientifique</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="section-eyebrow mb-3">Communauté</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/projets"         className="text-ink-700 hover:text-biogy-700">Galerie de projets</Link></li>
+              <li><Link to="/partager-projet" className="text-ink-700 hover:text-biogy-700">Partager un projet</Link></li>
+              <li><Link to="/forum"           className="text-ink-700 hover:text-biogy-700">Forum</Link></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-surface-line">
+          <div className="page py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-500">
+            <p>© {new Date().getFullYear()} Biogy — Ressource pédagogique STL Biotechnologie.</p>
+            <p>Construit pour la classe.</p>
           </div>
         </div>
       </footer>
@@ -406,4 +224,3 @@ function Layout({ children }) {
 }
 
 export default Layout;
-

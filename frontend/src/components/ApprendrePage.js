@@ -2,65 +2,91 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { getCourseLevels } from '../data/stlCurriculum';
 
-const LEVEL_STYLES = {
-  premiere: {
-    badge: 'bg-lab-blue/10 text-lab-blue',
-    button: 'bg-lab-blue text-white hover:bg-lab-blue/90',
-    glow: 'from-lab-blue/15 via-white to-lab-purple/10',
-  },
-  terminale: {
-    badge: 'bg-lab-teal/10 text-lab-teal',
-    button: 'bg-lab-teal text-white hover:bg-lab-teal/90',
-    glow: 'from-lab-teal/15 via-white to-lab-green/10',
-  },
+const LEVEL_ACCENT = {
+  premiere:  { badge: 'pill-biogy' },
+  terminale: { badge: 'pill-ink'   },
 };
 
 function ApprendrePage() {
   const levels = getCourseLevels();
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 pb-16 pt-8">
-      <section className="rounded-3xl border border-gray-200 bg-white px-6 py-8 shadow-xl lg:px-10">
-        <p className="inline-flex rounded-full border border-lab-blue/20 bg-lab-blue/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-lab-blue">
-          Cours STL
-        </p>
-        <h1 className="mt-5 text-3xl font-bold text-gray-800 lg:text-4xl">
-          Choisis ton niveau
+    <div className="page py-10 md:py-14">
+      <header className="max-w-3xl">
+        <p className="section-eyebrow">Apprendre</p>
+        <h1 className="mt-3 font-display text-3xl md:text-display-md text-ink-900">
+          Les livres de cours de la spécialité
         </h1>
-        <p className="mt-4 max-w-3xl text-base leading-8 text-gray-600">
-          Les cours sont maintenant ranges par niveau, puis par chapitre. Tu peux entrer dans le livre de premiere
-          ou dans le livre de terminale, puis ouvrir directement le chapitre qui t interesse.
+        <p className="mt-4 text-ink-600 leading-relaxed">
+          Choisis ton niveau pour ouvrir le livre correspondant. Chaque livre est organisé
+          en grands thèmes, puis en chapitres et en sous-parties — comme un manuel.
         </p>
-      </section>
+      </header>
 
-      <section className="mt-8 grid gap-6 lg:grid-cols-2">
+      <section className="mt-10 grid gap-5 md:grid-cols-2" aria-label="Niveaux">
         {levels.map((level) => {
-          const style = LEVEL_STYLES[level.id] || LEVEL_STYLES.premiere;
-          const chapterCount = level.sections.reduce((total, section) => total + section.chapters.length, 0);
+          const style = LEVEL_ACCENT[level.id] || LEVEL_ACCENT.premiere;
+          const chapterCount = level.sections.reduce(
+            (total, section) => total + section.chapters.length,
+            0,
+          );
 
           return (
-            <article
+            <Link
               key={level.id}
-              className={`rounded-3xl border border-gray-200 bg-gradient-to-br ${style.glow} p-6 shadow-lg`}
+              to={`/apprendre/${level.id}`}
+              className="group card p-6 md:p-8 transition-all hover:border-biogy-200 hover:shadow-elevated"
             >
-              <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${style.badge}`}>
-                {level.title}
-              </span>
-              <h2 className="mt-4 text-2xl font-bold text-gray-800">{level.title}</h2>
-              <p className="mt-3 text-sm leading-7 text-gray-600">{level.intro}</p>
-              <p className="mt-4 text-sm font-semibold text-gray-500">
-                {chapterCount} chapitres ou modules
+              <div className="flex items-center justify-between">
+                <span className={style.badge}>{level.title}</span>
+                <span className="text-xs font-medium text-ink-500">
+                  {chapterCount} chapitres
+                </span>
+              </div>
+
+              <h2 className="mt-5 font-display text-2xl text-ink-900">
+                Ouvrir le livre de {level.shortTitle.toLowerCase()}
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-ink-600">
+                {level.intro}
               </p>
 
-              <Link
-                to={`/apprendre/${level.id}`}
-                className={`mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${style.button}`}
-              >
-                Ouvrir {level.shortTitle}
-              </Link>
-            </article>
+              <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-biogy-700">
+                Ouvrir
+                <svg viewBox="0 0 20 20" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="currentColor" aria-hidden="true">
+                  <path d="M7.3 4.3l5.4 5.7-5.4 5.7-1.3-1.2 4.1-4.5L6 5.5z" />
+                </svg>
+              </div>
+            </Link>
           );
         })}
+      </section>
+
+      <section className="mt-10 card p-6 md:p-8">
+        <p className="section-eyebrow">Comment lire un chapitre</p>
+        <h2 className="mt-3 font-display text-xl text-ink-900">
+          Trois onglets, toujours dans le même ordre
+        </h2>
+        <ol className="mt-5 grid gap-3 md:grid-cols-3">
+          <li className="card-flat p-4">
+            <span className="pill-biogy">1 — Cours</span>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">
+              L'essentiel à savoir, les notions et les schémas — ce qu'on recopie dans le cahier.
+            </p>
+          </li>
+          <li className="card-flat p-4">
+            <span className="pill-neutral">2 — Travail guidé</span>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">
+              Les documents à analyser et les questions pour s'approprier le cours.
+            </p>
+          </li>
+          <li className="card-flat p-4">
+            <span className="pill-accent">3 — Bilan</span>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">
+              Points-clés, erreurs fréquentes, entraînement et pistes pour aller plus loin.
+            </p>
+          </li>
+        </ol>
       </section>
     </div>
   );

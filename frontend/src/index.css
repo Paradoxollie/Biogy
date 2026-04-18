@@ -2,60 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply font-sans bg-lab-bg text-gray-800;
+/* ---------- Base ---------- */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans bg-surface-muted text-ink-900 antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  /* Editorial serif for article / course headings */
+  h1.display, h2.display, h3.display,
+  .prose h1, .prose h2, .prose h3 {
+    @apply font-display;
+    font-feature-settings: "ss01";
+  }
+
+  /* Nav links unadorned, underlines restored inside prose / explicit links */
+  a { @apply no-underline; }
+  .prose a,
+  a.link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  /* Focus styles — classroom accessibility */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply outline-none ring-2 ring-biogy-500 ring-offset-2 ring-offset-surface;
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
-/* Suppression des soulignements par défaut des liens */
-a {
-  @apply no-underline;
+/* ---------- Component primitives ---------- */
+@layer components {
+  .page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+  .page-narrow {
+    @apply mx-auto w-full max-w-3xl px-4 sm:px-6;
+  }
+
+  .card {
+    @apply bg-surface rounded-card border border-surface-line shadow-soft;
+  }
+  .card-flat {
+    @apply bg-surface rounded-card border border-surface-line;
+  }
+  .card-elevated {
+    @apply bg-surface rounded-card border border-surface-line shadow-elevated;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-card px-4 py-2.5
+           text-sm font-semibold transition-colors duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary  { @apply btn bg-biogy-600 text-white hover:bg-biogy-700 active:bg-biogy-800 shadow-soft; }
+  .btn-secondary{ @apply btn bg-surface text-ink-900 border border-surface-line hover:bg-surface-subtle; }
+  .btn-ghost    { @apply btn text-ink-700 hover:bg-surface-subtle; }
+  .btn-danger   { @apply btn bg-biotech-red text-white hover:opacity-90; }
+
+  .pill         { @apply inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-semibold tracking-wide; }
+  .pill-neutral { @apply pill bg-surface-subtle text-ink-700; }
+  .pill-biogy   { @apply pill bg-biogy-50 text-biogy-700 ring-1 ring-inset ring-biogy-100; }
+  .pill-ink     { @apply pill bg-ink-50 text-ink-700 ring-1 ring-inset ring-ink-100; }
+  .pill-accent  { @apply pill bg-accent-50 text-accent-700 ring-1 ring-inset ring-accent-100; }
+
+  .section-eyebrow { @apply text-xs font-semibold uppercase tracking-[0.18em] text-ink-500; }
+  .section-title   { @apply font-display text-ink-900 text-2xl md:text-3xl leading-tight; }
+
+  .input {
+    @apply block w-full rounded-card border border-surface-line bg-surface
+           px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-400
+           shadow-soft focus:border-biogy-500;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
+  .prose { @apply text-ink-800 leading-relaxed; }
+  .prose p { @apply my-4; }
+  .prose h2 { @apply mt-10 mb-3 text-2xl; }
+  .prose h3 { @apply mt-6 mb-2 text-xl; }
+  .prose ul { @apply my-4 list-disc pl-5 space-y-1.5; }
+  .prose ol { @apply my-4 list-decimal pl-5 space-y-1.5; }
+  .prose strong { @apply text-ink-900 font-semibold; }
+  .prose blockquote {
+    @apply border-l-4 border-biogy-300 bg-biogy-50/40 px-4 py-2 my-4
+           rounded-r-card italic text-ink-700;
+  }
+
+  .paper-grid {
+    background-image:
+      linear-gradient(to right, rgba(16,26,41,0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(16,26,41,0.03) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
 }
 
-/* Conserver le soulignement uniquement pour les liens qui en ont besoin */
-a.with-underline, .prose a {
-  text-decoration: underline;
-}
-
-/* Effet de papier ligné pour le forum */
+/* ---------- Legacy utilities (forum paper + pulseGlow) ---------- */
 .paper-lined-bg {
   background-image: linear-gradient(0deg, rgba(230,230,250,0.1) 1px, transparent 1px);
   background-size: 100% 24px;
-  background-position: 0 0;
 }
-
 .perspective {
   perspective: 800px;
   transform-style: preserve-3d;
 }
-
-/* Animations pour le forum */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes pulseGlow {
-  0% {
-    filter: drop-shadow(0 0 0 rgba(139, 92, 246, 0));
-  }
-  50% {
-    filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.5));
-  }
-  100% {
-    filter: drop-shadow(0 0 0 rgba(139, 92, 246, 0));
-  }
+  0%,100% { filter: drop-shadow(0 0 0 rgba(20,166,118,0)); }
+  50%     { filter: drop-shadow(0 0 3px rgba(20,166,118,0.5)); }
 }
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
-
-.animate-pulse-glow {
-  animation: pulseGlow 2s infinite;
-}
+.animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+.animate-pulse-glow { animation: pulseGlow 2s infinite; }
