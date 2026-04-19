@@ -8,7 +8,6 @@ function ScienceWatchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
-  const [forceRefresh, setForceRefresh] = useState(false);
   const [biotechOnly, setBiotechOnly] = useState(true);
   const [articleCount, setArticleCount] = useState({});
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -95,32 +94,30 @@ function ScienceWatchPage() {
     }
   };
 
-  const fetchArticles = async (colorKey) => {
+  const fetchArticles = async (colorKey, { hardRefresh = false } = {}) => {
     setLoading(true);
     setError(null);
     setCurrentSlide(0); // Reset carousel on new fetch
-    
+
     try {
       let url = '/.netlify/functions/biotech-veille';
       const params = new URLSearchParams();
       if (colorKey) params.append('color', colorKey);
-      // Removed forceRefresh mapping to URL to simplify, the user rarely needs it dynamically
       params.append('biotechOnly', biotechOnly.toString());
-      params.append('max', '25'); 
-      
+      params.append('max', '25');
+      // refresh=true cote serveur => Cache-Control: no-store, donc on force
+      // un nouveau fetch RSS uniquement si l utilisateur le demande
+      // explicitement. Sinon on profite du cache CDN (s-maxage=1800).
+      if (hardRefresh) params.append('refresh', 'true');
+
       const fullUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
-      
+
       try {
         const response = await fetch(fullUrl, {
           signal: controller.signal,
-          cache: 'no-cache',
-          headers: {
-            'pragma': 'no-cache',
-            'cache-control': 'no-cache'
-          }
         });
         
         clearTimeout(timeoutId);
@@ -162,21 +159,9 @@ function ScienceWatchPage() {
   };
 
   useEffect(() => {
-    // Initial fetch for 'À la une'
+    // Initial fetch for 'À la une'. Le compte par couleur est calcule
+    // a partir de la reponse principale (pas de second appel inutile au CDN).
     fetchArticles(null);
-
-    const preloadArticleCounts = async () => {
-      try {
-        const response = await fetch('/.netlify/functions/biotech-veille?counts=true');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.counts) setArticleCount(data.counts);
-        }
-      } catch (error) {
-        console.error("Erreur préchargement compteurs:", error);
-      }
-    };
-    preloadArticleCounts();
   }, []);
 
   const handleColorSelect = (color) => {
@@ -211,7 +196,11 @@ function ScienceWatchPage() {
 
   const handleRefresh = () => {
     setArticles([]);
-    fetchArticles(selectedColor);
+    // Bouton Actualiser = on demande explicitement un nouveau fetch RSS
+    // (le serveur renverra Cache-Control: no-store). Sans ce flag on
+    // garderait simplement la reponse en cache CDN, ce qui est ce qu on
+    // veut pour l affichage initial.
+    fetchArticles(selectedColor, { hardRefresh: true });
   };
 
   // Format date helper
