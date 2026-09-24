@@ -15,6 +15,22 @@ const User = require('../models/User');
 
 let mongoServer;
 
+test('teacher corrections are absent from public HTML and require a server-verified admin', async () => {
+  const fs = require('node:fs');
+  const html = fs.readFileSync(require('node:path').join(__dirname, '../../frontend/public/laboratoire/at5-metrologie-pipettes.html'), 'utf8');
+  assert.doesNotMatch(html, /data-teacher-password|<div class="prof-(block|note)"/);
+  assert.match(html, /data-teacher-slot/);
+  const endpoint = '/api/lab/activities/at5-metrologie-pipettes/corrections';
+  await request(app).get(endpoint).expect(401);
+  const student = await createAuthHeader({ username: 'correction-student' });
+  await request(app).get(endpoint).set('Authorization', student.authorization).expect(403);
+  const teacher = await createAuthHeader({ username: 'correction-teacher', role: 'admin' });
+  const response = await request(app).get(endpoint).set('Authorization', teacher.authorization).expect(200);
+  assert.ok(Object.keys(response.body.corrections).length >= 15);
+  assert.match(response.headers['cache-control'], /no-store/);
+  await request(app).get('/api/lab/activities/unknown/corrections').set('Authorization', teacher.authorization).expect(404);
+});
+
 const createAuthHeader = async (overrides = {}) => {
   const user = await User.create({
     username: overrides.username || `user-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`,
@@ -174,4 +190,19 @@ test('admin can list, inspect and review lab submissions', async () => {
   assert.ok(storedSubmission);
   assert.equal(storedSubmission.review.status, 'reviewed');
   assert.equal(storedSubmission.review.feedback, 'Copie complète. Pense à mieux justifier la conclusion.');
+});
+
+test('students can read only their own receipts and teacher feedback', async () => {
+  const owner = await createAuthHeader({ username: 'receipt-owner' });
+  const other = await createAuthHeader({ username: 'receipt-other' });
+  await LabSubmission.create({ user: owner.user._id, usernameSnapshot: owner.user.username, activityId: 'at5-metrologie-pipettes', activityTitle: 'AT5', submissionHtml: '<p>Private answer</p>', formState: { fields: { private: 'answer' } }, review: { status: 'reviewed', feedback: 'Travail vérifié.' } });
+  await request(app).get('/api/lab/submissions/mine').expect(401);
+  const response = await request(app).get('/api/lab/submissions/mine').set('Authorization', owner.authorization).expect(200);
+  assert.equal(response.body.length, 1);
+  assert.equal(response.body[0].review.feedback, 'Travail vérifié.');
+  assert.equal(response.body[0].submissionHtml, undefined);
+  assert.equal(response.body[0].formState, undefined);
+  assert.match(response.headers['cache-control'], /no-store/);
+  const outsider = await request(app).get('/api/lab/submissions/mine').set('Authorization', other.authorization).expect(200);
+  assert.deepEqual(outsider.body, []);
 });

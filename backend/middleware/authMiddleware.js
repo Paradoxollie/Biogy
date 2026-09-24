@@ -1,3 +1,4 @@
+const { ensureDatabaseAvailable } = require('../utils/database');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/User');
@@ -24,10 +25,13 @@ const findUserFromRequest = async (req) => {
   }
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  return User.findById(decoded.id).select('-password');
+  const user = await User.findById(decoded.id).select('+tokenVersion -password');
+  if (user && (decoded.version || 0) !== (user.tokenVersion || 0)) return null;
+  return user;
 };
 
 const protect = async (req, res, next) => {
+  if (!ensureDatabaseAvailable(res)) return;
   try {
     const user = await findUserFromRequest(req);
 

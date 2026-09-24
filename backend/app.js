@@ -45,6 +45,8 @@ const corsOptions = {
 const app = express();
 
 app.disable('x-powered-by');
+// Render terminates TLS and adds the final forwarding hop.
+if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 
 app.use(helmet({
   crossOriginResourcePolicy: false,
@@ -85,10 +87,10 @@ app.use((err, req, res, next) => {
 
   console.error(err);
 
-  const statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : 500;
+  const statusCode = err.status || (res.statusCode && res.statusCode !== 200 ? res.statusCode : 500);
 
   return res.status(statusCode).json({
-    message: err.message || 'Erreur serveur',
+    message: statusCode >= 500 && process.env.NODE_ENV === 'production' ? 'Le service est temporairement indisponible.' : err.message || 'Erreur serveur',
     ...(process.env.NODE_ENV === 'production' ? {} : { stack: err.stack }),
   });
 });

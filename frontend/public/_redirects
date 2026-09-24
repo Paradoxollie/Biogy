@@ -1,9 +1,1 @@
-# API redirects - these must come before the SPA redirect
-/api/*  https://biogy.onrender.com/api/:splat  200!
-/api/*  https://biogy.onrender.com/api/:splat  204!  OPTIONS
-
-# Netlify Functions redirects
-/.netlify/functions/*  /.netlify/functions/:splat  200
-
-# SPA fallback - this must be the last redirect
-/*  /index.html  200
+# Canonical redirects are managed in the root netlify.toml.

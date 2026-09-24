@@ -11,7 +11,9 @@
 
   const activityId = body.dataset.activityId;
   const activityTitle = body.dataset.activityTitle || document.title;
-  const teacherPassword = body.dataset.teacherPassword || '';
+  let teacherUnlocked = false;
+  let teacherRequestPending = false;
+  let submitting = false;
   const apiBaseUrl = (() => {
     if (body.dataset.apiBase) {
       return body.dataset.apiBase;
@@ -25,10 +27,14 @@
     return '/api';
   })();
   const draftKey = `biogy:lab:${activityId}:draft`;
-  const teacherKey = `biogy:lab:${activityId}:teacher`;
+
 
   let autosaveTimer = null;
   let messageTimer = null;
+
+  const storageGet = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
+  const storageSet = (key, value) => { try { localStorage.setItem(key, value); return true; } catch { return false; } };
+  const storageRemove = (key) => { try { localStorage.removeItem(key); } catch {} };
 
   const safeJsonParse = (value) => {
     try {
@@ -45,15 +51,15 @@
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-  const getAuth = () => safeJsonParse(localStorage.getItem(authStorageKey));
+  const getAuth = () => safeJsonParse(storageGet(authStorageKey));
   const persistAuth = (value) => {
     if (value?.token) {
-      localStorage.setItem(authStorageKey, JSON.stringify(value));
+      storageSet(authStorageKey, JSON.stringify(value));
     }
   };
-  const clearAuth = () => localStorage.removeItem(authStorageKey);
+  const clearAuth = () => { storageRemove(authStorageKey); lockTeacherMode(); };
 
-  const isTeacherUnlocked = () => sessionStorage.getItem(teacherKey) === 'unlocked';
+  const isTeacherUnlocked = () => teacherUnlocked;
 
   const findQuestionCard = (questionNumber) => Array.from(document.querySelectorAll('.card'))
     .find((card) => card.querySelector('.q-num')?.textContent.trim() === String(questionNumber));
@@ -103,7 +109,7 @@
 
     q10Rows.forEach((row, index) => {
       const [sourceId, typeId] = q10Ids[index] || [];
-      const [sourceField, typeField] = row.querySelectorAll('textarea');
+      const [sourceField, typeField] = row.querySelectorAll('textarea, input');
 
       ensureElementId(sourceField, sourceId);
       ensureElementId(typeField, typeId);
@@ -129,12 +135,24 @@
   };
 
   const getFields = () => Array.from(document.querySelectorAll(fieldSelector))
-    .filter((field) => !field.closest('[data-biogy-runtime="ignore"]'));
+    .filter((field) => !field.closest('[data-biogy-runtime="ignore"], [data-teacher-slot]'));
 
   const ensureFieldKeys = () => {
     getFields().forEach((field, index) => {
+      if (!field.getAttribute('aria-label') && !field.labels?.length) {
+        const row = field.closest('tr');
+        const cell = field.closest('td');
+        const column = cell && field.closest('table')?.querySelectorAll('thead th')[cell.cellIndex]?.textContent;
+        const rowTitle = row?.querySelector('td, th')?.textContent;
+        const caseMatch = field.id.match(/^q12-case-([a-d])-(justesse|fidelite)$/);
+        const label = caseMatch ? `Cas ${caseMatch[1].toUpperCase()} — ${caseMatch[2] === 'fidelite' ? 'Fidélité' : 'Justesse'}`
+          : rowTitle ? `${rowTitle} — ${column || 'Réponse'}`
+          : field.id === 'targetScale' ? 'Échelle de la cible : grammes par anneau'
+          : field.parentElement.querySelector('label')?.textContent || field.placeholder || field.parentElement.textContent;
+        field.setAttribute('aria-label', label.trim().replace(/\s+/g, ' ').slice(0,240));
+      }
       if (!field.dataset.biogyKey) {
-        field.dataset.biogyKey = field.id || field.name || `field-${index + 1}`;
+        field.dataset.biogyKey = field.id || field.name || `field-${field.dataset.biogyLegacyIndex || index + 1}`;
       }
     });
   };
@@ -210,7 +228,9 @@
     const fields = state.fields || {};
 
     getFields().forEach((field) => {
-      const key = field.dataset.biogyKey;
+      const currentKey = field.dataset.biogyKey;
+      const legacyKey = `field-${field.dataset.biogyLegacyIndex}`;
+      const key = Object.prototype.hasOwnProperty.call(fields, currentKey) ? currentKey : legacyKey;
       if (Object.prototype.hasOwnProperty.call(fields, key)) {
         setFieldValue(field, fields[key]);
       }
@@ -224,7 +244,7 @@
 
   const saveDraft = (message) => {
     const state = collectState();
-    localStorage.setItem(draftKey, JSON.stringify(state));
+    if (!storageSet(draftKey, JSON.stringify(state))) { updateMessage('La sauvegarde locale est indisponible. Exporte ta copie avant de quitter la page.', 'error'); return state; }
     updateMessage(message || `Brouillon enregistré à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}.`, 'info');
     updateSessionPills(state);
     return state;
@@ -239,7 +259,8 @@
 
   const removeRuntimeElements = (root) => {
     root.querySelectorAll('[data-biogy-runtime]').forEach((element) => element.remove());
-    root.querySelectorAll('script').forEach((element) => element.remove());
+    root.querySelectorAll('script, [data-teacher-slot], .prof-block, .prof-note').forEach((element) => element.remove());
+    root.querySelectorAll('*').forEach((element) => { Array.from(element.attributes).forEach((attr) => { if (/^on/i.test(attr.name)) element.removeAttribute(attr.name); }); });
     root.querySelectorAll('link[href$="lab-session.css"]').forEach((element) => element.remove());
   };
 
@@ -276,9 +297,11 @@
       } else if (cloneField.tagName === 'SELECT') {
         Array.from(cloneField.options).forEach((option) => {
           option.selected = option.value === field.value;
+          option.toggleAttribute('selected', option.selected);
         });
       } else if (cloneField.type === 'checkbox' || cloneField.type === 'radio') {
         cloneField.checked = field.checked;
+        cloneField.toggleAttribute('checked', field.checked);
       } else {
         cloneField.setAttribute('value', field.value);
         cloneField.value = field.value;
@@ -301,8 +324,8 @@
     const infoBanner = document.createElement('div');
     infoBanner.className = 'biogy-submission-banner';
     infoBanner.innerHTML = `
-      <h2>${activityTitle}</h2>
-      <p>Copie envoyée par <strong>${userInfo.username}</strong> le ${new Date().toLocaleString('fr-FR')}.</p>
+      <h2>${escapeHtml(activityTitle)}</h2>
+      <p>Copie envoyée par <strong>${escapeHtml(userInfo.username)}</strong> le ${new Date().toLocaleString('fr-FR')}.</p>
     `;
 
     cloneBody.insertBefore(infoBanner, cloneBody.firstChild);
@@ -327,10 +350,11 @@
 
   const redirectToLogin = () => {
     saveDraft('Brouillon enregistré avant la connexion.');
-    window.location.assign(`/#/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+    window.location.assign(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
   };
 
   const submitCopy = async () => {
+    if (submitting) return;
     const userInfo = getAuth();
 
     if (!userInfo?.token) {
@@ -351,6 +375,8 @@
     };
 
     try {
+      submitting = true;
+      toolbar.querySelector('#biogySubmitButton').disabled = true;
       updateMessage('Envoi de la copie en cours...', 'info');
 
       const response = await fetch(`${apiBaseUrl}/lab/submissions`, {
@@ -360,6 +386,7 @@
           Authorization: `Bearer ${userInfo.token}`,
         },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(20000),
       });
       const data = await response.json();
 
@@ -373,7 +400,7 @@
         throw new Error(data.message || 'Erreur lors de l envoi de la copie.');
       }
 
-      localStorage.setItem(`biogy:lab:${activityId}:last-submission`, JSON.stringify({
+      storageSet(`biogy:lab:${activityId}:last-submission`, JSON.stringify({
         submittedAt: new Date().toISOString(),
         username: userInfo.username,
       }));
@@ -381,30 +408,36 @@
       updateMessage('Copie envoyée avec succès. Elle est maintenant disponible dans le tableau de correction.', 'success');
     } catch (error) {
       console.error(error);
-      updateMessage(error.message || 'Erreur lors de l envoi de la copie.', 'error');
-    }
+      updateMessage(error.name === 'TimeoutError' ? 'La confirmation n’est pas arrivée. Ton brouillon est conservé ; réessaie pour mettre à jour la même copie.' : error.message || 'Erreur lors de l’envoi de la copie.', 'error');
+    } finally { submitting = false; toolbar.querySelector('#biogySubmitButton').disabled = false; }
   };
 
-  const unlockTeacherMode = () => {
-    const typedPassword = window.prompt('Mot de passe professeur');
+  const unlockTeacherMode = async () => {
+    if (teacherRequestPending) return;
+    const auth = getAuth();
+    if (!auth?.token) { updateMessage('Connecte-toi avec ton compte professeur pour ouvrir les corrections.', 'info'); redirectToLogin(); return; }
+    teacherRequestPending = true;
+    try {
+      const response = await fetch(`${apiBaseUrl}/lab/activities/${encodeURIComponent(activityId)}/corrections`, { headers: { Authorization: `Bearer ${auth.token}` }, signal: AbortSignal.timeout(15000) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(response.status === 403 ? 'Les corrections sont réservées au compte professeur.' : data.message || 'Corrections temporairement indisponibles.');
+      Object.entries(data.corrections).forEach(([key, html]) => {
+        const slot = document.querySelector(`[data-teacher-slot="${key}"]`);
+        if (slot) slot.innerHTML = html;
+      });
+      teacherUnlocked = true;
+      window.__biogyOriginalToggleProf?.();
+      updateTeacherStatus();
+      updateMessage('Mode professeur activé pour cette session.', 'success');
+    } catch (error) { updateMessage(error.name === 'TimeoutError' ? 'Le serveur met du temps à répondre. Réessaie dans un instant.' : error.message, 'error'); }
+    finally { teacherRequestPending = false; }
+  };
 
-    if (typedPassword === null) {
-      return;
-    }
-
-    if (typedPassword !== teacherPassword) {
-      window.alert('Mot de passe incorrect.');
-      return;
-    }
-
-    sessionStorage.setItem(teacherKey, 'unlocked');
-
-    if (typeof window.__biogyOriginalToggleProf === 'function') {
-      window.__biogyOriginalToggleProf();
-    }
-
+  const lockTeacherMode = () => {
+    teacherUnlocked = false;
+    document.querySelectorAll('[data-teacher-slot]').forEach((slot) => { slot.replaceChildren(); });
+    if (document.body.classList.contains('prof-mode')) window.__biogyOriginalToggleProf?.();
     updateTeacherStatus();
-    updateMessage('Mode professeur activé pour cette session.', 'success');
   };
 
   const wrapTeacherMode = () => {
@@ -438,7 +471,7 @@
     <div class="biogy-session-toolbar__inner">
       <div class="biogy-session-toolbar__row">
         <div class="biogy-session-toolbar__meta">
-          <a class="biogy-session-pill biogy-session-pill--brand" href="/#/laboratoire">Biogy laboratoire</a>
+          <a class="biogy-session-pill biogy-session-pill--brand" href="/laboratoire">Biogy laboratoire</a>
           <div class="biogy-session-pill biogy-session-pill--auth" id="biogyAuthPill">Connexion non requise pour travailler</div>
           <div class="biogy-session-pill biogy-session-pill--teacher" id="biogyTeacherPill">Mode professeur verrouillé</div>
         </div>
@@ -479,7 +512,7 @@
   const headerMenuToggle = document.querySelector('#biogyNavToggle');
   const headerMobileMenu = document.querySelector('#biogyNavMobileMenu');
 
-  document.querySelectorAll('.site-nav-link[href="/#/actualites"], .site-mobile-link[href="/#/actualites"]').forEach((link) => {
+  document.querySelectorAll('.site-nav-link[href="/actualites"], .site-mobile-link[href="/actualites"]').forEach((link) => {
     link.textContent = 'Actualités';
   });
 
@@ -507,7 +540,7 @@
 
   function updateSessionPills(state) {
     const userInfo = getAuth();
-    const lastSubmission = safeJsonParse(localStorage.getItem(`biogy:lab:${activityId}:last-submission`));
+    const lastSubmission = safeJsonParse(storageGet(`biogy:lab:${activityId}:last-submission`));
 
     if (userInfo?.username) {
       authPill.textContent = `Connecté : ${userInfo.username}`;
@@ -544,7 +577,7 @@
 
   function updateSessionPills(state) {
     const userInfo = getAuth();
-    const lastSubmission = safeJsonParse(localStorage.getItem(`biogy:lab:${activityId}:last-submission`));
+    const lastSubmission = safeJsonParse(storageGet(`biogy:lab:${activityId}:last-submission`));
 
     if (userInfo?.username) {
       authPill.textContent = `Connecté : ${userInfo.username}`;
@@ -592,7 +625,7 @@
     renderHeaderAuth(null);
     updateSessionPills(collectState());
     closeHeaderMenu();
-    window.location.assign('/#/login');
+    window.location.assign('/login');
   }
 
   function bindHeaderActions() {
@@ -615,26 +648,26 @@
     if (headerAuthDesktop) {
       headerAuthDesktop.innerHTML = userInfo?.username
         ? `
-          <a class="site-profile-link" href="/#/profile">Bonjour, ${escapeHtml(userInfo.username)}!</a>
-          ${userInfo.role === 'admin' ? '<a class="site-admin-button" href="/#/admin">Admin</a>' : ''}
+          <a class="site-profile-link" href="/profile">Bonjour, ${escapeHtml(userInfo.username)}!</a>
+          ${userInfo.role === 'admin' ? '<a class="site-admin-button" href="/admin">Admin</a>' : ''}
           <button type="button" class="site-logout-button" data-biogy-action="logout">Déconnexion</button>
         `
         : `
-          <a class="site-auth-link" href="/#/login">Se connecter</a>
-          <a class="site-auth-button" href="/#/register">S'inscrire</a>
+          <a class="site-auth-link" href="/login">Se connecter</a>
+          <a class="site-auth-button" href="/register">S'inscrire</a>
         `;
     }
 
     if (headerAuthMobile) {
       headerAuthMobile.innerHTML = userInfo?.username
         ? `
-          <a class="site-mobile-link" href="/#/profile">Mon profil</a>
-          ${userInfo.role === 'admin' ? '<a class="site-mobile-link site-mobile-link--admin" href="/#/admin">Admin</a>' : ''}
+          <a class="site-mobile-link" href="/profile">Mon profil</a>
+          ${userInfo.role === 'admin' ? '<a class="site-mobile-link site-mobile-link--admin" href="/admin">Admin</a>' : ''}
           <button type="button" class="site-mobile-button" data-biogy-action="logout">Déconnexion</button>
         `
         : `
-          <a class="site-mobile-link" href="/#/login">Se connecter</a>
-          <a class="site-mobile-link site-mobile-link--register" href="/#/register">S'inscrire</a>
+          <a class="site-mobile-link" href="/login">Se connecter</a>
+          <a class="site-mobile-link site-mobile-link--register" href="/register">S'inscrire</a>
         `;
     }
 
@@ -745,26 +778,26 @@
     if (authDesktop) {
       authDesktop.innerHTML = userInfo?.username
         ? `
-          <a class="site-profile-link" href="/#/profile">Bonjour, ${escapeHtml(userInfo.username)}!</a>
-          ${userInfo.role === 'admin' ? '<a class="site-admin-button" href="/#/admin">Admin</a>' : ''}
+          <a class="site-profile-link" href="/profile">Bonjour, ${escapeHtml(userInfo.username)}!</a>
+          ${userInfo.role === 'admin' ? '<a class="site-admin-button" href="/admin">Admin</a>' : ''}
           <button type="button" class="site-logout-button" data-biogy-action="logout">Déconnexion</button>
         `
         : `
-          <a class="site-auth-link" href="/#/login">Se connecter</a>
-          <a class="site-auth-button" href="/#/register">S'inscrire</a>
+          <a class="site-auth-link" href="/login">Se connecter</a>
+          <a class="site-auth-button" href="/register">S'inscrire</a>
         `;
     }
 
     if (authMobile) {
       authMobile.innerHTML = userInfo?.username
         ? `
-          <a class="site-mobile-link" href="/#/profile">Mon profil</a>
-          ${userInfo.role === 'admin' ? '<a class="site-mobile-link site-mobile-link--admin" href="/#/admin">Admin</a>' : ''}
+          <a class="site-mobile-link" href="/profile">Mon profil</a>
+          ${userInfo.role === 'admin' ? '<a class="site-mobile-link site-mobile-link--admin" href="/admin">Admin</a>' : ''}
           <button type="button" class="site-mobile-button" data-biogy-action="logout">Déconnexion</button>
         `
         : `
-          <a class="site-mobile-link" href="/#/login">Se connecter</a>
-          <a class="site-mobile-link site-mobile-link--register" href="/#/register">S'inscrire</a>
+          <a class="site-mobile-link" href="/login">Se connecter</a>
+          <a class="site-mobile-link site-mobile-link--register" href="/register">S'inscrire</a>
         `;
     }
 
@@ -834,12 +867,13 @@
 
   window.addEventListener('storage', (event) => {
     if (event.key === authStorageKey) {
+      lockTeacherMode();
       renderHeaderAuth(getAuth());
       updateSessionPills(collectState());
     }
   });
 
-  const savedDraft = safeJsonParse(localStorage.getItem(draftKey));
+  const savedDraft = safeJsonParse(storageGet(draftKey));
   if (savedDraft) {
     restoreState(savedDraft);
     updateMessage('Brouillon restauré automatiquement.', 'info');
@@ -852,16 +886,16 @@
 
   if (initialUser?.username && desktopAuthRoot) {
     desktopAuthRoot.innerHTML = `
-      <a class="site-profile-link" href="/#/profile">Bonjour, ${escapeHtml(initialUser.username)}!</a>
-      ${initialUser.role === 'admin' ? '<a class="site-admin-button" href="/#/admin">Admin</a>' : ''}
+      <a class="site-profile-link" href="/profile">Bonjour, ${escapeHtml(initialUser.username)}!</a>
+      ${initialUser.role === 'admin' ? '<a class="site-admin-button" href="/admin">Admin</a>' : ''}
       <button type="button" class="site-logout-button" data-biogy-action="logout">Déconnexion</button>
     `;
   }
 
   if (initialUser?.username && mobileAuthRoot) {
     mobileAuthRoot.innerHTML = `
-      <a class="site-mobile-link" href="/#/profile">Mon profil</a>
-      ${initialUser.role === 'admin' ? '<a class="site-mobile-link site-mobile-link--admin" href="/#/admin">Admin</a>' : ''}
+      <a class="site-mobile-link" href="/profile">Mon profil</a>
+      ${initialUser.role === 'admin' ? '<a class="site-mobile-link site-mobile-link--admin" href="/admin">Admin</a>' : ''}
       <button type="button" class="site-mobile-button" data-biogy-action="logout">Déconnexion</button>
     `;
   }
@@ -875,6 +909,9 @@
   toolbar.querySelector('#biogySaveButton').addEventListener('click', () => saveDraft());
   toolbar.querySelector('#biogyDownloadButton').addEventListener('click', downloadFilledCopy);
   toolbar.querySelector('#biogySubmitButton').addEventListener('click', submitCopy);
+
+  window.addEventListener('pagehide', () => saveDraft());
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveDraft(); });
 
   getFields().forEach((field) => {
     field.addEventListener('input', scheduleAutosave);

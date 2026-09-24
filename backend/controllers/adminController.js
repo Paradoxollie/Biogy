@@ -1,3 +1,4 @@
+const crypto = require('node:crypto');
 const Post = require('../models/Post');
 const { deleteFromCloudinary } = require('../config/cloudinary');
 const User = require('../models/User');
@@ -180,7 +181,7 @@ const updateUserRole = async (req, res) => {
     console.error('Error in updateUserRole:', error);
     res.status(500).json({
       message: 'Erreur lors de la mise à jour du rôle utilisateur',
-      error: error.message
+      error: process.env.NODE_ENV === 'production' ? undefined : error.message
     });
   }
 };
@@ -213,7 +214,7 @@ const findUserByUsername = async (req, res) => {
     console.error('Error in findUserByUsername:', error);
     res.status(500).json({
       message: 'Erreur lors de la recherche de l\'utilisateur',
-      error: error.message
+      error: process.env.NODE_ENV === 'production' ? undefined : error.message
     });
   }
 };
@@ -286,7 +287,7 @@ const deleteUser = async (req, res) => {
  */
 const updateUsername = async (req, res) => {
   try {
-    const { username } = req.body;
+    const username = typeof req.body.username === 'string' ? req.body.username.trim() : '';
     const userId = req.params.id;
     
     if (!username || username.trim() === '') {
@@ -327,12 +328,28 @@ const updateUsername = async (req, res) => {
     console.error('Error in updateUsername:', error);
     res.status(500).json({
       message: 'Erreur lors de la mise à jour du nom d\'utilisateur',
-      error: error.message
+      error: process.env.NODE_ENV === 'production' ? undefined : error.message
     });
   }
 };
 
+const resetUserPassword = async (req, res) => {
+  if (!/^[0-9a-fA-F]{24}$/.test(req.params.id)) return res.status(400).json({ message: 'Identifiant invalide.' });
+  try {
+    const user = await User.findById(req.params.id).select('+tokenVersion');
+    if (!user) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    const temporaryPassword = crypto.randomBytes(12).toString('base64url');
+    user.password = temporaryPassword;
+    user.mustChangePassword = true;
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    await user.save();
+    res.set('Cache-Control', 'no-store');
+    return res.json({ temporaryPassword, user: { _id: user._id, username: user.username, role: user.role, mustChangePassword: true } });
+  } catch (error) { return res.status(500).json({ message: 'Impossible de réinitialiser ce mot de passe.' }); }
+};
+
 module.exports = {
+  resetUserPassword,
   getPendingPosts,
   getAllPosts,
   approvePost,

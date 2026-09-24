@@ -1,3 +1,4 @@
+const { respondWithDatabaseFallback, DATABASE_UNAVAILABLE_MESSAGE } = require('../utils/database');
 const Topic = require('../models/Topic');
 const Discussion = require('../models/Discussion');
 const { uploadToCloudinary } = require('../utils/cloudinary');
@@ -71,8 +72,9 @@ const createTopic = async (req, res) => {
 // @access  Public
 const getTopics = async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.max(1, Math.min(50, parseInt(req.query.limit, 10) || 10));
+    if (respondWithDatabaseFallback(res, { topics: [], pagination: { page, limit, total: 0, pages: 0 }, unavailable: true, message: DATABASE_UNAVAILABLE_MESSAGE })) return;
     const skip = (page - 1) * limit;
     const category = req.query.category;
     const search = req.query.search;
@@ -84,7 +86,7 @@ const getTopics = async (req, res) => {
     }
 
     if (search) {
-      query.title = { $regex: search, $options: 'i' };
+      query.title = { $regex: String(search).slice(0, 120).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' };
     }
 
     const topics = await Topic.find(query)
@@ -338,7 +340,7 @@ const createDiscussion = async (req, res) => {
 const getDiscussions = async (req, res) => {
   try {
     const topicId = req.params.id;
-    const page = parseInt(req.query.page, 10) || 1;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
 

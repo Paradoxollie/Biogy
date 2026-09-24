@@ -1,3 +1,4 @@
+const { respondWithDatabaseFallback } = require('../utils/database');
 const Post = require('../models/Post');
 const User = require('../models/User');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
@@ -64,6 +65,7 @@ const createPost = async (req, res, next) => {
 // @route   GET /api/posts
 // @access  Public
 const getApprovedPosts = async (req, res, next) => {
+  if (respondWithDatabaseFallback(res, [])) return;
   try {
     // Récupérer les posts avec statut 'approved', triés par date de création décroissante
     // et peupler les informations de l'utilisateur (username seulement)

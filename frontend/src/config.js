@@ -3,12 +3,12 @@
  */
 
 // URL de l'API backend
-export const API_URL = process.env.REACT_APP_API_URL || 'https://biogy.onrender.com';
+export const API_URL = import.meta.env.REACT_APP_API_URL || 'https://biogy.onrender.com';
 
 // URL pour les requêtes directes depuis le navigateur
 const getBrowserApiUrl = () => {
-  if (process.env.REACT_APP_BROWSER_API_URL) {
-    return process.env.REACT_APP_BROWSER_API_URL;
+  if (import.meta.env.REACT_APP_BROWSER_API_URL) {
+    return import.meta.env.REACT_APP_BROWSER_API_URL;
   }
 
   if (typeof window !== 'undefined') {
@@ -60,7 +60,7 @@ export const ROUTES = {
 export const FEATURES = {
   useProxies: false, // Désactiver l'utilisation des proxies CORS
   useLocalStorage: true, // Activer l'utilisation du localStorage
-  debug: process.env.NODE_ENV !== 'production' // Activer le mode debug en développement
+  debug: import.meta.env.DEV // Activer le mode debug en développement
 };
 
 export default {

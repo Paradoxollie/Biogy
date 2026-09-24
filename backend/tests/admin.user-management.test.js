@@ -75,7 +75,7 @@ test('admin username update rejects duplicates after trimming input', async () =
     .send({ username: '  existing-name  ' });
 
   assert.equal(response.statusCode, 400);
-  assert.equal(response.body.message, 'Ce nom d\'utilisateur est deja pris');
+  assert.equal(response.body.message, 'Ce nom d\'utilisateur est déjà pris');
 });
 
 test('admin can update a role through the admin API', async () => {
@@ -129,4 +129,15 @@ test('admin can reset a password without deleting the account', async () => {
 
   assert.equal(newLoginResponse.statusCode, 200);
   assert.equal(newLoginResponse.body.mustChangePassword, true);
+
+  await request(app).get('/api/auth/profile').set('Authorization', `Bearer ${studentUser.token}`).expect(401);
+  await request(app).post('/api/auth/change-password')
+    .set('Authorization', `Bearer ${newLoginResponse.body.token}`)
+    .send({ currentPassword: 'wrong-password', newPassword: 'Personal-password-2026' }).expect(400);
+  const changed = await request(app).post('/api/auth/change-password')
+    .set('Authorization', `Bearer ${newLoginResponse.body.token}`)
+    .send({ currentPassword: resetResponse.body.temporaryPassword, newPassword: 'Personal-password-2026' }).expect(200);
+  assert.equal(changed.body.user.mustChangePassword, false);
+  await request(app).get('/api/auth/profile').set('Authorization', `Bearer ${newLoginResponse.body.token}`).expect(401);
+  await request(app).get('/api/auth/profile').set('Authorization', `Bearer ${changed.body.user.token}`).expect(200);
 });

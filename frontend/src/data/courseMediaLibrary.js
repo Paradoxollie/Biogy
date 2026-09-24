@@ -6,7 +6,7 @@ import dnaNucleotideImage from '../assets/courses/open/dna-nucleotide-openstax.j
 import gramNegativeBacteriaImage from '../assets/courses/open/gram-negative-bacteria-smear.jpg';
 import hemocytometerGridImage from '../assets/courses/open/hemocytometer-grid.jpg';
 import humanKaryotypeImage from '../assets/courses/open/human-karyotype-nhgri.jpg';
-import intestinalVillusImage from '../assets/courses/open/intestinal-villi-microscope.jpg';
+import intestinalVillusImage from '../assets/courses/open/intestinal-villi-microscope.webp';
 import laboratoryMicroscopeImage from '../assets/courses/open/laboratory-optical-microscope.jpg';
 import meiosisDiagramImage from '../assets/courses/open/meiosis-diagram.svg';
 import mitosisOnionRootImage from '../assets/courses/open/mitosis-onion-root.jpg';
