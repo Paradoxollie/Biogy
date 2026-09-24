@@ -61,7 +61,7 @@ function Layout({ children }) {
 
   useEffect(() => {
     const updateTitle = () => {
-      const title = document.querySelector('main h1')?.textContent;
+      const title = document.querySelector('main h1')?.innerText.replace(/\s+/g, ' ').trim();
       document.title = title ? `${title} · Biogy` : 'Biogy · STL Biotechnologies';
     };
     updateTitle();
