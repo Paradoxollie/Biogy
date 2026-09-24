@@ -1,13 +1,13 @@
-import biotechDomainsImage from '../assets/courses/premiere/c1/biotech-domains.png';
+import biotechDomainsImage from '../assets/courses/premiere/c1/biotech-domains.webp';
 import globulesRougesImage from '../assets/courses/premiere/c1/globules-rouges.png';
 import hcbLogoImage from '../assets/courses/premiere/c1/hcb-logo.png';
 import futurolSchemaImage from '../assets/courses/premiere/c1/futurol-schema.jpg';
 import videoQrImage from '../assets/courses/premiere/c1/video-qr.png';
 import c4EpiImage from '../assets/courses/premiere/c4/epi.jpg';
 import c4Schema5MImage from '../assets/courses/premiere/c4/schema-5m.png';
-import c4DangerBioImage from '../assets/courses/premiere/c4/danger-biologique.png';
+import c4DangerBioImage from '../assets/courses/premiere/c4/danger-biologique.webp';
 import c4BaobabImage from '../assets/courses/premiere/c4/baobab.png';
-import c4DasriImage from '../assets/courses/premiere/c4/dasri.png';
+import c4DasriImage from '../assets/courses/premiere/c4/dasri.webp';
 import c4AcetoneImage from '../assets/courses/premiere/c4/acetone.jpg';
 import c4BioethanolImage from '../assets/courses/premiere/c4/bioethanol.png';
 import {

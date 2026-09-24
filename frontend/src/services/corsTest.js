@@ -4,7 +4,7 @@
 import axios from 'axios';
 
 // Récupérer l'URL de l'API depuis les variables d'environnement
-const API_URL = process.env.REACT_APP_API_URL || 'https://biogy-api.onrender.com';
+const API_URL = import.meta.env.REACT_APP_API_URL || 'https://biogy-api.onrender.com';
 
 /**
  * Test complet de la configuration CORS

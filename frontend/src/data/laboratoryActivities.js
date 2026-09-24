@@ -12,14 +12,14 @@ export const LABORATORY_ACTIVITIES = [
     hook:
       "Les élèves réalisent la séance directement dans le navigateur, peuvent enregistrer leur progression, puis envoyer leur copie à la fin de la séance.",
     objectives: [
-      'Vérifier la qualité métrologique d une pipette à piston P1000.',
+      'Vérifier la qualité métrologique d’une pipette à piston P1000.',
       'Exploiter des mesures de masse pour discuter justesse et fidélité.',
       'Utiliser une cible de métrologie pour interpréter les résultats.',
       'Rédiger une conclusion claire sur la conformité de la pipette.',
     ],
     highlights: [
-      'Mode professeur protégé par mot de passe.',
-      'Connexion demandée uniquement au moment de l envoi.',
+      'Corrections réservées au compte professeur.',
+      'Connexion demandée uniquement au moment de l’envoi.',
       'Autosauvegarde locale pour éviter la perte de travail.',
       'Copie transmise au tableau de bord admin pour correction.',
     ],

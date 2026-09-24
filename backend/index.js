@@ -25,7 +25,7 @@ const startServer = async () => {
     return serverInstance;
   }
 
-  const port = Number(process.env.PORT) || 4000;
+  const port = Number(process.env.PORT) || 5000;
   serverInstance = app.listen(port, () => {
     console.log(`Server ready on ${port}`);
   });

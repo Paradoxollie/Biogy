@@ -1,17 +1,6 @@
 const LabSubmission = require('../models/LabSubmission');
 
-const SCRIPT_TAG_PATTERN = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
-const INLINE_EVENT_PATTERN = /\son[a-z]+="[^"]*"/gi;
-
-const sanitizeSubmissionHtml = (value) => {
-  if (typeof value !== 'string') {
-    return '';
-  }
-
-  return value
-    .replace(SCRIPT_TAG_PATTERN, '')
-    .replace(INLINE_EVENT_PATTERN, '');
-};
+const sanitizeSubmissionHtml = require('../utils/sanitizeLabHtml');
 
 const countNonEmptyFields = (formState) => {
   if (!formState || typeof formState !== 'object') {

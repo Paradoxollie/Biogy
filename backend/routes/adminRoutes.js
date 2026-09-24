@@ -1,5 +1,5 @@
 const express = require('express');
-const { getPendingPosts, getAllPosts, approvePost, rejectPost, deletePostAdmin, updateUserRole, findUserByUsername, getAllUsers, deleteUser, updateUsername } = require('../controllers/adminController');
+const { getPendingPosts, getAllPosts, approvePost, rejectPost, deletePostAdmin, updateUserRole, findUserByUsername, getAllUsers, deleteUser, updateUsername, resetUserPassword } = require('../controllers/adminController');
 const { getLabSubmissions, getLabSubmissionById, reviewLabSubmission } = require('../controllers/labSubmissionController');
 const { protect } = require('../middleware/authMiddleware');
 const { admin } = require('../middleware/adminMiddleware');
@@ -45,6 +45,7 @@ router.put('/users/:id/role', updateUserRole);
 router.put('/users/:id/username', updateUsername);
 
 // Supprimer un utilisateur
+router.post('/users/:id/reset-password', resetUserPassword);
 router.delete('/users/:id', deleteUser);
 
 module.exports = router; 

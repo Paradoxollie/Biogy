@@ -44,6 +44,7 @@
   /* Respect reduced motion */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
+      scroll-behavior: auto !important;
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
@@ -71,11 +72,11 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-card px-4 py-2.5
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-card px-4 py-2.5
            text-sm font-semibold transition-colors duration-150
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  .btn-primary  { @apply btn bg-biogy-600 text-white hover:bg-biogy-700 active:bg-biogy-800 shadow-soft; }
+  .btn-primary  { @apply btn bg-biogy-700 text-white hover:bg-biogy-800 active:bg-biogy-800 shadow-soft; }
   .btn-secondary{ @apply btn bg-surface text-ink-900 border border-surface-line hover:bg-surface-subtle; }
   .btn-ghost    { @apply btn text-ink-700 hover:bg-surface-subtle; }
   .btn-danger   { @apply btn bg-biotech-red text-white hover:opacity-90; }
@@ -94,6 +95,10 @@
            px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-400
            shadow-soft focus:border-biogy-500;
   }
+
+  .skip-link { @apply fixed left-4 top-4 z-[200] -translate-y-24 rounded-card bg-ink-900 px-5 py-3 font-semibold text-white focus:translate-y-0; }
+  .page-heading { @apply font-display text-3xl text-ink-900 md:text-display-md; }
+  .notice { @apply rounded-card border border-accent-200 bg-accent-50 px-4 py-3 text-sm leading-relaxed text-accent-800; }
 
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
@@ -116,6 +121,21 @@
       linear-gradient(to bottom, rgba(16,26,41,0.03) 1px, transparent 1px);
     background-size: 28px 28px;
   }
+}
+
+@media (max-width: 640px) {
+  input, select, textarea { font-size: 16px !important; }
+}
+
+@media print {
+  @page { margin: 16mm; }
+  body, #root, main { background: white !important; color: black !important; }
+  header.sticky, footer, .no-print, .skip-link, [role="tablist"], button { display: none !important; }
+  .page, .page-narrow { max-width: none !important; padding: 0 !important; }
+  .card, .card-flat { box-shadow: none !important; break-inside: avoid; }
+  .print-answer { display: block !important; }
+  h1, h2, h3 { break-after: avoid; }
+  img, svg { max-height: 180mm; }
 }
 
 /* ---------- Legacy utilities (forum paper + pulseGlow) ---------- */

@@ -10,8 +10,8 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true,
     minlength: 3,
-    maxlength: 30,
-    match: /^[a-zA-Z0-9_.-]+$/,
+    maxlength: 60,
+    match: /^[\p{L}\p{N}][\p{L}\p{N} ._’'-]*$/u,
   },
   password: {
     type: String,
@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema({
     select: false,
     minlength: 8,
   },
+  mustChangePassword: { type: Boolean, default: false },
+  tokenVersion: { type: Number, default: 0, select: false },
   role: {
     type: String,
     default: DEFAULT_USER_ROLE,

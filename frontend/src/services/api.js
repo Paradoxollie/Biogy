@@ -1,9 +1,11 @@
 import axios from 'axios';
+import { BROWSER_API_URL } from '../config';
+import { readStorage } from '../utils/storage';
 
 // Création d'une instance axios avec la configuration de base
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true,
+  baseURL: BROWSER_API_URL,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   }
@@ -12,9 +14,9 @@ const api = axios.create({
 // Intercepteur pour ajouter le token d'authentification aux requêtes
 api.interceptors.request.use(
   (config) => {
-    const userInfo = localStorage.getItem('userInfo');
+    const userInfo = readStorage('userInfo');
     if (userInfo) {
-      const { token } = JSON.parse(userInfo);
+      const { token } = userInfo;
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

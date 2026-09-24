@@ -64,8 +64,8 @@ module.exports = {
         // Legacy aliases so existing components keep working during migration
         'lab-blue':   '#1e6eb6',
         'lab-purple': '#5b4a9d',
-        'lab-teal':   '#14a676',
-        'lab-green':  '#2f8f3d',
+        'lab-teal':   '#0e6e50',
+        'lab-green':  '#236c30',
         'lab-bg':     '#f7f8fa',
         'lab-lines':  '#e2e6ec',
       },
@@ -104,7 +104,7 @@ module.exports = {
     'bg-biotech-red', 'bg-biotech-green', 'bg-biotech-blue', 'bg-biotech-yellow', 'bg-biotech-white',
     'border-biotech-red', 'border-biotech-green', 'border-biotech-blue', 'border-biotech-yellow', 'border-biotech-white',
     // Legacy aliases may still be produced at runtime
-    'text-lab-blue', 'text-lab-teal', 'text-lab-purple', 'bg-lab-blue', 'bg-lab-teal', 'bg-lab-purple',
+    'text-lab-blue', 'text-lab-teal', 'text-lab-purple', 'bg-lab-blue', 'bg-lab-teal', 'bg-lab-purple', 'bg-lab-green', 'text-lab-green', 'bg-amber-700', 'text-amber-700', 'bg-gray-600', 'text-gray-600',
   ],
   plugins: [],
 }
