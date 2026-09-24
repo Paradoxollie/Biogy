@@ -4,6 +4,10 @@
   "outputDirectory": "frontend/build",
   "rewrites": [
     {
+      "source": "/.netlify/functions/biotech-veille",
+      "destination": "https://biogy.netlify.app/.netlify/functions/biotech-veille"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://biogy.onrender.com/api/:path*"
     },

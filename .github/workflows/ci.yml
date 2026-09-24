@@ -25,4 +25,5 @@ jobs:
       - run: npm audit --omit=dev --audit-level=high --prefix frontend
       - run: npm audit --omit=dev --audit-level=high --prefix backend
       - run: npm ci --prefix netlify/functions
+      - run: npm test --prefix netlify/functions
       - run: npm audit --omit=dev --audit-level=high --prefix netlify/functions

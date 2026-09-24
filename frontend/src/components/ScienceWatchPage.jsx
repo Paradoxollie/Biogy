@@ -3,6 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaLeaf, FaHeartbeat, FaIndustry, FaGlobe, FaWater, FaExclamationTriangle, FaFilter, FaSync, FaExternalLinkAlt, FaChevronLeft, FaChevronRight, FaArrowRight } from 'react-icons/fa';
 import { BiCategory } from 'react-icons/bi';
 
+const SmartImage = ({ src, alt, colorData, className }) => {
+  const [failedSource, setFailedSource] = useState(null);
+  if (!src || failedSource === src) {
+    return <div className={`flex h-full w-full items-center justify-center ${colorData.gradientFallback} ${className}`}>{colorData.whiteIcon}</div>;
+  }
+  return <img src={src} alt={alt} className={className} loading="lazy" onError={() => setFailedSource(src)} />;
+};
+
 function ScienceWatchPage() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -10,6 +18,7 @@ function ScienceWatchPage() {
   const [selectedColor, setSelectedColor] = useState(null);
   const [biotechOnly, setBiotechOnly] = useState(true);
   const [updatedAt, setUpdatedAt] = useState(null);
+  const [usesFallback, setUsesFallback] = useState(false);
   const requestRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -123,24 +132,27 @@ function ScienceWatchPage() {
           signal: controller.signal,
         });
 
-        clearTimeout(timeoutId);
-
         if (!response.ok) {
           if (response.status === 502 || response.status === 504) {
-             throw new Error(`La passerelle Netlify a renvoyé une erreur ${response.status}. Veuillez réessayer plus tard.`);
+             throw new Error('Les sources mettent du temps à répondre. Réessaie dans un instant.');
           }
           throw new Error(`Erreur réseau: ${response.status}`);
         }
 
+        if (!response.headers.get('content-type')?.includes('application/json')) {
+          throw new Error('La veille scientifique est momentanément indisponible. Réessaie dans un instant.');
+        }
         const data = await response.json();
+        clearTimeout(timeoutId);
         if (requestRef.current !== controller) return;
 
         if (data.error) throw new Error(data.error);
 
         if (data.articles && Array.isArray(data.articles)) {
           setArticles(data.articles);
-
-          setUpdatedAt(new Date());
+          setUsesFallback(Boolean(data.usesFallback));
+          const fetchedAt = data.fetchedAt ? new Date(data.fetchedAt) : null;
+          setUpdatedAt(fetchedAt && !Number.isNaN(fetchedAt.getTime()) ? fetchedAt : null);
         } else {
           throw new Error("Format de données incorrect");
         }
@@ -197,6 +209,7 @@ function ScienceWatchPage() {
   const formatDate = (dateString, format = 'long') => {
       if (!dateString) return '';
       const date = new Date(dateString);
+      if (Number.isNaN(date.getTime())) return 'Date non précisée';
       if (format === 'short') {
           return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
       }
@@ -210,30 +223,6 @@ function ScienceWatchPage() {
 
   const prevSlide = (maxSlides) => {
       setCurrentSlide((prev) => (prev === 0 ? maxSlides - 1 : prev - 1));
-  };
-
-  // Custom smart image handler for clean fallbacks
-  const SmartImage = ({ src, alt, colorData, className }) => {
-    const [imgError, setImgError] = useState(false);
-
-    // Treat no src exactly like an error immediately
-    if (!src || imgError) {
-        return (
-            <div className={`w-full h-full flex items-center justify-center ${colorData.gradientFallback} ${className}`}>
-                 {colorData.whiteIcon}
-            </div>
-        );
-    }
-
-    return (
-        <img
-            src={src}
-            alt={alt}
-            className={className}
-            loading="lazy"
-            onError={() => setImgError(true)}
-        />
-    );
   };
 
   // The Top Navigation / Category Ribbon
@@ -281,7 +270,7 @@ function ScienceWatchPage() {
   const renderToolbar = () => (
       <div className="flex flex-col sm:flex-row justify-between items-center py-4 mb-8">
           <div className="text-sm text-gray-600 font-medium mb-4 sm:mb-0">
-              {updatedAt ? `Articles chargés à ${updatedAt.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}` : 'Sélection de sources scientifiques'}
+              {updatedAt ? `Sources consultées le ${updatedAt.toLocaleDateString('fr-FR')} à ${updatedAt.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}` : 'Sélection de sources scientifiques'}
           </div>
           <div className="flex items-center gap-6 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
             <button
@@ -295,7 +284,7 @@ function ScienceWatchPage() {
             <div className="w-px h-4 bg-gray-300"></div>
             <label className="flex items-center cursor-pointer group">
                 <input type="checkbox" className="mr-2 h-4 w-4 accent-biogy-700" checked={biotechOnly} onChange={(event) => setBiotechOnly(event.target.checked)} />
-                <span className={`text-sm font-semibold transition-colors mr-3 ${biotechOnly ? 'text-gray-900' : 'text-gray-500'}`}><FaFilter className="inline w-3 h-3 mr-1 -mt-0.5" /> 100% Biotech</span>
+                <span className={`text-sm font-semibold transition-colors mr-3 ${biotechOnly ? 'text-gray-900' : 'text-gray-500'}`}><FaFilter className="inline w-3 h-3 mr-1 -mt-0.5" /> Thèmes biotech</span>
                 <div className={`relative w-9 h-5 rounded-full transition-colors duration-300 ${biotechOnly ? 'bg-blue-600' : 'bg-gray-300'}`}>
                     <div className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform duration-300 shadow-sm ${biotechOnly ? 'translate-x-4' : ''}`}></div>
                 </div>
@@ -337,7 +326,7 @@ function ScienceWatchPage() {
           <div className="p-6 md:p-8 flex flex-col justify-between w-full">
               <div>
                   <div className="flex items-center space-x-3 mb-3 text-sm">
-                      <span className="font-semibold text-gray-500">{formatDate(article.pubDate)}</span>
+                      <span className="font-semibold text-gray-600">{article.fallback ? 'Ressource pédagogique' : formatDate(article.pubDate) || 'Date non précisée'}</span>
                       <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                       <span className="font-bold text-gray-800 tracking-wide uppercase">{article.source || 'Source externe'}</span>
                   </div>
@@ -355,7 +344,7 @@ function ScienceWatchPage() {
 
               <div className="mt-auto">
                  <a href={article.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest group/btn no-underline">
-                     Lire l'article
+                     {article.fallback ? 'Consulter la ressource' : 'Lire l’article'}
                      <FaArrowRight className="ml-2 w-3 h-3 transition-transform group-hover/btn:translate-x-1" />
                  </a>
               </div>
@@ -404,7 +393,7 @@ function ScienceWatchPage() {
                                       {currentArticle.source}
                                   </span>
                                   <span className="text-gray-300 text-sm font-medium">
-                                      {formatDate(currentArticle.pubDate, 'short')}
+                                      {currentArticle.fallback ? 'Ressource pédagogique' : formatDate(currentArticle.pubDate, 'short') || 'Date non précisée'}
                                   </span>
                               </div>
                               <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="block focus:outline-none no-underline">
@@ -417,7 +406,7 @@ function ScienceWatchPage() {
                                   {currentArticle.description}
                               </p>
                               <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-8 py-3.5 bg-white text-gray-900 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg group/link no-underline">
-                                  Lire l'intégralité
+                                  {currentArticle.fallback ? 'Consulter la ressource' : 'Lire l’intégralité'}
                                   <FaExternalLinkAlt className="ml-3 w-3 h-3 opacity-50 transition-opacity group-hover/link:opacity-100" />
                               </a>
                           </motion.div>
@@ -429,12 +418,14 @@ function ScienceWatchPage() {
               {maxSlides > 1 && (
                   <div className="absolute right-6 bottom-8 md:right-12 md:bottom-12 flex space-x-3 z-10">
                       <button
+                          aria-label="Article précédent"
                           onClick={() => prevSlide(maxSlides)}
                           className="w-12 h-12 rounded-full border border-white/30 bg-black/30 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white hover:text-black transition-all"
                       >
                           <FaChevronLeft className="w-4 h-4" />
                       </button>
                       <button
+                          aria-label="Article suivant"
                           onClick={() => nextSlide(maxSlides)}
                           className="w-12 h-12 rounded-full border border-white/30 bg-black/30 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white hover:text-black transition-all"
                       >
@@ -449,9 +440,11 @@ function ScienceWatchPage() {
                       {featuredArticles.map((_, idx) => (
                           <button
                               key={idx}
+                              aria-label={`Afficher l’article ${idx + 1}`}
+                              aria-pressed={currentSlide === idx}
                               onClick={() => setCurrentSlide(idx)}
-                              className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === idx ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
-                          />
+                              className="flex h-11 w-11 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+                          ><span aria-hidden="true" className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === idx ? 'w-8 bg-white' : 'w-2 bg-white/40'}`} /></button>
                       ))}
                   </div>
               )}
@@ -475,7 +468,7 @@ function ScienceWatchPage() {
             });
         });
         // Sort them by date
-        displayArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+        displayArticles.sort((a, b) => Number(Boolean(a.fallback)) - Number(Boolean(b.fallback)) || (Date.parse(b.pubDate) || 0) - (Date.parse(a.pubDate) || 0));
     }
 
     if (displayArticles.length === 0) return null;
@@ -493,7 +486,7 @@ function ScienceWatchPage() {
             {restArticles.length > 0 && (
                 <div className="mb-10 flex items-center justify-between border-b 2 border-gray-900 pb-4">
                     <h2 className="text-3xl font-serif font-black text-gray-900">
-                        {selectedColor ? `Actualités ${biotechColors[selectedColor].name}` : 'Toute l\'actualité'}
+                        {selectedColor ? `À explorer · ${biotechColors[selectedColor].name}` : 'Pour aller plus loin'}
                     </h2>
                     <span className="text-gray-500 font-medium bg-gray-100 px-3 py-1 rounded-full text-sm">
                         {restArticles.length} articles
@@ -523,6 +516,8 @@ function ScienceWatchPage() {
 
         {/* Tools */}
          {renderToolbar()}
+
+        {usesFallback && !loading && <p role="status" className="mb-8 rounded-xl border border-biogy-200 bg-biogy-50 px-5 py-4 text-sm leading-relaxed text-biogy-900">Des ressources pédagogiques complètent les actualités disponibles. Elles sont signalées comme telles et ne correspondent pas à des nouvelles du jour.</p>}
 
         {error && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-50 text-red-800 p-6 shadow-sm mb-10 border-l-4 border-red-600 rounded-r-xl">
