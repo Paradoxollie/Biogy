@@ -48,7 +48,9 @@ npm audit --omit=dev --prefix backend
 npm audit --omit=dev --prefix netlify/functions
 ```
 
-Les tests serveur démarrent automatiquement MongoDB en mémoire ; le premier lancement télécharge son binaire. GitHub Actions exécute ces contrôles sur les pull requests et sur `main`.
+Les tests serveur démarrent automatiquement MongoDB en mémoire ; le premier lancement télécharge son binaire. GitHub Actions exécute ces contrôles sur les pull requests et sur `main`. Neuf tests couvrent aussi les flux RSS et le filtre biotech.
+
+Après une publication, le workflow manuel **Verify published sites** teste en lecture seule les trois adresses hébergées : état réel de MongoDB, routes de l’application, appels forum/projets, protection des copies et JSON de la veille.
 
 ## Hébergement
 
