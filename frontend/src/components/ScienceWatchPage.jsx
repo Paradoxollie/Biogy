@@ -236,7 +236,7 @@ function ScienceWatchPage() {
             onClick={() => handleColorSelect(null)}
             className={`flex-shrink-0 px-5 py-2 text-sm font-bold uppercase tracking-wider rounded-lg transition-all ${
                 selectedColor === null
-                ? 'bg-gray-900 text-white shadow-md'
+                ? 'bg-ink-900 text-paper shadow-md'
                 : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
             }`}
         >
@@ -363,7 +363,7 @@ function ScienceWatchPage() {
       const colorData = biotechColors[currentArticle.colorKey] || biotechColors.multi;
 
       return (
-          <div className="relative w-full mb-16 group/carousel bg-gray-900 rounded-[2rem] overflow-hidden shadow-2xl h-[65vh] min-h-[500px] max-h-[700px]">
+          <div className="relative w-full mb-16 group/carousel bg-night rounded-frame overflow-hidden shadow-2xl h-[65vh] min-h-[500px] max-h-[700px]">
 
               <AnimatePresence mode="wait">
                   <motion.div
@@ -382,8 +382,8 @@ function ScienceWatchPage() {
                       />
 
                       {/* Dual gradient for maximum text legibility */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
-                      <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-transparent to-transparent"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-night via-night/40 to-transparent"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-night/80 via-transparent to-transparent"></div>
 
                       <div className="absolute bottom-0 left-0 w-full p-8 md:p-16 md:w-4/5 lg:w-2/3">
                           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3, duration: 0.5 }}>
@@ -391,23 +391,23 @@ function ScienceWatchPage() {
                                   <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest text-white shadow-lg ${colorData.bgColor}`}>
                                       {colorData.badgeLabel}
                                   </span>
-                                  <span className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold uppercase tracking-widest">
+                                  <span className="px-3 py-1.5 rounded-full bg-chalk/15 backdrop-blur-md text-white text-xs font-bold uppercase tracking-widest">
                                       {currentArticle.source}
                                   </span>
-                                  <span className="text-gray-300 text-sm font-medium">
+                                  <span className="text-chalk/70 text-sm font-medium">
                                       {currentArticle.fallback ? 'Ressource pédagogique' : formatDate(currentArticle.pubDate, 'short') || 'Date non précisée'}
                                   </span>
                               </div>
                               <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="block focus:outline-none no-underline">
                                   {/* Refined title, no underline just color shift */}
-                                  <h2 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-xl hover:text-blue-200 transition-colors">
+                                  <h2 className="text-3xl md:text-5xl lg:text-6xl font-serif font-medium text-white leading-tight mb-6 drop-shadow-xl hover:text-mint transition-colors">
                                       {currentArticle.title}
                                   </h2>
                               </a>
-                              <p className="text-gray-200 text-lg md:text-xl font-serif line-clamp-2 md:line-clamp-3 mb-8 drop-shadow-md">
+                              <p className="text-chalk/85 text-lg md:text-xl font-serif line-clamp-2 md:line-clamp-3 mb-8 drop-shadow-md">
                                   {currentArticle.description}
                               </p>
-                              <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-8 py-3.5 bg-white text-gray-900 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg group/link no-underline">
+                              <a href={currentArticle.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-8 py-3.5 bg-chalk text-night font-bold rounded-pill hover:bg-mint transition-colors shadow-lg group/link no-underline">
                                   {currentArticle.fallback ? 'Consulter la ressource' : 'Lire l’intégralité'}
                                   <FaExternalLinkAlt className="ml-3 w-3 h-3 opacity-50 transition-opacity group-hover/link:opacity-100" />
                               </a>
@@ -422,14 +422,14 @@ function ScienceWatchPage() {
                       <button
                           aria-label="Article précédent"
                           onClick={() => prevSlide(maxSlides)}
-                          className="w-12 h-12 rounded-full border border-white/30 bg-black/30 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white hover:text-black transition-all"
+                          className="w-12 h-12 rounded-full border border-white/30 bg-black/30 backdrop-blur-sm text-white flex items-center justify-center hover:bg-chalk hover:text-night transition-all"
                       >
                           <FaChevronLeft className="w-4 h-4" />
                       </button>
                       <button
                           aria-label="Article suivant"
                           onClick={() => nextSlide(maxSlides)}
-                          className="w-12 h-12 rounded-full border border-white/30 bg-black/30 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white hover:text-black transition-all"
+                          className="w-12 h-12 rounded-full border border-white/30 bg-black/30 backdrop-blur-sm text-white flex items-center justify-center hover:bg-chalk hover:text-night transition-all"
                       >
                           <FaChevronRight className="w-4 h-4" />
                       </button>
@@ -510,7 +510,7 @@ function ScienceWatchPage() {
     <div className="min-h-screen">
       <PageHero
         eyebrow="Veille scientifique"
-        title={[{ text: 'Le vivant fait' }, { text: 'l’actualité.', className: 'italic text-biogy-700' }]}
+        title={[{ text: 'Le vivant fait' }, { text: 'l’actualité.', className: 'accent-italic' }]}
         lead="Explore les biotechnologies à travers des articles de presse et de recherche. Ouvre la source pour lire l’article complet et vérifier sa date."
         image={PHOTOS.veille}
         figureNumber={5}
@@ -581,7 +581,7 @@ function ScienceWatchPage() {
                         <button
                             aria-pressed={selectedColor === null}
             onClick={() => handleColorSelect(null)}
-                            className="mt-8 px-6 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors no-underline"
+                            className="mt-8 px-6 py-3 bg-ink-900 text-paper rounded-xl font-bold hover:bg-gray-800 transition-colors no-underline"
                         >
                             Retour à la une
                         </button>

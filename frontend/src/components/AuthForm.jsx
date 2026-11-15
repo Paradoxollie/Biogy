@@ -36,20 +36,20 @@ export default function AuthForm({ register = false }) {
     finally { setLoading(false); }
   };
   return <div className="page py-8 md:py-14"><div className="grid overflow-hidden rounded-frame border border-ink-900/10 bg-white shadow-elevated lg:grid-cols-[1fr_1.05fr]">
-    <aside className="relative flex min-h-[320px] flex-col justify-end overflow-hidden bg-ink-900 text-paper lg:min-h-[640px]">
+    <aside className="relative flex min-h-[320px] flex-col justify-end overflow-hidden bg-night text-chalk lg:min-h-[640px]">
       <FocusImage image={PHOTOS.microscope} className="absolute inset-0 h-full w-full" parallax={0} priority sizes="(min-width: 1024px) 45vw, 100vw" />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink-950/95 via-ink-950/55 to-ink-950/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-night/95 via-night/55 to-night/10" />
       <div className="relative flex flex-col justify-end p-7 sm:p-10">
-        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-paper/60">Mon espace Biogy</p>
-        <h2 className="mt-4 font-display text-[clamp(2rem,3.4vw,2.8rem)] leading-[1.04] tracking-tight">Le travail de la classe,<br /><span className="italic text-biogy-300">au même endroit.</span></h2>
-        <p className="mt-4 max-w-sm text-sm leading-7 text-paper/75">Rends tes travaux pratiques, échange sur le forum et partage tes projets avec la classe.</p>
-        <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-paper/15 pt-5 text-sm text-paper/75">
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-chalk/60">Mon espace Biogy</p>
+        <h2 className="mt-4 font-display text-[clamp(2rem,3.4vw,2.8rem)] leading-[1.04] tracking-tight">Le travail de la classe,<br /><span className="font-[520] italic text-mint">au même endroit.</span></h2>
+        <p className="mt-4 max-w-sm text-sm leading-7 text-chalk/75">Rends tes travaux pratiques, échange sur le forum et partage tes projets avec la classe.</p>
+        <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-chalk/15 pt-5 text-sm text-chalk/75">
           <span className="flex items-center gap-2"><BookOpen size={16} />Les cours restent ouverts à tous.</span>
-          <Link to="/apprendre" className="inline-flex min-h-11 items-center gap-2 font-semibold text-paper"><span className="link-draw">Accéder aux cours</span> <ArrowRight size={15} /></Link>
+          <Link to="/apprendre" className="inline-flex min-h-11 items-center gap-2 font-semibold text-chalk"><span className="link-draw">Accéder aux cours</span> <ArrowRight size={15} /></Link>
         </div>
       </div>
     </aside>
-    <section className="flex flex-col justify-center p-6 sm:p-10 lg:p-14"><p className="eyebrow">{register ? 'Inscription' : 'Connexion'}</p><h1 className="mt-4 font-display text-display-md">{register ? 'Créer mon compte' : <>Heureux de te <span className="italic text-biogy-700">retrouver.</span></>}</h1><p className="mt-3 text-sm leading-6 text-ink-600">{register ? 'Choisis un identifiant que ton enseignante pourra reconnaître.' : 'Connecte-toi avec ton identifiant de classe.'}</p>
+    <section className="flex flex-col justify-center p-6 sm:p-10 lg:p-14"><p className="eyebrow">{register ? 'Inscription' : 'Connexion'}</p><h1 className="mt-4 font-display text-display-md">{register ? 'Créer mon compte' : <>Heureux de te <span className="accent-italic">retrouver.</span></>}</h1><p className="mt-3 text-sm leading-6 text-ink-600">{register ? 'Choisis un identifiant que ton enseignante pourra reconnaître.' : 'Connecte-toi avec ton identifiant de classe.'}</p>
       {(error || location.state?.sessionExpired) && <p role="alert" className="mt-6 rounded-card border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error || 'Ta session a expiré. Connecte-toi à nouveau.'}</p>}
       <form onSubmit={submit} className="mt-7 space-y-5" aria-busy={loading}>
         <div><label htmlFor="username" className="block text-sm font-semibold">Identifiant</label><input id="username" name="username" type="text" className="input mt-2" autoComplete="username" autoCapitalize="none" spellCheck={false} required minLength={register ? 3 : undefined} maxLength={60} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Ton identifiant de classe" /></div>

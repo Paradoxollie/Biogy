@@ -200,7 +200,7 @@ function ProfilePage() {
     <div className="container mx-auto px-4 py-8">
       {/* En-tête du profil */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden sketch-container mb-6">
-        <div className="bg-biogy-700 hover:bg-biogy-800 h-32 relative">
+        <div className="bg-biogy-600 hover:bg-biogy-500 h-32 relative">
           {/* Avatar */}
           <div className="absolute -bottom-16 left-8">
             <div className="w-32 h-32 rounded-full bg-white p-1 shadow-lg">

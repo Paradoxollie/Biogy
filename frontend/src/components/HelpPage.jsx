@@ -6,7 +6,7 @@ import { Stagger, StaggerItem } from './ui/motion';
 import { PENCILS } from '../data/visuals';
 
 export default function HelpPage() {
-  return <><PageHero eyebrow="Aide & utilisation" title={[{ text: 'Bien utiliser' }, { text: 'Biogy.', className: 'italic text-biogy-700' }]} lead="Quelques repères pour travailler en classe et poursuivre tes révisions à la maison." pencil={PENCILS.verrerie} /><div className="page-narrow mt-12"><Stagger className="border-t border-ink-900/15">{[
+  return <><PageHero eyebrow="Aide & utilisation" title={[{ text: 'Bien utiliser' }, { text: 'Biogy.', className: 'accent-italic' }]} lead="Quelques repères pour travailler en classe et poursuivre tes révisions à la maison." pencil={PENCILS.verrerie} /><div className="page-narrow mt-12"><Stagger className="border-t border-ink-900/15">{[
     ['Ai-je besoin d’un compte ?', 'Les cours, les cartes de révision et les séances de laboratoire sont accessibles sans compte. Connecte-toi pour envoyer une copie, participer au forum ou proposer un projet.'],
     ['Où sont enregistrés mes favoris et mes réponses ?', 'Les favoris, les cours revus et les brouillons de TP sont enregistrés dans le navigateur de cet appareil. Ils ne suivent pas automatiquement ton compte sur un autre appareil. Un nettoyage du navigateur peut les effacer. Sur un ordinateur partagé, exporte ton travail et déconnecte-toi après la séance.'],
     ['Comment conserver ou rendre mon TP ?', 'La séance propose une sauvegarde locale et un export. Garde une copie de ton travail avant de quitter un ordinateur partagé. Le bouton d’envoi demande une connexion ; vérifie le message de confirmation avant de fermer la page.'],

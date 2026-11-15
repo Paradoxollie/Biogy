@@ -1,70 +1,25 @@
 /** @type {import('tailwindcss').Config} */
 
 // -----------------------------------------------------------------------------
-// Biogy — charte « carnet de laboratoire »
-// Papier chaud, encre vert-noir, vert gélose profond, ambre « flamme »,
-// bleu de méthylène pour la Terminale. Les palettes Tailwind historiques
-// (gray, blue, teal…) sont redirigées vers la charte pour que les écrans
-// plus anciens (forum, profil, admin) restent cohérents sans réécriture.
+// Biogy — charte « carnet de laboratoire », version jour et nuit.
+// Les teintes sont des variables CSS (src/index.css) : :root pour le jour,
+// .dark pour la nuit. Les palettes Tailwind historiques (gray, blue, teal…)
+// pointent vers la charte pour que les écrans plus anciens suivent le thème.
+// `night`, `chalk` et `mint` restent fixes : sections toujours sombres
+// (pied de page, photos en fond).
 // -----------------------------------------------------------------------------
 
-const ink = {
-  50: '#f3f5f3',
-  100: '#e6eae7',
-  200: '#cdd4cf',
-  300: '#a9b3ad',
-  400: '#7f8b85',
-  500: '#5f6b66',
-  600: '#47534e',
-  700: '#34403b',
-  800: '#222d29',
-  900: '#121b18',
-  950: '#0b1210',
-};
+const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+const v = (name) => `rgb(var(--${name}) / <alpha-value>)`;
+const scale = (name) => Object.fromEntries(SHADES.map((shade) => [shade, v(`${name}-${shade}`)]));
 
-const biogy = {
-  50: '#eef6f1',
-  100: '#d5eadd',
-  200: '#acd4bd',
-  300: '#7bb898',
-  400: '#4c9a76',
-  500: '#2c7f5c',
-  600: '#1e6a4b',
-  700: '#17573d',
-  800: '#124631',
-  900: '#0d3425',
-  950: '#072117',
-};
-
-const accent = {
-  50: '#fbf6ea',
-  100: '#f5e8c8',
-  200: '#ebd08f',
-  300: '#e0b35a',
-  400: '#d39837',
-  500: '#bb7e20',
-  600: '#9b6318',
-  700: '#7b4c16',
-  800: '#603b15',
-  900: '#4d3013',
-  950: '#2b1a09',
-};
-
-const cobalt = {
-  50: '#eff3fa',
-  100: '#dbe3f4',
-  200: '#b8c7e8',
-  300: '#8ca3d7',
-  400: '#5f7cc2',
-  500: '#4360ac',
-  600: '#344c92',
-  700: '#2b3e77',
-  800: '#253462',
-  900: '#1f2b50',
-  950: '#141b33',
-};
+const ink = scale('ink');
+const biogy = scale('biogy');
+const accent = scale('accent');
+const cobalt = scale('cobalt');
 
 module.exports = {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
@@ -74,18 +29,21 @@ module.exports = {
         accent,
         cobalt,
         paper: {
-          DEFAULT: '#f4f2ec',
-          50: '#fbfaf7',
-          100: '#f4f2ec',
-          200: '#ebe8df',
-          300: '#dedad0',
+          DEFAULT: v('paper'),
+          50: v('paper-50'),
+          100: v('paper'),
+          200: v('paper-200'),
+          300: v('paper-300'),
         },
         surface: {
-          DEFAULT: '#ffffff',
-          muted: '#f4f2ec',
-          subtle: '#ebe8df',
-          line: '#dedad0',
+          DEFAULT: v('card'),
+          muted: v('paper'),
+          subtle: v('paper-200'),
+          line: v('paper-300'),
         },
+        night: { DEFAULT: '#0b1210', soft: '#141d1a' },
+        chalk: '#f4f2ec',
+        mint: '#7bb898',
         biotech: {
           red: '#a3263a',
           green: '#2f7d3f',
@@ -93,7 +51,6 @@ module.exports = {
           yellow: '#a87a06',
           white: '#5f6b66',
         },
-        // Redirection des palettes historiques vers la charte
         gray: ink,
         slate: ink,
         zinc: ink,
@@ -108,13 +65,17 @@ module.exports = {
         violet: cobalt,
         purple: cobalt,
         amber: accent,
-        // Alias historiques
-        'lab-blue': cobalt[600],
-        'lab-purple': cobalt[700],
-        'lab-teal': biogy[700],
-        'lab-green': biogy[800],
-        'lab-bg': '#f4f2ec',
-        'lab-lines': '#dedad0',
+        'lab-blue': '#344c92',
+        'lab-purple': '#2b3e77',
+        'lab-teal': '#17573d',
+        'lab-green': '#124631',
+        'lab-bg': v('paper'),
+        'lab-lines': v('paper-300'),
+      },
+      // Les fonds « blancs » deviennent des cartes sombres la nuit ;
+      // le texte blanc reste blanc (posé sur des fonds colorés).
+      backgroundColor: {
+        white: v('card'),
       },
       fontFamily: {
         display: ['"Newsreader"', 'ui-serif', 'Georgia', 'serif'],
@@ -123,10 +84,10 @@ module.exports = {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       fontSize: {
-        'display-2xl': ['clamp(3rem, 6.4vw, 6.25rem)', { lineHeight: '0.98', letterSpacing: '-0.035em', fontWeight: '400' }],
-        'display-xl': ['clamp(2.6rem, 5vw, 4.5rem)', { lineHeight: '1.02', letterSpacing: '-0.03em', fontWeight: '400' }],
-        'display-lg': ['clamp(2.2rem, 3.8vw, 3.4rem)', { lineHeight: '1.06', letterSpacing: '-0.025em', fontWeight: '400' }],
-        'display-md': ['clamp(1.85rem, 2.8vw, 2.5rem)', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '400' }],
+        'display-2xl': ['clamp(3rem, 6.2vw, 6rem)', { lineHeight: '1.02', letterSpacing: '-0.032em', fontWeight: '450' }],
+        'display-xl': ['clamp(2.6rem, 5vw, 4.4rem)', { lineHeight: '1.05', letterSpacing: '-0.028em', fontWeight: '450' }],
+        'display-lg': ['clamp(2.2rem, 3.8vw, 3.35rem)', { lineHeight: '1.08', letterSpacing: '-0.022em', fontWeight: '450' }],
+        'display-md': ['clamp(1.85rem, 2.8vw, 2.5rem)', { lineHeight: '1.12', letterSpacing: '-0.018em', fontWeight: '450' }],
       },
       borderRadius: {
         card: '6px',
@@ -134,17 +95,17 @@ module.exports = {
         pill: '999px',
       },
       boxShadow: {
-        soft: '0 1px 0 rgba(18, 27, 24, 0.04), 0 1px 3px rgba(18, 27, 24, 0.05)',
-        elevated: '0 1px 0 rgba(18, 27, 24, 0.04), 0 18px 40px -18px rgba(18, 27, 24, 0.22)',
-        lift: '0 30px 60px -30px rgba(18, 27, 24, 0.35)',
-        focus: '0 0 0 3px rgba(44, 127, 92, 0.28)',
+        soft: '0 1px 0 rgb(var(--shadow) / 0.05), 0 1px 3px rgb(var(--shadow) / 0.07)',
+        elevated: '0 1px 0 rgb(var(--shadow) / 0.05), 0 18px 40px -18px rgb(var(--shadow) / 0.28)',
+        lift: '0 30px 60px -30px rgb(var(--shadow) / 0.42)',
+        focus: '0 0 0 3px rgb(var(--biogy-500) / 0.3)',
       },
       transitionTimingFunction: {
         lab: 'cubic-bezier(0.22, 1, 0.36, 1)',
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both',
-        marquee: 'marquee 48s linear infinite',
+        marquee: 'marquee 52s linear infinite',
         'pulse-dot': 'pulseDot 2.4s ease-in-out infinite',
       },
       keyframes: {

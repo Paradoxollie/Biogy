@@ -381,7 +381,7 @@ function TopicPage() {
           <p className="text-red-600 font-medium mb-4">Erreur: {error}</p>
           <button
             onClick={() => navigate('/forum')}
-            className="px-4 py-2 bg-biogy-700 hover:bg-biogy-800 text-white rounded-lg shadow-md hover:shadow-lg  transition-all duration-300"
+            className="px-4 py-2 bg-biogy-600 hover:bg-biogy-500 text-white rounded-lg shadow-md hover:shadow-lg  transition-all duration-300"
           >
             Retour au forum
           </button>
@@ -444,13 +444,8 @@ function TopicPage() {
                   <span className="font-medium">Supprimer</span>
                 </button>
               )}
-              <span className={`px-3 py-1.5 rounded-full text-sm font-medium bg-${
-                categories[topic.category]?.color || 'gray-500'
-              }/10 text-${
-                categories[topic.category]?.color || 'gray-500'
-              } border border-${
-                categories[topic.category]?.color || 'gray-500'
-              }/20 shadow-sm`}>
+              <span className="inline-flex items-center gap-2 rounded-full bg-ink-900/[0.05] px-3 py-1.5 text-sm font-medium text-ink-700">
+                <span className={`h-1.5 w-1.5 rounded-full bg-${categories[topic.category]?.color || 'gray-600'}`} aria-hidden="true" />
                 {categories[topic.category]?.name || 'Autre'}
               </span>
             </div>
@@ -578,7 +573,7 @@ function TopicPage() {
                     <button
                       onClick={() => saveEdit(discussion._id)}
                       disabled={submitting || !editContent.trim()}
-                      className="px-3 py-1 bg-biogy-700 hover:bg-biogy-800 text-white rounded hover:opacity-90 transition-all duration-200 disabled:opacity-50"
+                      className="px-3 py-1 bg-biogy-600 hover:bg-biogy-500 text-white rounded hover:opacity-90 transition-all duration-200 disabled:opacity-50"
                     >
                       {submitting ? 'Enregistrement...' : 'Enregistrer'}
                     </button>
@@ -1004,7 +999,7 @@ function TopicPage() {
               <button
                 type="submit"
                 disabled={submitting || !replyContent.trim()}
-                className="px-4 py-2 bg-biogy-700 hover:bg-biogy-800 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+                className="px-4 py-2 bg-biogy-600 hover:bg-biogy-500 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
               >
                 {submitting ? (
                   <span className="flex items-center">
@@ -1036,7 +1031,7 @@ function TopicPage() {
           <p className="text-gray-600 mb-4">Vous devez être connecté pour participer à cette discussion.</p>
           <Link
             to="/login"
-            className="px-4 py-2 bg-biogy-700 hover:bg-biogy-800 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 inline-flex items-center"
+            className="px-4 py-2 bg-biogy-600 hover:bg-biogy-500 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 inline-flex items-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clipRule="evenodd" />

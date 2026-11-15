@@ -8,10 +8,64 @@
    ============================================================================= */
 
 @layer base {
+  /* Jour */
   :root {
-    --paper: #f4f2ec;
-    --ink: #121b18;
+    color-scheme: light;
+    --paper: 242 239 231;
+    --paper-50: 250 248 243;
+    --paper-200: 232 228 217;
+    --paper-300: 214 208 194;
+    --card: 255 255 255;
+    --shadow: 18 27 24;
+
+    --ink-50: 243 245 243;  --ink-100: 230 234 231; --ink-200: 205 212 207; --ink-300: 169 179 173;
+    --ink-400: 120 132 126; --ink-500: 86 98 93;    --ink-600: 61 73 68;    --ink-700: 44 56 51;
+    --ink-800: 31 42 38;    --ink-900: 18 27 24;    --ink-950: 11 18 16;
+
+    --biogy-50: 238 246 241;  --biogy-100: 213 234 221; --biogy-200: 172 212 189; --biogy-300: 123 184 152;
+    --biogy-400: 76 154 118;  --biogy-500: 44 127 92;   --biogy-600: 30 106 75;   --biogy-700: 23 87 61;
+    --biogy-800: 18 70 49;    --biogy-900: 13 52 37;    --biogy-950: 7 33 23;
+
+    --accent-50: 251 246 234; --accent-100: 245 232 200; --accent-200: 235 208 143; --accent-300: 224 179 90;
+    --accent-400: 211 152 55; --accent-500: 187 126 32;  --accent-600: 155 99 24;   --accent-700: 123 76 22;
+    --accent-800: 96 59 21;   --accent-900: 77 48 19;    --accent-950: 43 26 9;
+
+    --cobalt-50: 239 243 250; --cobalt-100: 219 227 244; --cobalt-200: 184 199 232; --cobalt-300: 140 163 215;
+    --cobalt-400: 95 124 194; --cobalt-500: 67 96 172;   --cobalt-600: 52 76 146;   --cobalt-700: 43 62 119;
+    --cobalt-800: 37 52 98;   --cobalt-900: 31 43 80;    --cobalt-950: 20 27 51;
+
     --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.07 0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    --grain-opacity: 0.045;
+  }
+
+  /* Nuit : les échelles neutres s'inversent, les couleurs restent lisibles
+     (600 = fond de bouton sous texte blanc, 700+ = texte clair). */
+  .dark {
+    color-scheme: dark;
+    --paper: 14 20 18;
+    --paper-50: 19 26 23;
+    --paper-200: 26 35 31;
+    --paper-300: 46 57 52;
+    --card: 23 31 28;
+    --shadow: 0 0 0;
+
+    --ink-50: 22 30 27;     --ink-100: 29 38 34;    --ink-200: 43 53 49;    --ink-300: 62 73 68;
+    --ink-400: 98 110 104;  --ink-500: 141 152 147; --ink-600: 170 180 175; --ink-700: 197 205 201;
+    --ink-800: 220 226 222; --ink-900: 237 240 237; --ink-950: 247 248 246;
+
+    --biogy-50: 16 36 26;     --biogy-100: 20 48 35;    --biogy-200: 30 70 52;    --biogy-300: 44 98 74;
+    --biogy-400: 58 130 99;   --biogy-500: 54 128 96;   --biogy-600: 44 116 85;   --biogy-700: 126 194 160;
+    --biogy-800: 165 214 188; --biogy-900: 205 233 218; --biogy-950: 232 245 238;
+
+    --accent-50: 38 28 12;    --accent-100: 51 37 15;   --accent-200: 78 56 20;   --accent-300: 120 86 28;
+    --accent-400: 163 116 37; --accent-500: 176 126 40; --accent-600: 158 108 30; --accent-700: 230 188 104;
+    --accent-800: 239 212 156; --accent-900: 246 230 196; --accent-950: 251 243 225;
+
+    --cobalt-50: 19 26 43;    --cobalt-100: 24 33 58;   --cobalt-200: 36 49 84;   --cobalt-300: 52 70 116;
+    --cobalt-400: 74 100 170; --cobalt-500: 81 112 191; --cobalt-600: 71 99 176;  --cobalt-700: 163 181 228;
+    --cobalt-800: 193 205 239; --cobalt-900: 221 228 247; --cobalt-950: 239 243 252;
+
+    --grain-opacity: 0.03;
   }
 
   html {
@@ -35,12 +89,20 @@
     z-index: 60;
     pointer-events: none;
     background-image: var(--grain);
-    opacity: 0.04;
+    opacity: var(--grain-opacity);
+  }
+
+  /* Passage jour/nuit en douceur (désactivé hors bascule pour ne rien ralentir) */
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition: background-color 0.5s ease, border-color 0.5s ease, color 0.35s ease, fill 0.35s ease !important;
   }
 
   ::selection {
-    background: theme('colors.biogy.200');
-    color: theme('colors.ink.900');
+    background: rgb(var(--biogy-200));
+    color: rgb(var(--ink-900));
   }
 
   h1, h2, h3, h4 {
@@ -117,11 +179,14 @@
            active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary   { @apply btn bg-ink-900 text-paper hover:bg-biogy-700; }
-  .btn-green     { @apply btn bg-biogy-700 text-white hover:bg-biogy-800; }
+  .btn-green     { @apply btn bg-biogy-600 text-white hover:bg-biogy-500; }
   .btn-secondary { @apply btn border border-ink-200 bg-white/70 text-ink-900 hover:border-ink-900 hover:bg-white; }
   .btn-ghost     { @apply btn text-ink-700 hover:bg-ink-900/[0.06] hover:text-ink-900; }
   .btn-light     { @apply btn bg-paper text-ink-900 hover:bg-white; }
   .btn-outline-light { @apply btn border border-paper/30 text-paper hover:border-paper hover:bg-paper/10; }
+  /* Sur les sections toujours sombres (pied de page, photos) */
+  .btn-chalk     { @apply btn bg-chalk text-night hover:bg-mint; }
+  .btn-outline-chalk { @apply btn border border-chalk/30 text-chalk hover:border-chalk hover:bg-chalk/10; }
   .btn-danger    { @apply btn bg-biotech-red text-white hover:opacity-90; }
 
   .btn .btn-arrow { @apply transition-transform duration-300 ease-lab; }
@@ -140,6 +205,21 @@
            font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-ink-700;
   }
   .tag-dark { @apply tag border-paper/25 bg-paper/5 text-paper/80; }
+  .tag-night { @apply tag border-chalk/25 bg-chalk/5 text-chalk/80; }
+
+  /* Mot mis en valeur : italique un peu plus appuyé, vert du thème */
+  .accent-italic { @apply italic text-biogy-700; font-weight: 520; }
+
+  /* Trait de crayon vert sous un mot, tracé au chargement */
+  .mark-pencil {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 14' preserveAspectRatio='none'%3E%3Cpath d='M2 9.5C40 6.5 70 8 110 6.8S190 4.6 228 6.2 280 7.4 298 5.2' fill='none' stroke='%237bb898' stroke-width='3.2' stroke-linecap='round' opacity='.75'/%3E%3Cpath d='M8 11.2C60 9.4 120 10 170 8.6S250 8 292 8.4' fill='none' stroke='%237bb898' stroke-width='1.4' stroke-linecap='round' opacity='.45'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 0 96%;
+    background-size: 100% 0.24em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    animation: markDraw 1.3s cubic-bezier(0.65, 0, 0.35, 1) 1.15s both;
+  }
 
   .eyebrow {
     @apply inline-flex items-center gap-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500;
@@ -203,13 +283,14 @@
   }
 
   /* Dessin au crayon : se fond dans le papier */
-  .pencil { }
+  .pencil { transition: filter 0.4s ease; }
+  .dark .pencil { filter: invert(0.86) sepia(0.12) hue-rotate(90deg) saturate(0.6); }
   .pencil-light { filter: invert(0.95) sepia(0.15); }
 
   .paper-grid {
     background-image:
-      linear-gradient(to right, rgba(18, 27, 24, 0.045) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(18, 27, 24, 0.045) 1px, transparent 1px);
+      linear-gradient(to right, rgb(var(--ink-900) / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--ink-900) / 0.05) 1px, transparent 1px);
     background-size: 24px 24px;
   }
 
@@ -245,7 +326,7 @@
 
 /* ---------- Utilitaires historiques (forum) ---------- */
 .paper-lined-bg {
-  background-image: linear-gradient(0deg, rgba(18, 27, 24, 0.05) 1px, transparent 1px);
+  background-image: linear-gradient(0deg, rgb(var(--ink-900) / 0.06) 1px, transparent 1px);
   background-size: 100% 24px;
 }
 .perspective {
@@ -257,6 +338,11 @@
   50%      { filter: drop-shadow(0 0 3px rgba(44, 127, 92, 0.5)); }
 }
 .animate-pulse-glow { animation: pulseGlow 2s infinite; }
+
+@keyframes markDraw {
+  from { background-size: 0% 0.24em; }
+  to   { background-size: 100% 0.24em; }
+}
 
 /* Carte de révision : retournement 3D */
 .flip-scene { perspective: 1600px; }

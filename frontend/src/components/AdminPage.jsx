@@ -73,7 +73,7 @@ const PendingPostCard = ({ post, onApprove, onReject, onDelete }) => {
                 .finally(() => setLoading(false));
             }}
             disabled={loading}
-            className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors disabled:opacity-50"
+            className="px-3 py-1 bg-ink-600 text-paper rounded hover:bg-ink-700 transition-colors disabled:opacity-50"
           >
             Supprimer
           </button>

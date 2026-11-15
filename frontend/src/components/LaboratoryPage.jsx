@@ -18,7 +18,7 @@ export default function LaboratoryPage() {
     <>
       <PageHero
         eyebrow="Laboratoire"
-        title={[{ text: 'De la paillasse' }, { text: 'au compte rendu.', className: 'italic text-biogy-700' }]}
+        title={[{ text: 'De la paillasse' }, { text: 'au compte rendu.', className: 'accent-italic' }]}
         lead="Prépare tes manipulations, consigne tes observations et construis ta conclusion. Retrouve ici les séances à réaliser avec ton enseignante."
         image={PHOTOS.metrologie}
         figureNumber={4}

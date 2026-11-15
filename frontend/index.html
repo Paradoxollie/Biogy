@@ -4,7 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Biogy — Ressource de cours, travaux pratiques et veille scientifique pour les élèves de STL Biotechnologie.">
-    <meta name="theme-color" content="#f4f2ec">
+    <meta name="theme-color" content="#f2efe7">
+    <script>
+      // Thème jour/nuit appliqué avant l'affichage pour éviter un flash blanc.
+      (function () {
+        try {
+          var saved = localStorage.getItem('biogy-theme');
+          var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (dark) {
+            document.documentElement.classList.add('dark');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0e1412');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <title>Biogy — STL Biotechnologie</title>
 

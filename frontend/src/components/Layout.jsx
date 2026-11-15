@@ -5,6 +5,7 @@ import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import SystemStatusBanner from './SystemStatusBanner';
 import { EASE, Pencil } from './ui/motion';
+import ThemeToggle from './ui/ThemeToggle';
 import { PENCILS } from '../data/visuals';
 
 const NAV_ITEMS = [
@@ -18,8 +19,8 @@ const NAV_ITEMS = [
 
 export function Wordmark({ light = false, className = '' }) {
   return (
-    <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      <svg viewBox="0 0 28 28" className={`h-7 w-7 shrink-0 ${light ? 'text-paper' : 'text-ink-900'}`} aria-hidden="true">
+    <span className={`group/mark inline-flex items-center gap-2.5 ${className}`}>
+      <svg viewBox="0 0 28 28" className={`h-7 w-7 shrink-0 transition-transform duration-700 ease-lab group-hover/mark:rotate-[100deg] ${light ? 'text-chalk' : 'text-ink-900'}`} aria-hidden="true">
         <circle cx="14" cy="14" r="12.25" fill="none" stroke="currentColor" strokeWidth="1.25" />
         <circle cx="14" cy="14" r="9" fill="none" stroke="currentColor" strokeWidth="0.6" strokeDasharray="1.2 2.2" opacity="0.55" />
         <circle cx="11" cy="12.5" r="2.1" fill="#4c9a76" />
@@ -27,8 +28,8 @@ export function Wordmark({ light = false, className = '' }) {
         <circle cx="16.1" cy="17.4" r="1.6" fill="currentColor" />
       </svg>
       <span className="flex flex-col leading-none">
-        <span className={`font-display text-[1.4rem] font-medium tracking-[-0.02em] ${light ? 'text-paper' : 'text-ink-900'}`}>Biogy</span>
-        <span className={`mt-1 font-mono text-[8.5px] uppercase tracking-[0.24em] ${light ? 'text-paper/55' : 'text-ink-500'}`}>STL · Biotechnologies</span>
+        <span className={`font-display text-[1.4rem] font-medium tracking-[-0.02em] ${light ? 'text-chalk' : 'text-ink-900'}`}>Biogy</span>
+        <span className={`mt-1 font-mono text-[8.5px] uppercase tracking-[0.24em] ${light ? 'text-chalk/55' : 'text-ink-500'}`}>STL · Biotechnologies</span>
       </span>
     </span>
   );
@@ -56,6 +57,7 @@ function useHeaderState() {
 function Layout({ children }) {
   const { scrolled, hidden } = useHeaderState();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [hovered, setHovered] = useState(null);
   const location = useLocation();
   const { userInfo, logout, loadingAuth } = useAuth();
   const navigate = useNavigate();
@@ -110,20 +112,30 @@ function Layout({ children }) {
               <Wordmark />
             </Link>
 
-            <nav className="hidden items-center lg:flex" aria-label="Navigation principale">
+            <nav className="hidden items-center lg:flex" aria-label="Navigation principale" onMouseLeave={() => setHovered(null)}>
               {NAV_ITEMS.map((item) => {
                 const active = section === item.path;
                 return (
                   <NavLink
                     key={item.name}
                     to={item.path}
-                    className={`relative px-3.5 py-2 text-[14px] font-medium transition-colors duration-300 ${active ? 'text-ink-900' : 'text-ink-600 hover:text-ink-900'}`}
+                    onMouseEnter={() => setHovered(item.path)}
+                    onFocus={() => setHovered(item.path)}
+                    onBlur={() => setHovered(null)}
+                    className={`relative rounded-pill px-3.5 py-2 text-[14px] font-medium transition-colors duration-300 ${active || hovered === item.path ? 'text-ink-900' : 'text-ink-600'}`}
                   >
-                    {item.name}
+                    {hovered === item.path && (
+                      <motion.span
+                        layoutId="nav-hover"
+                        className="absolute inset-0 rounded-pill bg-ink-900/[0.07]"
+                        transition={{ type: 'spring', stiffness: 520, damping: 40 }}
+                      />
+                    )}
+                    <span className="relative">{item.name}</span>
                     {active && (
                       <motion.span
                         layoutId="nav-indicator"
-                        className="absolute inset-x-3.5 -bottom-0.5 h-px bg-ink-900"
+                        className="absolute bottom-0.5 left-1/2 h-[3px] w-[3px] -translate-x-1/2 rounded-full bg-biogy-600"
                         transition={{ type: 'spring', stiffness: 380, damping: 34 }}
                       />
                     )}
@@ -133,13 +145,14 @@ function Layout({ children }) {
             </nav>
 
             <div className="hidden items-center gap-1.5 lg:flex" aria-busy={loadingAuth}>
+              <ThemeToggle className="mr-1" />
               {userInfo ? (
                 <>
                   <Link
                     to="/mes-copies"
                     className="flex max-w-40 items-center gap-2 truncate rounded-pill px-3 py-2 text-sm font-medium text-ink-700 transition-colors hover:bg-ink-900/[0.05] hover:text-ink-900"
                   >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-biogy-700 font-mono text-[10px] uppercase text-white">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-biogy-600 font-mono text-[10px] uppercase text-white">
                       {userInfo.username?.slice(0, 1)}
                     </span>
                     <span className="truncate">{userInfo.username}</span>
@@ -156,6 +169,7 @@ function Layout({ children }) {
               )}
             </div>
 
+            <ThemeToggle className="ml-auto lg:hidden" />
             <button
               ref={menuButton}
               type="button"
@@ -245,49 +259,49 @@ function Layout({ children }) {
           </motion.div>
         </main>
 
-        <footer className="relative mt-24 overflow-hidden bg-ink-900 text-paper">
+        <footer className="relative mt-24 overflow-hidden bg-night text-chalk">
           <div className="pointer-events-none absolute -right-16 top-10 hidden w-[360px] opacity-40 md:block lg:right-10" aria-hidden="true">
             <Pencil drawing={PENCILS.microscope} light />
           </div>
           <div className="page relative pb-10 pt-20">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/50">Biogy · Lycée · STL Biotechnologies</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-chalk/50">Biogy · Lycée · STL Biotechnologies</p>
             <p className="mt-6 max-w-3xl font-display text-[clamp(2.2rem,5vw,4rem)] leading-[1.02] tracking-[-0.03em]">
-              Observer, mesurer, <em className="text-biogy-300">comprendre</em> le vivant.
+              Observer, mesurer, <em className="font-[520] text-mint">comprendre</em> le vivant.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/apprendre" className="btn-light">Ouvrir les cours <ArrowRight size={16} className="btn-arrow" /></Link>
-              <Link to="/laboratoire" className="btn-outline-light">Le laboratoire</Link>
+              <Link to="/apprendre" className="btn-chalk">Ouvrir les cours <ArrowRight size={16} className="btn-arrow" /></Link>
+              <Link to="/laboratoire" className="btn-outline-chalk">Le laboratoire</Link>
             </div>
 
-            <div className="mt-20 grid gap-10 border-t border-paper/15 pt-10 sm:grid-cols-2 md:grid-cols-4">
+            <div className="mt-20 grid gap-10 border-t border-chalk/15 pt-10 sm:grid-cols-2 md:grid-cols-4">
               <div className="md:col-span-2">
                 <Wordmark light />
-                <p className="mt-5 max-w-sm text-sm leading-7 text-paper/60">
+                <p className="mt-5 max-w-sm text-sm leading-7 text-chalk/60">
                   Cours, travaux pratiques, révisions et veille scientifique pour les élèves de Sciences et
                   Technologies de Laboratoire, spécialité biotechnologies.
                 </p>
               </div>
               <div>
-                <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-paper/45">Parcours</h3>
+                <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-chalk/45">Parcours</h3>
                 <ul className="mt-4 space-y-2.5 text-sm">
-                  <li><Link to="/apprendre" className="link-draw text-paper/80 hover:text-paper">Apprendre</Link></li>
-                  <li><Link to="/revisions" className="link-draw text-paper/80 hover:text-paper">Réviser</Link></li>
-                  <li><Link to="/laboratoire" className="link-draw text-paper/80 hover:text-paper">Laboratoire</Link></li>
-                  <li><Link to="/actualites" className="link-draw text-paper/80 hover:text-paper">Veille scientifique</Link></li>
+                  <li><Link to="/apprendre" className="link-draw text-chalk/80 hover:text-chalk">Apprendre</Link></li>
+                  <li><Link to="/revisions" className="link-draw text-chalk/80 hover:text-chalk">Réviser</Link></li>
+                  <li><Link to="/laboratoire" className="link-draw text-chalk/80 hover:text-chalk">Laboratoire</Link></li>
+                  <li><Link to="/actualites" className="link-draw text-chalk/80 hover:text-chalk">Veille scientifique</Link></li>
                 </ul>
               </div>
               <div>
-                <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-paper/45">Communauté</h3>
+                <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-chalk/45">Communauté</h3>
                 <ul className="mt-4 space-y-2.5 text-sm">
-                  <li><Link to="/projets" className="link-draw text-paper/80 hover:text-paper">Galerie de projets</Link></li>
-                  <li><Link to="/partager-projet" className="link-draw text-paper/80 hover:text-paper">Partager un projet</Link></li>
-                  <li><Link to="/forum" className="link-draw text-paper/80 hover:text-paper">Forum</Link></li>
-                  <li><Link to="/aide" className="link-draw text-paper/80 hover:text-paper">Aide & utilisation</Link></li>
+                  <li><Link to="/projets" className="link-draw text-chalk/80 hover:text-chalk">Galerie de projets</Link></li>
+                  <li><Link to="/partager-projet" className="link-draw text-chalk/80 hover:text-chalk">Partager un projet</Link></li>
+                  <li><Link to="/forum" className="link-draw text-chalk/80 hover:text-chalk">Forum</Link></li>
+                  <li><Link to="/aide" className="link-draw text-chalk/80 hover:text-chalk">Aide & utilisation</Link></li>
                 </ul>
               </div>
             </div>
 
-            <div className="mt-14 flex flex-col gap-3 border-t border-paper/15 pt-6 text-xs text-paper/45 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-14 flex flex-col gap-3 border-t border-chalk/15 pt-6 text-xs text-chalk/45 sm:flex-row sm:items-center sm:justify-between">
               <p>© {new Date().getFullYear()} Biogy — Ressource pédagogique STL Biotechnologies.</p>
               <p className="font-mono uppercase tracking-[0.16em]">Au laboratoire, la sécurité d’abord.</p>
             </div>

@@ -216,7 +216,7 @@ function ProjectsGallery() {
     <>
     <PageHero
       eyebrow="Les projets de la classe"
-      title={[{ text: 'La science' }, { text: 'se partage.', className: 'italic text-biogy-700' }]}
+      title={[{ text: 'La science' }, { text: 'se partage.', className: 'accent-italic' }]}
       lead="Observations, expériences et réalisations des élèves. Chaque projet est validé par l’enseignante avant publication."
       image={PHOTOS.projets}
       figureNumber={6}
@@ -435,7 +435,7 @@ function ProjectsGallery() {
                     <button
                       onClick={() => handleAddComment(project._id)}
                       disabled={!comment.trim() || commentLoading}
-                      className="bg-biogy-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 hover:bg-biogy-700/90 flex items-center sketch-button"
+                      className="bg-biogy-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 hover:bg-biogy-500 flex items-center sketch-button"
                     >
                       {commentLoading ? (
                         <div className="h-4 w-4 border-t-2 border-white rounded-full animate-spin mr-2"></div>
@@ -459,7 +459,7 @@ function ProjectsGallery() {
       )}
 
       <div className="text-center mt-16">
-        <Link to="/partager-projet" className="px-8 py-4 bg-biogy-700 hover:bg-biogy-800 text-white rounded-lg shadow-soft hover:shadow-soft transition-all duration-300 transform  sketch-cta">
+        <Link to="/partager-projet" className="px-8 py-4 bg-biogy-600 hover:bg-biogy-500 text-white rounded-lg shadow-soft hover:shadow-soft transition-all duration-300 transform  sketch-cta">
           <span className="font-scientific">Partager votre projet</span>
         </Link>
       </div>

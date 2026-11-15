@@ -118,7 +118,7 @@ function ForumPage() {
     <>
     <PageHero
       eyebrow="Forum de la classe"
-      title={[{ text: 'Une question ?' }, { text: 'On en parle.', className: 'italic text-biogy-700' }]}
+      title={[{ text: 'Une question ?' }, { text: 'On en parle.', className: 'accent-italic' }]}
       lead="Pose une question sur le cours, partage une méthode ou une observation. Les échanges restent entre élèves et enseignante, dans le respect de chacun."
       image={PHOTOS.forum}
       figureNumber={7}
@@ -134,18 +134,18 @@ function ForumPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
           {/* Filtres par catégorie */}
           <div className="flex flex-wrap gap-2 mb-4 md:mb-0">
-            {categories.map((cat, index) => (
+            {categories.map((cat) => (
               <button
                 key={cat.id}
                 aria-pressed={category === cat.id}
                 onClick={() => { setCategory(cat.id); setPagination((value) => ({ ...value, page: 1 })); }}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 transform  ${
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors duration-300 ${
                   category === cat.id
-                    ? `bg-${cat.color} text-white shadow-soft`
-                    : `bg-gray-100 text-${cat.color} hover:bg-gray-200`
+                    ? 'bg-ink-900 text-paper'
+                    : 'bg-ink-900/[0.05] text-ink-700 hover:bg-ink-900/10 hover:text-ink-900'
                 }`}
-                style={{animationDelay: `${0.1 + index * 0.05}s`}}
               >
+                {cat.id !== 'all' && <span className={`h-1.5 w-1.5 rounded-full bg-${cat.color}`} aria-hidden="true" />}
                 {cat.name}
               </button>
             ))}
@@ -199,7 +199,7 @@ function ForumPage() {
             <p className="text-red-500 font-medium mb-4">Erreur: {error}</p>
             <button
               onClick={() => setRetry((n) => n + 1)}
-              className="px-4 py-2 bg-biogy-700 hover:bg-biogy-800 text-white rounded-lg shadow-soft hover:shadow-soft  transition-all duration-300"
+              className="px-4 py-2 bg-biogy-600 hover:bg-biogy-500 text-white rounded-lg shadow-soft hover:shadow-soft  transition-all duration-300"
             >
               Réessayer
             </button>
@@ -216,7 +216,7 @@ function ForumPage() {
             <p className="text-gray-500 mb-6">Soyez le premier à créer un sujet de discussion !</p>
             <button
               onClick={handleNewTopic}
-              className="px-6 py-3 bg-biogy-700 hover:bg-biogy-800 text-white rounded-lg shadow-soft hover:shadow-soft  transition-all duration-300 font-medium"
+              className="px-6 py-3 bg-biogy-600 hover:bg-biogy-500 text-white rounded-lg shadow-soft hover:shadow-soft  transition-all duration-300 font-medium"
             >
               Créer un sujet
             </button>
@@ -295,13 +295,8 @@ function ForumPage() {
 
                     {/* Catégorie */}
                     <div className="col-span-2 flex md:justify-center items-center mt-3 md:mt-0">
-                      <span className={`px-3 py-1.5 rounded-full text-xs font-medium bg-${
-                        categories.find(cat => cat.id === topic.category)?.color || 'gray-500'
-                      }/10 text-${
-                        categories.find(cat => cat.id === topic.category)?.color || 'gray-500'
-                      } border border-${
-                        categories.find(cat => cat.id === topic.category)?.color || 'gray-500'
-                      }/20 shadow-sm`}>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-ink-900/[0.05] px-3 py-1.5 text-xs font-medium text-ink-700">
+                        <span className={`h-1.5 w-1.5 rounded-full bg-${categories.find(cat => cat.id === topic.category)?.color || 'gray-600'}`} aria-hidden="true" />
                         {categories.find(cat => cat.id === topic.category)?.name || 'Autre'}
                       </span>
                     </div>
@@ -373,7 +368,7 @@ function ForumPage() {
                           onClick={() => handlePageChange(page + 1)}
                           className={`px-4 py-2 text-sm font-medium transition-all duration-300 ${
                             pagination.page === page + 1
-                              ? 'bg-biogy-700 hover:bg-biogy-800 text-white shadow-soft'
+                              ? 'bg-biogy-600 hover:bg-biogy-500 text-white shadow-soft'
                               : 'text-gray-700 bg-gray-100 hover:bg-gray-200 hover:text-biogy-700'
                           }`}
                         >

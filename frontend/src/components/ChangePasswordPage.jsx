@@ -197,7 +197,7 @@ function ChangePasswordPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-biogy-700 hover:bg-biogy-800 px-5 py-3 font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-lg bg-biogy-600 hover:bg-biogy-500 px-5 py-3 font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? 'Enregistrement...' : 'Mettre à jour le mot de passe'}
               </button>

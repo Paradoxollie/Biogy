@@ -501,7 +501,7 @@ function ProfileEditPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="px-4 py-2 bg-biogy-700 text-white rounded-lg hover:bg-biogy-700/90 transition-all duration-300 disabled:opacity-50"
+              className="px-4 py-2 bg-biogy-600 text-white rounded-lg hover:bg-biogy-500 transition-all duration-300 disabled:opacity-50"
             >
               {submitting ? 'Enregistrement...' : 'Enregistrer'}
             </button>

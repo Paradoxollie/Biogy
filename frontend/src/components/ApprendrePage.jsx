@@ -32,7 +32,7 @@ function ApprendrePage() {
     <>
       <PageHero
         eyebrow="Apprendre"
-        title={[{ text: 'Un cours, une notion,' }, { text: 'un déclic.', className: 'italic text-biogy-700' }]}
+        title={[{ text: 'Un cours, une notion,' }, { text: 'un déclic.', className: 'accent-italic' }]}
         lead="Choisis ton niveau pour ouvrir le livre correspondant. Chaque livre est organisé en grands thèmes, puis en chapitres et en sous-parties — comme un manuel."
         pencil={PENCILS.cellule}
       />

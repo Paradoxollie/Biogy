@@ -38,7 +38,7 @@ export default function RevisionPage() {
     <>
       <PageHero
         eyebrow="Révisions"
-        title={[{ text: 'Un peu chaque jour,' }, { text: 'des notions qui restent.', className: 'italic text-biogy-700' }]}
+        title={[{ text: 'Un peu chaque jour,' }, { text: 'des notions qui restent.', className: 'accent-italic' }]}
         lead="Lis la question, formule ta réponse, puis retourne la carte. Le vocabulaire et les réponses proviennent directement des cours de Biogy."
         pencil={PENCILS.microbes}
       />

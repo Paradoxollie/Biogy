@@ -33,7 +33,7 @@ function CourseLevelPage() {
       <PageHero
         crumbs={[{ label: 'Apprendre', to: '/apprendre' }, { label: level.title }]}
         eyebrow={`Sommaire · ${level.title}`}
-        title={[{ text: level.shortTitle, className: 'italic text-biogy-700' }, { text: 'STL' }]}
+        title={[{ text: level.shortTitle, className: 'accent-italic' }, { text: 'STL' }]}
         lead={LEVEL_LEAD[level.id] || level.intro}
         image={LEVEL_VISUALS[level.id]}
         figureNumber={level.id === 'premiere' ? 2 : 3}

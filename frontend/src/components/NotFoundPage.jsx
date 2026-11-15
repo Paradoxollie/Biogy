@@ -9,7 +9,7 @@ export default function NotFoundPage() {
       <div>
         <Reveal y={8} blur={false}><p className="eyebrow">Erreur 404 · Champ vide</p></Reveal>
         <h1 className="mt-6 font-display text-display-xl">
-          <SplitWords parts={[{ text: 'Rien à observer' }, { text: 'sur cette lame.', className: 'italic text-biogy-700' }]} />
+          <SplitWords parts={[{ text: 'Rien à observer' }, { text: 'sur cette lame.', className: 'accent-italic' }]} />
         </h1>
         <Reveal delay={0.3} className="mt-6 max-w-md text-[17px] leading-8 text-ink-600">
           Le lien a peut-être changé. Retrouve ton chapitre dans les cours ou repars de l’accueil.

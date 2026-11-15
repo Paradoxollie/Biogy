@@ -99,13 +99,14 @@ export function SplitWords({ parts, delay = 0, stagger = 0.06, className = '' })
       {segments.map((segment, segmentIndex) => {
         if (segment.br) return <br key={`br-${segmentIndex}`} className={segment.className} />;
         const words = segment.text.split(' ').filter(Boolean);
+        const Wrapper = segment.wrap ? 'span' : React.Fragment;
         return (
-          <React.Fragment key={segmentIndex}>
+          <Wrapper key={segmentIndex} {...(segment.wrap ? { className: segment.wrap } : {})}>
             {words.map((word, wordIndex) => {
               const current = index++;
               return (
                 <React.Fragment key={`${segmentIndex}-${wordIndex}`}>
-                  <span className="inline-block overflow-hidden pb-[0.12em] -mb-[0.12em] align-bottom">
+                  <span className="-mx-[0.12em] -mb-[0.28em] -mt-[0.1em] inline-block overflow-hidden px-[0.12em] pb-[0.28em] pt-[0.1em] align-bottom">
                     <motion.span
                       className={`inline-block ${segment.className || ''}`}
                       initial={reduce ? { opacity: 0 } : { y: '108%', rotate: 2 }}
@@ -119,7 +120,7 @@ export function SplitWords({ parts, delay = 0, stagger = 0.06, className = '' })
                 </React.Fragment>
               );
             })}
-          </React.Fragment>
+          </Wrapper>
         );
       })}
     </span>
@@ -281,7 +282,7 @@ export function Marquee({ items, className = '', itemClassName = '' }) {
     </ul>
   );
   return (
-    <div className={`group relative flex overflow-hidden ${className}`}>
+    <div className={`group relative flex overflow-hidden py-1 ${className}`}>
       <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">
         {row(false)}
         {row(true)}
