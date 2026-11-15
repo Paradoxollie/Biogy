@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   FaBookOpen,
@@ -1173,7 +1174,7 @@ function ChapterContent({ chapter, style, onOpenImage }) {
 
       {tabs.length > 0 ? (
         <div>
-          <div className="flex flex-wrap gap-0.5 border-b border-surface-line" role="tablist" aria-label="Onglets du chapitre">
+          <div className="sticky top-3 z-20 flex w-full flex-wrap gap-1 rounded-pill border border-ink-900/10 bg-paper/90 p-1 shadow-soft backdrop-blur-md sm:w-fit" role="tablist" aria-label="Onglets du chapitre">
             {tabs.map((tab, index) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -1188,14 +1189,19 @@ function ChapterContent({ chapter, style, onOpenImage }) {
                   onKeyDown={(event) => navigateTab(event, index)}
                   aria-selected={isActive}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${
-                    isActive
-                      ? 'border-biogy-600 text-ink-900'
-                      : 'border-transparent text-ink-500 hover:text-ink-800'
+                  className={`relative inline-flex flex-1 items-center justify-center gap-2 rounded-pill px-5 py-2.5 text-sm font-semibold transition-colors duration-300 sm:flex-none ${
+                    isActive ? 'text-paper' : 'text-ink-600 hover:text-ink-900'
                   }`}
                 >
-                  <Icon className={isActive ? 'text-biogy-600' : 'text-ink-400'} />
-                  {tab.label}
+                  {isActive && (
+                    <motion.span
+                      layoutId={`chapter-tab-${chapter.id}`}
+                      className="absolute inset-0 rounded-pill bg-ink-900"
+                      transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                    />
+                  )}
+                  <Icon className={`relative ${isActive ? 'text-biogy-300' : 'text-ink-400'}`} />
+                  <span className="relative">{tab.label}</span>
                 </button>
               );
             })}
@@ -1427,53 +1433,54 @@ function CourseChapterPage() {
 
   return (
     <div className="page py-10 md:py-14">
-      <nav className="mb-6 text-xs font-semibold uppercase tracking-[0.16em] text-ink-500" aria-label="Fil d'ariane">
-        <Link to="/apprendre" className="hover:text-ink-900">Apprendre</Link>
-        <span className="mx-2 text-ink-300">/</span>
-        <Link to={`/apprendre/${level.id}`} className="hover:text-ink-900">{level.title}</Link>
-        <span className="mx-2 text-ink-300">/</span>
-        <span className="text-ink-700">{chapter.code}</span>
+      <nav className="mb-10 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-500" aria-label="Fil d'ariane">
+        <Link to="/apprendre" className="link-draw hover:text-ink-900">Apprendre</Link>
+        <span className="text-ink-300">/</span>
+        <Link to={`/apprendre/${level.id}`} className="link-draw hover:text-ink-900">{level.title}</Link>
+        <span className="text-ink-300">/</span>
+        <span className="text-ink-800">{chapter.code}</span>
         {lesson ? (
           <>
-            <span className="mx-2 text-ink-300">/</span>
-            <span className="text-ink-700">{lesson.code}</span>
+            <span className="text-ink-300">/</span>
+            <span className="text-ink-800">{lesson.code}</span>
           </>
         ) : null}
       </nav>
 
-      <header className="max-w-3xl">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={style.pill}>{level.title}</span>
-          <span className="pill-neutral">{section.title}</span>
-        </div>
-        <p className="mt-4 font-mono text-sm text-ink-500">{chapter.code}</p>
-        <h1 className="mt-2 font-display text-3xl md:text-display-md text-ink-900 leading-tight">
-          {chapter.title}
-        </h1>
-        <p className="mt-4 text-ink-600 leading-relaxed">{chapter.summary}</p>
-
-        {lesson ? (
-          <div className="mt-6 card-flat p-5">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-500">
-              <FaBookOpen /> Cours sélectionné
-            </div>
-            <h2 className="mt-2 font-display text-lg text-ink-900">
-              <span className="mr-2 font-mono text-sm text-ink-500">{lesson.code}</span>
-              {lesson.title}
-            </h2>
-            {lesson.summary ? (
-              <p className="mt-2 text-sm leading-relaxed text-ink-600">{lesson.summary}</p>
-            ) : null}
+      <header className="grid gap-10 border-b border-ink-900/10 pb-10 lg:grid-cols-12">
+        <div className="lg:col-span-8">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={style.pill}>{level.title}</span>
+            <span className="tag">{section.title}</span>
           </div>
-        ) : null}
+          <p className="mt-7 font-mono text-sm tracking-[0.08em] text-biogy-700">{chapter.code}</p>
+          <h1 className="mt-2 font-display text-display-lg text-ink-900">{chapter.title}</h1>
+          {chapter.summary ? <p className="mt-5 max-w-2xl text-[17px] leading-8 text-ink-600">{chapter.summary}</p> : null}
+        </div>
 
-        <Link
-          to={`/apprendre/${level.id}`}
-          className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-ink-600 hover:text-ink-900"
-        >
-          <FaAngleRight className="rotate-180" />
-          Retour au sommaire
-        </Link>
+        <aside className="flex flex-col justify-end gap-4 lg:col-span-4">
+          {lesson ? (
+            <div className="rounded-frame border border-biogy-200 bg-biogy-50/70 p-5">
+              <p className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-biogy-800">
+                <FaBookOpen /> Cours sélectionné
+              </p>
+              <h2 className="mt-3 font-display text-xl leading-snug text-ink-900">
+                <span className="mr-2 font-mono text-sm text-ink-500">{lesson.code}</span>
+                {lesson.title}
+              </h2>
+              {lesson.summary ? (
+                <p className="mt-2 text-sm leading-relaxed text-ink-600">{lesson.summary}</p>
+              ) : null}
+            </div>
+          ) : null}
+          <Link
+            to={`/apprendre/${level.id}`}
+            className="group inline-flex items-center gap-2 text-sm font-semibold text-ink-700 hover:text-ink-900"
+          >
+            <FaAngleRight className="rotate-180 transition-transform group-hover:-translate-x-0.5" />
+            <span className="link-draw">Retour au sommaire</span>
+          </Link>
+        </aside>
       </header>
 
       {contentItem?.content && <StudyToolbar path={`/apprendre/${level.id}/${chapter.id}${lesson ? `/${lesson.id}` : ''}`} title={contentItem.title} levelTitle={level.title} />}

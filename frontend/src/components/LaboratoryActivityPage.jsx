@@ -1,8 +1,11 @@
 import React from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { CheckCircle2, ExternalLink, Lock, Send } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ExternalLink, Lock, Send, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getLaboratoryActivity } from '../data/laboratoryActivities';
+import PageHero from './ui/PageHero';
+import { Reveal, Stagger, StaggerItem } from './ui/motion';
+import { PHOTOS } from '../data/visuals';
 
 function LaboratoryActivityPage() {
   const { activityId } = useParams();
@@ -13,99 +16,69 @@ function LaboratoryActivityPage() {
     return <Navigate to="/laboratoire" replace />;
   }
 
+  const facts = [
+    [Lock, 'Mode professeur', 'Les aides pédagogiques et corrections sont réservées au compte professeur, après vérification de ses droits.'],
+    [Send, 'Remise de copie', 'La séance est utilisable sans compte. La connexion est demandée au moment d’envoyer la copie.'],
+    [UserRound, 'État de session', userInfo ? `Connecté en tant que ${userInfo.username}.` : 'Non connecté pour le moment.'],
+  ];
+
   return (
-    <div className="page py-10 md:py-14">
-      <nav className="mb-6 text-sm text-gray-500">
-        <Link to="/laboratoire" className="hover:underline">
-          Laboratoire
-        </Link>
-        <span className="px-2">/</span>
-        <span className="font-semibold text-gray-700">{activity.code}</span>
-      </nav>
+    <>
+      <PageHero
+        crumbs={[{ label: 'Laboratoire', to: '/laboratoire' }, { label: activity.code }]}
+        eyebrow={`${activity.code} · ${activity.level}`}
+        title={activity.title}
+        lead={activity.summary}
+        image={PHOTOS.metrologie}
+        figureNumber={4}
+        actions={(
+          <>
+            <a href={activity.launchPath} className="btn-primary px-6">Ouvrir la séance <ExternalLink size={15} /></a>
+            {!userInfo && (
+              <Link to={`/login?redirect=${encodeURIComponent(activity.launchPath)}`} className="btn-secondary px-6">
+                Se connecter maintenant
+              </Link>
+            )}
+          </>
+        )}
+      />
 
-      <section className="rounded-card border border-gray-200 bg-white px-6 py-8 shadow-soft lg:px-10">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="rounded-full bg-lab-teal/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-lab-teal">
-            {activity.code}
-          </span>
-          <span className="rounded-full bg-lab-blue/10 px-3 py-1 text-xs font-semibold text-lab-blue">
-            {activity.level}
-          </span>
-          <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-            {activity.format}
-          </span>
-        </div>
+      <div className="page">
+        <Stagger className="mt-12 grid gap-px overflow-hidden rounded-frame border border-surface-line bg-surface-line md:grid-cols-3">
+          {facts.map(([Icon, title, text]) => (
+            <StaggerItem key={title} className="bg-paper-50 p-6">
+              <Icon size={18} strokeWidth={1.6} className="text-biogy-700" />
+              <h2 className="mt-3 font-display text-xl text-ink-900">{title}</h2>
+              <p className="mt-2 text-sm leading-6 text-ink-600">{text}</p>
+            </StaggerItem>
+          ))}
+        </Stagger>
 
-        <h1 className="mt-5 font-display text-3xl text-ink-900 lg:text-display-md">{activity.title}</h1>
-        <p className="mt-4 text-base leading-8 text-gray-600">{activity.summary}</p>
-
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <article className="rounded-card border border-gray-200 bg-gray-50/70 p-5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-              <Lock size={16} className="text-amber-600" />
-              Mode professeur
-            </div>
-            <p className="mt-3 text-sm leading-7 text-gray-600">
-              Les aides pédagogiques et corrections sont réservées au compte professeur, après vérification de ses droits.
-            </p>
-          </article>
-
-          <article className="rounded-card border border-gray-200 bg-gray-50/70 p-5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-              <Send size={16} className="text-lab-teal" />
-              Remise de copie
-            </div>
-            <p className="mt-3 text-sm leading-7 text-gray-600">
-              La séance est utilisable sans compte. La connexion est demandée au moment d’envoyer la copie.
-            </p>
-          </article>
-
-          <article className="rounded-card border border-gray-200 bg-gray-50/70 p-5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-              <CheckCircle2 size={16} className="text-lab-blue" />
-              État de session
-            </div>
-            <p className="mt-3 text-sm leading-7 text-gray-600">
-              {userInfo ? `Connecté en tant que ${userInfo.username}.` : 'Non connecté pour le moment.'}
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <article className="rounded-card border border-gray-200 bg-white p-6 shadow-soft">
-          <h2 className="font-display text-2xl text-gray-900">Objectifs de la séance</h2>
-          <ul className="mt-5 space-y-3">
-            {activity.objectives.map((objective) => (
-              <li key={objective} className="flex gap-3 rounded-card border border-gray-100 bg-gray-50/70 px-4 py-3 text-sm leading-7 text-gray-700">
-                <CheckCircle2 size={18} className="mt-1 shrink-0 text-lab-teal" />
-                <span>{objective}</span>
-              </li>
+        <section className="mt-16 grid gap-8 lg:grid-cols-12">
+          <Reveal className="lg:col-span-4">
+            <p className="eyebrow">Objectifs</p>
+            <h2 className="mt-4 font-display text-display-md">Ce que tu sauras faire à la fin de la séance.</h2>
+          </Reveal>
+          <Stagger as="ol" className="border-t border-ink-900/15 lg:col-span-8">
+            {activity.objectives.map((objective, index) => (
+              <StaggerItem as="li" key={objective} className="grid grid-cols-[3rem_1fr_auto] items-start gap-4 border-b border-ink-900/10 py-5">
+                <span className="font-mono text-sm text-biogy-700">{String(index + 1).padStart(2, '0')}</span>
+                <span className="font-display text-xl leading-snug text-ink-900">{objective}</span>
+                <CheckCircle2 size={18} strokeWidth={1.5} className="mt-1 text-ink-300" />
+              </StaggerItem>
             ))}
-          </ul>
-        </article>
+          </Stagger>
+        </section>
 
-        <aside className="rounded-card border border-gray-200 bg-[linear-gradient(180deg,_rgba(59,130,246,0.08),_rgba(20,184,166,0.06))] p-6 shadow-soft">
-          <h2 className="font-display text-xl text-gray-900">Lancer la séance</h2>
-          <p className="mt-4 text-sm leading-7 text-gray-600">
-            Ouvre la version interactive complète pour travailler en classe, sauvegarder ta progression et envoyer la copie à la fin.
-          </p>
-          <a
-            href={activity.launchPath}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-lab-teal px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-lab-teal/90"
-          >
-            Ouvrir la séance
-            <ExternalLink size={16} />
-          </a>
-          <Link
-            to={`/login?redirect=${encodeURIComponent(activity.launchPath)}`}
-            className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:border-lab-blue/30 hover:text-lab-blue"
-          >
-            Se connecter maintenant
-          </Link>
-        </aside>
-      </section>
-    </div>
+        <Reveal className="mt-16 flex flex-col items-start justify-between gap-6 rounded-frame bg-ink-900 p-8 text-paper md:flex-row md:items-center md:p-10">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-paper/55">Prêt·e ?</p>
+            <p className="mt-2 max-w-xl font-display text-[2rem] leading-tight">Ouvre la version interactive pour travailler en classe et envoyer ta copie à la fin.</p>
+          </div>
+          <a href={activity.launchPath} className="btn-light shrink-0 px-6">Lancer la séance <ArrowRight size={16} className="btn-arrow" /></a>
+        </Reveal>
+      </div>
+    </>
   );
 }
 

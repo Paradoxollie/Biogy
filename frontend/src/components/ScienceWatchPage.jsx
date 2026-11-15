@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaLeaf, FaHeartbeat, FaIndustry, FaGlobe, FaWater, FaExclamationTriangle, FaFilter, FaSync, FaExternalLinkAlt, FaChevronLeft, FaChevronRight, FaArrowRight } from 'react-icons/fa';
 import { BiCategory } from 'react-icons/bi';
+import PageHero from './ui/PageHero';
+import { PHOTOS } from '../data/visuals';
 
 const SmartImage = ({ src, alt, colorData, className }) => {
   const [failedSource, setFailedSource] = useState(null);
@@ -505,9 +507,15 @@ function ScienceWatchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/30">
-      {/* Editorial Header */}
-      <header className="page pb-8 pt-10 md:pt-14"><p className="section-eyebrow">Veille scientifique</p><h1 className="mt-3 font-display text-3xl md:text-display-lg">Le vivant fait l’actualité.</h1><p className="mt-4 max-w-2xl leading-relaxed text-ink-600">Explore les biotechnologies à travers des articles de presse et de recherche. Ouvre la source pour lire l’article complet et vérifier sa date.</p></header>
+    <div className="min-h-screen">
+      <PageHero
+        eyebrow="Veille scientifique"
+        title={[{ text: 'Le vivant fait' }, { text: 'l’actualité.', className: 'italic text-biogy-700' }]}
+        lead="Explore les biotechnologies à travers des articles de presse et de recherche. Ouvre la source pour lire l’article complet et vérifier sa date."
+        image={PHOTOS.veille}
+        figureNumber={5}
+        className="mb-8"
+      />
 
       {/* The sticky ribbon for navigation directly matching names */}
       {renderCategoryRibbon()}

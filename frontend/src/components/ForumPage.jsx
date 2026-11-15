@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BROWSER_API_URL } from '../config';
+import { ArrowRight } from 'lucide-react';
+import PageHero from './ui/PageHero';
+import { PHOTOS } from '../data/visuals';
 
 function ForumPage() {
   const [topics, setTopics] = useState([]);
@@ -112,29 +115,20 @@ function ForumPage() {
   };
 
   return (
-    <div className="page py-10 md:py-14">
-      {/* En-tête avec titre et bouton de création */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-        <div>
-          <h1 className="page-heading mb-2 relative inline-block">
-            Le forum de la classe
-          </h1>
-          <p className="text-gray-700">
-            Discutez, partagez et collaborez avec d'autres passionnés de biotechnologie
-          </p>
-        </div>
-
-        <button
-          onClick={handleNewTopic}
-          className="mt-4 md:mt-0 px-4 py-2 bg-biogy-700 hover:bg-biogy-800 text-white rounded-lg shadow-soft hover:shadow-soft  transition-all duration-300 flex items-center"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          Nouveau Sujet
+    <>
+    <PageHero
+      eyebrow="Forum de la classe"
+      title={[{ text: 'Une question ?' }, { text: 'On en parle.', className: 'italic text-biogy-700' }]}
+      lead="Pose une question sur le cours, partage une méthode ou une observation. Les échanges restent entre élèves et enseignante, dans le respect de chacun."
+      image={PHOTOS.forum}
+      figureNumber={7}
+      actions={(
+        <button onClick={handleNewTopic} className="btn-primary px-6">
+          Nouveau sujet <ArrowRight size={16} className="btn-arrow" />
         </button>
-      </div>
-
+      )}
+    />
+    <div className="page pt-10 md:pt-12">
       {/* Filtres et recherche */}
       <div className="bg-white rounded-lg shadow-soft p-5 mb-6 sketch-container" style={{animationDelay: '0.1s'}}>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -474,6 +468,7 @@ function ForumPage() {
         }
       `}</style>
     </div>
+    </>
   );
 }
 

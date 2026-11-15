@@ -1,99 +1,97 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowUpRight } from 'lucide-react';
 import { getCourseLevels } from '../data/stlCurriculum';
 import CourseSearch from './CourseSearch';
 import StudyDashboard from './StudyDashboard';
+import PageHero from './ui/PageHero';
+import { FocusImage, Reveal, Stagger, StaggerItem } from './ui/motion';
+import { LEVEL_VISUALS, PENCILS } from '../data/visuals';
 
-const LEVEL_ACCENT = {
-  premiere:  { badge: 'pill-biogy' },
-  terminale: { badge: 'pill-ink'   },
+const LEVEL_COPY = {
+  premiere: {
+    book: 'Livre 01',
+    text: 'Découvrir les biotechnologies, prévenir les risques, mesurer avec rigueur, cultiver et observer le vivant.',
+  },
+  terminale: {
+    book: 'Livre 02',
+    text: 'Approfondir les notions de Première, interpréter des résultats, conduire le projet technologique et préparer le bac.',
+  },
 };
+
+const READING_STEPS = [
+  ['Cours', 'L’essentiel à savoir : notions, définitions et schémas — ce que l’on recopie dans le cahier.'],
+  ['Travail guidé', 'Les documents à analyser et les questions pour s’approprier le cours, pas à pas.'],
+  ['Bilan', 'Points-clés, erreurs fréquentes, entraînement et pistes pour aller plus loin.'],
+];
 
 function ApprendrePage() {
   const levels = getCourseLevels();
 
   return (
-    <div className="page py-10 md:py-14">
-      <header className="max-w-3xl">
-        <p className="section-eyebrow">Apprendre</p>
-        <h1 className="mt-3 font-display text-3xl md:text-display-md text-ink-900">
-          Un cours, une notion, un déclic.
-        </h1>
-        <p className="mt-4 text-ink-600 leading-relaxed">
-          Choisis ton niveau pour ouvrir le livre correspondant. Chaque livre est organisé
-          en grands thèmes, puis en chapitres et en sous-parties — comme un manuel.
-        </p>
-      </header>
+    <>
+      <PageHero
+        eyebrow="Apprendre"
+        title={[{ text: 'Un cours, une notion,' }, { text: 'un déclic.', className: 'italic text-biogy-700' }]}
+        lead="Choisis ton niveau pour ouvrir le livre correspondant. Chaque livre est organisé en grands thèmes, puis en chapitres et en sous-parties — comme un manuel."
+        pencil={PENCILS.cellule}
+      />
 
-      <CourseSearch />
-      <div className="mt-6"><StudyDashboard /></div>
+      <div className="page">
+        <CourseSearch />
+        <div className="mt-6 empty:hidden"><StudyDashboard /></div>
 
-      <section className="mt-10 grid gap-5 md:grid-cols-2" aria-label="Niveaux">
-        {levels.map((level) => {
-          const style = LEVEL_ACCENT[level.id] || LEVEL_ACCENT.premiere;
-          const chapterCount = level.sections.reduce(
-            (total, section) => total + section.chapters.length,
-            0,
-          );
+        <section className="mt-16" aria-label="Niveaux">
+          <Reveal className="flex items-end justify-between gap-4 border-b border-ink-900/10 pb-5">
+            <h2 className="font-display text-display-md">Les livres</h2>
+            <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-500">{levels.length} niveaux</span>
+          </Reveal>
+          <div className="mt-8 grid gap-8 md:grid-cols-2">
+            {levels.map((level, index) => {
+              const chapterCount = level.sections.reduce((total, section) => total + section.chapters.length, 0);
+              const copy = LEVEL_COPY[level.id] || {};
+              return (
+                <Reveal key={level.id} delay={index * 0.1}>
+                  <Link to={`/apprendre/${level.id}`} className="group block">
+                    <FocusImage image={LEVEL_VISUALS[level.id]} className="aspect-[16/10] rounded-frame" zoomOnHover sizes="(min-width: 768px) 50vw, 100vw" />
+                    <div className="mt-5 flex items-start justify-between gap-6">
+                      <div>
+                        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-500">
+                          {copy.book} · {chapterCount} chapitres · {level.sections.length} thèmes
+                        </p>
+                        <h3 className="mt-2 font-display text-[2.2rem] leading-none tracking-tight text-ink-900">
+                          <span className="link-draw">{level.title}</span>
+                        </h3>
+                        <p className="mt-3 max-w-md text-[15px] leading-7 text-ink-600">{copy.text || level.intro}</p>
+                      </div>
+                      <span className="mt-6 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-ink-900/15 transition-all duration-500 ease-lab group-hover:border-ink-900 group-hover:bg-ink-900 group-hover:text-paper">
+                        <ArrowUpRight size={18} />
+                      </span>
+                    </div>
+                  </Link>
+                </Reveal>
+              );
+            })}
+          </div>
+        </section>
 
-          return (
-            <Link
-              key={level.id}
-              to={`/apprendre/${level.id}`}
-              className="group card p-6 md:p-8 transition-all hover:border-biogy-200 hover:shadow-elevated"
-            >
-              <div className="flex items-center justify-between">
-                <span className={style.badge}>{level.title}</span>
-                <span className="text-xs font-medium text-ink-500">
-                  {chapterCount} chapitres
-                </span>
-              </div>
-
-              <h2 className="mt-5 font-display text-2xl text-ink-900">
-                Ouvrir le livre de {level.shortTitle.toLowerCase()}
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-ink-600">
-                {level.intro}
-              </p>
-
-              <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-biogy-700">
-                Ouvrir
-                <svg viewBox="0 0 20 20" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="currentColor" aria-hidden="true">
-                  <path d="M7.3 4.3l5.4 5.7-5.4 5.7-1.3-1.2 4.1-4.5L6 5.5z" />
-                </svg>
-              </div>
-            </Link>
-          );
-        })}
-      </section>
-
-      <section className="mt-10 card p-6 md:p-8">
-        <p className="section-eyebrow">Comment lire un chapitre</p>
-        <h2 className="mt-3 font-display text-xl text-ink-900">
-          Trois onglets, toujours dans le même ordre
-        </h2>
-        <ol className="mt-5 grid gap-3 md:grid-cols-3">
-          <li className="card-flat p-4">
-            <span className="pill-biogy">1 — Cours</span>
-            <p className="mt-3 text-sm leading-relaxed text-ink-700">
-              L'essentiel à savoir, les notions et les schémas — ce qu'on recopie dans le cahier.
-            </p>
-          </li>
-          <li className="card-flat p-4">
-            <span className="pill-neutral">2 — Travail guidé</span>
-            <p className="mt-3 text-sm leading-relaxed text-ink-700">
-              Les documents à analyser et les questions pour s'approprier le cours.
-            </p>
-          </li>
-          <li className="card-flat p-4">
-            <span className="pill-accent">3 — Bilan</span>
-            <p className="mt-3 text-sm leading-relaxed text-ink-700">
-              Points-clés, erreurs fréquentes, entraînement et pistes pour aller plus loin.
-            </p>
-          </li>
-        </ol>
-      </section>
-    </div>
+        <section className="mt-20 grid gap-10 rounded-frame border border-surface-line bg-white p-7 md:p-10 lg:grid-cols-12">
+          <Reveal className="lg:col-span-4">
+            <p className="eyebrow">Comment lire un chapitre</p>
+            <h2 className="mt-4 font-display text-[2rem] leading-tight tracking-tight">Trois onglets, toujours dans le même ordre.</h2>
+          </Reveal>
+          <Stagger as="ol" className="grid gap-px overflow-hidden rounded-card border border-surface-line bg-surface-line sm:grid-cols-3 lg:col-span-8">
+            {READING_STEPS.map(([title, text], index) => (
+              <StaggerItem as="li" key={title} className="bg-white p-6">
+                <span className="font-mono text-[11px] tracking-[0.16em] text-biogy-700">0{index + 1}</span>
+                <h3 className="mt-3 font-display text-2xl">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-ink-600">{text}</p>
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </section>
+      </div>
+    </>
   );
 }
 

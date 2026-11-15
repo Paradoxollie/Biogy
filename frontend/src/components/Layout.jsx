@@ -1,49 +1,65 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import SystemStatusBanner from './SystemStatusBanner';
+import { EASE, Pencil } from './ui/motion';
+import { PENCILS } from '../data/visuals';
 
 const NAV_ITEMS = [
-  { name: 'Apprendre',   path: '/apprendre'   },
-  { name: 'Réviser',     path: '/revisions'   },
+  { name: 'Apprendre', path: '/apprendre' },
+  { name: 'Réviser', path: '/revisions' },
   { name: 'Laboratoire', path: '/laboratoire' },
-  { name: 'Projets',     path: '/projets'     },
-  { name: 'Actualités',  path: '/actualites'  },
-  { name: 'Forum',       path: '/forum'       },
+  { name: 'Projets', path: '/projets' },
+  { name: 'Actualités', path: '/actualites' },
+  { name: 'Forum', path: '/forum' },
 ];
 
-function Wordmark({ className = '' }) {
+export function Wordmark({ light = false, className = '' }) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <span className="relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-ink-900">
-        <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-          <circle cx="12" cy="12" r="8" fill="none" stroke="#14a676" strokeWidth="1.75" />
-          <circle cx="10" cy="11"   r="1.4" fill="#14a676" />
-          <circle cx="14" cy="10"   r="0.9" fill="#14a676" />
-          <circle cx="13.5" cy="14" r="1.1" fill="#14a676" />
-          <circle cx="9"  cy="14"   r="0.7" fill="#14a676" />
-        </svg>
-      </span>
-      <span className="font-display text-lg font-semibold tracking-tight text-ink-900">
-        Biogy
+    <span className={`inline-flex items-center gap-2.5 ${className}`}>
+      <svg viewBox="0 0 28 28" className={`h-7 w-7 shrink-0 ${light ? 'text-paper' : 'text-ink-900'}`} aria-hidden="true">
+        <circle cx="14" cy="14" r="12.25" fill="none" stroke="currentColor" strokeWidth="1.25" />
+        <circle cx="14" cy="14" r="9" fill="none" stroke="currentColor" strokeWidth="0.6" strokeDasharray="1.2 2.2" opacity="0.55" />
+        <circle cx="11" cy="12.5" r="2.1" fill="#4c9a76" />
+        <circle cx="17.2" cy="10.6" r="1.2" fill="#d39837" />
+        <circle cx="16.1" cy="17.4" r="1.6" fill="currentColor" />
+      </svg>
+      <span className="flex flex-col leading-none">
+        <span className={`font-display text-[1.4rem] font-medium tracking-[-0.02em] ${light ? 'text-paper' : 'text-ink-900'}`}>Biogy</span>
+        <span className={`mt-1 font-mono text-[8.5px] uppercase tracking-[0.24em] ${light ? 'text-paper/55' : 'text-ink-500'}`}>STL · Biotechnologies</span>
       </span>
     </span>
   );
 }
 
-function Layout({ children }) {
+function useHeaderState() {
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const last = useRef(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 12);
+      setHidden(y > 160 && y > last.current + 4);
+      if (y < last.current - 4 || y <= 160) setHidden(false);
+      last.current = y;
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return { scrolled, hidden };
+}
+
+function Layout({ children }) {
+  const { scrolled, hidden } = useHeaderState();
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { userInfo, logout, loadingAuth } = useAuth();
   const navigate = useNavigate();
   const menuButton = useRef(null);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 8);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -54,9 +70,10 @@ function Layout({ children }) {
 
   useEffect(() => {
     if (!mobileOpen) return undefined;
+    document.body.style.overflow = 'hidden';
     const close = (event) => { if (event.key === 'Escape') { setMobileOpen(false); menuButton.current?.focus(); } };
     window.addEventListener('keydown', close);
-    return () => window.removeEventListener('keydown', close);
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', close); };
   }, [mobileOpen]);
 
   useEffect(() => {
@@ -76,178 +93,208 @@ function Layout({ children }) {
     navigate('/login');
   };
 
+  const section = `/${location.pathname.split('/')[1] || ''}`;
+
   return (
-    <div className="min-h-screen flex flex-col bg-surface-muted text-ink-900">
-      <a href="#main-content" className="skip-link">Aller au contenu</a>
-      <header
-        className={`sticky top-0 z-40 w-full border-b transition-colors duration-200 ${
-          scrolled
-            ? 'bg-surface/90 backdrop-blur border-surface-line'
-            : 'bg-surface border-transparent'
-        }`}
-      >
-        <div className="page flex h-16 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" aria-label="Accueil Biogy">
+    <MotionConfig reducedMotion="user">
+      <div className="flex min-h-screen flex-col bg-paper text-ink-900">
+        <a href="#main-content" className="skip-link">Aller au contenu</a>
+
+        <header
+          className={`site-header sticky top-0 z-50 w-full transition-[transform,background-color,border-color,box-shadow] duration-500 ease-lab ${
+            hidden && !mobileOpen ? '-translate-y-full' : ''
+          } ${mobileOpen ? 'border-b border-ink-900/10 bg-paper' : scrolled ? 'border-b border-ink-900/10 bg-paper/85 backdrop-blur-md backdrop-saturate-150' : 'border-b border-transparent bg-paper'}`}
+        >
+          <div className="page flex h-[72px] items-center justify-between gap-6">
+            <Link to="/" aria-label="Accueil Biogy" className="shrink-0">
               <Wordmark />
             </Link>
-            <span className="hidden xl:inline-block h-5 w-px bg-surface-line" aria-hidden="true" />
-            <span className="hidden xl:inline-block text-[10px] font-medium uppercase tracking-[0.14em] text-ink-500">
-              STL · Biotechnologies
-            </span>
-          </div>
 
-          <nav className="hidden lg:flex items-center gap-0.5" aria-label="Navigation principale">
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                className={({ isActive }) =>
-                  `px-3 py-2 rounded-card text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'text-biogy-700 bg-biogy-50'
-                      : 'text-ink-700 hover:text-ink-900 hover:bg-surface-subtle'
-                  }`
-                }
-              >
-                {item.name}
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className="hidden lg:flex items-center gap-1" aria-busy={loadingAuth}>
-            {userInfo ? (
-              <>
-                <Link
-                  to="/mes-copies"
-                  className="max-w-28 truncate text-sm font-medium text-ink-700 hover:text-ink-900 px-2.5 py-2 rounded-card hover:bg-surface-subtle"
-                >
-                  {userInfo.username}
-                </Link>
-                {userInfo.role === 'admin' && (
-                  <Link to="/admin" className="btn-secondary">Admin</Link>
-                )}
-                <button onClick={handleLogout} className="btn-ghost" aria-label="Se déconnecter">Quitter</button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="btn-primary">Mon espace</Link>
-              </>
-            )}
-          </div>
-
-          <button
-            ref={menuButton}
-            type="button"
-            onClick={() => setMobileOpen((v) => !v)}
-            className="lg:hidden inline-flex h-11 w-11 items-center justify-center rounded-card text-ink-700 hover:bg-surface-subtle"
-            aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
-            aria-expanded={mobileOpen}
-            aria-controls="mobile-navigation"
-          >
-            {mobileOpen ? (
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {mobileOpen && (
-          <nav id="mobile-navigation" aria-label="Navigation mobile" className="lg:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-surface-line bg-surface">
-            <div className="page py-3 space-y-1">
-              {NAV_ITEMS.map((item) => (
-                <NavLink
-                  key={item.name}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `block px-3 py-2.5 rounded-card text-sm font-medium ${
-                      isActive
-                        ? 'bg-biogy-50 text-biogy-700'
-                        : 'text-ink-700 hover:bg-surface-subtle'
-                    }`
-                  }
-                >
-                  {item.name}
-                </NavLink>
-              ))}
-              <div className="pt-3 mt-2 border-t border-surface-line space-y-1">
-                {userInfo ? (
-                  <>
-                    <Link to="/profile" className="block px-3 py-2.5 rounded-card text-sm text-ink-700">Mon profil</Link>
-                    <Link to="/mes-copies" className="block px-3 py-2.5 rounded-card text-sm text-ink-700 hover:bg-surface-subtle">
-                      Mes copies — {userInfo.username}
-                    </Link>
-                    {userInfo.role === 'admin' && (
-                      <Link to="/admin" className="block px-3 py-2.5 rounded-card text-sm font-medium bg-ink-900 text-white">
-                        Panneau admin
-                      </Link>
+            <nav className="hidden items-center lg:flex" aria-label="Navigation principale">
+              {NAV_ITEMS.map((item) => {
+                const active = section === item.path;
+                return (
+                  <NavLink
+                    key={item.name}
+                    to={item.path}
+                    className={`relative px-3.5 py-2 text-[14px] font-medium transition-colors duration-300 ${active ? 'text-ink-900' : 'text-ink-600 hover:text-ink-900'}`}
+                  >
+                    {item.name}
+                    {active && (
+                      <motion.span
+                        layoutId="nav-indicator"
+                        className="absolute inset-x-3.5 -bottom-0.5 h-px bg-ink-900"
+                        transition={{ type: 'spring', stiffness: 380, damping: 34 }}
+                      />
                     )}
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-3 py-2.5 rounded-card text-sm text-biotech-red hover:bg-surface-subtle"
-                    >
-                      Se déconnecter
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/login"    className="block px-3 py-2.5 rounded-card text-sm text-ink-700 hover:bg-surface-subtle">Se connecter</Link>
-                    <Link to="/register" className="block px-3 py-2.5 rounded-card text-sm font-semibold bg-biogy-600 text-white">S'inscrire</Link>
-                  </>
-                )}
+                  </NavLink>
+                );
+              })}
+            </nav>
+
+            <div className="hidden items-center gap-1.5 lg:flex" aria-busy={loadingAuth}>
+              {userInfo ? (
+                <>
+                  <Link
+                    to="/mes-copies"
+                    className="flex max-w-40 items-center gap-2 truncate rounded-pill px-3 py-2 text-sm font-medium text-ink-700 transition-colors hover:bg-ink-900/[0.05] hover:text-ink-900"
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-biogy-700 font-mono text-[10px] uppercase text-white">
+                      {userInfo.username?.slice(0, 1)}
+                    </span>
+                    <span className="truncate">{userInfo.username}</span>
+                  </Link>
+                  {userInfo.role === 'admin' && (
+                    <Link to="/admin" className="btn-secondary min-h-9 px-4 py-1.5">Admin</Link>
+                  )}
+                  <button onClick={handleLogout} className="btn-ghost min-h-9 px-3 py-1.5" aria-label="Se déconnecter">Quitter</button>
+                </>
+              ) : (
+                <Link to="/login" className="btn-primary min-h-10 py-2">
+                  Mon espace <ArrowRight size={15} className="btn-arrow" />
+                </Link>
+              )}
+            </div>
+
+            <button
+              ref={menuButton}
+              type="button"
+              onClick={() => setMobileOpen((value) => !value)}
+              className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-900 transition-colors hover:bg-ink-900/[0.06] lg:hidden"
+              aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
+            >
+              <span className={`absolute h-px w-5 bg-current transition-transform duration-500 ease-lab ${mobileOpen ? 'rotate-45' : '-translate-y-[4px]'}`} />
+              <span className={`absolute h-px w-5 bg-current transition-transform duration-500 ease-lab ${mobileOpen ? '-rotate-45' : 'translate-y-[4px]'}`} />
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {mobileOpen && (
+              <motion.nav
+                id="mobile-navigation"
+                aria-label="Navigation mobile"
+                className="fixed inset-x-0 bottom-0 top-[72px] overflow-y-auto bg-paper lg:hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, ease: EASE }}
+              >
+                <div className="page flex min-h-full flex-col pb-10 pt-6">
+                  <ul className="border-t border-ink-900/10">
+                    {NAV_ITEMS.map((item, index) => (
+                      <motion.li
+                        key={item.name}
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.05 + index * 0.05, ease: EASE }}
+                        className="border-b border-ink-900/10"
+                      >
+                        <NavLink to={item.path} className="flex items-baseline justify-between py-4">
+                          <span className={`font-display text-[2rem] leading-none tracking-tight ${section === item.path ? 'italic text-biogy-700' : 'text-ink-900'}`}>{item.name}</span>
+                          <span className="font-mono text-[11px] text-ink-400">{String(index + 1).padStart(2, '0')}</span>
+                        </NavLink>
+                      </motion.li>
+                    ))}
+                  </ul>
+                  <motion.div
+                    className="mt-8 grid gap-2"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4, ease: EASE }}
+                  >
+                    {userInfo ? (
+                      <>
+                        <Link to="/mes-copies" className="btn-secondary w-full justify-between">Mes copies — {userInfo.username}<ArrowUpRight size={16} /></Link>
+                        <Link to="/profile" className="btn-ghost w-full justify-between">Mon profil<ArrowUpRight size={16} /></Link>
+                        {userInfo.role === 'admin' && <Link to="/admin" className="btn-primary w-full">Panneau admin</Link>}
+                        <button onClick={handleLogout} className="btn-ghost w-full text-biotech-red">Se déconnecter</button>
+                      </>
+                    ) : (
+                      <>
+                        <Link to="/login" className="btn-primary w-full">Se connecter</Link>
+                        <Link to="/register" className="btn-secondary w-full">Créer mon compte</Link>
+                      </>
+                    )}
+                  </motion.div>
+                  <div className="mt-auto pt-10">
+                    <Pencil drawing={PENCILS.microbes} className="mx-auto w-40 opacity-70" />
+                  </div>
+                </div>
+              </motion.nav>
+            )}
+          </AnimatePresence>
+        </header>
+
+        <SystemStatusBanner />
+        {userInfo?.mustChangePassword && location.pathname !== '/change-password' && (
+          <div className="no-print page pt-4">
+            <p className="notice">Ton mot de passe a été réinitialisé. <Link className="font-semibold underline" to="/change-password">Choisir mon nouveau mot de passe</Link></p>
+          </div>
+        )}
+
+        <main id="main-content" tabIndex={-1} className="min-w-0 flex-grow outline-none">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.45, ease: EASE }}
+          >
+            {children}
+          </motion.div>
+        </main>
+
+        <footer className="relative mt-24 overflow-hidden bg-ink-900 text-paper">
+          <div className="pointer-events-none absolute -right-16 top-10 hidden w-[360px] opacity-40 md:block lg:right-10" aria-hidden="true">
+            <Pencil drawing={PENCILS.microscope} light />
+          </div>
+          <div className="page relative pb-10 pt-20">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/50">Biogy · Lycée · STL Biotechnologies</p>
+            <p className="mt-6 max-w-3xl font-display text-[clamp(2.2rem,5vw,4rem)] leading-[1.02] tracking-[-0.03em]">
+              Observer, mesurer, <em className="text-biogy-300">comprendre</em> le vivant.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link to="/apprendre" className="btn-light">Ouvrir les cours <ArrowRight size={16} className="btn-arrow" /></Link>
+              <Link to="/laboratoire" className="btn-outline-light">Le laboratoire</Link>
+            </div>
+
+            <div className="mt-20 grid gap-10 border-t border-paper/15 pt-10 sm:grid-cols-2 md:grid-cols-4">
+              <div className="md:col-span-2">
+                <Wordmark light />
+                <p className="mt-5 max-w-sm text-sm leading-7 text-paper/60">
+                  Cours, travaux pratiques, révisions et veille scientifique pour les élèves de Sciences et
+                  Technologies de Laboratoire, spécialité biotechnologies.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-paper/45">Parcours</h3>
+                <ul className="mt-4 space-y-2.5 text-sm">
+                  <li><Link to="/apprendre" className="link-draw text-paper/80 hover:text-paper">Apprendre</Link></li>
+                  <li><Link to="/revisions" className="link-draw text-paper/80 hover:text-paper">Réviser</Link></li>
+                  <li><Link to="/laboratoire" className="link-draw text-paper/80 hover:text-paper">Laboratoire</Link></li>
+                  <li><Link to="/actualites" className="link-draw text-paper/80 hover:text-paper">Veille scientifique</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-paper/45">Communauté</h3>
+                <ul className="mt-4 space-y-2.5 text-sm">
+                  <li><Link to="/projets" className="link-draw text-paper/80 hover:text-paper">Galerie de projets</Link></li>
+                  <li><Link to="/partager-projet" className="link-draw text-paper/80 hover:text-paper">Partager un projet</Link></li>
+                  <li><Link to="/forum" className="link-draw text-paper/80 hover:text-paper">Forum</Link></li>
+                  <li><Link to="/aide" className="link-draw text-paper/80 hover:text-paper">Aide & utilisation</Link></li>
+                </ul>
               </div>
             </div>
-          </nav>
-        )}
-      </header>
 
-      <SystemStatusBanner />
-      {userInfo?.mustChangePassword && location.pathname !== '/change-password' && <div className="no-print page pt-4"><p className="notice">Ton mot de passe a été réinitialisé. <Link className="font-semibold underline" to="/change-password">Choisir mon nouveau mot de passe</Link></p></div>}
-      <main id="main-content" tabIndex={-1} className="min-w-0 flex-grow outline-none">{children}</main>
-
-      <footer className="mt-20 border-t border-surface-line bg-surface">
-        <div className="page py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-2">
-            <Wordmark />
-            <p className="mt-4 max-w-md text-sm leading-6 text-ink-600">
-              Plateforme de cours, de travaux pratiques et de veille scientifique pour les élèves
-              de Sciences et Technologies de Laboratoire, spécialité biotechnologie.
-            </p>
+            <div className="mt-14 flex flex-col gap-3 border-t border-paper/15 pt-6 text-xs text-paper/45 sm:flex-row sm:items-center sm:justify-between">
+              <p>© {new Date().getFullYear()} Biogy — Ressource pédagogique STL Biotechnologies.</p>
+              <p className="font-mono uppercase tracking-[0.16em]">Au laboratoire, la sécurité d’abord.</p>
+            </div>
           </div>
-
-          <div>
-            <h3 className="section-eyebrow mb-3">Parcours</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/apprendre"   className="text-ink-700 hover:text-biogy-700">Apprendre</Link></li>
-              <li><Link to="/revisions" className="text-ink-700 hover:text-biogy-700">Réviser</Link></li>
-              <li><Link to="/laboratoire" className="text-ink-700 hover:text-biogy-700">Laboratoire</Link></li>
-              <li><Link to="/actualites"  className="text-ink-700 hover:text-biogy-700">Veille scientifique</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="section-eyebrow mb-3">Communauté</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/projets"         className="text-ink-700 hover:text-biogy-700">Galerie de projets</Link></li>
-              <li><Link to="/partager-projet" className="text-ink-700 hover:text-biogy-700">Partager un projet</Link></li>
-              <li><Link to="/forum"           className="text-ink-700 hover:text-biogy-700">Forum</Link></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t border-surface-line">
-          <div className="page py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-500">
-            <p>© {new Date().getFullYear()} Biogy — Ressource pédagogique STL Biotechnologie.</p>
-            <Link to="/aide" className="text-ink-600 hover:text-biogy-700">Aide & utilisation</Link>
-          </div>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </MotionConfig>
   );
 }
 

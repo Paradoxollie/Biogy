@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, BookOpen, RotateCcw, Shuffle } from 'lucide-react';
 import { courseIndex } from '../data/courseIndex';
+import PageHero from './ui/PageHero';
+import { EASE, Pencil, Reveal } from './ui/motion';
+import { PENCILS } from '../data/visuals';
 
 const revisionCourses = courseIndex.filter((item) => item.content?.vocabulary?.length || item.content?.practice?.some((q) => q.expected));
 const cardsFor = (courses) => courses.flatMap((item) => [
@@ -16,24 +20,144 @@ export default function RevisionPage() {
   const [revealed, setRevealed] = useState(false);
   const [order, setOrder] = useState(null);
   const [known, setKnown] = useState([]);
+  const [direction, setDirection] = useState(1);
   const courses = revisionCourses.filter((item) => item.levelId === level);
   const cards = useMemo(() => cardsFor(revisionCourses.filter((item) => item.levelId === level && (!chapter || item.path === chapter))), [level, chapter]);
   const deck = order ? order.map((i) => cards[i]) : cards;
   const card = deck[position];
   const reset = () => { setPosition(0); setRevealed(false); setOrder(null); setKnown([]); };
-  const move = (step) => { setPosition((current) => (current + step + deck.length) % deck.length); setRevealed(false); };
+  const move = (step) => { setDirection(step); setPosition((current) => (current + step + deck.length) % deck.length); setRevealed(false); };
   const shuffle = () => {
     const indices = cards.map((_, i) => i);
     for (let i = indices.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); [indices[i], indices[j]] = [indices[j], indices[i]]; }
     setOrder(indices); setPosition(0); setRevealed(false);
   };
+  const progress = cards.length ? Math.round((known.length / cards.length) * 100) : 0;
+
   return (
-    <div className="page py-10 md:py-14">
-      <header className="max-w-2xl"><p className="section-eyebrow">Révisions</p><h1 className="mt-3 font-display text-3xl md:text-display-lg">Un peu chaque jour,<br /><span className="text-biogy-700">des notions qui restent.</span></h1><p className="mt-4 leading-relaxed text-ink-600">Lis la question, formule ta réponse, puis retourne la carte. Le vocabulaire et les réponses proviennent des cours de Biogy.</p></header>
-      <div className="mt-8 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <aside className="card h-fit p-5"><h2 className="font-semibold">Ma séance de révision</h2><label className="mt-5 block text-sm font-medium" htmlFor="revision-level">Niveau</label><select id="revision-level" className="input mt-2" value={level} onChange={(e) => { setLevel(e.target.value); setChapter(''); reset(); }}><option value="premiere">Première STL</option><option value="terminale">Terminale STL</option></select><label className="mt-5 block text-sm font-medium" htmlFor="revision-chapter">Cours</label><select id="revision-chapter" className="input mt-2" value={chapter} onChange={(e) => { setChapter(e.target.value); reset(); }}><option value="">Tous les cours disponibles</option>{courses.map((item) => <option key={item.path} value={item.path}>{item.code} · {item.title}</option>)}</select><div className="mt-6 border-t border-surface-line pt-5"><p className="text-sm text-ink-600" role="status">{known.length} / {cards.length} cartes comprises dans cette séance</p><progress className="mt-3 h-1.5 w-full accent-biogy-700" value={known.length} max={cards.length || 1} aria-label="Cartes comprises" /><p className="mt-3 text-xs leading-relaxed text-ink-500">Ce repère est une autoévaluation, pas une note. La séance se réinitialise en quittant la page.</p></div><button type="button" className="btn-ghost mt-4 w-full" onClick={reset}><RotateCcw size={16} />Recommencer</button></aside>
-        {card ? <section className="min-w-0" aria-label="Cartes de révision"><div className="mb-3 flex items-center justify-between text-sm text-ink-500"><span>Carte {position + 1} sur {deck.length}</span><button type="button" onClick={shuffle} className="btn-ghost"><Shuffle size={16} />Mélanger</button></div><article className="card overflow-hidden"><div className="border-b border-surface-line px-6 py-4 sm:px-8"><span className="pill-biogy">{card.type}</span><span className="ml-3 text-xs text-ink-500">{card.course.code}</span></div><div className="flex min-h-[280px] flex-col items-center justify-center px-6 py-10 text-center sm:px-10"><h2 className="font-display text-2xl leading-relaxed sm:text-3xl">{card.question}</h2>{revealed ? <div className="mt-7 w-full rounded-card bg-biogy-50 p-5 text-left" role="status"><p className="section-eyebrow text-biogy-700">Réponse du cours</p><p className="mt-3 leading-relaxed text-ink-800">{card.answer}</p></div> : <p className="mt-5 text-sm text-ink-500">Prends le temps de répondre avant de vérifier.</p>}</div><div className="flex flex-wrap items-center justify-center gap-3 border-t border-surface-line bg-surface-muted px-5 py-5">{revealed ? <><button type="button" className="btn-secondary" onClick={() => { setKnown((items) => items.filter((id) => id !== card.id)); move(1); }}>À revoir</button><button type="button" className="btn-primary" onClick={() => { setKnown((items) => [...new Set([...items, card.id])]); move(1); }}>J’ai compris <ArrowRight size={16} /></button></> : <button type="button" className="btn-primary" onClick={() => setRevealed(true)}>Afficher la réponse</button>}</div></article><div className="mt-4 flex items-center justify-between gap-3"><button type="button" className="btn-secondary" onClick={() => move(-1)} aria-label="Carte précédente"><ArrowLeft size={18} /></button><Link to={`${card.course.path}?onglet=bilan`} className="inline-flex items-center gap-2 text-center text-sm font-medium text-biogy-700"><BookOpen size={16} className="shrink-0" />Revoir le cours</Link><button type="button" className="btn-secondary" onClick={() => move(1)} aria-label="Carte suivante"><ArrowRight size={18} /></button></div>{known.length === cards.length && <p role="status" className="mt-5 rounded-card bg-biogy-50 p-4 text-center text-biogy-800">Toutes les cartes de cette sélection ont été marquées comme comprises. Reviens les revoir plus tard pour consolider tes acquis.</p>}</section> : <section className="card p-10 text-center"><BookOpen size={32} className="mx-auto text-biogy-700" /><h2 className="mt-4 font-display text-2xl">Les cartes arrivent avec les cours</h2><p className="mt-3 text-ink-600">Aucun contenu de révision n’est encore disponible pour ce niveau. Tu peux consulter son programme ou réviser les bases de Première.</p><Link to={`/apprendre/${level}`} className="btn-primary mt-6">Voir le programme</Link></section>}
+    <>
+      <PageHero
+        eyebrow="Révisions"
+        title={[{ text: 'Un peu chaque jour,' }, { text: 'des notions qui restent.', className: 'italic text-biogy-700' }]}
+        lead="Lis la question, formule ta réponse, puis retourne la carte. Le vocabulaire et les réponses proviennent directement des cours de Biogy."
+        pencil={PENCILS.microbes}
+      />
+
+      <div className="page mt-12 grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <Reveal as="aside" className="h-fit rounded-frame border border-surface-line bg-white p-6 lg:sticky lg:top-28">
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-500">Ma séance</p>
+          <label className="mt-5 block text-sm font-medium" htmlFor="revision-level">Niveau</label>
+          <select id="revision-level" className="input mt-2" value={level} onChange={(e) => { setLevel(e.target.value); setChapter(''); reset(); }}>
+            <option value="premiere">Première STL</option>
+            <option value="terminale">Terminale STL</option>
+          </select>
+          <label className="mt-5 block text-sm font-medium" htmlFor="revision-chapter">Cours</label>
+          <select id="revision-chapter" className="input mt-2" value={chapter} onChange={(e) => { setChapter(e.target.value); reset(); }}>
+            <option value="">Tous les cours disponibles</option>
+            {courses.map((item) => <option key={item.path} value={item.path}>{item.code} · {item.title}</option>)}
+          </select>
+          <div className="mt-7 border-t border-surface-line pt-6">
+            <div className="flex items-baseline justify-between">
+              <span className="font-display text-4xl leading-none tracking-tight">{known.length}<span className="text-ink-300">/{cards.length}</span></span>
+              <span className="font-mono text-[11px] text-ink-500">{progress} %</span>
+            </div>
+            <p className="mt-2 text-sm text-ink-600" role="status">cartes comprises dans cette séance</p>
+            <div className="mt-4 h-1 overflow-hidden rounded-full bg-ink-900/10" role="progressbar" aria-label="Cartes comprises" aria-valuemin={0} aria-valuemax={cards.length || 1} aria-valuenow={known.length}>
+              <motion.div className="h-full rounded-full bg-biogy-600" animate={{ width: `${progress}%` }} transition={{ duration: 0.8, ease: EASE }} />
+            </div>
+            <p className="mt-4 text-xs leading-relaxed text-ink-500">Ce repère est une autoévaluation, pas une note. La séance se réinitialise en quittant la page.</p>
+          </div>
+          <button type="button" className="btn-ghost mt-4 w-full" onClick={reset}><RotateCcw size={15} />Recommencer</button>
+        </Reveal>
+
+        {card ? (
+          <section className="min-w-0" aria-label="Cartes de révision">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-500">Carte {position + 1} / {deck.length}</span>
+              <button type="button" onClick={shuffle} className="btn-ghost min-h-9 py-1.5"><Shuffle size={15} />Mélanger</button>
+            </div>
+
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={card.id}
+                custom={direction}
+                initial={{ opacity: 0, x: direction * 40, rotate: direction * 1.5 }}
+                animate={{ opacity: 1, x: 0, rotate: 0 }}
+                exit={{ opacity: 0, x: direction * -40, rotate: direction * -1.5 }}
+                transition={{ duration: 0.45, ease: EASE }}
+                className="flip-scene"
+              >
+                <div className={`flip-card grid ${revealed ? 'is-flipped' : ''}`}>
+                  <article
+                    className="flip-face card relative flex min-h-[340px] flex-col overflow-hidden [grid-area:1/1]"
+                    aria-hidden={revealed}
+                  >
+                    <div className="flex items-center justify-between border-b border-surface-line px-6 py-4 sm:px-8">
+                      <span className="tag">{card.type}</span>
+                      <span className="font-mono text-[11px] text-ink-500">{card.course.code}</span>
+                    </div>
+                    <div className="paper-grid flex flex-1 flex-col items-center justify-center px-6 py-12 text-center sm:px-12">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">Question</p>
+                      <h2 className="mt-4 font-display text-[clamp(1.6rem,3vw,2.4rem)] leading-tight tracking-tight">{card.question}</h2>
+                      <p className="mt-6 text-sm text-ink-500">Prends le temps de répondre avant de retourner la carte.</p>
+                    </div>
+                  </article>
+                  <article
+                    className="flip-face flip-back relative flex min-h-[340px] flex-col overflow-hidden rounded-card bg-ink-900 text-paper shadow-elevated [grid-area:1/1]"
+                    aria-hidden={!revealed}
+                    role={revealed ? 'status' : undefined}
+                  >
+                    <div className="flex items-center justify-between border-b border-paper/15 px-6 py-4 sm:px-8">
+                      <span className="tag-dark">Réponse du cours</span>
+                      <span className="font-mono text-[11px] text-paper/50">{card.course.code}</span>
+                    </div>
+                    <div className="flex flex-1 flex-col justify-center px-6 py-10 sm:px-12">
+                      <p className="font-display text-xl italic text-biogy-300">{card.question}</p>
+                      <p className="mt-4 text-[17px] leading-8 text-paper/85">{card.answer}</p>
+                    </div>
+                  </article>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              {revealed ? (
+                <>
+                  <button type="button" className="btn-secondary px-6" onClick={() => { setKnown((items) => items.filter((id) => id !== card.id)); move(1); }}>À revoir</button>
+                  <button type="button" className="btn-green px-6" onClick={() => { setKnown((items) => [...new Set([...items, card.id])]); move(1); }}>J’ai compris <ArrowRight size={16} className="btn-arrow" /></button>
+                </>
+              ) : (
+                <button type="button" className="btn-primary px-7" onClick={() => setRevealed(true)}>Retourner la carte</button>
+              )}
+            </div>
+
+            <div className="mt-8 flex items-center justify-between gap-3 border-t border-ink-900/10 pt-5">
+              <button type="button" className="btn-secondary h-11 w-11 p-0" onClick={() => move(-1)} aria-label="Carte précédente"><ArrowLeft size={18} /></button>
+              <Link to={`${card.course.path}?onglet=bilan`} className="inline-flex items-center gap-2 text-center text-sm font-medium text-ink-800">
+                <BookOpen size={16} className="shrink-0 text-biogy-700" /><span className="link-draw">Revoir le cours</span>
+              </Link>
+              <button type="button" className="btn-secondary h-11 w-11 p-0" onClick={() => move(1)} aria-label="Carte suivante"><ArrowRight size={18} /></button>
+            </div>
+            {known.length === cards.length && (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                role="status"
+                className="mt-6 rounded-frame border border-biogy-200 bg-biogy-50 p-5 text-center text-biogy-900"
+              >
+                Toutes les cartes de cette sélection sont marquées comme comprises. Reviens les revoir plus tard pour consolider tes acquis.
+              </motion.p>
+            )}
+          </section>
+        ) : (
+          <section className="card flex flex-col items-center p-10 text-center">
+            <Pencil drawing={PENCILS.petri} className="w-40" />
+            <h2 className="mt-6 font-display text-3xl">Les cartes arrivent avec les cours</h2>
+            <p className="mt-3 max-w-md text-ink-600">Aucun contenu de révision n’est encore disponible pour ce niveau. Tu peux consulter son programme ou réviser les bases de Première.</p>
+            <Link to={`/apprendre/${level}`} className="btn-primary mt-6">Voir le programme</Link>
+          </section>
+        )}
       </div>
-    </div>
+    </>
   );
 }

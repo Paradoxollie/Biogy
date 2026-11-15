@@ -22,7 +22,7 @@ export default function MyCopiesPage() {
   }, [userInfo?.token, retry]);
   if (!loadingAuth && !userInfo) return <Navigate to="/login?redirect=%2Fmes-copies" replace />;
   return <div className="page max-w-4xl py-10 md:py-14">
-    <div className="flex items-center justify-between gap-3"><p className="section-eyebrow">Mon espace</p><Link className="btn-ghost" to="/profile">Mon profil</Link></div><h1 className="mt-3 font-display text-3xl md:text-display-lg">Mes copies de laboratoire</h1>
+    <div className="flex items-center justify-between gap-3"><p className="eyebrow">Mon espace</p><Link className="btn-ghost" to="/profile">Mon profil</Link></div><h1 className="mt-4 font-display text-display-lg">Mes copies <span className="italic text-biogy-700">de laboratoire</span></h1>
     <p className="mt-4 max-w-2xl leading-relaxed text-ink-600">Retrouve les envois confirmés et le retour de ton enseignante. Les brouillons conservés uniquement sur ton appareil n’apparaissent pas ici.</p>
     <div className="mt-8 space-y-5">
       {error ? <div role="alert" className="notice"><p>{error}</p><button type="button" className="btn-secondary mt-3" onClick={() => setRetry((value) => value + 1)}>Réessayer</button></div>

@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BROWSER_API_URL } from '../config';
+import { ArrowRight } from 'lucide-react';
+import PageHero from './ui/PageHero';
+import { PHOTOS } from '../data/visuals';
 
 function ProjectsGallery() {
   const [projects, setProjects] = useState([]);
@@ -210,8 +213,16 @@ function ProjectsGallery() {
   };
 
   return (
-    <div className="page py-10 md:py-14">
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-5"><div className="max-w-xl"><p className="section-eyebrow">Les projets de la classe</p><h1 className="page-heading mt-3">La science se partage.</h1><p className="mt-4 leading-relaxed text-ink-600">Observations, expériences et réalisations des élèves. Chaque projet est validé par l’enseignante avant publication.</p></div><Link to="/partager-projet" className="btn-primary">Partager un projet</Link></header>
+    <>
+    <PageHero
+      eyebrow="Les projets de la classe"
+      title={[{ text: 'La science' }, { text: 'se partage.', className: 'italic text-biogy-700' }]}
+      lead="Observations, expériences et réalisations des élèves. Chaque projet est validé par l’enseignante avant publication."
+      image={PHOTOS.projets}
+      figureNumber={6}
+      actions={<Link to="/partager-projet" className="btn-primary px-6">Partager un projet <ArrowRight size={16} className="btn-arrow" /></Link>}
+    />
+    <div className="page pt-10 md:pt-12">
 
       {loading ? (
         <div className="flex justify-center items-center min-h-[300px]">
@@ -668,6 +679,7 @@ function ProjectsGallery() {
         }
       `}</style>
     </div>
+    </>
   );
 }
 

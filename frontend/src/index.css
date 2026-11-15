@@ -2,46 +2,81 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---------- Base ---------- */
+/* =============================================================================
+   Biogy — charte « carnet de laboratoire »
+   Papier chaud, encre vert-noir, titres Newsreader, étiquettes en mono.
+   ============================================================================= */
+
 @layer base {
+  :root {
+    --paper: #f4f2ec;
+    --ink: #121b18;
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.07 0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
   }
 
   body {
-    @apply font-sans bg-surface-muted text-ink-900 antialiased;
+    @apply bg-paper font-sans text-ink-900 antialiased;
     font-feature-settings: "ss01", "cv11";
   }
 
-  /* Editorial serif for article / course headings */
+  /* Grain de papier très léger sur tout le site */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    background-image: var(--grain);
+    opacity: 0.04;
+  }
+
+  ::selection {
+    background: theme('colors.biogy.200');
+    color: theme('colors.ink.900');
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  .font-display, .font-serif {
+    font-optical-sizing: auto;
+  }
+
   h1.display, h2.display, h3.display,
   .prose h1, .prose h2, .prose h3 {
     @apply font-display;
-    font-feature-settings: "ss01";
   }
 
-  /* Nav links unadorned, underlines restored inside prose / explicit links */
   a { @apply no-underline; }
   .prose a,
   a.link {
     text-decoration: underline;
     text-decoration-thickness: 1px;
-    text-underline-offset: 2px;
+    text-underline-offset: 3px;
   }
 
-  /* Focus styles — classroom accessibility */
   a:focus-visible,
   button:focus-visible,
   input:focus-visible,
   textarea:focus-visible,
-  select:focus-visible {
-    @apply outline-none ring-2 ring-biogy-500 ring-offset-2 ring-offset-surface;
+  select:focus-visible,
+  summary:focus-visible {
+    @apply outline-none ring-2 ring-biogy-500 ring-offset-2 ring-offset-paper;
   }
 
-  /* Respect reduced motion */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       scroll-behavior: auto !important;
@@ -52,74 +87,142 @@
   }
 }
 
-/* ---------- Component primitives ---------- */
 @layer components {
+  /* ---------- Mise en page ---------- */
   .page {
-    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-[1240px] px-5 sm:px-8 lg:px-10;
   }
   .page-narrow {
-    @apply mx-auto w-full max-w-3xl px-4 sm:px-6;
+    @apply mx-auto w-full max-w-3xl px-5 sm:px-8;
   }
 
+  /* ---------- Surfaces ---------- */
   .card {
-    @apply bg-surface rounded-card border border-surface-line shadow-soft;
+    @apply rounded-card border border-surface-line bg-white shadow-soft;
   }
   .card-flat {
-    @apply bg-surface rounded-card border border-surface-line;
+    @apply rounded-card border border-surface-line bg-paper-50;
   }
   .card-elevated {
-    @apply bg-surface rounded-card border border-surface-line shadow-elevated;
+    @apply rounded-card border border-surface-line bg-white shadow-elevated;
+  }
+  .card-hover {
+    @apply transition-[transform,box-shadow,border-color] duration-500 ease-lab hover:-translate-y-1 hover:border-ink-300 hover:shadow-lift;
   }
 
+  /* ---------- Boutons ---------- */
   .btn {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-card px-4 py-2.5
-           text-sm font-semibold transition-colors duration-150
-           disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply relative inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-pill px-5 py-2.5
+           text-sm font-semibold tracking-[-0.005em] transition-[background-color,color,border-color,box-shadow,transform] duration-300 ease-lab
+           active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
-  .btn-primary  { @apply btn bg-biogy-700 text-white hover:bg-biogy-800 active:bg-biogy-800 shadow-soft; }
-  .btn-secondary{ @apply btn bg-surface text-ink-900 border border-surface-line hover:bg-surface-subtle; }
-  .btn-ghost    { @apply btn text-ink-700 hover:bg-surface-subtle; }
-  .btn-danger   { @apply btn bg-biotech-red text-white hover:opacity-90; }
+  .btn-primary   { @apply btn bg-ink-900 text-paper hover:bg-biogy-700; }
+  .btn-green     { @apply btn bg-biogy-700 text-white hover:bg-biogy-800; }
+  .btn-secondary { @apply btn border border-ink-200 bg-white/70 text-ink-900 hover:border-ink-900 hover:bg-white; }
+  .btn-ghost     { @apply btn text-ink-700 hover:bg-ink-900/[0.06] hover:text-ink-900; }
+  .btn-light     { @apply btn bg-paper text-ink-900 hover:bg-white; }
+  .btn-outline-light { @apply btn border border-paper/30 text-paper hover:border-paper hover:bg-paper/10; }
+  .btn-danger    { @apply btn bg-biotech-red text-white hover:opacity-90; }
 
-  .pill         { @apply inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-semibold tracking-wide; }
-  .pill-neutral { @apply pill bg-surface-subtle text-ink-700; }
-  .pill-biogy   { @apply pill bg-biogy-50 text-biogy-700 ring-1 ring-inset ring-biogy-100; }
-  .pill-ink     { @apply pill bg-ink-50 text-ink-700 ring-1 ring-inset ring-ink-100; }
-  .pill-accent  { @apply pill bg-accent-50 text-accent-700 ring-1 ring-inset ring-accent-100; }
+  .btn .btn-arrow { @apply transition-transform duration-300 ease-lab; }
+  .btn:hover .btn-arrow { transform: translateX(3px); }
 
-  .section-eyebrow { @apply text-xs font-semibold uppercase tracking-[0.18em] text-ink-500; }
-  .section-title   { @apply font-display text-ink-900 text-2xl md:text-3xl leading-tight; }
+  /* ---------- Étiquettes ---------- */
+  .pill         { @apply inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium tracking-wide; }
+  .pill-neutral { @apply pill bg-ink-900/[0.06] text-ink-700; }
+  .pill-biogy   { @apply pill bg-biogy-50 text-biogy-800 ring-1 ring-inset ring-biogy-200; }
+  .pill-ink     { @apply pill bg-cobalt-50 text-cobalt-800 ring-1 ring-inset ring-cobalt-200; }
+  .pill-accent  { @apply pill bg-accent-50 text-accent-800 ring-1 ring-inset ring-accent-200; }
 
+  /* Étiquette « échantillon » en mono, façon tube de laboratoire */
+  .tag {
+    @apply inline-flex items-center gap-2 rounded-[3px] border border-ink-900/15 bg-white/60 px-2 py-1
+           font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-ink-700;
+  }
+  .tag-dark { @apply tag border-paper/25 bg-paper/5 text-paper/80; }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply inline-block h-px w-6 bg-current opacity-60;
+  }
+  .section-eyebrow { @apply font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500; }
+  .section-title   { @apply font-display text-display-md text-ink-900; }
+  .page-heading    { @apply font-display text-display-lg text-ink-900; }
+
+  .figure-caption {
+    @apply font-mono text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-ink-500;
+  }
+
+  /* Lien souligné qui se dessine */
+  .link-draw {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .link-draw:hover, .group:hover .link-draw { background-size: 100% 1px; }
+
+  /* ---------- Formulaires ---------- */
   .input {
-    @apply block w-full rounded-card border border-surface-line bg-surface
-           px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-400
-           shadow-soft focus:border-biogy-500;
+    @apply block w-full rounded-card border border-ink-200 bg-white
+           px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-ink-400
+           transition-colors duration-200 focus:border-biogy-600;
   }
 
+  /* ---------- Divers ---------- */
   .skip-link { @apply fixed left-4 top-4 z-[200] -translate-y-24 rounded-card bg-ink-900 px-5 py-3 font-semibold text-white focus:translate-y-0; }
-  .page-heading { @apply font-display text-3xl text-ink-900 md:text-display-md; }
-  .notice { @apply rounded-card border border-accent-200 bg-accent-50 px-4 py-3 text-sm leading-relaxed text-accent-800; }
+  .notice { @apply rounded-card border border-accent-200 bg-accent-50 px-4 py-3 text-sm leading-relaxed text-accent-900; }
 
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 
-  .prose { @apply text-ink-800 leading-relaxed; }
-  .prose p { @apply my-4; }
-  .prose h2 { @apply mt-10 mb-3 text-2xl; }
-  .prose h3 { @apply mt-6 mb-2 text-xl; }
-  .prose ul { @apply my-4 list-disc pl-5 space-y-1.5; }
-  .prose ol { @apply my-4 list-decimal pl-5 space-y-1.5; }
-  .prose strong { @apply text-ink-900 font-semibold; }
-  .prose blockquote {
-    @apply border-l-4 border-biogy-300 bg-biogy-50/40 px-4 py-2 my-4
-           rounded-r-card italic text-ink-700;
+  /* Règle graduée (verrerie) */
+  .ruler {
+    height: 12px;
+    background-image:
+      repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 10px),
+      repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 50px);
+    background-size: 100% 6px, 100% 12px;
+    background-repeat: no-repeat;
+    background-position: 0 100%, 0 100%;
+    opacity: 0.35;
   }
+  .ruler-v {
+    width: 12px;
+    background-image:
+      repeating-linear-gradient(180deg, currentColor 0 1px, transparent 1px 10px),
+      repeating-linear-gradient(180deg, currentColor 0 1px, transparent 1px 50px);
+    background-size: 6px 100%, 12px 100%;
+    background-repeat: no-repeat;
+    background-position: 0 0, 0 0;
+    opacity: 0.35;
+  }
+
+  /* Dessin au crayon : se fond dans le papier */
+  .pencil { }
+  .pencil-light { filter: invert(0.95) sepia(0.15); }
 
   .paper-grid {
     background-image:
-      linear-gradient(to right, rgba(16,26,41,0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(16,26,41,0.03) 1px, transparent 1px);
-    background-size: 28px 28px;
+      linear-gradient(to right, rgba(18, 27, 24, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(18, 27, 24, 0.045) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* ---------- Contenus de cours ---------- */
+  .prose { @apply leading-relaxed text-ink-800; }
+  .prose p { @apply my-4; }
+  .prose h2 { @apply mb-3 mt-10 text-2xl; }
+  .prose h3 { @apply mb-2 mt-6 text-xl; }
+  .prose ul { @apply my-4 list-disc space-y-1.5 pl-5; }
+  .prose ol { @apply my-4 list-decimal space-y-1.5 pl-5; }
+  .prose strong { @apply font-semibold text-ink-900; }
+  .prose blockquote {
+    @apply my-4 rounded-r-card border-l-2 border-biogy-500 bg-biogy-50/50 px-4 py-2 italic text-ink-700;
   }
 }
 
@@ -129,31 +232,45 @@
 
 @media print {
   @page { margin: 16mm; }
+  body::before { display: none !important; }
   body, #root, main { background: white !important; color: black !important; }
-  header.sticky, footer, .no-print, .skip-link, [role="tablist"], button { display: none !important; }
+  header.site-header, footer, .no-print, .skip-link, [role="tablist"], button { display: none !important; }
   .page, .page-narrow { max-width: none !important; padding: 0 !important; }
   .card, .card-flat { box-shadow: none !important; break-inside: avoid; }
   .print-answer { display: block !important; }
   h1, h2, h3 { break-after: avoid; }
   img, svg { max-height: 180mm; }
+  [data-reveal], [data-reveal] * { opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; }
 }
 
-/* ---------- Legacy utilities (forum paper + pulseGlow) ---------- */
+/* ---------- Utilitaires historiques (forum) ---------- */
 .paper-lined-bg {
-  background-image: linear-gradient(0deg, rgba(230,230,250,0.1) 1px, transparent 1px);
+  background-image: linear-gradient(0deg, rgba(18, 27, 24, 0.05) 1px, transparent 1px);
   background-size: 100% 24px;
 }
 .perspective {
-  perspective: 800px;
+  perspective: 1200px;
   transform-style: preserve-3d;
 }
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 @keyframes pulseGlow {
-  0%,100% { filter: drop-shadow(0 0 0 rgba(20,166,118,0)); }
-  50%     { filter: drop-shadow(0 0 3px rgba(20,166,118,0.5)); }
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(44, 127, 92, 0)); }
+  50%      { filter: drop-shadow(0 0 3px rgba(44, 127, 92, 0.5)); }
 }
-.animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
 .animate-pulse-glow { animation: pulseGlow 2s infinite; }
+
+/* Carte de révision : retournement 3D */
+.flip-scene { perspective: 1600px; }
+.flip-card {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.flip-card.is-flipped { transform: rotateY(180deg); }
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-back { transform: rotateY(180deg); }
+@media (prefers-reduced-motion: reduce) {
+  .flip-card { transition: none; }
+}
