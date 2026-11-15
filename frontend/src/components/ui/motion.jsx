@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   animate,
   motion,
@@ -268,22 +269,35 @@ export function Counter({ value, duration = 1.6, className = '' }) {
    Marquee — bandeau qui défile lentement (pause au survol)
 ----------------------------------------------------------------------------- */
 export function Marquee({ items, className = '', itemClassName = '' }) {
+  // items : chaînes ou { label, to } (lien interne vers une leçon).
   const row = (hidden) => (
     <ul className="flex shrink-0 items-center" aria-hidden={hidden || undefined}>
-      {items.map((item) => (
-        <li key={item} className={`flex items-center whitespace-nowrap ${itemClassName}`}>
-          <span>{item}</span>
-          <svg viewBox="0 0 16 16" className="mx-7 h-3 w-3 shrink-0 opacity-50" aria-hidden="true">
-            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
-            <circle cx="8" cy="8" r="1.6" fill="currentColor" />
-          </svg>
-        </li>
-      ))}
+      {items.map((raw) => {
+        const item = typeof raw === 'string' ? { label: raw } : raw;
+        return (
+          <li key={item.label} className={`flex items-center whitespace-nowrap ${itemClassName}`}>
+            {item.to ? (
+              <Link
+                to={item.to}
+                tabIndex={hidden ? -1 : undefined}
+                className="link-draw transition-colors duration-300 hover:text-biogy-700"
+                title={`Ouvrir le cours : ${item.label}`}
+              >
+                {item.label}
+              </Link>
+            ) : <span>{item.label}</span>}
+            <svg viewBox="0 0 16 16" className="mx-7 h-3 w-3 shrink-0 opacity-50" aria-hidden="true">
+              <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
+              <circle cx="8" cy="8" r="1.6" fill="currentColor" />
+            </svg>
+          </li>
+        );
+      })}
     </ul>
   );
   return (
     <div className={`group relative flex overflow-hidden py-1 ${className}`}>
-      <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">
+      <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
         {row(false)}
         {row(true)}
       </div>

@@ -23,6 +23,7 @@ import {
 } from '../data/stlCurriculum';
 
 import StudyToolbar from './StudyToolbar';
+import LazyLesson from './lesson/LazyLesson';
 
 const LEVEL_STYLES = {
   premiere: {
@@ -1491,7 +1492,9 @@ function CourseChapterPage() {
         activeLessonId={lesson?.id || null}
       />
 
-      {contentItem?.content ? (
+      {contentItem?.content?.version === 2 ? (
+        <LazyLesson key={contentItem.id} id={contentItem.content.id} storageId={`${level.id}/${chapter.id}${lesson ? `/${lesson.id}` : ''}`} onOpenImage={setActiveImage} />
+      ) : contentItem?.content ? (
         <ChapterContent key={contentItem.id} chapter={contentItem} style={style} onOpenImage={setActiveImage} />
       ) : (
         <ChapterOutline chapter={chapter} />

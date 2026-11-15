@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { courseIndex, searchCourses } from './courseIndex';
+import { courseIndex, loadFullTextIndex, searchCourses } from './courseIndex';
 import { getCourseChapter, getCourseLesson } from './stlCurriculum';
 
 describe('course catalogue', () => {
@@ -16,6 +16,11 @@ describe('course catalogue', () => {
     expect(searchCourses('microscope').length).toBeGreaterThan(0);
     expect(searchCourses('DENOMBREMENT')).toEqual(searchCourses('dénombrement'));
     expect(searchCourses('DENOMBREMENT').length).toBeGreaterThan(0);
+  });
+  it('searches inside lazily loaded lessons once the full text is loaded', async () => {
+    expect(await loadFullTextIndex()).toBe(true);
+    const results = searchCourses('peptidoglycane');
+    expect(results.some((item) => item.id === 'module-1-diversite')).toBe(true);
   });
   it('combines level, content availability and personal bookmarks', () => {
     const item = courseIndex.find((entry) => entry.content);

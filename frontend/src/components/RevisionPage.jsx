@@ -1,16 +1,26 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, BookOpen, RotateCcw, Shuffle } from 'lucide-react';
 import { courseIndex } from '../data/courseIndex';
+import { loadAllPremiereLessons } from '../data/premiere';
 import PageHero from './ui/PageHero';
 import { EASE, Pencil, Reveal } from './ui/motion';
 import { PENCILS } from '../data/visuals';
 
-const revisionCourses = courseIndex.filter((item) => item.content?.vocabulary?.length || item.content?.practice?.some((q) => q.expected));
-const cardsFor = (courses) => courses.flatMap((item) => [
-  ...(item.content.vocabulary || []).map((word, index) => ({ id: `${item.path}:v${index}`, question: word.term, answer: word.definition, type: 'Vocabulaire', course: item })),
-  ...(item.content.practice || []).filter((q) => q.expected).map((q, index) => ({ id: `${item.path}:q${index}`, question: q.question, answer: q.expected, type: 'Entraînement', course: item })),
+const flat = (value) => (Array.isArray(value) ? value.join(' ') : value);
+const vocabularyOf = (content) => content?.review?.vocabulary || content?.vocabulary || [];
+const practiceOf = (content) => (content?.version === 2
+  ? (content.review?.exercises || []).map((exercise) => ({ question: flat(exercise.statement), expected: flat(exercise.answer) }))
+  : (content?.practice || []).filter((q) => q.expected));
+// Les leçons au format 2 sont chargées à la demande : on récupère leur bilan ici.
+const contentOf = (item, lessons) => (item.content?.lazy ? lessons[item.content.id] : item.content);
+const coursesWithCards = (lessons) => courseIndex
+  .map((item) => ({ item, content: contentOf(item, lessons) }))
+  .filter(({ content }) => vocabularyOf(content).length || practiceOf(content).length);
+const cardsFor = (entries) => entries.flatMap(({ item, content }) => [
+  ...vocabularyOf(content).map((word, index) => ({ id: `${item.path}:v${index}`, question: word.term, answer: word.definition, type: 'Vocabulaire', course: item })),
+  ...practiceOf(content).map((q, index) => ({ id: `${item.path}:q${index}`, question: q.question, answer: q.expected, type: 'Entraînement', course: item })),
 ]);
 
 export default function RevisionPage() {
@@ -21,8 +31,15 @@ export default function RevisionPage() {
   const [order, setOrder] = useState(null);
   const [known, setKnown] = useState([]);
   const [direction, setDirection] = useState(1);
-  const courses = revisionCourses.filter((item) => item.levelId === level);
-  const cards = useMemo(() => cardsFor(revisionCourses.filter((item) => item.levelId === level && (!chapter || item.path === chapter))), [level, chapter]);
+  const [lessons, setLessons] = useState(null);
+  useEffect(() => {
+    let active = true;
+    loadAllPremiereLessons().then((loaded) => { if (active) setLessons(loaded); }).catch(() => { if (active) setLessons({}); });
+    return () => { active = false; };
+  }, []);
+  const revisionEntries = useMemo(() => coursesWithCards(lessons || {}), [lessons]);
+  const courses = revisionEntries.filter(({ item }) => item.levelId === level).map(({ item }) => item);
+  const cards = useMemo(() => cardsFor(revisionEntries.filter(({ item }) => item.levelId === level && (!chapter || item.path === chapter))), [revisionEntries, level, chapter]);
   const deck = order ? order.map((i) => cards[i]) : cards;
   const card = deck[position];
   const reset = () => { setPosition(0); setRevealed(false); setOrder(null); setKnown([]); };
@@ -70,7 +87,11 @@ export default function RevisionPage() {
           <button type="button" className="btn-ghost mt-4 w-full" onClick={reset}><RotateCcw size={15} />Recommencer</button>
         </Reveal>
 
-        {card ? (
+        {!lessons ? (
+          <section className="card flex min-h-[340px] items-center justify-center p-10" role="status" aria-live="polite">
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-500">Préparation des cartes…</p>
+          </section>
+        ) : card ? (
           <section className="min-w-0" aria-label="Cartes de révision">
             <div className="mb-4 flex items-center justify-between">
               <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-500">Carte {position + 1} / {deck.length}</span>

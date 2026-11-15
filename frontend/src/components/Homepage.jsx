@@ -17,17 +17,19 @@ import {
 } from './ui/motion';
 import { PENCILS, PHOTOS } from '../data/visuals';
 
+// Chaque technique du bandeau ouvre la leçon de Première qui la traite.
 const TECHNIQUES = [
-  'Pipetage de précision',
-  'Isolement en quadrants',
-  'Coloration de Gram',
-  'Dénombrement en cellule de Malassez',
-  'Spectrophotométrie',
-  'Électrophorèse sur gel',
-  'Chromatographie',
-  'Dosage par titrage',
-  'Dilutions en série',
-  'Observation microscopique',
+  { label: 'Observation microscopique', to: '/apprendre/premiere/module-1-diversite' },
+  { label: 'Coloration de Gram', to: '/apprendre/premiere/module-1-diversite' },
+  { label: 'Travail en milieu aseptique', to: '/apprendre/premiere/module-2-culture' },
+  { label: 'Isolement en quadrants', to: '/apprendre/premiere/module-2-culture' },
+  { label: 'Identification bactérienne', to: '/apprendre/premiere/module-3-identification' },
+  { label: 'Dilutions en série', to: '/apprendre/premiere/module-4-denombrement' },
+  { label: 'Dénombrement en cellule de Malassez', to: '/apprendre/premiere/module-4-denombrement' },
+  { label: 'Préparation de solutions', to: '/apprendre/premiere/module-5-solutions' },
+  { label: 'Chromatographie', to: '/apprendre/premiere/module-7-separation' },
+  { label: 'Dosage par titrage', to: '/apprendre/premiere/module-8-concentration/c8-dosage-volumetrique' },
+  { label: 'Pipetage de précision', to: '/laboratoire/at5-metrologie-pipettes' },
 ];
 
 const QUICK_LINKS = [
@@ -95,10 +97,8 @@ function useCourseStats() {
       if (!active) return;
       const chapters = new Set(courseIndex.map((item) => item.path.split('/').slice(0, 4).join('/')));
       const written = courseIndex.filter((item) => item.content).length;
-      const documents = courseIndex.reduce((total, item) => total
-        + (item.content?.diagrams?.length || 0)
-        + (item.content?.questionSets || []).reduce((sum, set) => sum + (set.supports?.length || 0), 0), 0);
-      setStats({ chapters: chapters.size, written, documents });
+      const quizzes = courseIndex.filter((item) => item.content?.version === 2).length;
+      setStats({ chapters: chapters.size, written, quizzes });
     }).catch(() => {});
     return () => { active = false; };
   }, []);
@@ -149,7 +149,7 @@ function Hero() {
               {[
                 ['chapters', 'chapitres au programme'],
                 ['written', 'cours et parties rédigés'],
-                ['documents', 'documents et schémas'],
+                ['quizzes', 'QCM autocorrigés'],
               ].map(([key, label], index) => (
                 <div key={key} className={`pt-5 ${index ? 'border-l border-ink-900/10 pl-5' : 'pr-5'}`}>
                   <dt className="sr-only">{label}</dt>
@@ -174,7 +174,7 @@ function Hero() {
 
 function TechniquesBand() {
   return (
-    <section aria-label="Techniques abordées" className="border-y border-ink-900/10 bg-paper-50/70 py-4">
+    <section aria-label="Techniques abordées en Première — chaque technique ouvre son cours" className="border-y border-ink-900/10 bg-paper-50/70 py-4">
       <Marquee items={TECHNIQUES} itemClassName="font-display text-[1.6rem] font-[450] italic tracking-tight text-ink-800" />
     </section>
   );

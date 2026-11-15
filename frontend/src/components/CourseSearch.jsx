@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, ArrowUpRight, Bookmark, Check } from 'lucide-react';
-import { searchCourses } from '../data/courseIndex';
+import { loadFullTextIndex, searchCourses } from '../data/courseIndex';
 import useStudyProgress from '../hooks/useStudyProgress';
 
 export default function CourseSearch() {
@@ -12,6 +12,14 @@ export default function CourseSearch() {
   const favorites = params.get('favoris') === '1';
   const available = params.get('disponibles') === '1';
   const searching = Boolean(query || level || favorites || available);
+  // Dès qu'une recherche est saisie, on charge le texte complet des leçons.
+  const [, setFullTextReady] = useState(false);
+  useEffect(() => {
+    if (!query) return undefined;
+    let active = true;
+    loadFullTextIndex().then((ready) => { if (active && ready) setFullTextReady(true); });
+    return () => { active = false; };
+  }, [query]);
   const results = searching ? searchCourses(query, { level, available, bookmarks: favorites ? bookmarks : undefined }) : [];
   const change = (key, value) => {
     const next = new URLSearchParams(params);
